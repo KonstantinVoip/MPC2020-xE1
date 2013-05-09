@@ -1,0 +1,8 @@
+echo "Start BUILD Applic MPC Router"
+#rm -rf /tftpboot/ltib/usr/local/mpc_router_app/mpcapp  
+#make -f mpcapp_linux.mak clean
+make -f mpcapp_linux.mak
+cp mpcapp /tftpboot/ltib/usr/local/mpc_router_app
+echo "Complete BUILD Applic MPC Router"
+
+

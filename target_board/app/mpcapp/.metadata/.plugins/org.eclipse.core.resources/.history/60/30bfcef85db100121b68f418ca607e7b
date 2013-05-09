@@ -1,0 +1,1148 @@
+/**********************************************************************************************************************
+*                                        (c) COPYRIGHT by OAO SUPERTEL.                                             *
+*                                               All rights reserved.                                                  *
+***********************************************************************************************************************
+* Module      : mpcdrvlbcnor.c
+*
+* Description : Defenition function for NOr flash on local bus p2020rdb 
+*
+* Author      : Konstantin Shiluaev
+*
+******************************************************************************
+******************************************************************************
+*
+* Module's Description Record:
+* ============================
+*
+* $ProjectRevision: 0.0.1 $
+* $Source: 
+* $State: Debug$
+* $Revision: 0.0.1 $ $Name: $
+* $Date: 2012/10/23 10:40:51 $
+* $Locker: $
+*
+* Module's revision history:
+* ==========================
+* --------- $Log: mpcdrvlbcnor.c $
+* --------- Initial revision
+******************************************************************************/
+
+
+/*-----------------------------------------------------------------------------
+GENERAL NOTES
+-----------------------------------------------------------------------------*/
+
+/*****************************************************************************/
+/*	COMMON CONFIGURATION						     */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/*	INCLUDES							     */
+/*****************************************************************************/
+#include <linux/kernel.h>
+#include <asm/fsl_lbc.h>
+
+#include <linux/mtd/mtd.h>
+#include <linux/mtd/partitions.h>
+#include <linux/mtd/concat.h>
+#include <linux/mtd/cfi.h>
+
+#include <linux/of.h>
+#include <linux/of_platform.h>
+
+#include "mpcdrvlbcnor.h"
+
+
+/*External Header*/
+
+/*****************************************************************************/
+/*	PRIVATE MACROS							     */
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+/*	PRIVATE DATA TYPES						     */
+/*****************************************************************************/
+struct map_info    *map; 
+struct cfi_private *cfi;
+struct flchip      *pchip;
+
+
+/*****************************************************************************/
+/*	PRIVATE FUNCTION PROTOTYPES					     */
+/*****************************************************************************/
+/*NOr flash API*/
+static SINT32 nor_amdstd_read    (struct map_info *map, loff_t from, size_t len, size_t *retlen, u_char *buf);
+
+static SINT32 nor_do_read_onechip(struct map_info *map, struct flchip *chip, loff_t adr, size_t len, u_char *buf);
+static SINT32 nor_amdstd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,size_t *retlen, const u_char *buf);
+static SINT32 __xipram do_write_buffer(struct map_info *map, struct flchip *chip,unsigned long adr, const u_char *buf,int len);
+static SINT32 __xipram do_write_oneword(struct map_info *map,struct flchip *chip, unsigned long adr, map_word datum);
+static SINT32 cfi_amdstd_write_words(struct mtd_info *mtd, loff_t to, size_t len,size_t *retlen, const u_char *buf);
+
+static SINT32 get_chip(struct map_info *map, struct flchip *chip, unsigned long adr, int mode);
+static SINT32 put_chip(struct map_info *map, struct flchip *chip, unsigned long adr);
+static SINT32  __xipram chip_ready(struct map_info *map, unsigned long add);
+
+
+/* KERNEL MODULE HANDLING */
+
+
+/*****************************************************************************/
+/*	PRIVATE GLOBALS							     */
+/*****************************************************************************/
+
+  /*****************************************************************************/
+/*	PUBLIC GLOBALS							     */
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+/*	EXTERNAL REFERENCES						     */
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+/*	PUBLIC FUNCTION DEFINITIONS					     */
+/*****************************************************************************/
+/**************************************************************************************************
+Syntax:      	    static SINT32  MPCInitNORflash(void)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32  MPCInitNORflash()
+{
+	struct device_node *dp;
+	struct of_device   *dev;
+	struct resource res;
+	resource_size_t res_size;
+	const u32 *width;
+
+	///new
+	int min_chips;
+	int max_chips ;
+	
+	printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
+	map = kzalloc(sizeof(*map), GFP_KERNEL);
+	if (!map) {printk(KERN_WARNING "Failed to allocate memory for MAP_INFO_Structure\n");
+	   		   return NULL;}
+	
+	
+	printk("+++++++++++++++++++++Init CFI_PRIVATE Structure++++++++++++++++++++++++++\n\r");
+    cfi = kzalloc(sizeof(*cfi), GFP_KERNEL);
+    if (!cfi) {printk(KERN_WARNING "Failed to allocate memory for CFI device\n");
+   			return NULL;}
+          
+    cfi->chipshift=0x18;  //0x18
+    cfi->numchips =1;
+    /* Set the default CFI lock/unlock addresses */
+  	cfi->addr_unlock1 = 0x555;
+    cfi->addr_unlock2 = 0x2aa;
+    
+    printk("+++++++++++++++++++++Init FL_CHIP private Structure++++++++++++++++++++++++++\n\r");
+  	pchip = kzalloc(sizeof(*pchip), GFP_KERNEL);
+    if (!pchip ) {printk(KERN_WARNING "Failed to allocate memory for CFI device\n");
+  		   			return NULL;}
+  	pchip->start = (0 << cfi->chipshift);
+    pchip->state = FL_READY;
+    init_waitqueue_head(&pchip->wq);
+	spin_lock_init(&pchip->_spinlock);
+	pchip->mutex = &pchip->_spinlock;
+	
+	dp = of_find_node_by_name(NULL, "nor");
+	if (!dp) {printk(KERN_INFO "nor: can't find localbus nor node\n");of_node_put(dp);
+	return STATUS_ERR;}
+	
+	dev=of_find_device_by_node(dp);
+	if (!dev) 
+	{printk(KERN_INFO "fsl-lbc: can't find localbus device\n");
+	return STATUS_ERR;}
+	printk("__________________Device_NOR_INFO:\n\r");
+      
+	
+	////////////////Info
+	//dev_set_drvdata(&dev->dev, info);		
+	
+	if (of_address_to_resource(dp, 0, &res)) 
+	{
+	dev_err(&dev->dev, "Can't get IO address from device"" tree\n");
+	return STATUS_ERR;
+	//goto err_out;
+	}
+             
+	//dev_dbg(&dev->dev, "of_flash device: %.8llx-%.8llx\n",(unsigned long long)res.start,(unsigned long long)res.end););
+	printk(KERN_INFO "%.8llx-%.8llx\n",(unsigned long long)res.start,(unsigned long long)res.end);  
+	res_size = resource_size(&res);
+	printk(KERN_INFO "Size=0x%x\n",res_size);
+	
+	////////////////Info
+	width = of_get_property(dp, "bank-width", NULL);
+	if (!width) 
+	{
+	dev_err(&dev->dev, "Can't get bank width from device"
+	" tree\n");
+	//goto err_out;
+	return STATUS_ERR;
+	}
+            
+	//printk(KERN_INFO "!!!!MONSTER_SUPER2!!!!!!!!!!!!!!\n\r");
+	printk(KERN_INFO "BANK_WIDTH=%x\n",*width);
+	printk(KERN_INFO "DEV_NAME=%s\n",dev_name(&dev->dev));
+			
+	map->name=dev_name(&dev->dev);
+	map->phys=res.start;
+	map->size=res_size;
+	map->bankwidth=*width;
+	map->fldrv_priv=cfi;
+	map->virt=ioremap(map->phys,map->size);
+	
+	//
+	if (!map->virt)
+	{
+	printk(KERN_INFO "Failed to ioremap() flash region\n");
+	return STATUS_ERR;	
+	//dev_err(&dev->dev, "Failed to ioremap() flash region\n");
+	//goto err_out;
+	}
+	simple_map_init(map);
+    printk(KERN_INFO "!!!!OK_INIT_NOR!!!!!!!!!!!!!!\n\r");	
+
+	//simple_map_init(map);
+return STATUS_OK;
+}
+
+
+
+/*****************************************************************************/
+/*	PRIVATE FUNCTION DEFINITIONS					     */
+/*****************************************************************************/
+/**************************************************************************************************
+Syntax:      	  static SINT32 put_chip(struct map_info *map, struct flchip *chip, unsigned long adr)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+static SINT32 put_chip(struct map_info *map, struct flchip *chip, unsigned long adr)
+{
+	struct cfi_private *cfi = map->fldrv_priv;
+	printk("++++++++++cfi_cmdset_0002.c/put_chip+++++++++\n\r");
+	printk("Flash_chip_old_STATE=%d\n",chip->oldstate);
+	
+	
+	switch(chip->oldstate) {
+	case FL_ERASING:
+		chip->state = chip->oldstate;
+		map_write(map, CMD(0x30), chip->in_progress_block_addr);
+		chip->oldstate = FL_READY;
+		chip->state = FL_ERASING;
+		break;
+
+	case FL_XIP_WHILE_ERASING:
+		chip->state = chip->oldstate;
+		chip->oldstate = FL_READY;
+		break;
+
+	case FL_READY:
+	case FL_STATUS:
+		/* We should really make set_vpp() count, rather than doing this */
+		DISABLE_VPP(map);
+		break;
+	default:
+		printk(KERN_ERR "MTD: put_chip() called with oldstate %d!!\n", chip->oldstate);
+	}
+	wake_up(&chip->wq);
+}
+
+/**************************************************************************************************
+Syntax:      	    SINT32  int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr, int mode)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 get_chip(struct map_info *map, struct flchip *chip, unsigned long adr, int mode)
+{
+	DECLARE_WAITQUEUE(wait, current);
+	struct cfi_private *cfi = map->fldrv_priv;
+	unsigned long timeo;
+	struct cfi_pri_amdstd *cfip = (struct cfi_pri_amdstd *)cfi->cmdset_priv;
+	printk("++++++++++cfi_cmdset_0002.c/get_chip+++++++++\n\r");
+    printk("Flash_state=%d\n",chip->state);
+resettime:
+	timeo = jiffies + HZ;
+ retry:
+	switch (chip->state) {
+
+	case FL_STATUS:
+		for (;;) {   
+			if (chip_ready(map, adr))
+				break;
+
+			if (time_after(jiffies, timeo)) {
+				printk(KERN_ERR "Waiting for chip to be ready timed out.\n");
+				spin_unlock(chip->mutex);
+				return -EIO;
+			}
+			spin_unlock(chip->mutex);
+			cfi_udelay(1);
+			spin_lock(chip->mutex);
+			/* Someone else might have been playing with it. */
+			goto retry;
+		}
+
+	case FL_READY:
+	case FL_CFI_QUERY:
+	case FL_JEDEC_QUERY:
+		return 0;
+    
+	case FL_ERASING:
+		if (mode == FL_WRITING) /* FIXME: Erase-suspend-program appears broken. */
+			goto sleep;
+
+		if (!(   mode == FL_READY
+		      || mode == FL_POINT
+		      || !cfip
+		      || (mode == FL_WRITING && (cfip->EraseSuspend & 0x2))
+		      || (mode == FL_WRITING && (cfip->EraseSuspend & 0x1)
+		    )))
+			goto sleep;
+
+		/* We could check to see if we're trying to access the sector
+		 * that is currently being erased. However, no user will try
+		 * anything like that so we just wait for the timeout. */
+
+		/* Erase suspend */
+		/* It's harmless to issue the Erase-Suspend and Erase-Resume
+		 * commands when the erase algorithm isn't in progress. */
+		map_write(map, CMD(0xB0), chip->in_progress_block_addr);
+		chip->oldstate = FL_ERASING;
+		chip->state = FL_ERASE_SUSPENDING;
+		chip->erase_suspended = 1;
+		for (;;) {
+			if (chip_ready(map, adr))
+				break;
+
+			if (time_after(jiffies, timeo)) {
+				/* Should have suspended the erase by now.
+				 * Send an Erase-Resume command as either
+				 * there was an error (so leave the erase
+				 * routine to recover from it) or we trying to
+				 * use the erase-in-progress sector. */
+				map_write(map, CMD(0x30), chip->in_progress_block_addr);
+				chip->state = FL_ERASING;
+				chip->oldstate = FL_READY;
+				printk(KERN_ERR "MTD %s(): chip not ready after erase suspend\n", __func__);
+				return -EIO;
+			}
+
+			spin_unlock(chip->mutex);
+			cfi_udelay(1);
+			spin_lock(chip->mutex);
+			/* Nobody will touch it while it's in state FL_ERASE_SUSPENDING.
+			   So we can just loop here. */
+		}
+		chip->state = FL_READY;
+		return 0;
+
+	case FL_XIP_WHILE_ERASING:
+		if (mode != FL_READY && mode != FL_POINT &&
+		    (!cfip || !(cfip->EraseSuspend&2)))
+			goto sleep;
+		chip->oldstate = chip->state;
+		chip->state = FL_READY;
+		return 0;
+
+	case FL_POINT:
+		/* Only if there's no operation suspended... */
+		if (mode == FL_READY && chip->oldstate == FL_READY)
+			return 0;
+
+	default:
+	sleep:
+		set_current_state(TASK_UNINTERRUPTIBLE);
+		add_wait_queue(&chip->wq, &wait);
+		spin_unlock(chip->mutex);
+		schedule();
+		remove_wait_queue(&chip->wq, &wait);
+		spin_lock(chip->mutex);
+		goto resettime;
+	}
+}
+/**************************************************************************************************
+Syntax:      	  SINT32 __xipram chip_ready(struct map_info *map, unsigned long addr)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 __xipram chip_ready(struct map_info *map, unsigned long addr)
+{
+	map_word d, t;
+
+	d = map_read(map, addr);
+	t = map_read(map, addr);
+
+	return map_word_equal(map, d, t);
+}
+/**************************************************************************************************
+Syntax:      	  static SINT32 __xipram do_write_oneword(struct map_info *map, struct flchip *chip, unsigned long adr, map_word datum)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+static SINT32 __xipram do_write_oneword(struct map_info *map, struct flchip *chip, unsigned long adr, map_word datum)
+{
+	struct cfi_private *cfi = map->fldrv_priv;
+	unsigned long timeo = jiffies + HZ;
+	/*
+	 * We use a 1ms + 1 jiffies generic timeout for writes (most devices
+	 * have a max write time of a few hundreds usec). However, we should
+	 * use the maximum timeout value given by the chip at probe time
+	 * instead.  Unfortunately, struct flchip does have a field for
+	 * maximum timeout, only for typical which can be far too short
+	 * depending of the conditions.	 The ' + 1' is to avoid having a
+	 * timeout of 0 jiffies if HZ is smaller than 1000.
+	 */
+	unsigned long uWriteTimeout = ( HZ / 1000 ) + 1;
+	int ret = 0;
+	map_word oldd;
+	int retry_cnt = 0;
+	printk("++++++++++cfi_cmdset_0002.c/do_write_oneword+++++++++\n\r");
+	adr += chip->start;
+
+	spin_lock(chip->mutex);
+	ret = get_chip(map, chip, adr, FL_WRITING);
+	if (ret) {
+		spin_unlock(chip->mutex);
+		return ret;
+	}
+
+	DEBUG( MTD_DEBUG_LEVEL3, "MTD %s(): WRITE 0x%.8lx(0x%.8lx)\n",
+	       __func__, adr, datum.x[0] );
+
+	/*
+	 * Check for a NOP for the case when the datum to write is already
+	 * present - it saves time and works around buggy chips that corrupt
+	 * data at other locations when 0xff is written to a location that
+	 * already contains 0xff.
+	 */
+	oldd = map_read(map, adr);
+	if (map_word_equal(map, oldd, datum)) {
+		DEBUG( MTD_DEBUG_LEVEL3, "MTD %s(): NOP\n",
+		       __func__);
+		goto op_done;
+	}
+
+	XIP_INVAL_CACHED_RANGE(map, adr, map_bankwidth(map));
+	ENABLE_VPP(map);
+	xip_disable(map, chip, adr);
+ retry:
+	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
+	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
+	cfi_send_gen_cmd(0xA0, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
+	map_write(map, datum, adr);
+	chip->state = FL_WRITING;
+
+	INVALIDATE_CACHE_UDELAY(map, chip,
+				adr, map_bankwidth(map),
+				chip->word_write_time);
+
+	/* See comment above for timeout value. */
+	timeo = jiffies + uWriteTimeout;
+	for (;;) {
+		if (chip->state != FL_WRITING) {
+			/* Someone's suspended the write. Sleep */
+			DECLARE_WAITQUEUE(wait, current);
+
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			add_wait_queue(&chip->wq, &wait);
+			spin_unlock(chip->mutex);
+			schedule();
+			remove_wait_queue(&chip->wq, &wait);
+			timeo = jiffies + (HZ / 2); /* FIXME */
+			spin_lock(chip->mutex);
+			continue;
+		}
+
+		if (time_after(jiffies, timeo) && !chip_ready(map, adr)){
+			xip_enable(map, chip, adr);
+			printk(KERN_WARNING "MTD %s(): software timeout\n", __func__);
+			xip_disable(map, chip, adr);
+			break;
+		}
+
+		if (chip_ready(map, adr))
+			break;
+
+		/* Latency issues. Drop the lock, wait a while and retry */
+		UDELAY(map, chip, adr, 1);
+	}
+	/* Did we succeed? */
+	
+#if 0	
+	if (!chip_good(map, adr, datum)) {
+		/* reset on all failures. */
+		map_write( map, CMD(0xF0), chip->start );
+		/* FIXME - should have reset delay before continuing */
+
+		if (++retry_cnt <= MAX_WORD_RETRIES)
+			goto retry;
+
+		ret = -EIO;
+	}
+#endif	
+	xip_enable(map, chip, adr);
+ op_done:
+	chip->state = FL_READY;
+	put_chip(map, chip, adr);
+	spin_unlock(chip->mutex);
+
+	return ret;
+}
+/**************************************************************************************************
+Syntax:      	SINT32 __xipram do_write_buffer(struct map_info *map, struct flchip *chip,unsigned long adr, const u_char *buf,int len)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+static SINT32 cfi_amdstd_write_words(struct mtd_info *mtd, loff_t to, size_t len,size_t *retlen, const u_char *buf)
+{
+	struct map_info *map = mtd->priv;
+	struct cfi_private *cfi = map->fldrv_priv;
+	int ret = 0;
+	int chipnum;
+	unsigned long ofs, chipstart;
+	
+	
+	
+	DECLARE_WAITQUEUE(wait, current);
+
+	*retlen = 0;
+	if (!len)
+		return 0;
+
+	chipnum = to >> cfi->chipshift;
+	ofs = to  - (chipnum << cfi->chipshift);
+	chipstart = cfi->chips[chipnum].start;
+	printk("++++++++++cfi_cmdset_0002.c/cfi_amdstd_write_words+++++++++\n\r");
+	/* If it's not bus-aligned, do the first byte write */
+	if (ofs & (map_bankwidth(map)-1)) {
+		unsigned long bus_ofs = ofs & ~(map_bankwidth(map)-1);
+		int i = ofs - bus_ofs;
+		int n = 0;
+		map_word tmp_buf;
+
+ retry:
+		spin_lock(cfi->chips[chipnum].mutex);
+
+		if (cfi->chips[chipnum].state != FL_READY) {
+#if 0
+			printk(KERN_DEBUG "Waiting for chip to write, status = %d\n", cfi->chips[chipnum].state);
+#endif
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			add_wait_queue(&cfi->chips[chipnum].wq, &wait);
+
+			spin_unlock(cfi->chips[chipnum].mutex);
+
+			schedule();
+			remove_wait_queue(&cfi->chips[chipnum].wq, &wait);
+#if 0
+			if(signal_pending(current))
+				return -EINTR;
+#endif
+			goto retry;
+		}
+
+		/* Load 'tmp_buf' with old contents of flash */
+		tmp_buf = map_read(map, bus_ofs+chipstart);
+
+		spin_unlock(cfi->chips[chipnum].mutex);
+
+		/* Number of bytes to copy from buffer */
+		n = min_t(int, len, map_bankwidth(map)-i);
+
+		tmp_buf = map_word_load_partial(map, tmp_buf, buf, i, n);
+
+		ret = do_write_oneword(map, &cfi->chips[chipnum],bus_ofs, tmp_buf);
+		if (ret)
+			return ret;
+
+		ofs += n;
+		buf += n;
+		(*retlen) += n;
+		len -= n;
+
+		if (ofs >> cfi->chipshift) {
+			chipnum ++;
+			ofs = 0;
+			if (chipnum == cfi->numchips)
+				return 0;
+		}
+	}
+
+	/* We are now aligned, write as much as possible */
+	while(len >= map_bankwidth(map)) {
+		map_word datum;
+
+		datum = map_word_load(map, buf);
+
+		ret = do_write_oneword(map, &cfi->chips[chipnum],
+				       ofs, datum);
+		if (ret)
+			return ret;
+
+		ofs += map_bankwidth(map);
+		buf += map_bankwidth(map);
+		(*retlen) += map_bankwidth(map);
+		len -= map_bankwidth(map);
+
+		if (ofs >> cfi->chipshift) {
+			chipnum ++;
+			ofs = 0;
+			if (chipnum == cfi->numchips)
+				return 0;
+			chipstart = cfi->chips[chipnum].start;
+		}
+	}
+
+	/* Write the trailing bytes if any */
+	if (len & (map_bankwidth(map)-1)) {
+		map_word tmp_buf;
+
+ retry1:
+		spin_lock(cfi->chips[chipnum].mutex);
+
+		if (cfi->chips[chipnum].state != FL_READY) {
+#if 0
+			printk(KERN_DEBUG "Waiting for chip to write, status = %d\n", cfi->chips[chipnum].state);
+#endif
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			add_wait_queue(&cfi->chips[chipnum].wq, &wait);
+
+			spin_unlock(cfi->chips[chipnum].mutex);
+
+			schedule();
+			remove_wait_queue(&cfi->chips[chipnum].wq, &wait);
+#if 0
+			if(signal_pending(current))
+				return -EINTR;
+#endif
+			goto retry1;
+		}
+
+		tmp_buf = map_read(map, ofs + chipstart);
+
+		spin_unlock(cfi->chips[chipnum].mutex);
+
+		tmp_buf = map_word_load_partial(map, tmp_buf, buf, 0, len);
+
+		ret = do_write_oneword(map, &cfi->chips[chipnum],
+				ofs, tmp_buf);
+		if (ret)
+			return ret;
+
+		(*retlen) += len;
+	}
+
+	return 0;
+}
+/**************************************************************************************************
+Syntax:      	SINT32 __xipram do_write_buffer(struct map_info *map, struct flchip *chip,unsigned long adr, const u_char *buf,int len)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+/*
+ * FIXME: interleaved mode not tested, and probably not supported!
+ */
+SINT32 __xipram do_write_buffer(struct map_info *map, struct flchip *chip,unsigned long adr, const u_char *buf,int len)
+{
+	struct cfi_private *cfi = map->fldrv_priv;
+	unsigned long timeo = jiffies + HZ;
+	/* see comments in do_write_oneword() regarding uWriteTimeo. */
+	unsigned long uWriteTimeout = ( HZ / 1000 ) + 1;
+	int ret = -EIO;
+	unsigned long cmd_adr;
+	int z, words;
+	int i;
+	map_word datum;
+	printk("++++++++++cfi_cmdset_0002.c/do_write_buffer+++++++++\n\r");
+	adr += chip->start;
+	cmd_adr = adr;
+
+	
+	
+	for(i=0;i<=64;i++)
+	{
+		
+		printk("%x",buf[i]);
+	}
+	
+	printk("\n\r");
+
+	
+	spin_lock(chip->mutex);
+	ret = get_chip(map, chip, adr, FL_WRITING);
+	if (ret) {
+		spin_unlock(chip->mutex);
+		return ret;
+	}
+
+	datum = map_word_load(map, buf);
+
+	DEBUG( MTD_DEBUG_LEVEL3, "MTD %s(): WRITE 0x%.8lx(0x%.8lx)\n",
+	       __func__, adr, datum.x[0] );
+
+	XIP_INVAL_CACHED_RANGE(map, adr, len);
+	ENABLE_VPP(map);
+	xip_disable(map, chip, cmd_adr);
+
+	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
+	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
+	cfi_send_gen_cmd(0xA0, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
+
+	/* Write Buffer Load */
+	map_write(map, CMD(0x25), cmd_adr);
+
+	chip->state = FL_WRITING_TO_BUFFER;
+
+	/* Write length of data to come */
+	words = len / map_bankwidth(map);
+	map_write(map, CMD(words - 1), cmd_adr);
+	/* Write data */
+	z = 0;
+	while(z < words * map_bankwidth(map)) {
+		datum = map_word_load(map, buf);
+		map_write(map, datum, adr + z);
+
+		z += map_bankwidth(map);
+		buf += map_bankwidth(map);
+	}
+	z -= map_bankwidth(map);
+
+	adr += z;
+
+	/* Write Buffer Program Confirm: GO GO GO */
+	map_write(map, CMD(0x29), cmd_adr);
+	chip->state = FL_WRITING;
+
+	INVALIDATE_CACHE_UDELAY(map, chip,
+				adr, map_bankwidth(map),
+				chip->word_write_time);
+
+	timeo = jiffies + uWriteTimeout;
+
+	for (;;) {
+		if (chip->state != FL_WRITING) {
+			/* Someone's suspended the write. Sleep */
+			DECLARE_WAITQUEUE(wait, current);
+
+			set_current_state(TASK_UNINTERRUPTIBLE);
+			add_wait_queue(&chip->wq, &wait);
+			spin_unlock(chip->mutex);
+			schedule();
+			remove_wait_queue(&chip->wq, &wait);
+			timeo = jiffies + (HZ / 2); /* FIXME */
+			spin_lock(chip->mutex);
+			continue;
+		}
+
+		if (time_after(jiffies, timeo) && !chip_ready(map, adr))
+			break;
+
+		if (chip_ready(map, adr)) {
+			xip_enable(map, chip, adr);
+			goto op_done;
+		}
+
+		/* Latency issues. Drop the lock, wait a while and retry */
+		UDELAY(map, chip, adr, 1);
+	}
+
+	/* reset on all failures. */
+	map_write( map, CMD(0xF0), chip->start );
+	xip_enable(map, chip, adr);
+	/* FIXME - should have reset delay before continuing */
+
+	printk(KERN_WARNING "MTD %s(): software timeout\n",__func__ );
+
+	ret = -EIO;
+ op_done:
+	chip->state = FL_READY;
+	put_chip(map, chip, adr);
+	spin_unlock(chip->mutex);
+
+	return ret;
+}
+/**************************************************************************************************
+Syntax:      	static SINT32  nor_amdstd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,size_t *retlen, const u_char *buf)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 nor_amdstd_write_buffers(struct mtd_info *mtd, loff_t to, size_t len,size_t *retlen, const u_char *buf)
+{
+	struct map_info *map = mtd->priv;
+	struct cfi_private *cfi = map->fldrv_priv;
+	int wbufsize = cfi_interleave(cfi) << cfi->cfiq->MaxBufWriteSize;
+	int ret = 0;
+	int chipnum;
+	unsigned long ofs;
+	
+	
+	
+	const u_char kosta_buf[64]={0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,
+			0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa	};
+	
+	printk("++++++++++cfi_cmdset_0002.c/cfi_amdstd_write_buffers+++++++++\n\r");
+	
+	
+	*retlen = 0;
+	if (!len)
+		return 0;
+
+	
+	
+	chipnum = to >> cfi->chipshift;
+	ofs = to  - (chipnum << cfi->chipshift);
+	printk("__wbufsize=0x%x,____to=0x%x,____len=0x%x,chipnum=0x%x,ofs=0x%x\n",wbufsize,(int)to,(int)len,chipnum,(int)ofs);
+	
+	
+	/* If it's not bus-aligned, do the first word write */
+	if (ofs & (map_bankwidth(map)-1)) {
+		size_t local_len = (-ofs)&(map_bankwidth(map)-1);
+		if (local_len > len)
+			local_len = len;
+		ret = cfi_amdstd_write_words(mtd, ofs + (chipnum<<cfi->chipshift),local_len, retlen,buf);
+		if (ret)
+			return ret;
+		ofs += local_len;
+		buf += local_len;
+		len -= local_len;
+
+		if (ofs >> cfi->chipshift) {
+			chipnum ++;
+			ofs = 0;
+			if (chipnum == cfi->numchips)
+				return 0;
+		}
+	}
+
+	/* Write buffer is worth it only if more than one word to write... */
+	while (len >= map_bankwidth(map) * 2) {
+		/* We must not cross write block boundaries */
+		int size = wbufsize - (ofs & (wbufsize-1));
+
+		if (size > len)
+			size = len;
+		if (size % map_bankwidth(map))
+			size -= size % map_bankwidth(map);
+
+		ret = do_write_buffer(map, &cfi->chips[chipnum],ofs, kosta_buf/*buf*/, size);
+		if (ret)
+			return ret;
+
+		ofs += size;
+		buf += size;
+		(*retlen) += size;
+		len -= size;
+
+		if (ofs >> cfi->chipshift) {
+			chipnum ++;
+			ofs = 0;
+			if (chipnum == cfi->numchips)
+				return 0;
+		}
+	}
+
+	if (len) {
+		size_t retlen_dregs = 0;
+
+		ret = cfi_amdstd_write_words(mtd, ofs + (chipnum<<cfi->chipshift),
+					     len, &retlen_dregs,buf);
+
+		*retlen += retlen_dregs;
+		return ret;
+	}
+
+	return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	   SINT32 nor_do_read_onechip(struct map_info *map, struct flchip *chip, loff_t adr, size_t len, u_char *buf)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 nor_do_read_onechip(struct map_info *map, struct flchip *chip, loff_t adr, size_t len, u_char *buf)
+{
+	unsigned long cmd_addr;
+	struct cfi_private *cfi = map->fldrv_priv;
+	int ret;
+    int i;
+
+    adr += chip->start;
+	
+	/* Ensure cmd read/writes are aligned. */
+	cmd_addr = adr & ~(map_bankwidth(map)-1);
+	printk("?____________cfi_cmdset_0002.c/do_read_onechip\n\r");
+	printk("___adr=%x,cmd_addr=%x,___len=%x!\n\r",(int)adr,cmd_addr,(int)len);
+	
+	
+/*	
+	spin_lock(chip->mutex);
+
+	ret = get_chip(map, chip, cmd_addr, FL_READY);
+	if (ret) 
+	{
+		spin_unlock(chip->mutex);
+		return ret;
+	}
+	printk("addr!!!!!!!!!!!!=%x,\n\r",(int)adr);
+	if (chip->state != FL_POINT && chip->state != FL_READY)
+	{
+		map_write(map, CMD(0xf0), cmd_addr);
+		chip->state = FL_READY; 
+	}
+  
+*/  
+    
+#if 0	
+	printk("__MAP_Info_STRUCT__________\n");
+	printk(" name=%s,size=%x,phys=%x,bankwidth=%x ,pfow_base=%x,map_priv_1=%x\n\r",map->name,(int)map->size,(int)map->phys,map->bankwidth,(int)map->pfow_base,(int)map->map_priv_1);
+	printk(" map->cached=%x,(char *)map->cached=%s,map->virt=%x\n\r",map->cached,(char *)map->cached,map->virt);
+#endif	
+	
+
+	map_copy_from(map, buf, adr, len);
+	//map_copy_from(map, lbuf, adr, len);
+	printk("___map_copy_from__ addr=0x%x,len=0x%x!\n\r",(int)adr,(int)len);
+
+	printk("\n\r");
+	put_chip(map, chip, cmd_addr);
+	spin_unlock(chip->mutex);
+
+	return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	nor_amdstd_read (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 nor_amdstd_read (struct map_info *map, loff_t from, size_t len, size_t *retlen, u_char *buf)
+{
+	    //struct map_info *map = mtd->priv;
+		struct cfi_private *cfi = map->fldrv_priv;
+		unsigned long ofs;
+		int i;
+		int chipnum;
+		int ret = 0;
+		
+		//u_char *t_buf=0; 
+		/* ofs: offset within the first chip that the first read should start */
+		printk("_____________________cfi_cmdset_0002.c/cfi_amdstd_read::::::::::\n\r");
+		printk("cfi_strucuture_____________________:\n\r");
+		printk("in_from=%x,cfi->chipshift=%x,cfi->num_chips=%x,__inlen=%x:\n",(int)from,cfi->chipshift,cfi->numchips,(int)len); 	
+		
+		chipnum = (from >> cfi->chipshift);//
+		ofs = from - (chipnum <<  cfi->chipshift);
+		*retlen = 0;
+		
+		printk("chipnum=%x,ofs=%x,___from=%x,len=%x,chipshift=%x\n\r",chipnum,(int)ofs,(int)from,(int)len,cfi->chipshift);
+
+		while (len) 
+		{
+			unsigned long thislen;
+	       
+			
+			if (chipnum >= cfi->numchips)
+				break;
+
+			if ((len + ofs -1) >> cfi->chipshift)
+				thislen = (1<<cfi->chipshift) - ofs;
+			else
+				thislen = len;
+
+			printk("thislen=%x",(int)thislen) ;
+			//ret = nor_do_read_onechip(map, &cfi->chips[chipnum], ofs, thislen, buf);
+			
+			ret = nor_do_read_onechip(map, pchip, ofs, thislen, buf);
+			
+			
+			//ret = nor_do_read_onechip(map, &cfi->chips[chipnum], ofs, thislen);
+			if (ret)
+				break;
+
+			*retlen += thislen;
+			len -= thislen;
+			buf += thislen;
+			printk("retlen=%x\n",(int)retlen) ; 
+			ofs = 0;
+			chipnum++;
+		}
+
+		for(i=0;i<=128;i++)
+		{
+		
+			printk("0x%x  ",buf[i]);		
+		}		
+		
+	return STATUS_OK;
+}
+
+
+
+
+//////////////////////////////////////Interface API Functions///////////////////////////////// 
+/**************************************************************************************************
+Syntax:      mpcNorReadata (loff_t start_offset,size_t len,u_char *buf)
+
+Remarks:     This Read from localbus Interface. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 mpcNorReadata (loff_t start_offset,size_t len,u_char *buf)
+{
+u_char t_buf[1024];
+size_t retlen=NULL;
+
+
+map_copy_from(map, t_buf, start_offset, len);
+//map_copy_from(map, lbuf, adr, len);
+printk("___map_copy_from__ addr=0x%x,len=0x%x!\n\r",(int)adr,(int)len);
+
+
+
+//nor_amdstd_read (map, start_offset, len, &retlen,l_buf);
+//*buf=l_buf;
+
+return STATUS_OK;
+}
+
+
+/**************************************************************************************************
+Syntax:      	mpcNorWritedata(loff_t start_offset,size_t len,const u_char *buf)
+
+Remarks:	    This Function Write operations to local bus 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 mpcNorWritedata(loff_t start_offset,size_t len,const u_char *buf)
+{
+
+
+
+
+
+
+return STATUS_OK;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,626 @@
+*** README.mpcapp ***
+
+This README describes the installation, setup and functionality of the
+MPCP2020 test application (mpcapp). The mpcapp.
+
+Contents
+--------
+	0) Distributed files
+	1) Introduction
+	2) Installation
+	2.1) Linux host system
+	2.2) VxWorks host system
+	2.3) OK1 host system
+	3) Compile Time Configuration
+	4) Supported messages and message layout
+	4.1) MIF-Buffers
+	4.2) Supported messages
+	5) ISDN CC Application and Target Module's Startup
+	6) Special control requests
+	6.1) NPMC-8260-4E1, NPMC-8280-4E1 and NPCI-8280-4E1 data routing
+	6.2) NPMC-4S0 data routing
+	6.3) NPMC860-2E1 data routing
+	7) Additional Documentation
+	8) Contact
+	9) History
+
+
+
+0) Distributed files
+--------------------
+
+The CCAPP test application currently consists of following files:
+
+	filename		description
+	--------		-----------
+	README.ccapp		this readme file
+	ccapp_rel.c		application release file
+	ccapp.h			common application header file
+	ccapp_ctrl.c		control message routines
+	ccapp_ctrl.h		control message declarations
+	ccapp_data.c		data transfer routines
+	ccapp_data.h		data transfer declarations
+	ccapp_isdn.c		ISDN functions and message setup
+	ccapp_isdn.h		ISDN related declarations
+	ccapp_main.c		main routines
+	ccapp_test.c		test routines
+	ccapp_test.h		declarations for test routines
+	ccapp_user.c		user support functions
+	ccapp_user.h		user support functions declarations
+	printl3.c		debug L3 messages
+	printl3.h		debug L3 messages declarations
+	ccuif.h			ISDN Call Control interface declarations
+	mifmsg.h		MIF message declarations
+	linux/Makefile		makefile to compile sources under Linux
+	linux/ccuif_miflib.c	adaption layer CCApp to Linux miflib
+	linux/ccapp_linux.c	linux main file
+
+Please note that operating system dependent files are only delivered for
+the desired operating system.
+
+
+
+1) Introduction
+---------------
+The ISDN Call Control application (CCApp) implements an example application
+that demonstrates the communication with the ISDN Call Control user interface
+(CCUIF) running on a target board. The communication is performed via a
+message interface, the so called MIF interface.
+
+The common software structure is as follows:
+
+    --------------------------------
+   |   ISDN CC test application     |
+    --------------------------------
+                   ^
+                   |
+                   v
+    --------------------------------
+   |   Message Interface library    |
+    --------------------------------
+                   ^
+                   |
+                   v
+    --------------------------------
+   |      Kernel Module Driver      |   ( Linux and VxWorks)
+    --------------------------------
+                   ^
+                   | e.g. PCI bus
+                   v
+    --------------------------------
+   |     CCUIF on Target Card       |
+    --------------------------------
+
+The CC test application uses the library routines of the message interface
+(MIF) library to send messages to the CCUIF on the target card. The MIF
+message layout is defined in mifbuf.h which is included in the library source
+package. The MIF messsage header and data content is defined in the header
+file ccuif.h, the message codes and further common MIF definitions are
+defined in mifmsg.h.
+
+As the MIF library implementation for Linux differs to the implementation for
+OK1 there are apaption layer files included in the source archive (see source
+files above).
+
+The Kernel Module Driver shown above is only used on Linux and VxWorks host
+systems; on OK1 host systems this functionality is mostly included in the OK1
+MIF library except for hardware dependant functions like interrupt and memory
+window setup.
+
+For information about the Message Interface library and the Kernel Module
+Driver please refer to the readme-files included in the distributed source
+archive.
+
+
+
+2) Installation
+---------------
+
+2.1) Linux host system
+----------------------
+The software runs on a Linux host system. Currently kernel 2.4 and 2.6
+are supported. It is delivered in source code to consider different Linux
+kernel versions.
+
+Please note that the Makefile might need to be adapted according to the your
+source directory layout.
+
+Unpack the application, library and driver packages:
+
+> cd <your_source_directory>
+> tar -xzvf ccapp_<date>.tgz
+
+The packages are extracted in the current directory within following
+directories:
+'app/ccapp'
+
+To compile the test application following steps have to be taken:
+
+> cd <your_source_directory>
+> cd app/ccapp/linux
+> make
+
+
+To clean up the source directories change into the appropriate directory
+and just type:
+
+> make clean
+
+
+
+2.2) VxWorks host system
+------------------------
+The software runs on a VxWorks host system. It is delivered in source code
+to consider different VxWorks operating system versions.
+
+Please note that the makefile might need to be adapted according to the your
+source directory layout and your host system.
+
+Unpack the application, library and driver packages:
+
+> cd <your_source_directory>
+> tar -xzvf ccapp_<date>.tgz
+
+The packages are extracted in the current directory within following
+directories:
+'app/ccapp'
+
+To compile the test application following steps have to be taken:
+
+> cd <your_source_directory>
+> cd app/ccapp/vxworks
+> make
+
+
+To clean up the source directories change into the appropriate directory
+and just type:
+
+> make clean
+
+The application is compiled into a relocatable 'ccapp.o' that can be loaded
+or linked into your VxWorks system. After loading/linking the module each
+public routine can be called by the VxWorks shell (if installed) or by a
+different application. The main entry point of the application is routine
+'ccapp' in file vxworks/ccapp_vxworks.c.
+
+For convenience a startup script is provided that allows to download the
+required software modules (driver, library and application) into your system
+via (T)FTP (if installed on your system). Please adapt the script according
+to your requirements. Do not start applications from the script because
+this may block your shell.
+
+
+
+2.3) OK1 host system
+--------------------
+Please note that the Makefile might need to be adapted according to the your
+source directory layout.
+
+Unpack the application, library and driver packages:
+
+> cd <your_source_directory>
+> tar -xzvf ccapp_<date>.tgz
+
+The packages are extracted in the current directory within following
+directories:
+'app/ccapp'
+
+To compile the test application following steps have to be taken:
+
+> cd <your_source_directory>
+> cd app/ccapp/ok1
+> make
+
+Link the generated file 'ccapp_obj.o' to your project firmware.
+
+
+To clean up the source directories change into the appropriate directory
+and just type:
+
+> make clean
+
+
+
+3) Compile Time Configuration
+-----------------------------
+The N.A.T. CC test application supports a various number of host systems
+and operating systems. Also it supports different target systems. To meet
+the purpose the configuration of the CC application is done via compile
+time configuration.
+
+The application's common compile time configuration is done in file ccapp.h.
+Please note that in some source code files special compile time configuration
+definitions can be set (e.g. ccapp_isdn.c, ccapp_data.c).
+
+Please note that a wrong compile time configuration may lead to unresolved
+references or errorneous behaviour.
+
+
+
+4) Supported messages and message layout
+----------------------------------------
+ISDN Call Control messages are located in the data part of the MIF messages
+MIF_MSG_DAT_REQ and MIF_MSG_DAT_IND if the prot_id field is set to
+MIF_USER_CCUIF. In that case the data part contains the Q.931 public
+information elements as described in the specification.
+
+Public information elements are ISDN information elements which are coded
+according to Q.931. These information elements are used by the FAPI test
+application to handle ISDN requests and indications. All Q.931 information
+elements which are provided by the ISDN network are handled over transparently
+in theses part of the message (i.e. if a date/time IE is provided by the
+network you can find it in the public coded information element part of the
+message, it is encoded by routine print_date_time(), defined in printl3.c).
+
+To debug the Q.931 coded information elements the ISDN CC test application
+is provided with a layer 3 monitor wich is enabled by setting MIF_DBG_PRINT2
+via CCApp_Dbg();
+
+Please note that the host application is responsible for answering an
+incoming call or acknowledgement of an incoming disconnection, this is
+not automatically done by the target module.
+
+
+
+5) ISDN CC Application and Target Module's Startup
+--------------------------------------------------
+The main entry point of the ISDN CC test application is the function
+CCApp_Start() (defined in ccapp_main.c). After printing out the compile time
+configuration the host system dependant MIF library initialization is performed
+(CCUIF_Init()) and the port protocol configuration information is requested
+from the user (ccapp_main_init(), ccapp_main.c).
+
+The port protocol information is stored in a device information database
+(CCAPP_DEV_INFO) and is later used by the other source modules like
+ccapp_isdn.c.
+
+The port protocol configuration (CCUIF_PROT_CFG) consists of the switch type
+(sw_type) and the network side (ntwk). The sw_type-parameter determines the
+used ISDN protocol switch type (e.g. CCUIF_SW_TYPE_PRI_NET5 = E1 primary rate).
+The ntwk-paramameter determines the network side, TE or NT. The port protocol
+configuration is passed via the message MIF_MSG_PORT_CFG to the target.
+Note, that not all port protocol configurations may be supported by the target
+module's firmware.
+
+After the port protocol configuration has been performed the ISDN stack on
+the target is started by sending the message MIF_MSG_TARGET_START.
+
+After the stack has been started further message described above can be
+exchanged with the target.
+
+
+6) Special control requests
+---------------------------
+Within the application files ccapp_ctrl.c and ccapp_ctrl.h the test application
+demonstrates how to setup special control messages. The currently implemented
+messages are used to configure the routing of data on the target card via
+the timeslot interchange chip, to configure the CT bus features and to
+configure the framer chip.
+
+MIF control codes are defined in mifmsg.h. Please note that these control
+codes are used for host-target communication. An application may define other
+application specific control codes and map them to the MIF control codes.
+E.g. the delivered test application uses this mechanism to automatically
+route B channel data when open a B channel (because target firmware usually
+does not setup a default routing for B channel data). This mechanism allows
+most applications to communicate with target software without changing the
+host-target communication interface.
+
+Supported control requests:
+	MIF_CTL_REQ_LIF_CFG,    /* line interface configuration */
+	MIF_CTL_REQ_RENA_LOC,   /* route enable: local - local */
+	MIF_CTL_REQ_RENA_LOC_BP,/* route enable: local - backplane */
+	MIF_CTL_REQ_RDIS_LOC,   /* route disable: local - local */
+	MIF_CTL_REQ_RDIS_LOC_BP,/* route disable: local - backplane */
+	MIF_CTL_REQ_RBP_MASTER, /* route backplane bus: set master mode */
+	MIF_CTL_REQ_RBP_SETCLK, /* route backplane bus: set clock frequency */
+	MIF_CTL_REQ_RBP_SETRATE,/* route backplane bus: set data rate */
+	MIF_CTL_REQ_L1_STATE,   /* get layer 1 state */
+	MIF_CTL_REQ_CHAN_STAT,  /* request channel statistics */
+	MIF_CTL_REQ_LIF_DIS,    /* disable line interface */
+	MIF_CTL_REQ_LIF_ENA,    /* enable line interface */
+	MIF_CTL_REQ_LIF_STAT,   /* request line interface statistics */
+
+Supported control indications:
+	MIF_CTL_IND_PH_AI,      /* PH_AI indication (L1 up) */
+	MIF_CTL_IND_PH_DI,      /* PH_DI indication (L1 down) */
+	MIF_CTL_IND_TX_LEVEL,   /* indicates transmit level */
+	MIF_CTL_IND_L2_UP,      /* layer 2 is up */
+	MIF_CTL_IND_L2_DOWN,    /* layer 2 is down */
+	MIF_CTL_IND_CHAN_STAT,  /* channel statistic indication (CCUIF_CHAN_STAT) */
+	MIF_CTL_IND_LIF_STAT,   /* line interface statistics */
+
+All special routing control messages take the parameters neccessary to
+configure the routing between the CPU, the CT bus and the E1 lines, to
+configure the CT bus features or to configure the framer.
+For details of these parameter please refer to the special message setup as
+defined in ccapp_ctrl.c.
+
+
+
+6.1) NPMC-8260-4E1, NPMC-8280-4E1 and NPCI-8280-4E1 data routing
+----------------------------------------------------------------
+
+The picture below shows the telecommunication related connections on the
+NPMC-8260-4E1, NPMC-8280-4E1 and NPCI-8280-4E1.
+
+The Oki ML53812-2 (Ct812) is a H.100/H.110 CT Bus System Interface Time-Slot
+Interchange chip which allows routing between local serial interfaces and the
+CT bus (or when in compatibility mode: for the SC bus).
+
+The assignment for the local serial interfaces on the NPMC82xx card is as
+follows:
+
+                                 CT - bus
+                        <=========================>
+                                    |
+                                    |
+                                    | CT bus
+                             ---------------
+                            |               |
+                            |               |
+                            |     Ct812     |
+                            |               |
+                            |               |
+                             ---------------
+                             | | | | | | | |
+                             4 5 6 7 3 2 1 0  local serial interfaces (0...7)
+                             | | | | | | | |
+                             | | | | | | | |
+   ----------------          | | | | | | | |     ----------
+  |                |- TDM_A -| | | | | | | |    |          |
+  |     MPC82xx    |- TDM_B ---| | | | | | |----|          | --> E1/T1 line 1
+  | Power QUICC II |- TDM_C -----| | | | |------|   Quad   | --> E1/T1 line 2
+  |                |- TDM_D -------| | |--------|   Falc   | --> E1/T1 line 3
+   ----------------                  |----------|          | --> E1/T1 line 4
+                                                |          |
+                                                 ----------
+
+The telecommunication I/O on the NPMC82xx card is done via the Multi-
+Channel-Controller (MCC) part of the MPC82xx, the Ct812 Time-Slot Interchange
+chip and the Quad Falc framer.
+
+The MCC interface is connected via Time-Division-Multiplexed bus (TDM bus)
+to four of the local serial interfaces of the Ct812, the other four local
+serial interfaces of the Ct812 are connected to the Quad Falc.
+
+To route data from the MPC82xx MCC interface to the E1 line the Ct812 has
+to be programmed according to following mapping by use of the control request
+MIF_CTL_REQ_RENA_LOC (lsif = local serial interface):
+
+  TDM_A <-> lsif 4 <-> lsif 0 <-> E1 line 1
+  TDM_B <-> lsif 5 <-> lsif 1 <-> E1 line 2
+  TDM_C <-> lsif 6 <-> lsif 2 <-> E1 line 3
+  TDM_D <-> lsif 7 <-> lsif 3 <-> E1 line 4
+
+To disable a routing between local serial interfaces the control request
+MIF_CTL_REQ_RDIS_LOC is used.
+
+To route data from the MPC82xx MCC interface to CT bus the Ct812 has to
+be programmed according to following mapping by use of the control request
+MIF_CTL_REQ_RENA_LOC_BP:
+
+  TDM_A <-> lsif 4 <-> CT bus data line N
+  TDM_B <-> lsif 5 <-> CT bus data line N
+  TDM_C <-> lsif 6 <-> CT bus data line N
+  TDM_D <-> lsif 7 <-> CT bus data line N
+
+To disable a routing between local serial interfaces and the backplane bus
+the control request MIF_CTL_REQ_RDIS_LOC_BP is used. Please note that setting
+up the routing takes parameters for the local serial interface and the
+backplane bus whereas the disabling of such a routing only depends on
+parameters for the local serial interface.
+
+The control request MIF_CTL_REQ_RBP_MASTER controls if the module is CT-bus
+master or not. If the module is configured as CT-bus master it will generate
+all necessary CT-bus timing signals for all devices on the CT- bus. It will
+also generate all necessary SC bus timing signals. There must be exactly one
+clock master on the CT- or SC bus.
+
+The framer configuration control request MIF_CTL_REQ_LIF_CFG currently allows
+to configure the short or long haule mode, the line impedance, the transmit
+pulse shape, the line coding and the framing mode.
+
+The control code MIF_CTL_REQ_L1_STATE is used to trigger a control indication
+that indicates the current physical layer (layer 1, L1) state in a simplified
+way (TE: L1 UP means I.431 state F1 and L1 DOWN means all other I.431 TE
+states, NT: L1 UP means I.431 state G1 and L1 DOWN means all other I.431
+NT states). In case the L1 state changes a control indication MIF_CTL_IND_PH_AI
+or MIF_CTL_IND_PH_DI is delivered automatically by the target.
+Note that requesting and indicating the L1 state is a compile time target
+firmware feature that must be enabled to make use of this control code.
+To get the L1 state after application startup it is recommended first to
+issue the MIF_CTL_REQ_L1_STATE control request to capture the current L1 state
+before monitoring on the MIF_CTL_IND_PH_xI control indications (because the
+target firmware may already have processed some L1 related events).
+Note that if L1 state indications are passed by the target to the application
+a huge amount of message transfer may occur if L1 is unstable.
+
+
+
+6.2) NPMC-4S0 data routing
+--------------------------
+
+The assignment for the local serial interfaces on the NPMC860-4S0 is as
+follows:
+
+                                 CT - bus
+                        <=========================>
+                                    |
+                                    |
+                                    | CT bus
+                             ---------------
+                            |               |
+                            |               |
+                            |     Ct812     |
+                            |               |
+                            |               |
+                             ---------------
+                             | | | | | | | |
+                             7 6 5 4 3 2 1 0  local serial interfaces
+			                 | |  (lsif 0...7)
+                                         | |
+                                         | |
+   ----------------                      | |        ------
+  |                |                     | +- IDL -| MCST | --> S0 line 1
+  |     MPC860     |- TDM_A -------------| |        ------
+  |  Power QUICC   |- TDM_B                         ------
+  |                |                       +- IDL -| MCST | --> S0 line 2
+   ----------------                        |        ------
+                                           |        ------
+					   +- IDL -| MCST | --> S0 line 3
+					   |        ------
+					   |        ------
+					   +- IDL -| MCST | --> S0 line 4
+					            ------
+
+The telecommunication I/O on the NPMC860-S40 is done via the Quicc-
+Multichannel-Controller (QMC) part of the MPC860, the Ct812 Time-Slot
+Interchange chip and the MCST framer.
+
+The QMC interface is connected via Time-Division-Multiplexed bus (TDM bus)
+A to one local serial interface of the Ct812 (TDM B is unused). Another
+local serial interface of the Ct812 is connected to the MCST devices.
+
+The different channels of the S0 ports are all located on the TDM A resp.
+the IDL bus as follows (lsif = local serial interface, ts = timeslot):
+
+S0 Port        ----- 1 -----  ----- 2 -----  ----- 3 -----  ----- 4 -----
+ISDN channel    D   B1   B2    D   B1   B2    D   B1   B2    D   B1   B2
+
+              ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+Timeslot     | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 10 | 11 |
+(TDM/IDL)     ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+To route D channel data to/from S0 port 2 one has to do the following
+mapping:
+
+   TDM A/ts 03 <-> lsif 1/ts 03 <-> lsif 0/ts 03 <-> S0 2/ts 03
+
+The control request MIF_CTL_REQ_RBP_MASTER controls if the module is CT-bus
+master or not. If the module is configured as CT-bus master it will
+generate all necessary CT-bus timing signals for all devices on the CT-
+bus. It will also generate all necessary SC bus timing signals. There must
+be exactly one clock master on the CT- or SC bus.
+
+
+
+6.3) NPMC860-2E1 data routing
+-----------------------------
+The following section describes the TDM bus mapping on the NPMC860-2E1 PMC
+module. A general overview about the connection between the different hardware
+chips is shown in the figure below. For more information about the hardware
+please refer to [5].
+
+The Power QUICC has two time division multiplexed (TDM) channels with 32
+timeslots each (full-duplex). Every framer has 32 timeslots (full-duplex).
+The CT812 timeslot router has eight local serial lines numbered from 0 to 7
+of which the first four are used as shown below. Each local line operates
+at a frequency of 2.048 MHz which leads to 32 timeslots per line.
+The CT812 also has a SC/CT-bus interface with 16/32 sychronous data lines.
+The number of SC/CT bus timeslots depends on the configured clock frequency
+and data rate (refer to MIF_CTL_REQ_RBP_SETCLK and MIF_CTL_REQ_RBP_SETRATE).
+
+The CT812 provides the clock signals to the MPC860, the framer chips and
+if requested to the SC/CT bus. The CT812 can retrieve a reference signal
+from the SC/CT bus or from one of the framer chips. To retrieve the
+synchronisation from the SC/CT bus the CT812 must operate in slave mode
+(except for the NETREFx inputs). In master mode the reference for the
+CT812 can be retrieved from one of the NETREFx inputs or from one of the
+framer chips (refer to MIF_CTL_REQ_R_SELREF). To switch between master
+and slave mode use IOCTL MIF_CTL_REQ_RBP_MASTER.
+
+If no reference is used the CT812 must be configured into master mode and
+the reference select must be set to free running. After the initialization
+the CT812 is set into SC/CT bus slave mode to avoid clock signal contention
+on the SC/CT bus if multiple boards are in a system.
+
+Every local channel can be routed from the Power QUICC or one of the framers
+to timeslots on the CT/SC bus or vice versa. It is also possible to route
+timeslots between the two framers or a framer and the Power QUICC. The local
+bus serial lines of the CT812 are connected to the Power QUICC and the framers
+as shown below (please refer to [5] for further information):
+
+                    SC/CT - bus backplane
+                 <=========================>
+                             |
+                             |
+                             | SC/CT bus (16/32 synchronous data lines)
+                      ----------------
+                     |                |
+                     |     CT 812     |
+                     |    timeslot    |
+                     |     router     |
+                     |                |
+                      ----------------
+                      |    |    |    |
+                     0|   1|   3|   2|  local bus serial lines (0...3)
+                      |    |    |    |
+                      |    |    |    |
+   -------------  A   |    |    |    |     ----------
+  |             |-----     |    |    |    |          |
+  |   MPC 860   |          |    |     ----| framer 1 | ---> E1 line 1
+  | Power QUICC | B        |    |         |          |
+  |             |----------     |          ----------
+   -------------                |
+                                |          ----------
+                                |         |          |
+                                 ---------| framer 2 | ---> E1 line 2
+                                          |          |
+                                           ----------
+
+For mapping the timeslots two cases have to be distinguished: 'local
+mapping' and 'backplane mapping': The local mapping is always a bidirectional
+mapping between two local lines and timeslots. A local mapping can be
+established between the two ports of the MPC860, between the MPC860 and
+one of the framers or between the two framers. Refer to MIF_CTL_REQ_RENA_LOC
+and MIF_CTL_REQ_RDIS_LOC. The backplane mapping is always a unidirectional
+mapping between one of the MPC860 ports and the SC/CT bus or between one of
+the framers and the SC/CT bus. The direction of the mapping (from local to
+SC/CT bus or from SC/CT bus to local) is defined via a parameter in the
+IOCTLs MIF_CTL_REQ_RENA_LOC_BP and MIF_CTL_REQ_RDIS_LOC_BP.
+
+
+
+7) Additional Documentation
+---------------------------
+[1] N.A.T., NPMC8260-E1/T1 Technical Manual, 10/2004
+[2] N.A.T., NPMC8280-E1/T1 Technical Manual, 04/2006
+[3] N.A.T., NPCI8280-E1/T1 Technical Manual, 03/2006
+[4] N.A.T., NPMC-4S0 Technical Manual, 02/2006
+[5] N.A.T. GmbH, NPMC860-2E1 Technical Reference Manual V1.7, 08/2005
+[6] Motorola, MPC8280 PowerQUICC II Family Reference Manual, Rev.D, 03/2004
+[7] Oki Semiconductor, ML53812-2 H.100/H.110 CT Bus System Interface and
+    Time-Slot Interchange, 01/2000
+[8] Infineon, Quad E1/T1/J1 Framer and Line Interface Component for Long
+    Short Haul Applications PEB 22554 V1.3, Data Sheet, 07/2000
+
+
+
+8) Contact
+----------
+N.A.T. GmbH
+Kamillenweg 22
+D-53757 Sankt Augustin
+
+Phone: ++49/2241/3989-0
+Fax: ++49/2241/3989-10
+
+E-mail: sales@nateurope.com
+Internet: http://www.nateurope.com
+
+
+
+9) History
+----------
+NAT 060914 initial version of this file
+NAT 070329 updated for kernel 2.6 usage
+NAT 070402 added notes about MIF control codes
+NAT 070626 minor changes
+NAT 070821 updated for VxWorks
+NAT 071002 updated
+NAT 071009 added section 'NPMC860-2E1 data routing'
+NAT 071023 added IOCTLs MIF_CTL_REQ_LIF_DIS, MIF_CTL_REQ_LIF_ENA
+NAT 071219 added IOCTL MIF_CTL_REQ_LIF_STAT/MIF_CTL_IND_LIF_STAT
+
+

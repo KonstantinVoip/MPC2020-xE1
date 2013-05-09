@@ -1,0 +1,35 @@
+<Analysispoints>
+	<Name>AnalysispointsManager</Name>
+	<ProjectPath></ProjectPath>
+	<MaxNumberOfCores>8</MaxNumberOfCores>
+	<Comments>Analysispoints Manager</Comments>
+	<IgnoreAll>false</IgnoreAll>
+	<SpecializedManager>
+		<Name>TracepointsManager</Name>
+		<Comments>Tracepoints Manager</Comments>
+	</SpecializedManager>
+	<Core>
+		<Name>0</Name>
+	</Core>
+	<Core>
+		<Name>1</Name>
+	</Core>
+	<Core>
+		<Name>2</Name>
+	</Core>
+	<Core>
+		<Name>3</Name>
+	</Core>
+	<Core>
+		<Name>4</Name>
+	</Core>
+	<Core>
+		<Name>5</Name>
+	</Core>
+	<Core>
+		<Name>6</Name>
+	</Core>
+	<Core>
+		<Name>7</Name>
+	</Core>
+</Analysispoints>

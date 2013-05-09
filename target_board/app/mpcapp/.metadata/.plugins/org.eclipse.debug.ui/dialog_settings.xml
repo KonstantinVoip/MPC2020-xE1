@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.debug.ui.LAUNCH_CONFIGURATION_PROPERTIES_DIALOG_SECTION">
+		<item value="1037" key="DIALOG_WIDTH"/>
+		<item value="740" key="DIALOG_HEIGHT"/>
+		<item value="1|Sans Serif|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+	</section>
+	<section name="org.eclipse.debug.ui.LAUNCH_CONFIGURATIONS_DIALOG_SECTION">
+		<item value="1319" key="DIALOG_WIDTH"/>
+		<item value=", com.freescale.cdt.launch.cw.attach, " key="org.eclipse.debug.ui.EXPANDED_NODES"/>
+		<item value="701" key="DIALOG_HEIGHT"/>
+		<item value="405" key="org.eclipse.debug.ui.DIALOG_SASH_WEIGHTS_1"/>
+		<item value="594" key="org.eclipse.debug.ui.DIALOG_SASH_WEIGHTS_2"/>
+		<item value="1|Sans Serif|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+	</section>
+	<section name="org.eclipse.debug.ui.SELECT_LAUNCH_CONFIGURATION_DIALOG">
+		<item value="348" key="DIALOG_WIDTH"/>
+		<item value="310" key="DIALOG_HEIGHT"/>
+		<item value="1|Sans Serif|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+	</section>
+</section>

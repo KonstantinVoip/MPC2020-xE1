@@ -1,0 +1,11 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+USER_OBJS :=
+
+USER_OBJS_QUOTED :=
+
+LIBS := -l$(ProjDirPath)/Lib/librt_E500V2.a -l$(ProjDirPath)/Lib/libc_E500V2.a -l$(ProjDirPath)/Lib/UART1_P10xx-P20xxRDB.UC.a
+
+LIBS_QUOTED := -l"$(ProjDirPath)/Lib/librt_E500V2.a" -l"$(ProjDirPath)/Lib/libc_E500V2.a" -l"$(ProjDirPath)/Lib/UART1_P10xx-P20xxRDB.UC.a"

@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730" moduleId="org.eclipse.cdt.core.settings" name="Linux_C_Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.managedbuilder.core.ManagedBuildManager" point="org.eclipse.cdt.core.ScannerInfoProvider"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.LltErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.AsmErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.MweppcErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.MPWEppcErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.CobjErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.freescale.core.ide.cdt.errorParsers.LnkErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="elf" artifactName="linux" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" buildReferences="true" buildReferencingConfigurations="false" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MweppcErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MPWEppcErrorParser" id="com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730" isPrebuildInvalidatingBuild="false" name="Linux_C_Debug" parent="com.freescale.pa.cdt.gcc.configuration.linux.debug" produceBuildErrorsWithMissingReferences="true">
+					<folderInfo id="com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730." name="/" resourcePath="">
+						<toolChain id="com.freescale.pa.cdt.gcc.toolchain.linux.debug.147909692" name="Power Architecture Linux C Debug Tool Chain" superClass="com.freescale.pa.cdt.gcc.toolchain.linux.debug">
+							<option id="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.1533430521" name="Architecture" superClass="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch" value="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.e500v2" valueType="enumerated"/>
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="com.freescale.pa.cdt.gcc.toolchain.targetPlatform1.275909611" superClass="com.freescale.pa.cdt.gcc.toolchain.targetPlatform1"/>
+							<builder buildPath="${ProjDirPath}/Obj" cleanBuildTarget="" enableAutoBuild="false" enabledIncrementalBuild="true" id="com.freescale.pa.cdt.gcc.toolchain.linux.debug.builder.443745068" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Power Linux Debug Builder" parallelBuildWorkspaceOn="true" parallelizationNumber="-1" superClass="com.freescale.pa.cdt.gcc.toolchain.linux.debug.builder"/>
+							<tool command="powerpc-none-linux-gnuspe-gcc" id="com.freescale.pa.cdt.gcc.linux.linker.debug.1872800102" name="Power Linux Linker" superClass="com.freescale.pa.cdt.gcc.linux.linker.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.575553476" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool command="powerpc-none-linux-gnuspe-gcc" id="com.freescale.pa.cdt.gcc.linux.compiler.debug.861136497" name="Power Linux Compiler" superClass="com.freescale.pa.cdt.gcc.linux.compiler.debug">
+								<option id="gnu.c.compiler.option.optimization.level.1747102114" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.misc.other.2003464730" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -mhard-float" valueType="string"/>
+								<option id="gnu.c.compiler.option.include.paths.1242268486" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
+								</option>
+								<option id="gnu.c.compiler.option.include.files.393094655" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1951556706" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool command="powerpc-none-linux-gnuspe-as" id="com.freescale.pa.cdt.gcc.linux.assembler.debug.1907631284" name="Power Linux Assembler" superClass="com.freescale.pa.cdt.gcc.linux.assembler.debug">
+								<option id="gnu.both.asm.option.flags.700894099" name="Assembler flags" superClass="gnu.both.asm.option.flags" value="-g" valueType="string"/>
+								<option id="gnu.both.asm.option.include.paths.1450545873" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.278030105" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool command="powerpc-none-linux-gnuspe-gcc" id="com.freescale.pa.cdt.gcc.linux.preprocessor.debug.129226175" name="Power Linux Preprocessor" superClass="com.freescale.pa.cdt.gcc.linux.preprocessor.debug"/>
+							<tool command="powerpc-none-linux-gnuspe-objdump" id="com.freescale.pa.cdt.gcc.linux.disassembler.debug.207059874" name="Power Linux Disassembler" superClass="com.freescale.pa.cdt.gcc.linux.disassembler.debug"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="scannerConfiguration">
+				<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+				<profile id="com.freescale.pa.cdt.toolchain.linux.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="false"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxDir}/powerpc-linux-gnu-gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.cpp.toolchain.linux.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="false"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxDir}/powerpc-linux-gnu-g++" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.elf.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="false"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccElfDir}/powerpc-elf-gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="makefileGenerator">
+						<runAction arguments="-E -P -v -dD" command="" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/${specs_file}&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'g++ -E -P -v -dD &quot;${plugin_state_location}/specs.cpp&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/specs.c&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.eabi.e500mc.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500mcDir}/powerpc-eabi-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500mc.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500mcDir}/powerpc-eabi-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.linux.e500mc.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500mcDir}/powerpc-unknown-linux-gnu-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500mc.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500mcDir}/powerpc-unknown-linux-gnu-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v1.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v1Dir}/powerpc-eabispe-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500v1.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v1Dir}/powerpc-eabispe-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.linux.e500v1.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v1Dir}/powerpc-unknown-linux-gnuspe-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500v1.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v1Dir}/powerpc-unknown-linux-gnuspe-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v2Dir}/powerpc-eabispe-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500v2.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v2Dir}/powerpc-eabispe-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.linux.e500v2.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v2Dir}/powerpc-unknown-linux-gnuspe-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500v2.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v2Dir}/powerpc-unknown-linux-gnuspe-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.aeabi.e5500.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccAeabiE5500Dir}/powerpc-aeabi-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.aeabi.e5500.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccAeabiE5500Dir}/powerpc-aeabi-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.linux.e5500.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE5500Dir}/powerpc-unknown-linux-gnu-gcc" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e5500.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE5500Dir}/powerpc-unknown-linux-gnu-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="com.freescale.pa.cdt.toolchain.cpp.elf.discoveryProfile">
+					<buildOutputProvider>
+						<openAction enabled="false" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccElfDir}/powerpc-elf-g++" useDefault="true"/>
+						<parser enabled="false"/>
+					</scannerInfoProvider>
+				</profile>
+				<scannerConfigBuildInfo instanceId="com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730;com.freescale.pa.cdt.gcc.configuration.linux.debug.317911730.;com.freescale.pa.cdt.gcc.linux.compiler.debug.861136497;cdt.managedbuild.tool.gnu.c.compiler.input.1951556706">
+					<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+					<profile id="com.freescale.pa.cdt.toolchain.linux.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="false"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxDir}/powerpc-none-linux-gnuspe-gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.cpp.toolchain.linux.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="false"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxDir}/powerpc-linux-gnu-g++" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.elf.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="false"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccElfDir}/powerpc-elf-gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="makefileGenerator">
+							<runAction arguments="-E -P -v -dD" command="" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/${specs_file}&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'g++ -E -P -v -dD &quot;${plugin_state_location}/specs.cpp&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/specs.c&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.eabi.e500mc.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500mcDir}/powerpc-eabi-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500mc.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500mcDir}/powerpc-eabi-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.linux.e500mc.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500mcDir}/powerpc-unknown-linux-gnu-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500mc.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500mcDir}/powerpc-unknown-linux-gnu-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v1.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v1Dir}/powerpc-eabispe-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500v1.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v1Dir}/powerpc-eabispe-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.linux.e500v1.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v1Dir}/powerpc-unknown-linux-gnuspe-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500v1.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v1Dir}/powerpc-unknown-linux-gnuspe-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v2Dir}/powerpc-eabispe-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.eabi.e500v2.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccEabiE500v2Dir}/powerpc-eabispe-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.linux.e500v2.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v2Dir}/powerpc-unknown-linux-gnuspe-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e500v2.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE500v2Dir}/powerpc-unknown-linux-gnuspe-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.aeabi.e5500.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccAeabiE5500Dir}/powerpc-aeabi-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.aeabi.e5500.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccAeabiE5500Dir}/powerpc-aeabi-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.linux.e5500.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE5500Dir}/powerpc-unknown-linux-gnu-gcc" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.linux.e5500.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxE5500Dir}/powerpc-unknown-linux-gnu-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="com.freescale.pa.cdt.toolchain.cpp.elf.discoveryProfile">
+						<buildOutputProvider>
+							<openAction enabled="false" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccElfDir}/powerpc-elf-g++" useDefault="true"/>
+							<parser enabled="false"/>
+						</scannerInfoProvider>
+					</profile>
+				</scannerConfigBuildInfo>
+			</storageModule>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="linux.com.freescale.pa.cdt.gcc.toolchain.linux.projectType.573969847" name="Power Architecture Linux C Project" projectType="com.freescale.pa.cdt.gcc.toolchain.linux.projectType"/>
+	</storageModule>
+</cproject>

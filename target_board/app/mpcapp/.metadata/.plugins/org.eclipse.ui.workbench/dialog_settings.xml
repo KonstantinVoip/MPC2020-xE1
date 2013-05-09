@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="WorkbenchPreferenceDialogSettings">
+		<item value="0" key="DIALOG_Y_ORIGIN"/>
+		<item value="205" key="DIALOG_X_ORIGIN"/>
+	</section>
+	<section name="InstallationDialogSettings">
+		<item value="694" key="DIALOG_WIDTH"/>
+		<item value="-155" key="DIALOG_Y_ORIGIN"/>
+		<item value="-29" key="DIALOG_X_ORIGIN"/>
+		<item value="729" key="DIALOG_HEIGHT"/>
+		<item value="1|Sans Serif|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+	</section>
+	<section name="ImportExportAction">
+		<item value="com.freescale.pa.elfimporter.wizard1" key="ImportExportPage.STORE_SELECTED_IMPORT_WIZARD_ID"/>
+		<list key="ImportExportPage.STORE_EXPANDED_IMPORT_CATEGORIES">
+			<item value="com.freescale.core.ide.cwprojectImporter.category"/>
+		</list>
+	</section>
+</section>

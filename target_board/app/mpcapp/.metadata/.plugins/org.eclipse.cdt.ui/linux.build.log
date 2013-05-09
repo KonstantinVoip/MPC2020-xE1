@@ -1,0 +1,5 @@
+
+**** Build of configuration Linux_C_Debug for project linux ****
+
+/usr/local/Freescale/CodeWarrior_PA_10.1.2/gnu/bin/make -j6 all 
+make: Цель `all' не требует выполнения команд.

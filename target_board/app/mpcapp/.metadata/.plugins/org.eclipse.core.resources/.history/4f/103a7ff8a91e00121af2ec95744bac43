@@ -1,0 +1,91 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+-include ../makefile.local
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS_QUOTED += \
+"../Source/P10xx-P20xxRDB_P2020_init.c" \
+"../Source/interrupt.c" \
+"../Source/main.c" 
+
+ASM_SRCS += \
+../Source/eppc_exception.asm 
+
+C_SRCS += \
+../Source/P10xx-P20xxRDB_P2020_init.c \
+../Source/interrupt.c \
+../Source/main.c 
+
+ASM_SRCS_QUOTED += \
+"../Source/eppc_exception.asm" 
+
+OBJS += \
+./Source/P10xx-P20xxRDB_P2020_init.obj \
+./Source/eppc_exception.obj \
+./Source/interrupt.obj \
+./Source/main.obj 
+
+OBJS_QUOTED += \
+"./Source/P10xx-P20xxRDB_P2020_init.obj" \
+"./Source/eppc_exception.obj" \
+"./Source/interrupt.obj" \
+"./Source/main.obj" 
+
+C_DEPS += \
+./Source/P10xx-P20xxRDB_P2020_init.d \
+./Source/interrupt.d \
+./Source/main.d 
+
+OBJS_OS_FORMAT += \
+./Source/P10xx-P20xxRDB_P2020_init.obj \
+./Source/eppc_exception.obj \
+./Source/interrupt.obj \
+./Source/main.obj 
+
+C_DEPS_QUOTED += \
+"./Source/P10xx-P20xxRDB_P2020_init.d" \
+"./Source/interrupt.d" \
+"./Source/main.d" 
+
+
+# Each subdirectory must supply rules for building sources it contributes
+Source/P10xx-P20xxRDB_P2020_init.obj: ../Source/P10xx-P20xxRDB_P2020_init.c
+	@echo 'Building file: $<'
+	@echo 'Executing target #1 $<'
+	@echo 'Invoking: PowerPC Compiler'
+	"$(PAToolsDirEnv)/mwcceppc" @@"Source/P10xx-P20xxRDB_P2020_init.args" -o "Source/P10xx-P20xxRDB_P2020_init.obj" "$<" -MD -gccdep
+	@echo 'Finished building: $<'
+	@echo ' '
+
+Source/%.d: ../Source/%.c
+	@echo 'Regenerating dependency file: $@'
+	
+	@echo ' '
+
+Source/%.obj: ../Source/%.asm
+	@echo 'Building file: $<'
+	@echo 'Executing target #2 $<'
+	@echo 'Invoking: PowerPC Assembler'
+	"$(PAToolsDirEnv)/mwasmeppc" -sym dwarf-2 -sym full -msgstyle parseable -proc e500v2 -big -nosyspath -o "$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+Source/interrupt.obj: ../Source/interrupt.c
+	@echo 'Building file: $<'
+	@echo 'Executing target #3 $<'
+	@echo 'Invoking: PowerPC Compiler'
+	"$(PAToolsDirEnv)/mwcceppc" @@"Source/interrupt.args" -o "Source/interrupt.obj" "$<" -MD -gccdep
+	@echo 'Finished building: $<'
+	@echo ' '
+
+Source/main.obj: ../Source/main.c
+	@echo 'Building file: $<'
+	@echo 'Executing target #4 $<'
+	@echo 'Invoking: PowerPC Compiler'
+	"$(PAToolsDirEnv)/mwcceppc" @@"Source/main.args" -o "Source/main.obj" "$<" -MD -gccdep
+	@echo 'Finished building: $<'
+	@echo ' '
+
+

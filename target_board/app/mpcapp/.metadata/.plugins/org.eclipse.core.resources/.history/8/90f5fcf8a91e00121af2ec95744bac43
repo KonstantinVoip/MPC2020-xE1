@@ -1,0 +1,44 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+-include ../makefile.local
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS_QUOTED += \
+"../Lib/__ppc_eabi_init.c" 
+
+C_SRCS += \
+../Lib/__ppc_eabi_init.c 
+
+OBJS += \
+./Lib/__ppc_eabi_init.obj 
+
+OBJS_QUOTED += \
+"./Lib/__ppc_eabi_init.obj" 
+
+C_DEPS += \
+./Lib/__ppc_eabi_init.d 
+
+OBJS_OS_FORMAT += \
+./Lib/__ppc_eabi_init.obj 
+
+C_DEPS_QUOTED += \
+"./Lib/__ppc_eabi_init.d" 
+
+
+# Each subdirectory must supply rules for building sources it contributes
+Lib/__ppc_eabi_init.obj: ../Lib/__ppc_eabi_init.c
+	@echo 'Building file: $<'
+	@echo 'Executing target #6 $<'
+	@echo 'Invoking: PowerPC Compiler'
+	"$(PAToolsDirEnv)/mwcceppc" @@"Lib/__ppc_eabi_init.args" -o "Lib/__ppc_eabi_init.obj" "$<" -MD -gccdep
+	@echo 'Finished building: $<'
+	@echo ' '
+
+Lib/%.d: ../Lib/%.c
+	@echo 'Regenerating dependency file: $@'
+	
+	@echo ' '
+
+
