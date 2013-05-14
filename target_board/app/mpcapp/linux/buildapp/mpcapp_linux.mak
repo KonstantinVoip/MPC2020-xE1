@@ -3,7 +3,7 @@
 #powerpc build tools compiler
 #CC=/opt/freescale/usr/local/gcc-4.3.74-eglibc-2.8.74-dp-2/powerpc-none-linux-gnuspe/bin/powerpc-none-linux-gnuspe-gcc
 #Codewarrior build tool compiler
-CC=/usr/local/Freescale/CodeWarrior_PA_10.1.2/Cross_Tools/powerpc-linux/bin/powerpc-none-linux-gnuspe-gcc
+CC=/usr/local/Freescale/CodeWarrior_PA_10.2.1/Cross_Tools/powerpc-linux/bin/powerpc-none-linux-gnuspe-gcc
 
 #application name
 APPNAME = mpcapp

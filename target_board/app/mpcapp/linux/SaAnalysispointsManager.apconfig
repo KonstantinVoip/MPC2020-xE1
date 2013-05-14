@@ -1,6 +1,6 @@
 <Analysispoints>
 	<Name>AnalysispointsManager</Name>
-	<ProjectPath>/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/linux/SaAnalysispointsManager.apconfig</ProjectPath>
+	<ProjectPath></ProjectPath>
 	<MaxNumberOfCores>8</MaxNumberOfCores>
 	<Comments>Analysispoints Manager</Comments>
 	<IgnoreAll>false</IgnoreAll>
