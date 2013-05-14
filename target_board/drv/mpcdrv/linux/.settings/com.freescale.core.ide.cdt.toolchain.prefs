@@ -1,9 +1,12 @@
-#Thu Oct 25 12:59:15 MSD 2012
+#Mon May 13 18:18:44 MSD 2013
 eclipse.preferences.version=1
+hotfix/class\ com.freescale.core.ide.cdt.toolchain.ProjectErrorParserHotFix=true
 hotfix/class\ com.freescale.core.ide.cdt.toolchain.QuotePathsHotFix=true
 hotfix/class\ com.freescale.core.ide.cdt.toolchain.ToolOptionsUpdateHotFix=true
 hotfix/class\ com.freescale.core.ide.cdt.toolchain.UiElementValueTypeHotFix=true
 hotfix/com.freescale.core.ide.util.pbhotfix=true
+hotfix/com.freescale.ppc.cdt.toolchain=true
 hotfix/com.freescale.ppc.toolchain.ToolOptionsUpdate.fileAndProgram_v1=true
 hotfix/com.freescale.ppc.toolchain.UIElementValueTypeUpdate=true
+hotfix/com.freescale.ppc.toolchain.UIElementValueTypeUpdate.toSymbolFiles=true
 hotfix/pa.cdt.gcc.toolchain.quotePathsHotFix=true
