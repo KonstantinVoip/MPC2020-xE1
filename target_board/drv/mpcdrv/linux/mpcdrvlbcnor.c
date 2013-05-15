@@ -1093,7 +1093,8 @@ Return Value:	Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 SINT32 mpcNorReadata (loff_t start_offset,size_t len,u_char *buf)
 {
-u_char t_buf[1024];
+//u_char t_buf[1024];
+  u16 t_buf[128];
 size_t retlen=NULL;
 int i;
 
@@ -1104,10 +1105,9 @@ map_copy_from(map, t_buf, start_offset, len);
 //map_copy_from(map, lbuf, adr, len);
 
 
-for(i=0;i<=32;i++)
+for(i=0;i<=16;i++)
 {
-	
-	printk("0x%x\n\r",t_buf[i]);
+	printk("iter%d  0x%x\n\r",i,t_buf[i]);
 }
 
 

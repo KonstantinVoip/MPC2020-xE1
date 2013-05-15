@@ -1729,21 +1729,6 @@ static void pktgen_run(struct pktgen_thread *t)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	  static void pktgen_xmit(struct pktgen_dev *pkt_dev)
 
@@ -2047,7 +2032,6 @@ int cpu;
 			printk(KERN_WARNING "pktgen: WARNING: Cannot create thread for cpu %d (%d)\n", cpu, err);
 	    }
 	}
-
 
 return 1;
 }

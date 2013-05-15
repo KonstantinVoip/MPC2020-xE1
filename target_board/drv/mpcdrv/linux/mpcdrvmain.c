@@ -117,7 +117,6 @@ static  loff_t gstart_offset;
 static  size_t glen;
 
 
-
 //#define PMJCR		0x50D4
 //#define PMJCR		0x50D0   //
 //#define PMJCR     0xE00A0  //PVR Processor version register 0x80211040
@@ -415,6 +414,9 @@ static int  mpcdrv_ioctl(struct inode* inodep, struct file* filep, unsigned int 
 }
 
 
+
+
+
 /*****************************************************************************/
 /*	KERNEL MODULE HANDLING						     */
 /*****************************************************************************/
@@ -436,12 +438,13 @@ size_t len=0x000000100;
 
 u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_2\n\r");    
+    printk("SUPER_MODULE_SET_3\n\r");    
 	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.
 	*/
 	//initialzate nor flash memory device.
+	//p2020TestBus();
 	
 	MPCInitNORflash();
 	MPCInitlocalBus();
@@ -449,7 +452,6 @@ u16 lbc_buf[128];
 	//MPCDumplocalbusreg();
 	
 
-	
 	
 	
 	mpcNorReadata (from,len,lbc_buf);
