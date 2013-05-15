@@ -43,7 +43,7 @@
 								</option>
 								<option id="gnu.c.compiler.option.include.files.393094655" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1951556706" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.asmpreproc.1513956566" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.asmpreproc"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.asmpreproc.114533449" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.asmpreproc"/>
 							</tool>
 							<tool command="powerpc-none-linux-gnuspe-as" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="com.freescale.pa.cdt.gcc.linux.assembler.debug.1907631284" name="Power Linux Assembler" superClass="com.freescale.pa.cdt.gcc.linux.assembler.debug">
 								<option id="gnu.both.asm.option.flags.700894099" name="Assembler flags" superClass="gnu.both.asm.option.flags" value="-g" valueType="string"/>
