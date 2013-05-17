@@ -64,6 +64,7 @@ GENERAL NOTES
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
 struct map_info    *map; 
+
 struct cfi_private *cfi;
 struct flchip      *pchip;
 
@@ -124,11 +125,11 @@ SINT32  MPCInitNORflash()
 	struct of_device   *dev;
 	struct resource res;
 	resource_size_t res_size;
-	const u32 *width;
+	//const u32 *width;
 
 	///new
-	int min_chips;
-	int max_chips ;
+	//int min_chips;
+	//int max_chips ;
 	
 	printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
 	map = kzalloc(sizeof(*map), GFP_KERNEL);
@@ -136,6 +137,9 @@ SINT32  MPCInitNORflash()
 	   		   return NULL;}
 	
 	
+	
+	
+	/*
 	printk("+++++++++++++++++++++Init CFI_PRIVATE Structure++++++++++++++++++++++++++\n\r");
     cfi = kzalloc(sizeof(*cfi), GFP_KERNEL);
     if (!cfi) {printk(KERN_WARNING "Failed to allocate memory for CFI device\n");
@@ -143,7 +147,7 @@ SINT32  MPCInitNORflash()
           
     cfi->chipshift=0x18;  //0x18
     cfi->numchips =1;
-    /* Set the default CFI lock/unlock addresses */
+    // Set the default CFI lock/unlock addresses
   	cfi->addr_unlock1 = 0x555;
     cfi->addr_unlock2 = 0x2aa;
     
@@ -156,6 +160,9 @@ SINT32  MPCInitNORflash()
     init_waitqueue_head(&pchip->wq);
 	spin_lock_init(&pchip->_spinlock);
 	pchip->mutex = &pchip->_spinlock;
+	*/
+	
+	
 	
 	dp = of_find_node_by_name(NULL, "nor");
 	if (!dp) {printk(KERN_INFO "nor: can't find localbus nor node\n");of_node_put(dp);
@@ -186,26 +193,25 @@ SINT32  MPCInitNORflash()
 	printk(KERN_INFO "Size=0x%x\n",res_size);
 	
 	////////////////Info
+	
+	/*
 	width = of_get_property(dp, "bank-width", NULL);
 	if (!width) 
 	{
 	dev_err(&dev->dev, "Can't get bank width from device"
 	" tree\n");
-	//goto err_out;
 	return STATUS_ERR;
 	}
-        
+    */  
 	
 	//printk(KERN_INFO "!!!!MONSTER_SUPER2!!!!!!!!!!!!!!\n\r");
-	printk(KERN_INFO "BANK_WIDTH=%x\n",*width);
+	//printk(KERN_INFO "BANK_WIDTH=%x\n",*width);
 	printk(KERN_INFO "DEV_NAME=%s\n",dev_name(&dev->dev));
 			
-	
-	
 	map->name=dev_name(&dev->dev);
 	map->phys=res.start;
 	map->size=res_size;
-	map->bankwidth=*width;
+	map->bankwidth=2;//*width;
 	map->fldrv_priv=cfi;
 	map->virt=ioremap(map->phys,map->size);
 	
@@ -217,8 +223,8 @@ SINT32  MPCInitNORflash()
 	//dev_err(&dev->dev, "Failed to ioremap() flash region\n");
 	//goto err_out;
 	}
-	simple_map_init(map);
-    printk(KERN_INFO "!!!!OK_INIT_NOR!!!!!!!!!!!!!!\n\r");	
+	//simple_map_init(map);
+    //printk(KERN_INFO "!!!!OK_INIT_NOR!!!!!!!!!!!!!!\n\r");	
 
 	//simple_map_init(map);
 return STATUS_OK;
@@ -1110,15 +1116,7 @@ for(i=0;i<=16;i++)
 	printk("iter%d  0x%x\n\r",i,t_buf[i]);
 }
 
-
-
-
-
-
 //printk("___map_copy_from__ addr=0x%x,len=0x%x!\n\r",(int)adr,(int)len);
-
-
-
 //nor_amdstd_read (map, start_offset, len, &retlen,l_buf);
 //*buf=l_buf;
 

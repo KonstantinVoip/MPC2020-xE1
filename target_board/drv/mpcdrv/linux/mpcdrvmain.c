@@ -438,7 +438,7 @@ size_t len=0x000000100;
 
 u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_3\n\r");    
+    printk("SUPER_MODULE_SET_5\n\r");    
 	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.
@@ -447,7 +447,7 @@ u16 lbc_buf[128];
 	//p2020TestBus();
 	
 	MPCInitNORflash();
-	MPCInitlocalBus();
+	//MPCInitlocalBus();
 	
 	//MPCDumplocalbusreg();
 	
