@@ -70,7 +70,8 @@ GENERAL NOTES
 /*driver interface */
 
 #include "mpcdrvtest.h"
-#include "mpcdrvlbcnor.h"
+//#include "mpcdrvlbcnor.h"
+#include "mpcdrvlbcCyclone.h" 
 #include "mpcdrveth_ipv4.h"
 
 /*External Header*/
@@ -251,7 +252,7 @@ static int  mpcdrv_ioctl(struct inode* inodep, struct file* filep, unsigned int 
 	{
 		case IOC_INIT_P2020:
 		//Initialize P2020 software and hardware module
-		  MPCInitNORflash(); //init structure
+		  //MPCInitNORflash(); //init structure
 		break;
 		
 		case IOC_SET_DATA:
@@ -395,7 +396,7 @@ static int  mpcdrv_ioctl(struct inode* inodep, struct file* filep, unsigned int 
 		 
 		//set sam buffer for read and write 
 		case IOC_LBCDATABUF_P2020: 
-		mpcNorReadata (gstart_offset,glen,localbusbuffer); 
+		//mpcNorReadata (gstart_offset,glen,localbusbuffer); 
         if (!access_ok(VERIFY_READ, (unsigned int*)arg, 0x1000))
 				return -EFAULT;	
 	
@@ -433,20 +434,23 @@ int mpc_init_module(void)
 {
 
 
-loff_t from=0x0000000000000000;
-size_t len=0x000000100;
+//loff_t from=0x0000000000000000;
+//size_t len=0x000000100;
 
-u16 lbc_buf[128];
+//u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_5\n\r");    
+    printk("SUPER_MODULE_SET_Cyclone3_Lbc\n\r");    
 	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.
 	*/
 	//initialzate nor flash memory device.
 	//p2020TestBus();
-	
-	MPCInitNORflash();
+	test_Cyc3Init();
+    //test_Cyc3Read();
+	test_Cyc3Write();
+	test_Cyc3Read();
+	//MPCInitNORflash();
 	//MPCInitlocalBus();
 	
 	//MPCDumplocalbusreg();
@@ -454,7 +458,7 @@ u16 lbc_buf[128];
 
 	
 	
-	mpcNorReadata (from,len,lbc_buf);
+	//mpcNorReadata (from,len,lbc_buf);
 	
 	//InitEthipv4drv();
 	/////////////////////////Initialize ethernet configurations/////////
