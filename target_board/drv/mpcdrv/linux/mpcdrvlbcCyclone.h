@@ -42,9 +42,34 @@
 /*	INCLUDES							     */
 
 #include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcUniDef.h"
+#include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/elbcTransnmitBuf.h"
 /*****************************************************************************/
 /*	PUBLIC MACROS							     */
 /*****************************************************************************/
+
+/*  
+ * 
+ * Cyclone 3 PLIS memory Addresation for Linux  ofs=0x0000000000000000;
+ * this start memory windows for CS0  ->and physical 0xef000000
+ * 
+ * this logical memory for read and write 
+ */
+
+///////////DEFINE for GLOBAL PLIS CONFIGURATIONs
+
+
+#define PLIS_LINUX_START_DATA_OFFSET  0x0000000000000000
+#define PLIS_PHYSICAL_RESOURCE_START  0xef000000
+#define PLIS_PHYSICAL_RESOURCE_SIZE   0x01000000
+
+
+
+ 
+#define  PLIS_ADDRESS0    0
+#define  PLIS_ADDRESS30   30       
+
+#define  PLIS_ADDRESS800  800
+#define  PLIS_ADDRESS1000 1000
 
 
 
@@ -59,7 +84,8 @@ SINT32 test_Cyc3Write();
 /*****************************************************************************/
 /*	PUBLIC FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
-
+UINT16 plis_read16 (const u16 addr);
+void   plis_write16(const u16 addr,const u16 value);
 
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */

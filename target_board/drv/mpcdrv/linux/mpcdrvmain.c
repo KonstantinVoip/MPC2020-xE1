@@ -432,14 +432,22 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 int mpc_init_module(void)
 {
-
+u16 address=0;
+u16 out_data=0;
+u16 i;
+u8  in_num_of_tdm_ch=0;
+u16 in_size=1;
+u16 *in_buf=0;
+u16 *out_buf=0;
+u16 *out_size=0;
+u8  *out_num_of_tdm_ch=0;
 
 //loff_t from=0x0000000000000000;
 //size_t len=0x000000100;
 
 //u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_Cyclone3_Lbc\n\r");    
+    printk("SUPER_MODULE_SET_Cyclone3_Lbc_Kosta_Revision\n\r");    
 	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.
@@ -447,9 +455,30 @@ int mpc_init_module(void)
 	//initialzate nor flash memory device.
 	//p2020TestBus();
 	test_Cyc3Init();
-    //test_Cyc3Read();
-	test_Cyc3Write();
-	test_Cyc3Read();
+	Tdm_Direction0_write (in_buf , in_size,in_num_of_tdm_ch);
+	Tdm_Direction0_read  (out_buf,out_size,out_num_of_tdm_ch);
+	
+	//plis_write16(PLIS_ADDRESS0,0xeeee);
+	
+	//out_data=plis_read16 (PLIS_ADDRESS0);
+	//printk("iter%d ,address=0x%x,data= 0x%04x\n\r",i,address,out_data);
+	
+	/*
+	for(i=0;i<16;i++)
+    {	
+    	
+    out_data=plis_read16 (address+i);
+	printk("iter%d ,address=0x%x,data= 0x%04x\n\r",i,address,out_data);
+	
+    }
+    */
+    
+	//test_Cyc3Read();
+	
+	
+	
+	//test_Cyc3Write();
+	//test_Cyc3Read();
 	//MPCInitNORflash();
 	//MPCInitlocalBus();
 	

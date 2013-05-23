@@ -103,7 +103,7 @@ struct map_info    *map;
 /**************************************************************************************************
 Syntax:      	    SINT32 Cyc3Init();
 
-Remarks:			This Function wait for complete operations Read/Write. 
+Remarks:			This Function Init Cyclone3 device 
 
    
 Return Value:	Returns 1 on success and negative value on failure.
@@ -140,6 +140,168 @@ SINT32 test_Cyc3Init()
 return 1;
 }
 
+/**************************************************************************************************
+Syntax:      	    UINT16 plis_read16 (const u16 addr)
+
+Remarks:			This Function wait for complete operations Read/Write. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 plis_read16 (const u16 addr)
+{
+u16 byte_offset=0x0000; 
+u16 out_data=0x0000;
+ 
+byte_offset = addr*2;
+
+//printk("byte_offset= %d,addr=%d\n\r",byte_offset,addr);
+
+ out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+ return out_data;
+}
+/**************************************************************************************************
+Syntax:      	    void   plis_write16(const u16 addr,u16 value)
+
+Remarks:			This Write to PLIS  address value. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void   plis_write16(const u16 addr,const  u16 value)
+{
+  u16 byte_offset=0x0000; 	
+  byte_offset = addr*2;
+	
+ __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+	
+	
+}
+/**************************************************************************************************
+Syntax:      	   void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch
+
+Remarks:			This Write to PLIS  address value. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch)
+{
+	u16 dannie30 =1;
+	u16 i=0;
+	u16 value=0xeeee;
+	
+	while (dannie30)
+	{
+		dannie30=plis_read16 (PLIS_ADDRESS30);	
+	}
+	
+	printk("dannie30=%x\n\r",dannie30);
+	
+	for(i=0;i<in_size+1;i++)
+	{
+		
+		plis_write16(DIR0_ADDRESS_WRITE_DATA,value);
+		
+		
+	}
+	
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
+	
+	
+	
+}
+
+/**************************************************************************************************
+Syntax:      	   void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch
+
+Remarks:			This Write to PLIS  address value. 
+
+   
+Return Value:	Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
+{
+  u16 dannie1000=0;
+  u16 dannie800=0;
+  u16 plis_read_data=0;
+  u16 i=0;		  
+  u16 data_size=1;
+  u16 iteration=0;
+  
+  while (!dannie1000)
+  {
+	  if(iteration<20)
+	  {
+		 
+	  
+	  
+	  dannie1000=plis_read16 (PLIS_ADDRESS1000);
+	  printk("+++visim dannie1000=%x\n\r",dannie1000);
+      
+	  iteration++;
+	  
+	  }  
+
+      
+  }
+	
+   printk("dannie1000=%x\n\r",dannie1000);
+  
+  
+   dannie800=plis_read16 (PLIS_ADDRESS800);
+   printk("dannie800=%x\n\r",dannie800);
+  
+   do
+   {
+
+	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
+	   printk("plis_read_data =0x%x\n\r",plis_read_data);
+   }while( i< data_size+1);
+   
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,11 +330,6 @@ UINT16 y;
     printk("++++++++++mpcCyclone3Readata-+++++++++++\n\r") ;
    
     
-  // y= __raw_readw(map->virt + start_offset);
-    //Old_functions!!!!
-    //map_copy_from(map, t_buf, start_offset, len);
-	
-	
 	for(i=0;i<=16;i++)
 	{
 		y= __raw_readw(map->virt + start_offset+i);
