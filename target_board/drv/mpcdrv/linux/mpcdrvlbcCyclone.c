@@ -127,9 +127,9 @@ SINT32 test_Cyc3Init()
 	map->size=0x01000000;//res_size; 16Mb
 	map->bankwidth=2;//width;
 	map->fldrv_priv= NULL;//cfi;
+	//map->virt=0xe1180000;//ioremap(map->phys,map->size);
 	map->virt=ioremap(map->phys,map->size);
-	
-	
+	//printk("MAP_VIRT_OFFSET=0x%08x\n\r",map->virt);
 	//
 	if (!map->virt)
 	{
@@ -160,10 +160,11 @@ u16 out_data=0x0000;
  
 byte_offset = addr*2;
 
-//printk("byte_offset= %d,addr=%d\n\r",byte_offset,addr);
 
  out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
- return out_data;
+//printk("READ_OFFSET=0x%08x\n\r",map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+//printk("READ_OFFSET=0x%08x\n\r",byte_offset);
+  return out_data;
 }
 /**************************************************************************************************
 Syntax:      	    void   plis_write16(const u16 addr,u16 value)
@@ -184,9 +185,14 @@ void   plis_write16(const u16 addr,const  u16 value)
   byte_offset = addr*2;
 	
  __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
-	
-	
+  // printk("WRITE_OFFSET=0x%08x\n\r",map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+  //printk("WRITE_OFFSET=0x%08x\n\r",byte_offset);
 }
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	   void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch
 
@@ -258,26 +264,32 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 	  
 	  
 	  dannie1000=plis_read16 (PLIS_ADDRESS1000);
-	  printk("+++visim dannie1000=%x\n\r",dannie1000);
+	  printk("+++visim dannie1000=0x%x\n\r",dannie1000);
       
 	  iteration++;
 	  
 	  }  
-
+	  else
+	  {
+	  break;
+	  }
+	  
       
   }
 	
-   printk("dannie1000=%x\n\r",dannie1000);
+   printk("dannie1000=0x%x\n\r",dannie1000);
   
   
    dannie800=plis_read16 (PLIS_ADDRESS800);
-   printk("dannie800=%x\n\r",dannie800);
+   printk("dannie800=0x%x\n\r",dannie800);
   
+   
    do
    {
 
 	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
 	   printk("plis_read_data =0x%x\n\r",plis_read_data);
+	   i++;
    }while( i< data_size+1);
    
 

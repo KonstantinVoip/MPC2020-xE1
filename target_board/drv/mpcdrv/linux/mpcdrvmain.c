@@ -436,7 +436,7 @@ u16 address=0;
 u16 out_data=0;
 u16 i;
 u8  in_num_of_tdm_ch=0;
-u16 in_size=1;
+u16  in_size=1;
 u16 *in_buf=0;
 u16 *out_buf=0;
 u16 *out_size=0;
@@ -454,9 +454,11 @@ u8  *out_num_of_tdm_ch=0;
 	*/
 	//initialzate nor flash memory device.
 	//p2020TestBus();
-	test_Cyc3Init();
-	Tdm_Direction0_write (in_buf , in_size,in_num_of_tdm_ch);
-	Tdm_Direction0_read  (out_buf,out_size,out_num_of_tdm_ch);
+	
+	
+	//test_Cyc3Init();
+	//Tdm_Direction0_write (in_buf , in_size,in_num_of_tdm_ch);
+	//Tdm_Direction0_read  (out_buf,out_size,out_num_of_tdm_ch);
 	
 	//plis_write16(PLIS_ADDRESS0,0xeeee);
 	
@@ -468,10 +470,10 @@ u8  *out_num_of_tdm_ch=0;
     {	
     	
     out_data=plis_read16 (address+i);
-	printk("iter%d ,address=0x%x,data= 0x%04x\n\r",i,address,out_data);
+	//printk("iter%d ,address=0x%x,data= 0x%04x\n\r",i,address,out_data);
 	
-    }
-    */
+    }*/
+    
     
 	//test_Cyc3Read();
 	
@@ -489,7 +491,7 @@ u8  *out_num_of_tdm_ch=0;
 	
 	//mpcNorReadata (from,len,lbc_buf);
 	
-	//InitEthipv4drv();
+	 InitEthipv4drv();
 	/////////////////////////Initialize ethernet configurations/////////
 	
 	

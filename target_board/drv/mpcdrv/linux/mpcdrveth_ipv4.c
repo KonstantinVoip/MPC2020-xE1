@@ -144,13 +144,6 @@ GENERAL NOTES
 
 
 
-
-
-
-
-
-
-
 static LIST_HEAD(pktgen_threads);
 
 
@@ -375,7 +368,6 @@ static inline ktime_t ktime_now(void)
 }
 
 
-
 static int pktgen_if_show()
 //static int pktgen_if_show(struct seq_file *seq, void *v)
 {
@@ -582,19 +574,6 @@ static int pktgen_if_show()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifdef CONFIG_XFRM
 static int pktgen_output_ipsec(struct sk_buff *skb, struct pktgen_dev *pkt_dev)
 {
@@ -737,13 +716,6 @@ out:
 	if_unlock(t);
 	return rv;
 }
-
-
-
-
-
-
-
 
 
 
@@ -890,13 +862,6 @@ out1:
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
 static void spin(struct pktgen_dev *pkt_dev, ktime_t spin_until)
 {
 	ktime_t start_time, end_time;
@@ -1940,8 +1905,10 @@ static int pktgen_thread_worker(void *arg)
 {
 	 // struct net_device *net;
 	  //Имена наших device "eth0"<->Tsec 1 ,"eth1"<->Tsec 2,"eth2"<->Tsec 3
-	  const char *ifname="eth0";
-	  pktgen_add_device(t,ifname);
+	  //const char *ifname="eth0";
+	    const char *ifname="eth2";  
+	
+	pktgen_add_device(t,ifname);
       //mod_cur_headers(pkt_dev);
 	  //pktgen_setup_inject(pkt_dev);
 	 // pktgen_if_show();	 
@@ -2006,6 +1973,7 @@ static int __init pktgen_create_thread(int cpu)
 	
 	return 0;
 }
+
 /**************************************************************************************************
 Syntax:      	  SINT32 InitEthipv4drv()
 
@@ -2025,7 +1993,7 @@ int cpu;
     for_each_online_cpu(cpu) 
 	{
 		int err;
-		printk("cpu=%d\n\r",cpu);
+		printk("cpu_num_of_core=%d\n\r",cpu);
 		err = pktgen_create_thread(cpu);
 		if (err)
 		{
@@ -2035,7 +2003,6 @@ int cpu;
 
 return 1;
 }
-
 
 
 
