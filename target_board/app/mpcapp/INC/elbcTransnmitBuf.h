@@ -11,9 +11,9 @@
 
 
 /////////Direction0////////////////////
-#define  DIR0_ADDRESS_WRITE_SUCCESS       60//0x3C
-#define  DIR0_ADDRESS_WRITE_DATA          400//0x190
-#define  DIR0_ADDRESS_READ_DATA           800//0x320
+#define  DIR0_ADDRESS_WRITE_SUCCESS       30  //0x1E
+#define  DIR0_ADDRESS_WRITE_DATA          200 //0xC8
+#define  DIR0_ADDRESS_READ_DATA           400 //0x190
 
 
 
