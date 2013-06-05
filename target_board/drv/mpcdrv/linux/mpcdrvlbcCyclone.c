@@ -301,23 +301,6 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	    SINT32 Cyc3Read()
 
@@ -337,11 +320,7 @@ int i;
 loff_t start_offset=0x0000000000000000;
 UINT16 y;
 
-
-
-    printk("++++++++++mpcCyclone3Readata-+++++++++++\n\r") ;
-   
-    
+    printk("++++++++++mpcCyclone3Readata-+++++++++++\n\r") ;    
 	for(i=0;i<=16;i++)
 	{
 		y= __raw_readw(map->virt + start_offset+i);
@@ -369,7 +348,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 SINT32 test_Cyc3Write()
 {
 UINT16  x=0x2222;	
-loff_t ofs=0x0000000000000000;
+loff_t  ofs=0x0000000000000000;
 
 printk("Start_write_to_PLIS\n\r");      
 			 //__raw_writeb(x, map->virt + ofs);

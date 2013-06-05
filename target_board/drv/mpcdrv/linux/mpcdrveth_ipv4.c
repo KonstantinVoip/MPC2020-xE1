@@ -79,6 +79,15 @@ GENERAL NOTES
 #include <net/checksum.h>
 #include <net/ipv6.h>
 #include <net/addrconf.h>
+
+
+
+// Add kosta Include for DMA and routing table 
+
+
+//#include <net/route.h>
+//#include <linux/dma-mapping.h>
+
 #ifdef CONFIG_XFRM
 #include <net/xfrm.h>
 #endif
