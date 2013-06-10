@@ -444,7 +444,7 @@ u8  *out_num_of_tdm_ch=0;
 
 //loff_t from=0x0000000000000000;
 //size_t len=0x000000100;
-
+ address =5;
 //u16 lbc_buf[128];
 
     printk("SUPER_MODULE_SET_Cyclone3_Lbc_Kosta_Revision\n\r");    
