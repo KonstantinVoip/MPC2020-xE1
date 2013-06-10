@@ -491,7 +491,7 @@ u8  *out_num_of_tdm_ch=0;
 	
 	//mpcNorReadata (from,len,lbc_buf);
 	
-	 InitEthipv4drv();
+	// InitEthipv4drv();
 	/////////////////////////Initialize ethernet configurations/////////
 	
 	
