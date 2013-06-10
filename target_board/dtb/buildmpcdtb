@@ -1,0 +1,12 @@
+echo "Start BUILD MPC_P2020 DTB FILE"
+export PATH=$PATH:/opt/freescale/ltib/usr/bin/
+
+
+rm -rf /tftpboot/p2010rdb.dtb
+dtc  -f -b 0 -I dts -O dtb -R 1024 -o p2010rdb.dtb p2010rdb.dts
+
+cp p2010rdb.dtb /tftpboot
+rm -rf p2010rdb.dtb
+echo "Complete BUILD MPC_P2020 DTB File"
+
+
