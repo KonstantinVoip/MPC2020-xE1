@@ -447,7 +447,7 @@ u8  *out_num_of_tdm_ch=0;
  address =5;
 //u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_Cyclone3_Lbc_Kosta_Revision\n\r");    
+    printk("SUPER_MODULE_SET_Cyclone4_Lbc_Kosta_Revision\n\r");    
 	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.

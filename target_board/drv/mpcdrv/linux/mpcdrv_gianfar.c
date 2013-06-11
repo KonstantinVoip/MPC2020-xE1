@@ -84,7 +84,7 @@ GENERAL NOTES
 #endif
 
 //#include "gianfar.h"
-#include "fsl_pq_mdio.h"
+//#include "fsl_pq_mdio.h"
 
 
 
@@ -134,7 +134,7 @@ GENERAL NOTES
 
 
 
-#include "mpcdrveth_gianfar.h"
+//#include "mpcdrveth_gianfar.h"
 
 
 
