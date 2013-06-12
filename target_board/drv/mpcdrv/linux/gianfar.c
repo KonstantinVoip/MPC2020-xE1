@@ -1482,7 +1482,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	// Initialize the filer table 
 	gfar_init_filer_table(priv);
 
-	// Create all the sysfs files 
+	//Create all the sysfs files 
 	//gfar_init_sysfs(dev);   
 
 	// Print out the device info 
@@ -2171,7 +2171,6 @@ void stop_gfar(struct net_device *dev)
 	
 	/*if (priv->ptimer_present)
 		gfar_1588_stop(dev);*/
-
 	/* Free the IRQs */
 	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_MULTI_INTR) {
 		for (i = 0; i < priv->num_grps; i++)
@@ -2409,8 +2408,7 @@ void gfar_tx_start(struct net_device *dev)
 }
 #endif
 
-void gfar_configure_tx_coalescing(struct gfar_private *priv,
-				unsigned long tx_mask)
+void gfar_configure_tx_coalescing(struct gfar_private *priv,unsigned long tx_mask)
 {
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 __iomem *baddr;
@@ -2436,8 +2434,7 @@ void gfar_configure_tx_coalescing(struct gfar_private *priv,
 	}
 }
 
-void gfar_configure_rx_coalescing(struct gfar_private *priv,
-				unsigned long rx_mask)
+void gfar_configure_rx_coalescing(struct gfar_private *priv,unsigned long rx_mask)
 {
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 __iomem *baddr;
@@ -2579,10 +2576,8 @@ unsigned long alloc_bds(struct gfar_private *priv, dma_addr_t *addr)
 		priv->bd_in_ram = 0;
 	}
 #else
-	region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +
-			sizeof(struct rxbd8) * priv->total_rx_ring_size;
-	vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev,
-				region_size, addr, GFP_KERNEL);
+	region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
+	vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev,region_size, addr, GFP_KERNEL);
 #endif
 	return vaddr;
 }
@@ -3047,8 +3042,19 @@ static inline struct txbd8 *next_txbd(struct txbd8 *bdp, struct txbd8 *base,
 	return skip_txbd(bdp, 1, base, ring_size);
 }
 
-/* This is called by the kernel when a frame is ready for transmission. */
-/* It is pointed to by the dev->hard_start_xmit function pointer */
+/**************************************************************************************************
+Syntax:      	    static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
+
+Remarks:			This is called by the kernel when a frame is ready for transmission.
+                    It is pointed to by the dev->hard_start_xmit function pointer
+   
+Return Value:	   
+
+ 				    Value		 									Description
+				-------------------------------------------------------------------------------------
+				    = 1												Success
+				    =-1												Failure
+***************************************************************************************************/
 static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
@@ -3074,11 +3080,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	txq = netdev_get_tx_queue(dev, rq);
 	base = tx_queue->tx_bd_base;
 	regs = tx_queue->grp->regs;
-
+	
+	printk("+gfar_start_xmit_3084_device =%s+\n\r",dev->name);
+	
+	
 	/* make space for additional header when fcb is needed */
-	if (((skb->ip_summed == CHECKSUM_PARTIAL) ||
-			(priv->vlgrp && vlan_tx_tag_present(skb))) &&
-			(skb_headroom(skb) < GMAC_FCB_LEN))
+	if (((skb->ip_summed == CHECKSUM_PARTIAL) ||(priv->vlgrp && vlan_tx_tag_present(skb))) && (skb_headroom(skb) < GMAC_FCB_LEN))
 	{
 		struct sk_buff *skb_new;
 
@@ -3130,8 +3137,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 			/* Point at the next BD, wrapping as needed */
 			txbdp = next_txbd(txbdp, base, tx_queue->tx_ring_size);
 			length = skb_shinfo(skb)->frags[i].size;
-			lstatus = txbdp->lstatus | length |
-				BD_LFLAG(TXBD_READY);
+			lstatus = txbdp->lstatus | length | BD_LFLAG(TXBD_READY);
 
 			/* Handle the last BD specially */
 			if (i == nr_frags - 1)
@@ -3170,7 +3176,8 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		gfar_tx_vlan(skb, fcb);
 	}
 
-/*	if (priv->ptimer_present) 
+	//kosta comment disable IEEE1588 timer
+    /*if (priv->ptimer_present) 
 	{
 		// Enable ptp flag so that Tx time stamping happens 
 		if (gfar_ptp_do_txstamp(skb))
@@ -3184,9 +3191,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	/* setup the TxBD length and buffer pointer for the first BD */
 	tx_queue->tx_skbuff[tx_queue->skb_curtx] = skb;
-	txbdp_start->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,
-			skb_headlen(skb), DMA_TO_DEVICE);
-
+	txbdp_start->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,skb_headlen(skb), DMA_TO_DEVICE);
 	lstatus |= BD_LFLAG(TXBD_CRC | TXBD_READY) | skb_headlen(skb);
 
 	/*
@@ -3203,8 +3208,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	/* Update the current skb pointer to the next entry we will use
 	 * (wrapping if necessary) */
-	tx_queue->skb_curtx = (tx_queue->skb_curtx + 1) &
-		TX_RING_MOD_MASK(tx_queue->tx_ring_size);
+	tx_queue->skb_curtx = (tx_queue->skb_curtx + 1) & TX_RING_MOD_MASK(tx_queue->tx_ring_size);
 
 	tx_queue->cur_tx = next_txbd(txbdp, base, tx_queue->tx_ring_size);
 
@@ -3526,8 +3530,7 @@ static int gfar_change_mtu(struct net_device *dev, int new_mtu)
  */
 static void gfar_reset_task(struct work_struct *work)
 {
-	struct gfar_private *priv = container_of(work, struct gfar_private,
-			reset_task);
+	struct gfar_private *priv = container_of(work, struct gfar_private,reset_task);
 	struct net_device *dev = priv->ndev;
 
 	if (dev->flags & IFF_UP) {
@@ -3742,9 +3745,10 @@ static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,st
 	struct net_device *dev = rx_queue->dev;
 	struct gfar_private *priv = netdev_priv(dev);
 	u32 lstatus;
-
-	bdp->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,
-			priv->rx_buffer_size, DMA_FROM_DEVICE);
+	
+	
+	printk("+gfar_new_rxbdp_3751+\n\r");
+	bdp->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,priv->rx_buffer_size, DMA_FROM_DEVICE);
 
 	lstatus = BD_LFLAG(RXBD_EMPTY | RXBD_INTERRUPT);
 
@@ -3878,7 +3882,7 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	unsigned int alignamount;
 	struct gfar_private *priv = netdev_priv(dev);
 	struct sk_buff *skb = NULL;
-
+	printk("+gfar_new_skb_3885+\n\r");
 	skb = netdev_alloc_skb(dev, priv->rx_buffer_size + RXBUF_ALIGNMENT);
 
 	if (!skb)
@@ -3905,7 +3909,7 @@ static inline void count_errors(unsigned short status, struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct net_device_stats *stats = &dev->stats;
 	struct gfar_extra_stats *estats = &priv->extra_stats;
-
+	printk("?count_errors_3912?\n\r");
 	/* If the packet was truncated, none of the other errors
 	 * matter */
 	if (status & RXBD_TRUNCATED) {
@@ -3938,8 +3942,7 @@ static inline void count_errors(unsigned short status, struct net_device *dev)
 	}
 }
 
-static inline unsigned long __wk_phy_to_virt(struct net_device *dev,
-				unsigned long phy)
+static inline unsigned long __wk_phy_to_virt(struct net_device *dev,unsigned long phy)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	unsigned long virt, offset;
@@ -3958,7 +3961,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	unsigned char *data;
 	u16 len;
 	int ret;
-
+	printk("+gfar_receive_wakeup_3964+\n\r");
 	/* get the first full descriptor */
 	while (!(bdp->status & RXBD_EMPTY)) {
 		rmb();
@@ -4020,7 +4023,7 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	struct gfar_private *priv = gfargrp->priv;
 	struct net_device *dev = priv->ndev;
 	u32 ievent;
-
+	printk("+gfar_receive_4026+\n\r");
 	ievent = gfar_read(&regs->ievent);
 
 	if ((ievent & IEVENT_FGPI) == IEVENT_FGPI) {
@@ -4051,14 +4054,13 @@ static inline void gfar_rx_checksum(struct sk_buff *skb, struct rxfcb *fcb)
 
 /* gfar_process_frame() -- handle one incoming packet if skb
  * isn't NULL.  */
-static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,
-			      int amount_pull)
+static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	struct rxfcb *fcb = NULL;
 
 	int ret;
-
+	printk("+gfar_process_frame_4063+\n\r");
 	/* fcb is at the beginning if exists */
 	fcb = (struct rxfcb *)skb->data;
 
@@ -4130,7 +4132,7 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 	int temp;
 #endif
 #endif
-
+	//printk("+gfar_clean_rx_ring_4135+\n\r");
 	/* Get the first full descriptor */
 	bdp = rx_queue->cur_rx;
 	base = rx_queue->rx_bd_base;
@@ -4166,7 +4168,8 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 #endif
 #endif
 
-	while (!((bdp->status & RXBD_EMPTY) || (--rx_work_limit < 0))) {
+	while (!((bdp->status & RXBD_EMPTY) || (--rx_work_limit < 0))) 
+	{
 		struct sk_buff *newskb;
 		rmb();
 
@@ -4201,19 +4204,20 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 
 		skb = rx_queue->rx_skbuff[rx_queue->skb_currx];
 
-		dma_unmap_single(&priv->ofdev->dev, bdp->bufPtr,
-				priv->rx_buffer_size, DMA_FROM_DEVICE);
+		dma_unmap_single(&priv->ofdev->dev, bdp->bufPtr,priv->rx_buffer_size, DMA_FROM_DEVICE);
 
 		/* We drop the frame if we failed to allocate a new buffer */
-		if (unlikely(!newskb || !(bdp->status & RXBD_LAST) ||
-				 bdp->status & RXBD_ERR)) {
+		if (unlikely(!newskb || !(bdp->status & RXBD_LAST) || bdp->status & RXBD_ERR)) 
+		{
 			count_errors(bdp->status, dev);
 
 			if (unlikely(!newskb))
 				newskb = skb;
 			else if (skb)
 				dev_kfree_skb_any(skb);
-		} else {
+		}
+		else 
+		{
 			/* Increment the number of packets */
 			rx_queue->stats.rx_packets++;
 			howmany++;
@@ -4309,7 +4313,7 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 
 	/* Update the current rxbd pointer to be the next one */
 	rx_queue->cur_rx = bdp;
-
+	printk("+gfar_clean_rx_ring_4316=%d frame\n\r",howmany);
 	return howmany;
 }
 
@@ -4457,8 +4461,7 @@ static int gfar_poll_rx(struct napi_struct *napi, int budget)
 #else
 static int gfar_poll(struct napi_struct *napi, int budget)
 {
-	struct gfar_priv_grp *gfargrp = container_of(napi,
-			struct gfar_priv_grp, napi);
+	struct gfar_priv_grp *gfargrp = container_of(napi,struct gfar_priv_grp, napi);
 	struct gfar_private *priv = gfargrp->priv;
 	struct gfar __iomem *regs = gfargrp->regs;
 	struct gfar_priv_tx_q *tx_queue = NULL;
@@ -4470,7 +4473,7 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	u32 tstat, tstat_thalt = 0, mask;
 	u32 rstat, rstat_local, rstat_rhalt = 0;
 
-
+	printk("+gfar_poll_4474+\n\r");
 	num_queues = gfargrp->num_rx_queues;
 	tstat = gfar_read(&regs->tstat);
 	tstat = tstat & TSTAT_TXF_MASK_ALL;
@@ -4846,7 +4849,7 @@ static irqreturn_t gfar_error(int irq, void *grp_id)
 	struct gfar __iomem *regs = gfargrp->regs;
 	struct gfar_private *priv= gfargrp->priv;
 	struct net_device *dev = priv->ndev;
-
+    printk("+gfar_error_4850+\n\r");
 	/* Save ievent for future reference */
 	u32 events = gfar_read(&regs->ievent);
 
