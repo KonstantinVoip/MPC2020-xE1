@@ -20,6 +20,7 @@
 		ethernet0 = &enet0;
 		ethernet1 = &enet1;
 		ethernet2 = &enet2;
+		ethernet3 = &enet3;
 		serial0 = &serial0;
 		serial1 = &serial1;
 	};
@@ -368,19 +369,25 @@
 			phy-connection-type = "rmii";
 		};
 
-		crypto@30000 {
-			compatible = "fsl,sec3.1", "fsl,sec3.0", "fsl,sec2.4",
-				     "fsl,sec2.2", "fsl,sec2.1", "fsl,sec2.0";
-			reg = <0x30000 0x10000>;
-			interrupts = <45 2 58 2>;
-			interrupt-parent = <&mpic>;
-			fsl,num-channels = <4>;
-			fsl,channel-fifo-len = <24>;
-			fsl,exec-units-mask = <0xbfe>;
-			fsl,descriptor-types-mask = <0x3ab0ebf>;
-			fsl,multi-host-mode = "primary";
-			fsl,channel-remap = <0x3>;
+        /*Virtual Ethernet  <<->>Local BUS and CYC3 PLIS*/
+
+        enet3: ethernet@22000 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			cell-index = <3>;
+			device_type = "network";
+			model = "eTSEC";
+			compatible = "gianfar";
+			reg = <0x22000 0x1000>;
+			local-mac-address = [ 00 00 00 00 00 00 ];
+			fixed-link = <1 1 100 0 0>;
+			phy-connection-type = "rmii";
 		};
+        
+        
+        
+
+
 
 		mpic: pic@40000 {
 			interrupt-controller;

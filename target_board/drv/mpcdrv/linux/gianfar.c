@@ -111,6 +111,29 @@
 #include "gianfar.h"
 //#include "fsl_pq_mdio.h"
 
+
+
+/*Add Kosta Debugging Information */
+
+
+
+#define DEBUG_VIRTUAL_ETHERNET    
+//#define DEBUG_PHY_ETHERNET
+
+
+#define DEBUG_RECIEVE_VIRTUAL_ETHERNET
+#define DEBUG_TRANSMIT_VIRTUAL_ETHERNET
+
+
+//#define DEBUG_PHY_RECIEVE
+
+
+#define DEBUG_PHY_TRANSMIT  1
+
+
+
+
+
 #define TX_TIMEOUT      (1*HZ)
 #undef BRIEF_GFAR_ERRORS
 #undef VERBOSE_GFAR_ERRORS
@@ -2479,33 +2502,28 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 		if ((err = request_irq(grp->interruptError, gfar_error, 0,
 				grp->int_name_er,grp)) < 0) {
 			if (netif_msg_intr(priv))
-				printk(KERN_ERR "%s: Can't get IRQ %d\n",
-					dev->name, grp->interruptError);
-
+				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptError);
 				goto err_irq_fail;
 		}
 
 		if ((err = request_irq(grp->interruptTransmit, gfar_transmit,
 				0, grp->int_name_tx, grp)) < 0) {
 			if (netif_msg_intr(priv))
-				printk(KERN_ERR "%s: Can't get IRQ %d\n",
-					dev->name, grp->interruptTransmit);
+				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto tx_irq_fail;
 		}
 
-		if ((err = request_irq(grp->interruptReceive, gfar_receive, 0,
-				grp->int_name_rx, grp)) < 0) {
+		if ((err = request_irq(grp->interruptReceive, gfar_receive, 0,grp->int_name_rx, grp)) < 0)
+		{
 			if (netif_msg_intr(priv))
-				printk(KERN_ERR "%s: Can't get IRQ %d\n",
-					dev->name, grp->interruptReceive);
+				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptReceive);
 			goto rx_irq_fail;
 		}
 	} else {
 		if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,
 				grp->int_name_tx, grp)) < 0) {
 			if (netif_msg_intr(priv))
-				printk(KERN_ERR "%s: Can't get IRQ %d\n",
-					dev->name, grp->interruptTransmit);
+				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
 		}
 	}
@@ -2664,14 +2682,6 @@ int startup_gfar(struct net_device *dev)
 		vaddr   += sizeof (struct rxbd8) * rx_queue->rx_ring_size;
 		baddr   += 2;
 	}
-
-	
-	
-	
-///////////////////////////////////////////////////////////////////////////////////////
-	
-	
-	
 	/* Setup the skbuff rings */
 	for (i = 0; i < priv->num_tx_queues; i++)
 	{
@@ -2768,8 +2778,7 @@ int startup_gfar(struct net_device *dev)
 			if (!skb)
 			{
 				printk(KERN_ERR
-					"%s: Can't allocate RX buffers\n",
-					dev->name);
+					"%s: Can't allocate RX buffers\n",dev->name);
 
 				goto err_rxalloc_fail;
 			}
@@ -2914,8 +2923,7 @@ int startup_gfar(struct net_device *dev)
 	gfar_write(&regs->tctrl, tctrl);
 
 	/* Set the extraction length and index */
-	attrs = ATTRELI_EL(priv->rx_stash_size) |
-		ATTRELI_EI(priv->rx_stash_index);
+	attrs = ATTRELI_EL(priv->rx_stash_size) |ATTRELI_EI(priv->rx_stash_index);
 
 	gfar_write(&regs->attreli, attrs);
 
@@ -3075,14 +3083,28 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		rq = smp_processor_id();
 	else
 #endif
+	
+		
+	//HIGH Lewel Packet to transmit
 	rq = skb->queue_mapping;
+	
+	
+	#ifdef DEBUG_PHY_TRANSMIT	
+	   printk("+gfar_start_xmit_skb->queue_mapping->>>>> rq=0x%x+\n\r",rq);
+	#endif	
+	
+	
+	
+	
 	tx_queue = priv->tx_queue[rq];
 	txq = netdev_get_tx_queue(dev, rq);
 	base = tx_queue->tx_bd_base;
 	regs = tx_queue->grp->regs;
 	
-	printk("+gfar_start_xmit_3084_device =%s+\n\r",dev->name);
 	
+#ifdef DEBUG_PHY_TRANSMIT	
+	   printk("+gfar_start_xmit_3106_device =%s+\n\r",dev->name);
+#endif	
 	
 	/* make space for additional header when fcb is needed */
 	if (((skb->ip_summed == CHECKSUM_PARTIAL) ||(priv->vlgrp && vlan_tx_tag_present(skb))) && (skb_headroom(skb) < GMAC_FCB_LEN))
@@ -3090,7 +3112,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		struct sk_buff *skb_new;
 
 		     skb_new = skb_realloc_headroom(skb, GMAC_FCB_LEN);
-		     if (!skb_new) {
+			 #ifdef DEBUG_PHY_TRANSMIT	
+		     printk("+gfar_start_xmit_3116_skb_new =0x%x+\n\r",skb_new);
+			 #endif
+		     
+		     if (!skb_new) 
+		     {
 			 dev->stats.tx_errors++;
 			 kfree_skb(skb);
 			 return NETDEV_TX_OK;
@@ -3101,6 +3128,11 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	/* total number of fragments in the SKB */
 	nr_frags = skb_shinfo(skb)->nr_frags;
+
+#ifdef DEBUG_PHY_TRANSMIT	
+	   printk("+gfar_start_xmit_3133_nr_frags =%d+\n\r", nr_frags);
+#endif
+	
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	if (!priv->sps)
 #endif
@@ -3112,22 +3144,30 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		/* no space, stop the queue */
 		netif_tx_stop_queue(txq);
 		dev->stats.tx_fifo_errors++;
-#ifdef CONFIG_GFAR_SW_PKT_STEERING
+		#ifdef CONFIG_GFAR_SW_PKT_STEERING
 		if (!priv->sps)
-#endif
-			spin_unlock_irqrestore(&tx_queue->txlock, flags);
+		#endif
+			
+		spin_unlock_irqrestore(&tx_queue->txlock, flags);
 		return NETDEV_TX_BUSY;
 	}
 
 	/* Update transmit stats */
 	txq->tx_bytes += skb->len;
 	txq->tx_packets++;
-
 	txbdp = txbdp_start = tx_queue->cur_tx;
 
+	#ifdef DEBUG_PHY_TRANSMIT	
+	printk("+gfar_start_xmit_3161_skb->len =0x%x+\n\r",skb->len);
+	#endif
+	
+	
 	if (nr_frags == 0) 
 	{
 		lstatus = txbdp->lstatus | BD_LFLAG(TXBD_LAST | TXBD_INTERRUPT);
+		#ifdef DEBUG_PHY_TRANSMIT	
+		printk("+gfar_start_xmit_3164_S_lstatus =%x+\n\r", lstatus);
+		#endif
 	} 
 	else 
 	{
@@ -3148,13 +3188,19 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 					skb_shinfo(skb)->frags[i].page_offset,
 					length,
 					DMA_TO_DEVICE);
-
+			
+			#ifdef DEBUG_PHY_TRANSMIT	
+			printk("+gfar_start_xmit_3188_buffaddr =0x%x+\n\r",bufaddr);
+			#endif
 			/* set the TxBD length and buffer pointer */
 			txbdp->bufPtr = bufaddr;
 			txbdp->lstatus = lstatus;
 		}
 
 		lstatus = txbdp_start->lstatus;
+		#ifdef DEBUG_PHY_TRANSMIT	
+		printk("+gfar_start_xmit_3197_E_lstatus =%x+\n\r", lstatus);
+		#endif
 	}
 
 	/* Set up checksumming */
@@ -3163,6 +3209,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		fcb = gfar_add_fcb(skb);
 		lstatus |= BD_LFLAG(TXBD_TOE);
 		gfar_tx_checksum(skb, fcb);
+		
+		#ifdef DEBUG_PHY_TRANSMIT	
+		printk("+gfar_start_xmit_gfar_tx_checksum_3209+\n\r");
+		#endif
+	    
+	
 	}
 
 	if (priv->vlgrp && vlan_tx_tag_present(skb))
@@ -3194,6 +3246,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	txbdp_start->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,skb_headlen(skb), DMA_TO_DEVICE);
 	lstatus |= BD_LFLAG(TXBD_CRC | TXBD_READY) | skb_headlen(skb);
 
+	
+	#ifdef DEBUG_PHY_TRANSMIT	
+	printk("+gfar_start_xmit_txbdp_start->bufPtr=0x%x\n\r",txbdp_start->bufPtr);
+	#endif
+	
+	
 	/*
 	 * The powerpc-specific eieio() is used, as wmb() has too strong
 	 * semantics (it requires synchronization between cacheable and
@@ -3203,15 +3261,11 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 * should be expanded to include weaker barriers.
 	 */
 	eieio();
-
 	txbdp_start->lstatus = lstatus;
-
 	/* Update the current skb pointer to the next entry we will use
 	 * (wrapping if necessary) */
 	tx_queue->skb_curtx = (tx_queue->skb_curtx + 1) & TX_RING_MOD_MASK(tx_queue->tx_ring_size);
-
 	tx_queue->cur_tx = next_txbd(txbdp, base, tx_queue->tx_ring_size);
-
 	/* reduce TxBD free count */
 	tx_queue->num_txbdfree -= (nr_frags + 1);
 
@@ -3226,7 +3280,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		dev->stats.tx_fifo_errors++;
 	}
 
-	// Tell the DMA to go go go 
+	// Tell the DMA to go go go  Send Packet
 	gfar_write(&regs->tstat, TSTAT_CLEAR_THALT >> tx_queue->qindex);
 
 	// Unlock priv 
@@ -3746,8 +3800,12 @@ static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,st
 	struct gfar_private *priv = netdev_priv(dev);
 	u32 lstatus;
 	
+
+#ifdef DEBUG_PHY_RECIEVE	
+	   printk("+gfar_new_rxbdp_3751+\n\r");
+#endif 
 	
-	printk("+gfar_new_rxbdp_3751+\n\r");
+	
 	bdp->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,priv->rx_buffer_size, DMA_FROM_DEVICE);
 
 	lstatus = BD_LFLAG(RXBD_EMPTY | RXBD_INTERRUPT);
@@ -3882,7 +3940,13 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	unsigned int alignamount;
 	struct gfar_private *priv = netdev_priv(dev);
 	struct sk_buff *skb = NULL;
-	printk("+gfar_new_skb_3885+\n\r");
+	
+
+	
+#ifdef DEBUG_PHY_RECIEVE	
+	printk("+gfar_new_skb_3885+\n\r");  
+#endif 	
+		
 	skb = netdev_alloc_skb(dev, priv->rx_buffer_size + RXBUF_ALIGNMENT);
 
 	if (!skb)
@@ -3961,7 +4025,14 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	unsigned char *data;
 	u16 len;
 	int ret;
+
+#ifdef DEBUG_PHY_RECIEVE	
 	printk("+gfar_receive_wakeup_3964+\n\r");
+#endif 		
+	
+	
+	
+	
 	/* get the first full descriptor */
 	while (!(bdp->status & RXBD_EMPTY)) {
 		rmb();
@@ -4023,7 +4094,18 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	struct gfar_private *priv = gfargrp->priv;
 	struct net_device *dev = priv->ndev;
 	u32 ievent;
-	printk("+gfar_receive_4026+\n\r");
+	
+	
+
+#ifdef DEBUG_PHY_RECIEVE	
+	printk("+gfar_receive_4058+\n\r");
+#endif 		
+	
+	
+	
+
+	
+	
 	ievent = gfar_read(&regs->ievent);
 
 	if ((ievent & IEVENT_FGPI) == IEVENT_FGPI) {
@@ -4060,8 +4142,14 @@ static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int am
 	struct rxfcb *fcb = NULL;
 
 	int ret;
+	
+	
+#ifdef 	DEBUG_PHY_RECIEVE
 	printk("+gfar_process_frame_4063+\n\r");
-	/* fcb is at the beginning if exists */
+#endif	
+	
+	
+	/* fcb is at the beginning if exists */                                                                                                              
 	fcb = (struct rxfcb *)skb->data;
 
 	/* Remove the FCB from the skb */
@@ -4132,7 +4220,16 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 	int temp;
 #endif
 #endif
-	//printk("+gfar_clean_rx_ring_4135+\n\r");
+	
+	
+	
+#ifdef DEBUG_PHY_RECIEVE	
+	printk("+gfar_clean_rx_ring_4135+\n\r");
+#endif 	
+	
+	
+	
+
 	/* Get the first full descriptor */
 	bdp = rx_queue->cur_rx;
 	base = rx_queue->rx_bd_base;
@@ -4313,7 +4410,11 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 
 	/* Update the current rxbd pointer to be the next one */
 	rx_queue->cur_rx = bdp;
+	
+#ifdef DEBUG_PHY_RECIEVE	
 	printk("+gfar_clean_rx_ring_4316=%d frame\n\r",howmany);
+#endif
+	
 	return howmany;
 }
 
@@ -4473,7 +4574,15 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	u32 tstat, tstat_thalt = 0, mask;
 	u32 rstat, rstat_local, rstat_rhalt = 0;
 
+	
+#ifdef DEBUG_PHY_RECIEVE	
 	printk("+gfar_poll_4474+\n\r");
+#endif 		
+	
+	
+	
+	
+	
 	num_queues = gfargrp->num_rx_queues;
 	tstat = gfar_read(&regs->tstat);
 	tstat = tstat & TSTAT_TXF_MASK_ALL;
@@ -4653,8 +4762,7 @@ static void adjust_link(struct net_device *dev)
 			default:
 				if (netif_msg_link(priv))
 					printk(KERN_WARNING
-						"%s: Ack!  Speed (%d) is not 10/100/1000!\n",
-						dev->name, phydev->speed);
+						"%s: Ack!  Speed (%d) is not 10/100/1000!\n",dev->name, phydev->speed);
 				break;
 			}
 
