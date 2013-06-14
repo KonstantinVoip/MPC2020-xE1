@@ -376,7 +376,7 @@
 			#size-cells = <1>;
 			cell-index = <3>;
 			device_type = "network";
-			model = "eTSEC";
+			model = "KeTSEC";
 			compatible = "gianfar";
 			reg = <0x22000 0x1000>;
 			local-mac-address = [ 00 00 00 00 00 00 ];

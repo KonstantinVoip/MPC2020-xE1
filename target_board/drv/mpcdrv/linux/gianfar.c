@@ -117,7 +117,9 @@
 
 
 
-#define DEBUG_VIRTUAL_ETHERNET    
+
+  #define VIRTUAL_ETHERNET     1
+//#define DEBUG_VIRTUAL_ETHERNET    
 //#define DEBUG_PHY_ETHERNET
 
 
@@ -395,6 +397,34 @@ static void enable_napi(struct gfar_private *priv)
 #endif
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, const char *model)
+Parameters:     	*np,*priv,*model
+Remarks:			parsing gfar_group
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, const char *model)
 {
 	u32 *queue_mask;
@@ -403,10 +433,26 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
 	int i;
 	int cpus = num_online_cpus();
 #endif
-    printk("+++++++++++++++++gfar_parse_group_383_start+++++++++++++++++++++++++++++\n");
-	addr = of_translate_address(np,of_get_address(np, 0, &size, NULL));
+    printk("+++++++++++++++++gfar_parse_group_383_start model=%s+++++++++++++++++++++++++++++\n",model);
+	
+    
+
+#ifdef VIRTUAL_ETHERNET    
+    if (model && !strcasecmp(model, "KeTSEC"))
+    {   	
+    	printk("++VIRTUAL_ETH_445+++ \n");
+    	return 0;	
+    }
+ #endif    
+    
+    
+    
+    
+    
+    addr = of_translate_address(np,of_get_address(np, 0, &size, NULL));
 	printk("addr=______0x%x\n\r",addr);
 	priv->gfargrp[priv->num_grps].regs = ioremap(addr, size);
+
 
 	if (!priv->gfargrp[priv->num_grps].regs)
 		return -ENOMEM;
@@ -416,10 +462,8 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
 	/* If we aren't the FEC we have multiple interrupts */
 	if (model && strcasecmp(model, "FEC")) 
 	{
-		priv->gfargrp[priv->num_grps].interruptReceive =
-			irq_of_parse_and_map(np, 1);
-		priv->gfargrp[priv->num_grps].interruptError =
-			irq_of_parse_and_map(np,2);
+		priv->gfargrp[priv->num_grps].interruptReceive =irq_of_parse_and_map(np, 1);
+		priv->gfargrp[priv->num_grps].interruptError = irq_of_parse_and_map(np,2);
 		if (priv->gfargrp[priv->num_grps].interruptTransmit < 0 ||
 			priv->gfargrp[priv->num_grps].interruptReceive < 0 ||
 			priv->gfargrp[priv->num_grps].interruptError < 0) {
@@ -431,14 +475,10 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
 	priv->gfargrp[priv->num_grps].priv = priv;
 	spin_lock_init(&priv->gfargrp[priv->num_grps].grplock);
 	if(priv->mode == MQ_MG_MODE) {
-		queue_mask = (u32 *)of_get_property(np,
-					"fsl,rx-bit-map", NULL);
-		priv->gfargrp[priv->num_grps].rx_bit_map =
-			queue_mask ?  *queue_mask :(DEFAULT_MAPPING >> priv->num_grps);
-		queue_mask = (u32 *)of_get_property(np,
-					"fsl,tx-bit-map", NULL);
-		priv->gfargrp[priv->num_grps].tx_bit_map =
-			queue_mask ? *queue_mask : (DEFAULT_MAPPING >> priv->num_grps);
+		queue_mask = (u32 *)of_get_property(np,"fsl,rx-bit-map", NULL);
+		priv->gfargrp[priv->num_grps].rx_bit_map = queue_mask ?  *queue_mask :(DEFAULT_MAPPING >> priv->num_grps);
+		queue_mask = (u32 *)of_get_property(np,"fsl,tx-bit-map", NULL);
+		priv->gfargrp[priv->num_grps].tx_bit_map = queue_mask ? *queue_mask : (DEFAULT_MAPPING >> priv->num_grps);
 	} else {
 		priv->gfargrp[priv->num_grps].rx_bit_map = 0xFF;
 		priv->gfargrp[priv->num_grps].tx_bit_map = 0xFF;
@@ -543,15 +583,16 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	priv->num_rx_queues = num_rx_qs;
 	priv->num_grps = 0x0;
 
-	model = of_get_property(np, "model", NULL);
+	//Get model field on enet P2020 -> on p2010 rdb.dts
+	  model = of_get_property(np, "model", NULL);
 
-	
+	  printk("++++++++++++gfar_of_init_580_model=%s+++++++++++\n",model);
 	
 	
 	for (i = 0; i < MAXGROUPS; i++)
 		priv->gfargrp[i].regs = NULL;
    
-    printk("+++++++++++++++++gfar_of_init_530_of_device_is_compatible+++++++++++++++++++++++++++++\n");
+    
 	
 	/* Parse and initialize group specific information */
 	if (of_device_is_compatible(np, "fsl,etsec2")) 
@@ -653,14 +694,20 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 		printk(KERN_INFO "IEEE1588: disable on the system.\n");
     */
 		
-		
+   		
 	mac_addr = of_get_mac_address(np);
-	printk("mac_addr_do_copy=______0x%x\n",mac_addr);
-	//printk(">>>mac_addr=______%s<<<<<\n",mac_addr);
+	printk("mac_addr=______0x%s\n",mac_addr);
 	if (mac_addr)
 		memcpy(dev->dev_addr, mac_addr, MAC_ADDR_LEN);
 
-		printk("mac_addr_after_copy=%c\n",dev->dev_addr);
+	
+	if (model && !strcasecmp(model, "KeTSEC"))
+		priv->device_flags =
+			FSL_GIANFAR_DEV_HAS_GIGABIT |
+			FSL_GIANFAR_DEV_HAS_COALESCE |
+			FSL_GIANFAR_DEV_HAS_RMON |
+			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
+	
 	if (model && !strcasecmp(model, "TSEC"))
 		priv->device_flags =
 			FSL_GIANFAR_DEV_HAS_GIGABIT |
@@ -679,13 +726,23 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_EXTENDED_HASH;
 
 	ctype = of_get_property(np, "phy-connection-type", NULL);
-    printk("++++++++++++++++++CTYPE=%s++++++++++++++++++++++++++_661\n",ctype);
-	// We only care about rgmii-id.  The rest are autodetected 
-	
+    printk("++++++++++++++++++TYPE_PHY=%s++++++++++++++++++++++++++_661\n",ctype);
+    
+    
+    //Next Add Interface Type of LocalBus -> Cyclone3 data bus
+    
+    if (ctype && !strcmp(ctype, "lbc"))
+        		priv->interface =  PHY_INTERFACE_MODE_RMII;
+        				          //PHY_INTERFACE_MODE_LBC;
+   
+    if (ctype && !strcmp(ctype, "rmii"))
+    		priv->interface = PHY_INTERFACE_MODE_RMII;
+        
 	if (ctype && !strcmp(ctype, "rgmii-id"))
 		priv->interface = PHY_INTERFACE_MODE_RGMII_ID;
-	else
-		priv->interface = PHY_INTERFACE_MODE_RMII;
+	
+	/*else
+		priv->interface = PHY_INTERFACE_MODE_RMII;*/
     
 	if (of_get_property(np, "fsl,magic-packet", NULL))
 		priv->device_flags |= FSL_GIANFAR_DEV_HAS_MAGIC_PACKET;
@@ -693,13 +750,12 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	if (of_get_property(np, "fsl,wake-on-filer", NULL))
 		priv->device_flags |= FSL_GIANFAR_DEV_HAS_ARP_PACKET;
 
-	priv->phy_node = of_parse_phandle(np, "phy-handle", 0);
 
-	
+	priv->phy_node = of_parse_phandle(np, "phy-handle", 0);
 
 	// Find the TBI PHY.  If it's not there, we don't support SGMII 
 	priv->tbi_node = of_parse_phandle(np, "tbi-handle", 0);
-    printk("+++++++++++++++++gfar_of_init_681_return 0_OK+++++++++++++++++++++++++++++\n");	
+    printk("+++++++++++++++++gfar_of_init_703_return 0_OK+++++++++++++++++++++++++++++\n");	
 	return 0;
 
 rx_alloc_failed:
@@ -793,6 +849,9 @@ static void gfar_init_filer_table(struct gfar_private *priv)
 	u32 rqfcr = 0x0;
 	u32 rqfpr = FPR_FILER_MASK;
 
+	
+	printk("+++++++++++++_gfar_init_filer_table__853_+++++++\n\r");
+	
 	/* Default rule */
 	rqfcr = RQFCR_CMP_MATCH;
 	ftp_rqfcr[rqfar] = rqfcr;
@@ -1207,7 +1266,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	u32 __iomem *baddr;
 	u16 static count=0;
 	
-	printk("+++++++++++++++++gfar_probe_1200_start=%d+++++++++++++++++++++++++++++\n",count);
+	printk("+++++++++++++++++gfar_probe_1251_start+++++++++++++++++++++++++++++\n");
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	int j;
 	int cpus = num_online_cpus();
@@ -1218,17 +1277,24 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	if (err)
 		return err;
 
-		
-		
-		
-		
-		
 	priv = netdev_priv(dev);
 	priv->ndev = dev;
 	priv->ofdev = ofdev;
 	priv->node = ofdev->node;
 	SET_NETDEV_DEV(dev, &ofdev->dev);
 
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//kosta _ptimer_registres disable
 /*	if (priv->ptimer_present)
 	{
 		err = gfar_ptp_init(priv);
@@ -1246,14 +1312,18 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	INIT_WORK(&priv->reset_task, gfar_reset_task);
 
 	dev_set_drvdata(&ofdev->dev, priv);
-	
 	regs = priv->gfargrp[0].regs;
-    printk("++++++++gfar_probe__1230_priv->gfargrp[0]_____regs=0x%x+++++++++\n\r",regs);
+    
 	
-   
-   ////////////Physical Initialization set eTSEC Registers 
-   if(count<3)
-   {
+	
+	
+	
+	printk("++++++++gfar_probe__1230_priv->gfargrp[0]_____regs=0x%x+++++++++\n\r",regs);
+    ////////////Physical Initialization set eTSEC Registers 
+    
+	
+	if(count<3)
+    {
 	
 	// Stop the DMA engine now, in case it was running before 
 	// (The firmware could have used it, and left it running). 
@@ -1278,6 +1348,10 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	dev->mtu = 1500;
 	dev->netdev_ops = &gfar_netdev_ops;
 //	dev->ethtool_ops = &gfar_ethtool_ops;
+	
+	
+
+	
 
 #ifdef CONFIG_GIANFAR_TXNAPI
 	 //Seperate napi for tx and rx for each group 
@@ -1349,7 +1423,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 		priv->hash_regs[7] = &regs->gaddr7;
 	}
     
-	printk("+++++++++++++++++gfar_probe__1401_priv->device_flags & FSL_GIANFAR_DEV_HAS_PADDING\n");
+	//printk("+++++++++++++++++gfar_probe__1419_priv->device_flags & FSL_GIANFAR_DEV_HAS_PADDING\n");
 	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_PADDING)
 		priv->padding = DEFAULT_PADDING;
 	else
@@ -1385,7 +1459,12 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 				priv->gfargrp[i].rx_bit_map, MAX_RX_QS);
 	}
     printk("+++++++++++++++++gfar_probe__1436_Calculate RSTAT, TSTAT\n");
-	// Calculate RSTAT, TSTAT, RQUEUE and TQUEUE values,
+	
+///Add kosta driver comment!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+if (count<3)
+{
+    
+    // Calculate RSTAT, TSTAT, RQUEUE and TQUEUE values,
 	// also assign queues to groups 
 	for (grp_idx = 0; grp_idx < priv->num_grps; grp_idx++)
 	{
@@ -1412,6 +1491,10 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 
 	gfar_write(&regs->rqueue, rqueue);
 	gfar_write(&regs->tqueue, tqueue);
+
+}//////////////////////End kosta komment
+
+printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 
 	priv->rx_buffer_size = DEFAULT_RX_BUFFER_SIZE;
 	priv->wk_buffer_size = DEFAULT_WK_BUFFER_SIZE;
@@ -1445,7 +1528,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 
 	// Carrier starts down, phylib will bring it up 
 	netif_carrier_off(dev);
-    printk("+++++++++++++++++gfar_probe__1497_register_netdev(dev);\n");
+    printk("+++++++++++++++++gfar_probe__1489_register_netdev(dev);\n");
 	
 	
 	err = register_netdev(dev);
@@ -1465,50 +1548,43 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 
 	// fill out IRQ number and name fields 
 	len_devname = strlen(dev->name);
+	
+	printk("+++++++++++++gfar_probe__1549_len_devname=%d;\n",len_devname);
+	
+	
+	
+	
 	for (i = 0; i < priv->num_grps; i++)
 	{
-		strncpy(&priv->gfargrp[i].int_name_tx[0], dev->name,
-				len_devname);
+		strncpy(&priv->gfargrp[i].int_name_tx[0], dev->name,len_devname);
 		if (priv->device_flags & FSL_GIANFAR_DEV_HAS_MULTI_INTR) 
 		{
-			strncpy(&priv->gfargrp[i].int_name_tx[len_devname],
-				"_g", sizeof("_g"));
-			priv->gfargrp[i].int_name_tx[
-				strlen(priv->gfargrp[i].int_name_tx)] = i+48;
-			strncpy(&priv->gfargrp[i].int_name_tx[strlen(
-				priv->gfargrp[i].int_name_tx)],
-				"_tx", sizeof("_tx") + 1);
+			strncpy(&priv->gfargrp[i].int_name_tx[len_devname],"_g", sizeof("_g"));
+			priv->gfargrp[i].int_name_tx[strlen(priv->gfargrp[i].int_name_tx)] = i+48;
+			strncpy(&priv->gfargrp[i].int_name_tx[strlen(priv->gfargrp[i].int_name_tx)],"_tx", sizeof("_tx") + 1);
 
-			strncpy(&priv->gfargrp[i].int_name_rx[0], dev->name,
-					len_devname);
-			strncpy(&priv->gfargrp[i].int_name_rx[len_devname],
-					"_g", sizeof("_g"));
-			priv->gfargrp[i].int_name_rx[
-				strlen(priv->gfargrp[i].int_name_rx)] = i+48;
-			strncpy(&priv->gfargrp[i].int_name_rx[strlen(
-				priv->gfargrp[i].int_name_rx)],
-				"_rx", sizeof("_rx") + 1);
+			strncpy(&priv->gfargrp[i].int_name_rx[0], dev->name,len_devname);
+			strncpy(&priv->gfargrp[i].int_name_rx[len_devname],"_g", sizeof("_g"));
+			priv->gfargrp[i].int_name_rx[strlen(priv->gfargrp[i].int_name_rx)] = i+48;
+			strncpy(&priv->gfargrp[i].int_name_rx[strlen(priv->gfargrp[i].int_name_rx)],"_rx", sizeof("_rx") + 1);
 
-			strncpy(&priv->gfargrp[i].int_name_er[0], dev->name,
-					len_devname);
-			strncpy(&priv->gfargrp[i].int_name_er[len_devname],
-				"_g", sizeof("_g"));
-			priv->gfargrp[i].int_name_er[strlen(
-					priv->gfargrp[i].int_name_er)] = i+48;
+			strncpy(&priv->gfargrp[i].int_name_er[0], dev->name,len_devname);
+			strncpy(&priv->gfargrp[i].int_name_er[len_devname],"_g", sizeof("_g"));
+			priv->gfargrp[i].int_name_er[strlen(priv->gfargrp[i].int_name_er)] = i+48;
 			strncpy(&priv->gfargrp[i].int_name_er[strlen(\
-				priv->gfargrp[i].int_name_er)],
-				"_er", sizeof("_er") + 1);
+				priv->gfargrp[i].int_name_er)],"_er", sizeof("_er") + 1);
 		} else
 			priv->gfargrp[i].int_name_tx[len_devname] = '\0';
 	}
-
+	//printk("+++++++++++++gfar_probe__1576_len_devname=%d;\n",len_devname);
 	// Initialize the filer table 
-	gfar_init_filer_table(priv);
+	 //gfar_init_filer_table(priv);
 
 	//Create all the sysfs files 
 	//gfar_init_sysfs(dev);   
 
 	// Print out the device info 
+	printk("15871587158715871587158715871587158715871587158715871587\n\r");
 	printk(KERN_INFO DEVICE_NAME "%pM\n", dev->name, dev->dev_addr);
 
 	// Even more device info helps when determining which kernel 
@@ -1841,10 +1917,24 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 ecntrl;
-    
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+
+	
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	{
+		
+		printk("VIRTUAL_ETHERNET_1930\n\r");
+		return PHY_INTERFACE_MODE_RMII;
+	}
+	
+	
 	
 	ecntrl = gfar_read(&regs->ecntrl);
-    printk("+++++++++++gfar_get_interface_1754++++++++++++++ =%x\n",ecntrl);
+    printk("+++++++++++gfar_get_interface_1936++++++++++++++ =%x\n",ecntrl);
+	
 	if (ecntrl & ECNTRL_SGMII_MODE)
 		return PHY_INTERFACE_MODE_SGMII;
 
@@ -1892,7 +1982,7 @@ static int init_phy(struct net_device *dev)
 		priv->device_flags & FSL_GIANFAR_DEV_HAS_GIGABIT ?
 		SUPPORTED_1000baseT_Full : 0;
 	phy_interface_t interface;
-    printk("++++++++++++++init_phy_1881+++++++++++++++++++\n\r");
+    printk("++++++++++++++init_phy_1964+++++++++++++++++++\n\r");
 	priv->oldlink = 0;
 	priv->oldspeed = 0;
 	priv->oldduplex = -1;
@@ -1971,51 +2061,70 @@ static void init_registers(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = NULL;
 	int i = 0;
-    printk("++++++++++init_registers_1960_start+++++++++++++\n");
-	for (i = 0; i < priv->num_grps; i++) 
+    const char *virt_dev=0;
+	
+	printk("++++++++++init_registers_2052_start= %s+++++++++++++\n",dev->name);
+	virt_dev=dev->name;
+	
+	
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	{
+		
+		printk("VIRTUAL_ETHERNET_2057\n\r");
+		return;
+	}
+    		
+	//if (model && !strcasecmp(model, "TSEC"))
+	
+	
+	 for (i = 0; i < priv->num_grps; i++) 
+		{
 		regs = priv->gfargrp[i].regs;
 		// Clear IEVENT 
 		gfar_write(&regs->ievent, IEVENT_INIT_CLEAR);
 
 		// Initialize IMASK 
 		gfar_write(&regs->imask, IMASK_INIT_CLEAR);
-	}
+		}
 
-	regs = priv->gfargrp[0].regs;
-	// Init hash registers to zero 
-	gfar_write(&regs->igaddr0, 0);
-	gfar_write(&regs->igaddr1, 0);
-	gfar_write(&regs->igaddr2, 0);
-	gfar_write(&regs->igaddr3, 0);
-	gfar_write(&regs->igaddr4, 0);
-	gfar_write(&regs->igaddr5, 0);
-	gfar_write(&regs->igaddr6, 0);
-	gfar_write(&regs->igaddr7, 0);
+		regs = priv->gfargrp[0].regs;
+		//Init hash registers to zero 
+		gfar_write(&regs->igaddr0, 0);
+		gfar_write(&regs->igaddr1, 0);
+		gfar_write(&regs->igaddr2, 0);
+		gfar_write(&regs->igaddr3, 0);
+		gfar_write(&regs->igaddr4, 0);
+		gfar_write(&regs->igaddr5, 0);
+		gfar_write(&regs->igaddr6, 0);
+		gfar_write(&regs->igaddr7, 0);
 
-	gfar_write(&regs->gaddr0, 0);
-	gfar_write(&regs->gaddr1, 0);
-	gfar_write(&regs->gaddr2, 0);
-	gfar_write(&regs->gaddr3, 0);
-	gfar_write(&regs->gaddr4, 0);
-	gfar_write(&regs->gaddr5, 0);
-	gfar_write(&regs->gaddr6, 0);
-	gfar_write(&regs->gaddr7, 0);
+		gfar_write(&regs->gaddr0, 0);
+		gfar_write(&regs->gaddr1, 0);
+		gfar_write(&regs->gaddr2, 0);
+		gfar_write(&regs->gaddr3, 0);
+		gfar_write(&regs->gaddr4, 0);
+		gfar_write(&regs->gaddr5, 0);
+		gfar_write(&regs->gaddr6, 0);
+		gfar_write(&regs->gaddr7, 0);
 
-	// Zero out the rmon mib registers if it has them 
-	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_RMON) {
+		// Zero out the rmon mib registers if it has them 
+		if (priv->device_flags & FSL_GIANFAR_DEV_HAS_RMON)
+		{
 		memset_io(&(regs->rmon), 0, sizeof (struct rmon_mib));
 
 		// Mask off the CAM interrupts 
 		gfar_write(&regs->rmon.cam1, 0xffffffff);
 		gfar_write(&regs->rmon.cam2, 0xffffffff);
-	}
+		}
 
-	// Initialize the max receive buffer length 
-	gfar_write(&regs->mrblr, priv->rx_buffer_size);
+		// Initialize the max receive buffer length 
+		gfar_write(&regs->mrblr, priv->rx_buffer_size);
 
-	// Initialize the Minimum Frame Length Register
-	gfar_write(&regs->minflr, MINFLR_INIT_SETTINGS);
+		// Initialize the Minimum Frame Length Register
+		gfar_write(&regs->minflr, MINFLR_INIT_SETTINGS);
+
+
 }
 
 
@@ -2620,9 +2729,18 @@ int startup_gfar(struct net_device *dev)
 	u32 rctrl = 0;
 	u32 tctrl = 0;
 	u32 attrs = 0;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	static count=0;
+	
 
-	printk("++++++++++startup_gfar__2617++++++++++++++\n\r");
-	 
+	printk("++++++++++startup_gfar__2737++++++++++++++\n\r");
+
+
+	
+	
+	
+	
 	for (i = 0; i < priv->num_grps; i++) 
 	{
 		regs = priv->gfargrp[i].regs;
@@ -2644,8 +2762,7 @@ int startup_gfar(struct net_device *dev)
 	if (vaddr == 0) 
 	{
 		if (netif_msg_ifup(priv))
-			printk(KERN_ERR "%s: Could not allocate buffer descriptors!\n",
-					dev->name);
+			printk(KERN_ERR "%s: Could not allocate buffer descriptors!\n",dev->name);
 		return -ENOMEM;
 	}
 
@@ -2746,7 +2863,8 @@ int startup_gfar(struct net_device *dev)
 		txbdp = tx_queue->tx_bd_base;
 
 		/* Initialize Transmit Descriptor Ring */
-		for (j = 0; j < tx_queue->tx_ring_size; j++) {
+		for (j = 0; j < tx_queue->tx_ring_size; j++)
+		{
 			txbdp->lstatus = 0;
 			txbdp->bufPtr = 0;
 			txbdp++;
@@ -2790,7 +2908,7 @@ int startup_gfar(struct net_device *dev)
 		rxbdp--;
 		rxbdp->status |= RXBD_WRAP;
 	}
-    printk("+startup_gfar_2796_gfar_new_skb+\n\r");
+    printk("+startup_gfar_2903_gfar_new_skb+\n\r");
 
 	
 	#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
@@ -2826,7 +2944,7 @@ int startup_gfar(struct net_device *dev)
 			err = -ENOMEM;
 			goto wk_buf_fail;
 		}  
-        printk("+startup_gfar_2832_netif_msg_ifup+\n\r");
+        printk("+startup_gfar_2933_netif_msg_ifup+\n\r");
 		priv->wk_buf_vaddr = vaddr;
 		priv->wk_buf_paddr = addr;
 		wk_buf_vaddr = (unsigned long)(vaddr + RXBUF_ALIGNMENT) \
@@ -2850,7 +2968,7 @@ int startup_gfar(struct net_device *dev)
 		wkbdp->status |= RXBD_WRAP;
 	}
 
-	printk(">>>>>>>>>>>>>>startup_gfar_2856<<<<<<<<\n\r");
+	printk(">>>>>>>>>>>>>>startup_gfar_2963<<<<<<<<\n\r");
 	
 	for (i = 0; i < priv->num_grps; i++)
 	{
@@ -2859,10 +2977,11 @@ int startup_gfar(struct net_device *dev)
 		{
 			for (j = 0; j < i; j++)
 				free_grp_irqs(&priv->gfargrp[j]);
-			//goto irq_fail;
+			goto irq_fail;
 		}
 	}
-    printk("+startup_gfar_2868_register_grp_irqs+\n\r");
+  
+	printk("+startup_gfar_2868_register_grp_irqs+\n\r");
 	phy_start(priv->phydev);
     printk("+startup_gfar_2864_phy_start+\n\r");
 	gfar_configure_tx_coalescing(priv, 0xFF);
@@ -3314,10 +3433,23 @@ static int gfar_close(struct net_device *dev)
 /* Changes the mac address if the controller is not running. */
 static int gfar_set_mac_address(struct net_device *dev)
 {
+ const char *virt_dev=0;	
+ virt_dev=dev->name;	
+ 
+	printk(">>>>>>>>>>gfar_set_mac_address____3415_start<<<\n\r");
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	{
+		
+		printk("VIRTUAL_ETHERNET_3419\n\r");
+		return 0;
+	}
 	
-	printk(">>>>>>>>>>gfar_set_mac_address____3269_start<<<\n\r");
+	
 	gfar_set_mac_for_addr(dev, 0, dev->dev_addr);
 
+	
+	
+	
 	return 0;
 }
 
