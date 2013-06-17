@@ -399,26 +399,8 @@ static void enable_napi(struct gfar_private *priv)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
-Syntax:      	    static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, const char *model)
+Syntax:      	    403_static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, const char *model)
 Parameters:     	*np,*priv,*model
 Remarks:			parsing gfar_group
 
@@ -433,24 +415,23 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
 	int i;
 	int cpus = num_online_cpus();
 #endif
-    printk("+++++++++++++++++gfar_parse_group_383_start model=%s+++++++++++++++++++++++++++++\n",model);
-	
     
 
 #ifdef VIRTUAL_ETHERNET    
     if (model && !strcasecmp(model, "KeTSEC"))
     {   	
-    	printk("++VIRTUAL_ETH_445+++ \n");
+    	//printk("++VIRTUAL_ETH_445+++ \n");
+    	printk("++gfar_parse_group_410_() model=%s+++++++\n",model);
     	return 0;	
     }
  #endif    
     
-    
+         printk("++gfar_parse_group_410_() model=%s+++++++\n",model);
     
     
     
     addr = of_translate_address(np,of_get_address(np, 0, &size, NULL));
-	printk("addr=______0x%x\n\r",addr);
+	printk("++gfar_parse_group_410/of_translate_address() addr=0x%x\n\r",addr);
 	priv->gfargrp[priv->num_grps].regs = ioremap(addr, size);
 
 
@@ -508,6 +489,14 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
 	return 0;
 }
 
+/**************************************************************************************************
+Syntax:      	    490_static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
+Parameters:     	ofdev,*priv,**pdev
+Remarks:			init gianfar
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 {
 	const char *model;
@@ -529,8 +518,8 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	int sps;
 #endif
 
-
-    printk("+++++++++++++++++gfar_of_init_470_start+++++++++++++++++++++++++++++\n");
+	printk("++gfar_of_init_503_()++\n\r");
+    
 
 	if (!np || !of_device_is_available(np))
 		return -ENODEV;
@@ -585,8 +574,10 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 
 	//Get model field on enet P2020 -> on p2010 rdb.dts
 	  model = of_get_property(np, "model", NULL);
-
-	  printk("++++++++++++gfar_of_init_580_model=%s+++++++++++\n",model);
+	  printk("++gfar_of_init_503/of_get_property()model=%s ++\n\r",model);   
+	  
+	  
+	
 	
 	
 	for (i = 0; i < MAXGROUPS; i++)
@@ -693,10 +684,10 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	else
 		printk(KERN_INFO "IEEE1588: disable on the system.\n");
     */
-		
+	
    		
 	mac_addr = of_get_mac_address(np);
-	printk("mac_addr=______0x%s\n",mac_addr);
+	printk("++gfar_of_init_503/of_get_mac_address()mac_addr=0x%x ++\n\r",mac_addr); 
 	if (mac_addr)
 		memcpy(dev->dev_addr, mac_addr, MAC_ADDR_LEN);
 
@@ -726,9 +717,8 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_EXTENDED_HASH;
 
 	ctype = of_get_property(np, "phy-connection-type", NULL);
-    printk("++++++++++++++++++TYPE_PHY=%s++++++++++++++++++++++++++_661\n",ctype);
-    
-    
+	printk("++gfar_of_init_503/of_get_property()ctype=%s ++\n\r",ctype); 
+	
     //Next Add Interface Type of LocalBus -> Cyclone3 data bus
     
     if (ctype && !strcmp(ctype, "lbc"))
@@ -755,21 +745,24 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 
 	// Find the TBI PHY.  If it's not there, we don't support SGMII 
 	priv->tbi_node = of_parse_phandle(np, "tbi-handle", 0);
-    printk("+++++++++++++++++gfar_of_init_703_return 0_OK+++++++++++++++++++++++++++++\n");	
+    
+
+	printk("++gfar_of_init_503/RETURN_OK++\n\r"); 
 	return 0;
 
 rx_alloc_failed:
-	printk("????rx_alloc_failed???\n");
+	printk("????gfar_of_init_503/rx_alloc_failed???\n");
 	free_rx_pointers(priv);
 tx_alloc_failed:
-	printk("????tx_alloc_failed???\n");
+	printk("????gfar_of_init_503/tx_alloc_failed???\n");
 	free_tx_pointers(priv);
 err_grp_init:
-	printk("????err_grp_init???\n");
+	printk("????gfar_of_init_503/err_grp_init???\n");
 	unmap_group_regs(priv);
 	free_netdev(dev);
 	return err;
 }
+
 
 /* Ioctl MII Interface */
 static int gfar_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
@@ -849,8 +842,8 @@ static void gfar_init_filer_table(struct gfar_private *priv)
 	u32 rqfcr = 0x0;
 	u32 rqfpr = FPR_FILER_MASK;
 
+	printk("++gfar_init_filer_table_840_()+++\n\r");
 	
-	printk("+++++++++++++_gfar_init_filer_table__853_+++++++\n\r");
 	
 	/* Default rule */
 	rqfcr = RQFCR_CMP_MATCH;
@@ -1252,7 +1245,14 @@ static irqreturn_t gfar_virtual_transmit(int irq, void *grp_id)
 }
 #endif
 
-/* Set up the ethernet device structure, private data,and anything else we need before we start */
+/**************************************************************************************************
+Syntax:      	    1249_static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
+Parameters:     	*ofdev*,*match
+Remarks:			Set up the ethernet device structure, private data,and anything else we need before we start
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 {
 	u32 tempval;
@@ -1266,7 +1266,10 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	u32 __iomem *baddr;
 	u16 static count=0;
 	
-	printk("+++++++++++++++++gfar_probe_1251_start+++++++++++++++++++++++++++++\n");
+	printk("++gfar_probe_1260_()/name=%s+++++++\n\r",match->name);
+	
+	
+
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	int j;
 	int cpus = num_online_cpus();
@@ -1283,17 +1286,6 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	priv->node = ofdev->node;
 	SET_NETDEV_DEV(dev, &ofdev->dev);
 
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	//kosta _ptimer_registres disable
 /*	if (priv->ptimer_present)
 	{
@@ -1313,12 +1305,8 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 
 	dev_set_drvdata(&ofdev->dev, priv);
 	regs = priv->gfargrp[0].regs;
-    
-	
-	
-	
-	
-	printk("++++++++gfar_probe__1230_priv->gfargrp[0]_____regs=0x%x+++++++++\n\r",regs);
+    printk("++gfar_probe_1260_()/priv->gfargrp[0].regs=0x%x+++++++\n\r",regs);
+
     ////////////Physical Initialization set eTSEC Registers 
     
 	
@@ -1363,8 +1351,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 			netif_napi_add(dev, &priv->gfargrp[i].napi_tx,
 #endif
 				gfar_poll_tx, GFAR_DEV_WEIGHT);
-		netif_napi_add(dev, &priv->gfargrp[i].napi_rx, gfar_poll_rx,
-				GFAR_DEV_WEIGHT);
+		netif_napi_add(dev, &priv->gfargrp[i].napi_rx, gfar_poll_rx,GFAR_DEV_WEIGHT);
 	}
 #else
 	// Register for napi ...We are registering NAPI for each grp 
@@ -1458,7 +1445,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 		priv->gfargrp[i].rx_bit_map = reverse_bitmap(
 				priv->gfargrp[i].rx_bit_map, MAX_RX_QS);
 	}
-    printk("+++++++++++++++++gfar_probe__1436_Calculate RSTAT, TSTAT\n");
+    //printk("+++++++++++++++++gfar_probe__1436_Calculate RSTAT, TSTAT\n");
 	
 ///Add kosta driver comment!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
 if (count<3)
@@ -1494,7 +1481,7 @@ if (count<3)
 
 }//////////////////////End kosta komment
 
-printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
+    //printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 
 	priv->rx_buffer_size = DEFAULT_RX_BUFFER_SIZE;
 	priv->wk_buffer_size = DEFAULT_WK_BUFFER_SIZE;
@@ -1528,11 +1515,9 @@ printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 
 	// Carrier starts down, phylib will bring it up 
 	netif_carrier_off(dev);
-    printk("+++++++++++++++++gfar_probe__1489_register_netdev(dev);\n");
-	
-	
 	err = register_netdev(dev);
-
+	printk("++gfar_probe_1260_()/register_netdev(dev)=0x%x+++++++\n\r",err);
+	
 	if (err)
 	{
 		printk(KERN_ERR "%s: Cannot register net device, aborting.\n",dev->name);
@@ -1548,8 +1533,8 @@ printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 
 	// fill out IRQ number and name fields 
 	len_devname = strlen(dev->name);
-	
-	printk("+++++++++++++gfar_probe__1549_len_devname=%d;\n",len_devname);
+	//printk("++gfar_probe_1260_()/register_netdev(dev)=0x%x+++++++\n\r",err);
+	//printk("+++++++++++++gfar_probe__1549_len_devname=%d;\n",len_devname);
 	
 	
 	
@@ -1584,7 +1569,7 @@ printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 	//gfar_init_sysfs(dev);   
 
 	// Print out the device info 
-	printk("15871587158715871587158715871587158715871587158715871587\n\r");
+	//printk("15871587158715871587158715871587158715871587158715871587\n\r");
 	printk(KERN_INFO DEVICE_NAME "%pM\n", dev->name, dev->dev_addr);
 
 	// Even more device info helps when determining which kernel 
@@ -1595,10 +1580,11 @@ printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 	for(i = 0; i < priv->num_tx_queues; i++)
 		 printk(KERN_INFO "%s:TX BD ring size for Q[%d]: %d\n",dev->name, i, priv->tx_queue[i]->tx_ring_size);
     count++;
-	return 0; 
+    printk("++gfar_probe_1260_()/RETURN_OK++\n\r");
+    return 0; 
 
 register_fail:
-	printk("????register_fail???\n\r");
+	printk("????gfar_probe_1260_()/register_fail???\n\r");
 	/*if (priv->ptimer_present)
 		gfar_ptp_cleanup(priv);*/
 	unmap_group_regs(priv);
@@ -1613,12 +1599,18 @@ register_fail:
 
 	
 }
+/**************************************************************************************************
+Syntax:      	    1603_static int gfar_remove(struct of_device *ofdev)
+Parameters:     	*ofdev
+Remarks:			Set up the ethernet device structure, private data,and anything else we need before we start
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
+***************************************************************************************************/
 static int gfar_remove(struct of_device *ofdev)
 {
 	struct gfar_private *priv = dev_get_drvdata(&ofdev->dev);
-
+	printk("++gfar_remove_1619_()\n\r");
 	if (priv->phy_node)
 		of_node_put(priv->phy_node);
 	if (priv->tbi_node)
@@ -1677,9 +1669,8 @@ static void gfar_config_filer_table(struct net_device *dev)
 	u32 rqfcr = RQFCR_RJE | RQFCR_CMP_MATCH;
 	u8  rqfcr_queue = priv->num_rx_queues-1;
 	int i;
-     
-	printk(">>>>>>gfar_config_filer_table___1593_start\n\r"); 
-	 
+	printk("++gfar_config_filer_table_1663_()++\n\r"); 
+
 	if (gfar_get_ip(dev))
 		printk(KERN_ERR "WOL: get the ip address error\n");
 	ip_addr = priv->ip_addr;
@@ -1909,14 +1900,20 @@ static int gfar_resume(struct of_device *ofdev)
 #define gfar_resume NULL
 #endif
 
-/* Reads the controller's registers to determine what interface
- * connects it to the PHY.
- */
+
+/**************************************************************************************************
+Syntax:      	    1905_static phy_interface_t gfar_get_interface(struct net_device *dev)
+Parameters:     	dev
+Remarks:			Reads the controller's registers to determine what interface onnects it to the PHY.
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static phy_interface_t gfar_get_interface(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
-	u32 ecntrl;
+	u32 ecntrl=0;
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
@@ -1925,15 +1922,16 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 	
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	{
-		
-		printk("VIRTUAL_ETHERNET_1930\n\r");
+		printk("++gfar_get_interface_1920_() ecntrl=0x%x\n",ecntrl);
+	
+		//printk("VIRTUAL_ETHERNET_1930\n\r");
 		return PHY_INTERFACE_MODE_RMII;
 	}
 	
 	
 	
-	ecntrl = gfar_read(&regs->ecntrl);
-    printk("+++++++++++gfar_get_interface_1936++++++++++++++ =%x\n",ecntrl);
+	  ecntrl = gfar_read(&regs->ecntrl);
+	  printk("++gfar_get_interface_1920_() ecntrl=0x%x\n",ecntrl);
 	
 	if (ecntrl & ECNTRL_SGMII_MODE)
 		return PHY_INTERFACE_MODE_SGMII;
@@ -1970,61 +1968,44 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 
 	return PHY_INTERFACE_MODE_MII;
 }
+/**************************************************************************************************
+Syntax:      	    1980_static phy_interface_t gfar_get_interface(struct net_device *dev)
+Parameters:     	dev
+Remarks:			Initializes driver's PHY state, and attaches to the PHY.
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
-/* Initializes driver's PHY state, and attaches to the PHY.
- * Returns 0 on success.
- */
+***************************************************************************************************/
 static int init_phy(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	uint gigabit_support = priv->device_flags & FSL_GIANFAR_DEV_HAS_GIGABIT ? SUPPORTED_1000baseT_Full : 0;
 	phy_interface_t interface;
     
-	
-	
-	
-	printk("++++++++++++++start_init_phy_1964+++++++++++++++++++\n\r");
 	priv->oldlink = 0;
 	priv->oldspeed = 0;
 	priv->oldduplex = -1;
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-	
-	
-	
+	interface = gfar_get_interface(dev);
+	printk("++init_phy_1980_()/gfar_get_interface(dev)=0x%x\n",interface);
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	   {
-			
-		interface = gfar_get_interface(dev);	
+				
 		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,interface);
-		printk("VIRTUAL_ETHERNET_2002\n\r");
+		//printk("VIRTUAL_ETHERNET_2002\n\r");
 		priv->phydev->supported &= (GFAR_SUPPORTED | gigabit_support);
 		priv->phydev->advertising = priv->phydev->supported;
-		printk("VIRTUAL_ETHERNET_2005\n\r");
+		//printk("VIRTUAL_ETHERNET_2005\n\r");
 	    return 0;
 	  }
 	
-	
-	
-	
-	
-	
-	
-	
-	interface = gfar_get_interface(dev);
 
 	priv->phydev = of_phy_connect(dev, priv->phy_node, &adjust_link, 0,interface);
 	if (!priv->phydev)
 		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,interface);
 
-	
-	
-
-	
-	
-	
 	
 	if (!priv->phydev) 
 	{
@@ -2087,27 +2068,31 @@ static void gfar_configure_serdes(struct net_device *dev)
 	phy_write(tbiphy, MII_BMCR, BMCR_ANENABLE |
 			BMCR_ANRESTART | BMCR_FULLDPLX | BMCR_SPEED1000);
 }
+/**************************************************************************************************
+Syntax:      	    2080_static void init_registers(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static void init_registers(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = NULL;
 	int i = 0;
     const char *virt_dev=0;
-	
-	printk("++++++++++init_registers_2052_start= %s+++++++++++++\n",dev->name);
 	virt_dev=dev->name;
-	
-	
-	
+    
+	printk("++init_registers_2080_() name=%s+++++++\n",dev->name);
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	{
 		
-		printk("VIRTUAL_ETHERNET_2057\n\r");
+		//printk("VIRTUAL_ETHERNET_2057\n\r");
 		return;
 	}
     		
-	//if (model && !strcasecmp(model, "TSEC"))
+	
 	
 	
 	 for (i = 0; i < priv->num_grps; i++) 
@@ -2311,13 +2296,20 @@ void free_bds(struct gfar_private *priv)
 			gfar_read(&(priv->gfargrp[0].regs)->tbase0));
 #endif
 }
+/**************************************************************************************************
+Syntax:      	    2300_void stop_gfar(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Stop Device 
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 void stop_gfar(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	unsigned long flags;
 	int i = 0;
-
+	printk("++stop_gfar_2310_()++\n\r");
 	phy_stop(priv->phydev);
 
 	/* Lock it down */
@@ -2487,42 +2479,32 @@ static void free_skb_resources(struct gfar_private *priv)
 	}
 }
 
+/**************************************************************************************************
+Syntax:      	    2480_void gfar_start(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Set up the ethernet device structure, private data,and anything else we need before we start
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
-
-
-
-
-
-
-
-
-
-
-
-
+***************************************************************************************************/
 void gfar_start(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-	
+	printk("++gfar_start_2490_()++\n\r");
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	   {
 	
-			printk("VIRTUAL_ETHERNET_2468\n\r");
+			//printk("VIRTUAL_ETHERNET_2468\n\r");
 			dev->trans_start = jiffies;
 			return;
 	  }
 
-	
-	
-	
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 tempval;
 	int i = 0;
-	printk("++++++gfar_start_2464+++++\n");
 	/* Enable Rx and Tx in MACCFG1 */
 	tempval = gfar_read(&regs->maccfg1);
 	tempval |= (MACCFG1_RX_EN | MACCFG1_TX_EN);
@@ -2770,7 +2752,16 @@ unsigned long alloc_bds(struct gfar_private *priv, dma_addr_t *addr)
 	return vaddr;
 }
 
-/* Bring the controller up and running */
+
+
+/**************************************************************************************************
+Syntax:      	    2760_int startup_gfar(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Bring the controller up and running 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 int startup_gfar(struct net_device *dev)
 {
 	struct txbd8 *txbdp;
@@ -2795,28 +2786,18 @@ int startup_gfar(struct net_device *dev)
 	static count=0;
 	
 	unsigned long region_size;
+	printk("++startup_gfar_2760_()name=%s++\n",dev->name);
 
-	
-	
-	
-	
-	printk("++++++++++startup_gfar__2737++++++++++++++=%s\n\r",dev->name);
-    
-
-	
+   
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	   {
-			
-		    
 		/* Allocate memory for the buffer descriptors */
 		   vaddr = 0;//alloc_bds(priv, &addr);
 		 // region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
 		 // printk("allocate_reg_size2744\n\r");
-		
-		
-		
+	
 		 //vaddr = alloc_bds(priv, &addr);
-		 printk("allocate_vaddr_2744\n\r"); 
+		 //printk("allocate_vaddr_2744\n\r"); 
 		 gfar_start(dev);
 		 //phy_start(priv->phydev);
 
@@ -2834,7 +2815,8 @@ int startup_gfar(struct net_device *dev)
 		
 		    //gfar_start(dev); 
 		    //printk("VIRTUAL_ETHERNET_2826n\r");
-			return 0;
+		 printk("++startup_gfar_2982_()/RETURN_OK++\n\r");	
+		 return 0;
 	  }
 	
 	
@@ -3003,7 +2985,9 @@ int startup_gfar(struct net_device *dev)
 		rxbdp--;
 		rxbdp->status |= RXBD_WRAP;
 	}
-    printk("+startup_gfar_2903_gfar_new_skb+\n\r");
+	printk("++startup_gfar_2760_()name=%s++\n",dev->name);
+	
+	//printk("+startup_gfar_2903_gfar_new_skb+\n\r");
 
 	
 	#ifdef CONFIG_GFAR_SKBUFF_RECYCLING
@@ -3039,7 +3023,7 @@ int startup_gfar(struct net_device *dev)
 			err = -ENOMEM;
 			goto wk_buf_fail;
 		}  
-        printk("+startup_gfar_2933_netif_msg_ifup+\n\r");
+        //printk("+startup_gfar_2933_netif_msg_ifup+\n\r");
 		priv->wk_buf_vaddr = vaddr;
 		priv->wk_buf_paddr = addr;
 		wk_buf_vaddr = (unsigned long)(vaddr + RXBUF_ALIGNMENT) \
@@ -3063,7 +3047,7 @@ int startup_gfar(struct net_device *dev)
 		wkbdp->status |= RXBD_WRAP;
 	}
 
-	printk(">>>>>>>>>>>>>>startup_gfar_2969<<<<<<<<\n\r");
+	//printk(">>>>>>>>>>>>>>startup_gfar_2969<<<<<<<<\n\r");
 	
 	for (i = 0; i < priv->num_grps; i++)
 	{
@@ -3076,9 +3060,10 @@ int startup_gfar(struct net_device *dev)
 		}
 	}
     
-	printk("+startup_gfar_2982_register_grp_irqs+\n\r");
+	//printk("+startup_gfar_2982_register_grp_irqs+\n\r");
 	phy_start(priv->phydev);
-    printk("+startup_gfar_2984_phy_start+\n\r");
+	
+	//printk("+startup_gfar_2984_phy_start+\n\r");
 	gfar_configure_tx_coalescing(priv, 0xFF);
 	gfar_configure_rx_coalescing(priv, 0xFF);
 
@@ -3155,9 +3140,8 @@ int startup_gfar(struct net_device *dev)
 
 	/* Start the controller */
 	gfar_start(dev); 
-    printk("startup_gfar_3061->>>>>>>>return_OK\n\r");
+	printk("++startup_gfar_2982_()/RETURN_OK++\n\r");
 	return 0;
-
 irq_fail:
 wk_buf_fail:
 	dma_free_coherent(&priv->ofdev->dev,
@@ -3169,17 +3153,24 @@ rx_skb_fail:
 tx_skb_fail:
 	free_skb_resources(priv);
 	free_bds(priv);
-	printk("startup_gfar_3075->>>>>>>>return_ERROR\n\r");
+	printk("???startup_gfar_2982_()/return_ERROR???\n\r");
 	return err;
 }
 
-/* Called when something needs to use the ethernet device */
-/* Returns 0 for success. */
+/**************************************************************************************************
+Syntax:      	    3160_static int gfar_enet_open(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Called when something needs to use the ethernet device 
+
+Return Value:	    0  =>  Returns 0 for success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_enet_open(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	int err;
-
+    
+	printk("++gfar_enet_open_3170_()++\n\r");
 	enable_napi(priv);
 
 	/* Initialize a bunch of registers */
@@ -3263,13 +3254,11 @@ static inline struct txbd8 *next_txbd(struct txbd8 *bdp, struct txbd8 *base,int 
 }
 
 /**************************************************************************************************
-Syntax:      	    static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
+Syntax:      	    3250_static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 Remarks:			This is called by the kernel when a frame is ready for transmission.
                     It is pointed to by the dev->hard_start_xmit function pointer
-   
 Return Value:	   
-
  				    Value		 									Description
 				-------------------------------------------------------------------------------------
 				    = 1												Success
@@ -3504,11 +3493,18 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-/* Stops the kernel queue, and halts the controller */
+
+/**************************************************************************************************
+Syntax:      	    3495_static int gfar_close(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_close(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
-
+	printk("++gfar_close_3490_()++\n\r");
 	disable_napi(priv);
 
 	cancel_work_sync(&priv->reset_task);
@@ -3528,12 +3524,12 @@ static int gfar_set_mac_address(struct net_device *dev)
 {
  const char *virt_dev=0;	
  virt_dev=dev->name;	
- 
-	printk(">>>>>>>>>>gfar_set_mac_address____3415_start<<<\n\r");
+     printk("++gfar_set_mac_address_3510_()++\n\r"); 
+	//printk(">>>>>>>>>>gfar_set_mac_address____3415_start<<<\n\r");
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	{
 		
-		printk("VIRTUAL_ETHERNET_3419\n\r");
+		//printk("VIRTUAL_ETHERNET_3419\n\r");
 		return 0;
 	}
 	
@@ -4241,6 +4237,15 @@ static inline unsigned long __wk_phy_to_virt(struct net_device *dev,unsigned lon
 	return virt;
 }
 
+
+/**************************************************************************************************
+Syntax:      	    4230_static void gfar_receive_wakeup(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Set up the ethernet device structure, private data,and anything else we need before we start
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static void gfar_receive_wakeup(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
@@ -4254,9 +4259,6 @@ static void gfar_receive_wakeup(struct net_device *dev)
 #ifdef DEBUG_PHY_RECIEVE	
 	printk("+gfar_receive_wakeup_3964+\n\r");
 #endif 		
-	
-	
-	
 	
 	/* get the first full descriptor */
 	while (!(bdp->status & RXBD_EMPTY)) {
