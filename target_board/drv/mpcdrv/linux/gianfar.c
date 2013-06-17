@@ -1978,22 +1978,54 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 static int init_phy(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
-	uint gigabit_support =
-		priv->device_flags & FSL_GIANFAR_DEV_HAS_GIGABIT ?
-		SUPPORTED_1000baseT_Full : 0;
+	uint gigabit_support = priv->device_flags & FSL_GIANFAR_DEV_HAS_GIGABIT ? SUPPORTED_1000baseT_Full : 0;
 	phy_interface_t interface;
-    printk("++++++++++++++init_phy_1964+++++++++++++++++++\n\r");
+    
+	
+	
+	
+	printk("++++++++++++++start_init_phy_1964+++++++++++++++++++\n\r");
 	priv->oldlink = 0;
 	priv->oldspeed = 0;
 	priv->oldduplex = -1;
-
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	
+	
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+			
+		interface = gfar_get_interface(dev);	
+		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,interface);
+		printk("VIRTUAL_ETHERNET_2002\n\r");
+		priv->phydev->supported &= (GFAR_SUPPORTED | gigabit_support);
+		priv->phydev->advertising = priv->phydev->supported;
+		printk("VIRTUAL_ETHERNET_2005\n\r");
+	    return 0;
+	  }
+	
+	
+	
+	
+	
+	
+	
+	
 	interface = gfar_get_interface(dev);
 
-	priv->phydev = of_phy_connect(dev, priv->phy_node, &adjust_link, 0,
-				      interface);
+	priv->phydev = of_phy_connect(dev, priv->phy_node, &adjust_link, 0,interface);
 	if (!priv->phydev)
-		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,
-							 interface);
+		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,interface);
+
+	
+	
+
+	
+	
+	
+	
 	if (!priv->phydev) 
 	{
 		dev_err(&dev->dev, "could not attach to PHY\n");
@@ -2455,13 +2487,42 @@ static void free_skb_resources(struct gfar_private *priv)
 	}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void gfar_start(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+	
+			printk("VIRTUAL_ETHERNET_2468\n\r");
+			dev->trans_start = jiffies;
+			return;
+	  }
+
+	
+	
+	
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 tempval;
 	int i = 0;
-    printk("++++++gfar_start_2349+++++\n");
+	printk("++++++gfar_start_2464+++++\n");
 	/* Enable Rx and Tx in MACCFG1 */
 	tempval = gfar_read(&regs->maccfg1);
 	tempval |= (MACCFG1_RX_EN | MACCFG1_TX_EN);
@@ -2733,12 +2794,48 @@ int startup_gfar(struct net_device *dev)
 	virt_dev=dev->name;
 	static count=0;
 	
-
-	printk("++++++++++startup_gfar__2737++++++++++++++\n\r");
-
+	unsigned long region_size;
 
 	
 	
+	
+	
+	printk("++++++++++startup_gfar__2737++++++++++++++=%s\n\r",dev->name);
+    
+
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+			
+		    
+		/* Allocate memory for the buffer descriptors */
+		   vaddr = 0;//alloc_bds(priv, &addr);
+		 // region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
+		 // printk("allocate_reg_size2744\n\r");
+		
+		
+		
+		 //vaddr = alloc_bds(priv, &addr);
+		 printk("allocate_vaddr_2744\n\r"); 
+		 gfar_start(dev);
+		 //phy_start(priv->phydev);
+
+		 
+		 /*
+		if (vaddr == 0) 
+		{
+			if (netif_msg_ifup(priv))
+				printk(KERN_ERR "%s: Could not allocate buffer descriptors!\n",dev->name);
+			return -ENOMEM;
+		}	
+		  */ 
+		  // phy_start(priv->phydev);
+		   //printk("phy_start\n\r");
+		
+		    //gfar_start(dev); 
+		    //printk("VIRTUAL_ETHERNET_2826n\r");
+			return 0;
+	  }
 	
 	
 	for (i = 0; i < priv->num_grps; i++) 
@@ -2816,8 +2913,7 @@ int startup_gfar(struct net_device *dev)
 		{
 			if (netif_msg_ifup(priv))
 				printk(KERN_ERR
-					"%s: Could not allocate	tx_skbuff\n",
-					dev->name);
+					"%s: Could not allocate	tx_skbuff\n",dev->name);
 			err = -ENOMEM;
 			goto tx_skb_fail;
 		}
@@ -2841,8 +2937,7 @@ int startup_gfar(struct net_device *dev)
 		{
 			if (netif_msg_ifup(priv))
 				printk(KERN_ERR
-					"%s: Could not allocate rx_skbuff\n",
-					dev->name);
+					"%s: Could not allocate rx_skbuff\n",dev->name);
 			err = -ENOMEM;
 			goto rx_skb_fail;
 		}
@@ -2968,7 +3063,7 @@ int startup_gfar(struct net_device *dev)
 		wkbdp->status |= RXBD_WRAP;
 	}
 
-	printk(">>>>>>>>>>>>>>startup_gfar_2963<<<<<<<<\n\r");
+	printk(">>>>>>>>>>>>>>startup_gfar_2969<<<<<<<<\n\r");
 	
 	for (i = 0; i < priv->num_grps; i++)
 	{
@@ -2980,10 +3075,10 @@ int startup_gfar(struct net_device *dev)
 			goto irq_fail;
 		}
 	}
-  
-	printk("+startup_gfar_2868_register_grp_irqs+\n\r");
+    
+	printk("+startup_gfar_2982_register_grp_irqs+\n\r");
 	phy_start(priv->phydev);
-    printk("+startup_gfar_2864_phy_start+\n\r");
+    printk("+startup_gfar_2984_phy_start+\n\r");
 	gfar_configure_tx_coalescing(priv, 0xFF);
 	gfar_configure_rx_coalescing(priv, 0xFF);
 
@@ -3060,7 +3155,7 @@ int startup_gfar(struct net_device *dev)
 
 	/* Start the controller */
 	gfar_start(dev); 
-    printk("startup_gfar_2931->>>>>>>>return_OK\n\r");
+    printk("startup_gfar_3061->>>>>>>>return_OK\n\r");
 	return 0;
 
 irq_fail:
@@ -3074,7 +3169,7 @@ rx_skb_fail:
 tx_skb_fail:
 	free_skb_resources(priv);
 	free_bds(priv);
-	printk("startup_gfar_2945->>>>>>>>return_ERROR\n\r");
+	printk("startup_gfar_3075->>>>>>>>return_ERROR\n\r");
 	return err;
 }
 
@@ -3155,16 +3250,14 @@ void inline gfar_tx_vlan(struct sk_buff *skb, struct txfcb *fcb)
 	fcb->vlctl = vlan_tx_tag_get(skb);
 }
 
-static inline struct txbd8 *skip_txbd(struct txbd8 *bdp, int stride,
-			       struct txbd8 *base, int ring_size)
+static inline struct txbd8 *skip_txbd(struct txbd8 *bdp, int stride,struct txbd8 *base, int ring_size)
 {
 	struct txbd8 *new_bd = bdp + stride;
 
 	return (new_bd >= (base + ring_size)) ? (new_bd - ring_size) : new_bd;
 }
 
-static inline struct txbd8 *next_txbd(struct txbd8 *bdp, struct txbd8 *base,
-		int ring_size)
+static inline struct txbd8 *next_txbd(struct txbd8 *bdp, struct txbd8 *base,int ring_size)
 {
 	return skip_txbd(bdp, 1, base, ring_size);
 }
@@ -4931,7 +5024,28 @@ static void gfar_set_multi(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	u32 tempval;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
 
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+			
+		    printk("<+++++eth3_gfar_set_multi_______5030+++++>\n\r");
+			return;
+	  
+	   }
+
+	
+	printk("<+++++gfar_set_multi_______5030+++++>\n\r");  
+	
+	
+	
+	
+	
+	
+	
 	if (dev->flags & IFF_PROMISC) {
 		/* Set RCTRL to PROM */
 		tempval = gfar_read(&regs->rctrl);
