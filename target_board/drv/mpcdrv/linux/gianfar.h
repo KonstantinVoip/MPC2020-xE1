@@ -1425,12 +1425,9 @@ extern void gfar_halt(struct net_device *dev);
 //extern void pmuxcr_guts_write(void);                  //kosta comment 11.06.13
 //extern void gfar_ptp_store_rxstamp(struct net_device *dev, struct sk_buff *skb);    //kosta comment 11.06.13         
 //extern int gfar_ioctl_1588(struct net_device *dev, struct ifreq *ifr, int cmd);     //kosta comment 11.06.13 
-extern void gfar_phy_test(struct mii_bus *bus, struct phy_device *phydev,
-		int enable, u32 regnum, u32 read);
-extern void gfar_configure_tx_coalescing(struct gfar_private *priv,
-					unsigned long tx_mask);
-extern void gfar_configure_rx_coalescing(struct gfar_private *priv,
-					unsigned long rx_mask);
+extern void gfar_phy_test(struct mii_bus *bus, struct phy_device *phydev,int enable, u32 regnum, u32 read);
+extern void gfar_configure_tx_coalescing(struct gfar_private *priv,unsigned long tx_mask);
+extern void gfar_configure_rx_coalescing(struct gfar_private *priv,unsigned long rx_mask);
 //void gfar_init_sysfs(struct net_device *dev);
 
 //extern const struct ethtool_ops gfar_ethtool_ops;

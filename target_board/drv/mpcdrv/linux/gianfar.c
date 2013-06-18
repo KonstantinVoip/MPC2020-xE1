@@ -149,8 +149,7 @@ static void gfar_reset_task(struct work_struct *work);
 static void gfar_timeout(struct net_device *dev);
 static int gfar_close(struct net_device *dev);
 struct sk_buff *gfar_new_skb(struct net_device *dev);
-static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,
-		struct sk_buff *skb);
+static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,struct sk_buff *skb);
 static int gfar_set_mac_address(struct net_device *dev);
 static int gfar_change_mtu(struct net_device *dev, int new_mtu);
 static irqreturn_t gfar_error(int irq, void *dev_id);
@@ -159,8 +158,7 @@ static irqreturn_t gfar_interrupt(int irq, void *dev_id);
 static void adjust_link(struct net_device *dev);
 static void init_registers(struct net_device *dev);
 static int init_phy(struct net_device *dev);
-static int gfar_probe(struct of_device *ofdev,
-		const struct of_device_id *match);
+static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match);
 static int gfar_remove(struct of_device *ofdev);
 static void free_skb_resources(struct gfar_private *priv);
 static void gfar_set_multi(struct net_device *dev);
@@ -185,10 +183,8 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue, int tx_work_limit
 #else
 static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue);
 #endif
-static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,
-			      int amount_pull);
-static void gfar_vlan_rx_register(struct net_device *netdev,
-		                struct vlan_group *grp);
+static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull);
+static void gfar_vlan_rx_register(struct net_device *netdev,struct vlan_group *grp);
 void gfar_halt(struct net_device *dev);
 static void gfar_halt_nodisable(struct net_device *dev);
 void gfar_start(struct net_device *dev);
@@ -694,7 +690,7 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	
 	if (model && !strcasecmp(model, "KeTSEC"))
 		priv->device_flags =
-			FSL_GIANFAR_DEV_HAS_GIGABIT |
+			//FSL_GIANFAR_DEV_HAS_GIGABIT |           //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
 			FSL_GIANFAR_DEV_HAS_RMON |
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
@@ -707,7 +703,7 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	if (model && !strcasecmp(model, "eTSEC"))
 		priv->device_flags =
-			FSL_GIANFAR_DEV_HAS_GIGABIT |
+			//FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
 			FSL_GIANFAR_DEV_HAS_RMON |
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR |
@@ -1266,7 +1262,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	u32 __iomem *baddr;
 	u16 static count=0;
 	
-	printk("++gfar_probe_1260_()/name=%s+++++++\n\r",match->name);
+	printk("++gfar_probe_1260_()/name=%x+++++++\n\r",match->name);
 	
 	
 
@@ -2309,7 +2305,21 @@ void stop_gfar(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	unsigned long flags;
 	int i = 0;
-	printk("++stop_gfar_2310_()++\n\r");
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+			
+		printk("++stop_gfar_2310_()++\n\r");
+			return;
+	  }
+	
+	
+	 printk("++stop_gfar_2310_()++\n\r");
+	
+	
 	phy_stop(priv->phydev);
 
 	/* Lock it down */
@@ -2795,7 +2805,7 @@ int startup_gfar(struct net_device *dev)
 		   vaddr = 0;//alloc_bds(priv, &addr);
 		 // region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
 		 // printk("allocate_reg_size2744\n\r");
-	
+		   phy_start(priv->phydev);
 		 //vaddr = alloc_bds(priv, &addr);
 		 //printk("allocate_vaddr_2744\n\r"); 
 		 gfar_start(dev);
@@ -3061,6 +3071,9 @@ int startup_gfar(struct net_device *dev)
 	}
     
 	//printk("+startup_gfar_2982_register_grp_irqs+\n\r");
+	
+	//Start _Physical Layer of device ->DP83848/////////////////
+	//LINK UP _DOWN ////recieve ->transmit/////////////////////
 	phy_start(priv->phydev);
 	
 	//printk("+startup_gfar_2984_phy_start+\n\r");
@@ -3277,7 +3290,10 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	u32 bufaddr;
 	unsigned long flags;
 	unsigned int nr_frags, length;
-
+	const char *virt_dev=0;
+	unsigned char *in_high_level_data;
+	virt_dev=dev->name;
+	
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	if (priv->sps)
@@ -3289,23 +3305,58 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	//HIGH Lewel Packet to transmit
 	rq = skb->queue_mapping;
 	
+	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	       {
+			
+	    	length=skb->len;
+	    	in_high_level_data=skb->data;
+	    	printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",length);
+	    	
+	    	for(i=0;i<20;i++)
+	    	{
+	    		
+	    		printk("data =0x%x\n\r",in_high_level_data[i]);
+	    		
+	    	}
+	    	
+		    
+			return;
+	       }
+	      
+	  
 	
-	#ifdef DEBUG_PHY_TRANSMIT	
-	   printk("+gfar_start_xmit_skb->queue_mapping->>>>> rq=0x%x+\n\r",rq);
-	#endif	
+	
+	  	 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+			#ifdef DEBUG_PHY_TRANSMIT	
+		    printk("+gfar_start_xmit_skb->queue_mapping->>>>> rq=0x%x+\n\r",rq);
+		    #endif		
+		 }
 	
 	
+	  	 
+	  	 
+	  	 
+	  	 
+	  	 
 	
 	
-	tx_queue = priv->tx_queue[rq];
-	txq = netdev_get_tx_queue(dev, rq);
-	base = tx_queue->tx_bd_base;
-	regs = tx_queue->grp->regs;
-	
-	
-#ifdef DEBUG_PHY_TRANSMIT	
-	   printk("+gfar_start_xmit_3106_device =%s+\n\r",dev->name);
-#endif	
+	   //blank for eth3 device ,phy ,eth0,eth1,eth2 ->OK
+		 tx_queue = priv->tx_queue[rq];
+		 txq = netdev_get_tx_queue(dev, rq);
+		 base = tx_queue->tx_bd_base;
+		 regs = tx_queue->grp->regs;
+	    
+		
+		 
+		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+            #ifdef DEBUG_PHY_TRANSMIT	
+	        printk("+gfar_start_xmit_3106_device =%s+\n\r",dev->name);
+            #endif	  			 
+		 }
+       
+
 	
 	/* make space for additional header when fcb is needed */
 	if (((skb->ip_summed == CHECKSUM_PARTIAL) ||(priv->vlgrp && vlan_tx_tag_present(skb))) && (skb_headroom(skb) < GMAC_FCB_LEN))
@@ -3330,9 +3381,15 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* total number of fragments in the SKB */
 	nr_frags = skb_shinfo(skb)->nr_frags;
 
-#ifdef DEBUG_PHY_TRANSMIT	
-	   printk("+gfar_start_xmit_3133_nr_frags =%d+\n\r", nr_frags);
-#endif
+	 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+	 {
+		#ifdef DEBUG_PHY_TRANSMIT	
+	    printk("+gfar_start_xmit_3133_nr_frags =%d+\n\r", nr_frags);
+        #endif	 
+	 }
+	
+	
+
 	
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	if (!priv->sps)
@@ -3358,17 +3415,32 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	txq->tx_packets++;
 	txbdp = txbdp_start = tx_queue->cur_tx;
 
-	#ifdef DEBUG_PHY_TRANSMIT	
-	printk("+gfar_start_xmit_3161_skb->len =0x%x+\n\r",skb->len);
-	#endif
+	
+	
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+	  {	
+        #ifdef DEBUG_PHY_TRANSMIT	
+        printk("+gfar_start_xmit_3161_skb->len =0x%x+\n\r",skb->len);
+        #endif		
+	  }
+	
+	
+	
+
 	
 	
 	if (nr_frags == 0) 
 	{
 		lstatus = txbdp->lstatus | BD_LFLAG(TXBD_LAST | TXBD_INTERRUPT);
-		#ifdef DEBUG_PHY_TRANSMIT	
-		printk("+gfar_start_xmit_3164_S_lstatus =%x+\n\r", lstatus);
-		#endif
+	
+		
+		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+			#ifdef DEBUG_PHY_TRANSMIT	
+			printk("+gfar_start_xmit_3164_S_lstatus =%x+\n\r", lstatus);
+            #endif 
+		 }
+	
 	} 
 	else 
 	{
@@ -3389,19 +3461,31 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 					skb_shinfo(skb)->frags[i].page_offset,
 					length,
 					DMA_TO_DEVICE);
-			
-			#ifdef DEBUG_PHY_TRANSMIT	
-			printk("+gfar_start_xmit_3188_buffaddr =0x%x+\n\r",bufaddr);
-			#endif
+			  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+				 {
+				 #ifdef DEBUG_PHY_TRANSMIT	
+				 printk("+gfar_start_xmit_3188_buffaddr =0x%x+\n\r",bufaddr);
+				#endif				  
+				 }
 			/* set the TxBD length and buffer pointer */
 			txbdp->bufPtr = bufaddr;
 			txbdp->lstatus = lstatus;
 		}
 
 		lstatus = txbdp_start->lstatus;
-		#ifdef DEBUG_PHY_TRANSMIT	
-		printk("+gfar_start_xmit_3197_E_lstatus =%x+\n\r", lstatus);
-		#endif
+		
+		
+		
+		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+			 {
+              #ifdef DEBUG_PHY_TRANSMIT	
+			  printk("+gfar_start_xmit_3197_E_lstatus =%x+\n\r", lstatus);
+			  #endif
+			 }
+		
+		
+		
+	
 	}
 
 	/* Set up checksumming */
@@ -3411,11 +3495,13 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		lstatus |= BD_LFLAG(TXBD_TOE);
 		gfar_tx_checksum(skb, fcb);
 		
-		#ifdef DEBUG_PHY_TRANSMIT	
-		printk("+gfar_start_xmit_gfar_tx_checksum_3209+\n\r");
-		#endif
-	    
-	
+		
+		  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+			 {		
+			 #ifdef DEBUG_PHY_TRANSMIT	
+			 printk("+gfar_start_xmit_gfar_tx_checksum_3209+\n\r");
+			 #endif			
+			 }
 	}
 
 	if (priv->vlgrp && vlan_tx_tag_present(skb))
@@ -3447,11 +3533,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	txbdp_start->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,skb_headlen(skb), DMA_TO_DEVICE);
 	lstatus |= BD_LFLAG(TXBD_CRC | TXBD_READY) | skb_headlen(skb);
 
-	
-	#ifdef DEBUG_PHY_TRANSMIT	
-	printk("+gfar_start_xmit_txbdp_start->bufPtr=0x%x\n\r",txbdp_start->bufPtr);
-	#endif
-	
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+      {	
+	     #ifdef DEBUG_PHY_TRANSMIT	
+	     printk("+gfar_start_xmit_txbdp_start->bufPtr=0x%x\n\r",txbdp_start->bufPtr);
+		 #endif
+      }
 	
 	/*
 	 * The powerpc-specific eieio() is used, as wmb() has too strong
@@ -3532,13 +3619,7 @@ static int gfar_set_mac_address(struct net_device *dev)
 		//printk("VIRTUAL_ETHERNET_3419\n\r");
 		return 0;
 	}
-	
-	
 	gfar_set_mac_for_addr(dev, 0, dev->dev_addr);
-
-	
-	
-	
 	return 0;
 }
 
@@ -3826,7 +3907,15 @@ static void gfar_timeout(struct net_device *dev)
 	schedule_work(&priv->reset_task);
 }
 
-/* Interrupt Handler for Transmit complete */
+
+
+/**************************************************************************************************
+Syntax:      	    3897_static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
+Parameters:     	*tx_queue
+Remarks:			Interrupt Handler for Transmit complete
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 #ifdef CONFIG_GIANFAR_TXNAPI
 static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue, int tx_work_limit)
 #else
@@ -3850,12 +3939,16 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 	int howmany_recycle = 0;
 #endif
-
+    
+	
+	printk("++gfar_clean_tx_ring_3930()/name=%s ++\n\r",dev->name);
+	
 	rx_queue = priv->rx_queue[tx_queue->qindex];
 	bdp = tx_queue->dirty_tx;
 	skb_dirtytx = tx_queue->skb_dirtytx;
 
-	while ((skb = tx_queue->tx_skbuff[skb_dirtytx])) {
+	while ((skb = tx_queue->tx_skbuff[skb_dirtytx])) 
+	{
 		frags = skb_shinfo(skb)->nr_frags;
 		lbdp = skip_txbd(bdp, frags, base, tx_ring_size);
 
@@ -3866,23 +3959,20 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
 				(lstatus & BD_LENGTH_MASK))
 			break;
 
-		dma_unmap_single(&priv->ofdev->dev,
-				bdp->bufPtr,
-				bdp->length,
-				DMA_TO_DEVICE);
+		dma_unmap_single(&priv->ofdev->dev,bdp->bufPtr,bdp->length,DMA_TO_DEVICE);
 
+		
 		bdp->lstatus &= BD_LFLAG(TXBD_WRAP);
 		bdp = next_txbd(bdp, base, tx_ring_size);
 
-		for (i = 0; i < frags; i++) {
-			dma_unmap_page(&priv->ofdev->dev,
-					bdp->bufPtr,
-					bdp->length,
-					DMA_TO_DEVICE);
+		for (i = 0; i < frags; i++) 
+		{
+			dma_unmap_page(&priv->ofdev->dev,bdp->bufPtr,bdp->length,DMA_TO_DEVICE);
 			bdp->lstatus &= BD_LFLAG(TXBD_WRAP);
 			bdp = next_txbd(bdp, base, tx_ring_size);
 		}
 
+		
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 		howmany_recycle += gfar_kfree_skb(skb, tx_queue->qindex);
 #else
@@ -3890,8 +3980,7 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
 #endif
 		tx_queue->tx_skbuff[skb_dirtytx] = NULL;
 
-		skb_dirtytx = (skb_dirtytx + 1) &
-			TX_RING_MOD_MASK(tx_ring_size);
+		skb_dirtytx = (skb_dirtytx + 1) & TX_RING_MOD_MASK(tx_ring_size);
 
 		howmany++;
 		tx_queue->num_txbdfree += frags + 1;
@@ -4161,12 +4250,22 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	unsigned int alignamount;
 	struct gfar_private *priv = netdev_priv(dev);
 	struct sk_buff *skb = NULL;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	
+	
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		 //#ifdef DEBUG_PHY_RECIEVE	
+		 printk("+gfar_new_skb_3885+\n\r");  
+		 //#endif 			
+		 }
+	
+	
+	
 	
 
-	
-#ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_new_skb_3885+\n\r");  
-#endif 	
 		
 	skb = netdev_alloc_skb(dev, priv->rx_buffer_size + RXBUF_ALIGNMENT);
 
@@ -4932,30 +5031,51 @@ static irqreturn_t gfar_interrupt(int irq, void *grp_id)
 	return IRQ_HANDLED;
 }
 
-/* Called every time the controller might need to be made
- * aware of new link state.  The PHY code conveys this
- * information through variables in the phydev structure, and this
- * function converts those variables into the appropriate
- * register values, and can bring down the device if needed.
- */
+
+/**************************************************************************************************
+Syntax:      	    4950_ static void adjust_link(struct net_device *dev)
+Parameters:     	*dev
+Remarks:			Called every time the controller might need to be made
+                    aware of new link state.  The PHY code conveys this
+                    information through variables in the phydev structure, and this
+                    function converts those variables into the appropriate
+                    register values, and can bring down the device if needed. 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+***************************************************************************************************/
 static void adjust_link(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 	unsigned long flags;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	//Enable Struct PHY_DEV ->>next to PHY_DEVICE->check link state
 	struct phy_device *phydev = priv->phydev;
+	//printk("++adjust_link_4964_()/name=%s++\n\r",dev->name);
+	
+	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {  
+		        return;
+	   }
+	
+	
+	
 	int new_state = 0;
-
+    
 	local_irq_save(flags);
 	lock_tx_qs(priv);
 
-	if (phydev->link) {
+	if (phydev->link) 
+	{
 		u32 tempval = gfar_read(&regs->maccfg2);
 		u32 ecntrl = gfar_read(&regs->ecntrl);
 
 		/* Now we make sure that we can be in full duplex mode.
 		 * If not, we operate in half-duplex mode. */
-		if (phydev->duplex != priv->oldduplex) {
+		if (phydev->duplex != priv->oldduplex)
+		{
 			new_state = 1;
 			if (!(phydev->duplex))
 				tempval &= ~(MACCFG2_FULL_DUPLEX);
@@ -4965,9 +5085,11 @@ static void adjust_link(struct net_device *dev)
 			priv->oldduplex = phydev->duplex;
 		}
 
-		if (phydev->speed != priv->oldspeed) {
+		if (phydev->speed != priv->oldspeed) 
+		{
 			new_state = 1;
-			switch (phydev->speed) {
+			switch (phydev->speed)
+			{
 			case 1000:
 				tempval =
 				    ((tempval & ~(MACCFG2_IF)) | MACCFG2_GMII);
@@ -4999,11 +5121,14 @@ static void adjust_link(struct net_device *dev)
 		gfar_write(&regs->maccfg2, tempval);
 		gfar_write(&regs->ecntrl, ecntrl);
 
-		if (!priv->oldlink) {
+		if (!priv->oldlink)
+		{
 			new_state = 1;
 			priv->oldlink = 1;
 		}
-	} else if (priv->oldlink) {
+	} 
+	else if (priv->oldlink) 
+	{
 		new_state = 1;
 		priv->oldlink = 0;
 		priv->oldspeed = 0;
