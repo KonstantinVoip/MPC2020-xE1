@@ -1047,8 +1047,7 @@ struct gfar_skb_handler {
 	struct sk_buff *recycle_queue;
 };
 
-extern void gfar_free_recycle_queue(struct gfar_skb_handler *sh,
-		int lock_flag);
+extern void gfar_free_recycle_queue(struct gfar_skb_handler *sh,int lock_flag);
 #endif
 
 /* Structure for PTP Time Stamp */
@@ -1389,8 +1388,7 @@ static inline void gfar_write(volatile unsigned __iomem *addr, u32 val)
 	out_be32(addr, val);
 }
 
-static inline void gfar_read_filer(struct gfar_private *priv,
-		unsigned int far, u32 *fcr, u32 *fpr)
+static inline void gfar_read_filer(struct gfar_private *priv,unsigned int far, u32 *fcr, u32 *fpr)
 {
 	struct gfar __iomem *regs = priv->gfargrp[0].regs;
 

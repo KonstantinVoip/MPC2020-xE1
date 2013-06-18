@@ -1,11 +1,11 @@
 #driver name
 #TARGET = mpcdrv 
- TARGET = gianfar
+ TARGET =mpcgianfar
 
 
  
 
-   obj-m  += gianfar.o
+   obj-m  += mpcgianfar.o
  
   #obj-m  += mpcdrv.o
   #mpcdrv-objs := mpcdrvmain.o mpcdrvtest.o
@@ -14,7 +14,8 @@
   #mpcdrv-objs := pktgen.o
   #mpcdrv-objs := mpcdrvmain.o mpcdrvlbcnor.o mpcdrveth_ipv4.o mpcdrvtest.o
   #mpcdrv-objs := mpcdrvmain.o mpcdrvlbcCyclone.o mpcdrveth_ipv4.o mpcdrvtest.o 
-   mpcdrv-objs := gianfar.o
+  #mpcdrv-objs := gianfar.o mpcdrvlbcCyclone.o
+  mpcgianfar-objs := gianfar.o mpcdrvlbcCyclone.o
   
 
   
