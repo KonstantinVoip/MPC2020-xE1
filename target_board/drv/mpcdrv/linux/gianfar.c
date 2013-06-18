@@ -1,6 +1,6 @@
 /*
  * drivers/net/gianfar.c
- *
+ *...
  * Gianfar Ethernet Driver
  * This driver is designed for the non-CPM ethernet controllers
  * on the 85xx and 83xx family of integrated processors

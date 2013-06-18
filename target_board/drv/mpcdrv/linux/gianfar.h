@@ -1,6 +1,6 @@
 /*
  * drivers/net/gianfar.h
- *
+ *..
  * Gianfar Ethernet Driver
  * Driver for FEC on MPC8540 and TSEC on MPC8540/MPC8560
  * Based on 8260_io/fcc_enet.c
