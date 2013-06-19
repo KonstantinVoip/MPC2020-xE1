@@ -22,7 +22,7 @@
  *  RA 11 31 24.2
  *  Dec +69 19 52
  *  V 3.84
- *  B-V +1.62
+ *  B-V +1.62..
  *
  *  Theory of operation
  *

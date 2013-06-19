@@ -8,7 +8,7 @@
  * Author: Andy Fleming
  * Maintainer: Kumar Gala
  * Modifier: Sandeep Gopalpet <sandeep.kumar@freescale.com>
- *
+ *..
  * Copyright 2002-2010 Freescale Semiconductor, Inc.
  *
  * This program is free software; you can redistribute  it and/or modify it
