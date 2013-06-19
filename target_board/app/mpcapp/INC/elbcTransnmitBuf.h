@@ -76,8 +76,11 @@ void write_toPLIS_success8();
 
 
 //Prototype functions of HIGH Level/////////
-void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
-void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch);
+
+
+
+//void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
+//void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch);
 
 /////Next 32 transmit recieve _functions
 

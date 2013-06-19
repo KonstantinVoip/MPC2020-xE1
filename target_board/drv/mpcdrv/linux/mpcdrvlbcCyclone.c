@@ -61,7 +61,8 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-
+//#define TDM_DIRECTION0_WRITE_DEBUG 1
+#define TDM_DIRECTION0_READ_DEBUG  1
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -100,7 +101,7 @@ GENERAL NOTES
 struct map_info    *map; 
 
 /**************************************************************************************************
-Syntax:      	    SINT32 Cyc3Init();
+Syntax:      	    LocalBusCyc3_Init();
 
 Remarks:			This Function Init Cyclone3 device 
 
@@ -112,11 +113,13 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-SINT32 test_Cyc3Init()
+void LocalBusCyc3_Init()
 {
 	
-
-	printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
+    
+	printk("++LocalBusCyc3_Init()_120++\n\r");
+	
+	//printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
 	map = kzalloc(sizeof(*map), GFP_KERNEL);
 	if (!map) {printk(KERN_WARNING "Failed to allocate memory for MAP_INFO_Structure\n");
 	   		   return NULL;}
@@ -136,7 +139,7 @@ SINT32 test_Cyc3Init()
 	return STATUS_ERR;
 	}
 	
-return 1;
+   //return 1;
 }
 
 /**************************************************************************************************
@@ -211,12 +214,32 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	u16 i=0;
 	u16 value=0xeeee;
 	
+	
+#ifdef TDM_DIRECTION0_WRITE_DEBUG
+	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
+#endif	
+	   
+#ifdef TDM_DIRECTION0_WRITE_DEBUG
+	   for(i=0;i<in_size;i++)
+	   {	   
+	   printk("in_data = 0x%04x \n\r",in_buf[i]);  	    
+	   }
+#endif	
+	   
+#ifdef TDM_DIRECTION0_WRITE_DEBUG
+      printk("+++++++++++++++++++++++++++++++++++++++++++\n\r");  
+#endif	   
+	   
+	   
 	while (dannie30)
 	{
 		dannie30=plis_read16 (PLIS_ADDRESS30);	
 	}
 	
+	
+#ifdef TDM_DIRECTION0_WRITE_DEBUG	
 	printk("dannie30=%x\n\r",dannie30);
+#endif
 	
 	for(i=0;i<in_size+1;i++)
 	{
@@ -234,9 +257,9 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 }
 
 /**************************************************************************************************
-Syntax:      	   void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch
+Syntax:      	   void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 
-Remarks:			This Write to PLIS  address value. 
+Remarks:		   This Read from PLIS0 tdm direction  
 
    
 Return Value:	Returns 1 on success and negative value on failure.
@@ -281,7 +304,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
   
    dannie800=plis_read16 (PLIS_ADDRESS800);
    printk("dannie800=0x%x\n\r",dannie800);
-  
+   
    
    do
    {

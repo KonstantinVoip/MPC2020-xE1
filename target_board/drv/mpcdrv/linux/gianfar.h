@@ -1407,6 +1407,15 @@ static inline void gfar_read_filer(struct gfar_private *priv,unsigned int far, u
 	gfar_write(&regs->rqfpr, fpr);
 }
 
+////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
+extern void LocalBusCyc3_Init();
+ 
+extern void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
+extern void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch); 
+ 
+ 
+ 
+////////////////////////////////////////////////////////////////////////// 
 extern inline void lock_rx_qs(struct gfar_private *priv);
 extern inline void lock_tx_qs(struct gfar_private *priv);
 extern inline void unlock_rx_qs(struct gfar_private *priv);

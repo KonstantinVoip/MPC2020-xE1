@@ -125,12 +125,19 @@
 
 #define DEBUG_RECIEVE_VIRTUAL_ETHERNET
 #define DEBUG_TRANSMIT_VIRTUAL_ETHERNET
+#define DEBUG_IRQ_INTERRUPT
 
 
-//#define DEBUG_PHY_RECIEVE
+#define DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP 1
+#define DEBUG_GFAR_PROBE                     1
+#define DEBUG_STARTUP_GIANFAR                1
 
 
-#define DEBUG_PHY_TRANSMIT  1
+#define   DEBUG_PHY_RECIEVE    1
+
+
+
+//#define DEBUG_PHY_TRANSMIT  1
 
 
 
@@ -417,7 +424,52 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
     if (model && !strcasecmp(model, "KeTSEC"))
     {   	
     	//printk("++VIRTUAL_ETH_445+++ \n");
+    	LocalBusCyc3_Init();
     	printk("++gfar_parse_group_410_() model=%s+++++++\n",model);
+          
+    	  #ifdef DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP
+    	
+          addr = of_translate_address(np,of_get_address(np, 0, &size, NULL));
+    	  printk("++gfar_parse_group_410/of_translate_address() addr=0x%x\n\r",addr);
+    	  priv->gfargrp[priv->num_grps].regs = ioremap(addr, size); 
+    	 
+    	  
+    		if (!priv->gfargrp[priv->num_grps].regs)
+    			return -ENOMEM;
+
+    		priv->gfargrp[priv->num_grps].interruptTransmit =irq_of_parse_and_map(np, 0);
+
+    		/* If we aren't the FEC we have multiple interrupts */
+    		if (model && strcasecmp(model, "FEC")) 
+    		{
+    			printk("++FEC+++\n\r");
+    			priv->gfargrp[priv->num_grps].interruptReceive =irq_of_parse_and_map(np, 1);
+    			priv->gfargrp[priv->num_grps].interruptError = irq_of_parse_and_map(np,2);
+    			if (priv->gfargrp[priv->num_grps].interruptTransmit < 0 ||
+    				priv->gfargrp[priv->num_grps].interruptReceive < 0 ||
+    				priv->gfargrp[priv->num_grps].interruptError < 0) {
+    				return -EINVAL;
+    			}
+    		}
+    	  
+    		priv->gfargrp[priv->num_grps].grp_id = priv->num_grps;
+    			priv->gfargrp[priv->num_grps].priv = priv;
+    			spin_lock_init(&priv->gfargrp[priv->num_grps].grplock);
+    			if(priv->mode == MQ_MG_MODE) {
+    				queue_mask = (u32 *)of_get_property(np,"fsl,rx-bit-map", NULL);
+    				priv->gfargrp[priv->num_grps].rx_bit_map = queue_mask ?  *queue_mask :(DEFAULT_MAPPING >> priv->num_grps);
+    				queue_mask = (u32 *)of_get_property(np,"fsl,tx-bit-map", NULL);
+    				priv->gfargrp[priv->num_grps].tx_bit_map = queue_mask ? *queue_mask : (DEFAULT_MAPPING >> priv->num_grps);
+    			} else {
+    				priv->gfargrp[priv->num_grps].rx_bit_map = 0xFF;
+    				priv->gfargrp[priv->num_grps].tx_bit_map = 0xFF;
+    			}
+    	  
+    	  
+    	  
+    	  priv->num_grps++;
+          #endif 
+    	
     	return 0;	
     }
  #endif    
@@ -627,9 +679,9 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 
 	for (i = 0; i < priv->num_rx_queues; i++)
 	{
-		priv->rx_queue[i] = (struct gfar_priv_rx_q *)kmalloc(
-					sizeof (struct gfar_priv_rx_q), GFP_KERNEL);
-		if (!priv->rx_queue[i]) {
+		priv->rx_queue[i] = (struct gfar_priv_rx_q *)kmalloc(sizeof (struct gfar_priv_rx_q), GFP_KERNEL);
+		if (!priv->rx_queue[i]) 
+		{
 			err = -ENOMEM;
 			goto rx_alloc_failed;
 		}
@@ -692,8 +744,8 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 		priv->device_flags =
 			//FSL_GIANFAR_DEV_HAS_GIGABIT |           //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
-			FSL_GIANFAR_DEV_HAS_RMON |
-			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
+			FSL_GIANFAR_DEV_HAS_RMON ;//|
+			//FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	
 	if (model && !strcasecmp(model, "TSEC"))
 		priv->device_flags =
@@ -1444,24 +1496,30 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
     //printk("+++++++++++++++++gfar_probe__1436_Calculate RSTAT, TSTAT\n");
 	
 ///Add kosta driver comment!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
-if (count<3)
-{
+
+	
+	
+//if (count<3)
+//{
     
     // Calculate RSTAT, TSTAT, RQUEUE and TQUEUE values,
 	// also assign queues to groups 
+	
+#ifdef 	DEBUG_GFAR_PROBE 
+	
 	for (grp_idx = 0; grp_idx < priv->num_grps; grp_idx++)
 	{
 		priv->gfargrp[grp_idx].num_rx_queues = 0x0;
-		for_each_bit(i, &priv->gfargrp[grp_idx].rx_bit_map,
-				priv->num_rx_queues) {
+		for_each_bit(i, &priv->gfargrp[grp_idx].rx_bit_map,priv->num_rx_queues) 
+		{
 			priv->gfargrp[grp_idx].num_rx_queues++;
 			priv->rx_queue[i]->grp = &priv->gfargrp[grp_idx];
 			rstat = rstat | (RSTAT_CLEAR_RHALT >> i);
 			rqueue = rqueue | ((RQUEUE_EN0 | RQUEUE_EX0) >> i);
 		}
 		priv->gfargrp[grp_idx].num_tx_queues = 0x0;
-		for_each_bit (i, &priv->gfargrp[grp_idx].tx_bit_map,
-				priv->num_tx_queues) {
+		for_each_bit (i, &priv->gfargrp[grp_idx].tx_bit_map,priv->num_tx_queues)
+		{
 			priv->gfargrp[grp_idx].num_tx_queues++;
 			priv->tx_queue[i]->grp = &priv->gfargrp[grp_idx];
 			tstat = tstat | (TSTAT_CLEAR_THALT >> i);
@@ -1471,11 +1529,15 @@ if (count<3)
 		priv->gfargrp[grp_idx].tstat = tstat;
 		rstat = tstat =0;
 	}
-
+#endif 
+	
+	if (count<3)
+	{
 	gfar_write(&regs->rqueue, rqueue);
 	gfar_write(&regs->tqueue, tqueue);
-
-}//////////////////////End kosta komment
+	}
+	
+//}//////////////////////End kosta komment
 
     //printk(">>>>gfar_probe_1494|Net_fevice =%s<<<<\n\r",dev->name);
 
@@ -2644,7 +2706,13 @@ void gfar_configure_rx_coalescing(struct gfar_private *priv,unsigned long rx_mas
 		}
 	}
 }
+/**************************************************************************************************
+Syntax:      	    2710_static int register_grp_irqs(struct gfar_priv_grp *grp)
+Parameters:     	*grp
+Remarks:			Registered Interrupt for gianfar
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
+***************************************************************************************************/
 static int register_grp_irqs(struct gfar_priv_grp *grp)
 {
 	struct gfar_private *priv = grp->priv;
@@ -2655,21 +2723,37 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	int cpus = num_online_cpus();
 	struct cpumask cpumask_msg_intrs;
 #endif
-
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	
+#ifdef  DEBUG_IRQ_INTERRUPT
+	
+	    printk("++register_grp_irqs_2674_()=%s|grp=%s ++\n\r",dev->name,grp->int_name_er);
+	
+#endif 	
+	
+	
+	
 	/* If the device has multiple interrupts, register for
 	 * them.  Otherwise, only register for the one */
-	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_MULTI_INTR) {
-		/* Install our interrupt handlers for Error,
-		 * Transmit, and Receive */
-		if ((err = request_irq(grp->interruptError, gfar_error, 0,
-				grp->int_name_er,grp)) < 0) {
+	if (priv->device_flags & FSL_GIANFAR_DEV_HAS_MULTI_INTR)
+	{
+		
+		#ifdef DEBUG_IRQ_INTERRUPT
+	    printk("++register_grp_irqs_2674_()/HAS_MULTI_INTR=0x%x ++\n\r",priv->device_flags);
+		#endif 
+		
+		/* Install our interrupt handlers for Error, * Transmit, and Receive */
+		if ((err = request_irq(grp->interruptError, gfar_error, 0,grp->int_name_er,grp)) < 0) 
+		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptError);
 				goto err_irq_fail;
 		}
 
-		if ((err = request_irq(grp->interruptTransmit, gfar_transmit,
-				0, grp->int_name_tx, grp)) < 0) {
+		if ((err = request_irq(grp->interruptTransmit, gfar_transmit,0, grp->int_name_tx, grp)) < 0) 
+		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto tx_irq_fail;
@@ -2681,9 +2765,15 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptReceive);
 			goto rx_irq_fail;
 		}
-	} else {
-		if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,
-				grp->int_name_tx, grp)) < 0) {
+	} 
+	else 
+	{
+		
+		#ifdef DEBUG_IRQ_INTERRUPT
+	    printk("++register_grp_irqs_2674_()/HAS_ONE_INTR=0x%x ++\n\r",priv->device_flags);
+		#endif
+		if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
+		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
@@ -2728,10 +2818,14 @@ vtx_irq_fail:
 #endif
 rx_irq_fail:
 	free_irq(grp->interruptTransmit, grp);
+	printk("???register_grp_irqs/rx_irq_fail???\n\r");
 tx_irq_fail:
 	free_irq(grp->interruptError, grp);
+	printk("???register_grp_irqs/tx_irq_fail???\n\r"); 
+	
 err_irq_fail:
-	return err;
+	printk("???register_grp_irqs/err_irq_fail???\n\r"); 
+    return err;
 
 }
 
@@ -2801,14 +2895,63 @@ int startup_gfar(struct net_device *dev)
    
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	   {
+		
+		
+		#ifdef  DEBUG_STARTUP_GIANFAR
+		
+		priv->total_tx_ring_size = 0;
+		for (i = 0; i < priv->num_tx_queues; i++)
+			priv->total_tx_ring_size += priv->tx_queue[i]->tx_ring_size;
+
+		priv->total_rx_ring_size = 0;
+		for (i = 0; i < priv->num_rx_queues; i++)
+			priv->total_rx_ring_size += priv->rx_queue[i]->rx_ring_size;
+
 		/* Allocate memory for the buffer descriptors */
-		   vaddr = 0;//alloc_bds(priv, &addr);
+		vaddr = alloc_bds(priv, &addr);
+		printk("++vaddr=0x%x++\n\r",vaddr);
+		if (vaddr == 0) 
+		{
+			if (netif_msg_ifup(priv))
+				printk(KERN_ERR "%s: Could not allocate buffer descriptors!\n",dev->name);
+			return -ENOMEM;
+		}
+		
+		
+		
+		for (i = 0; i < priv->num_grps; i++)
+		{
+			err = register_grp_irqs(&priv->gfargrp[i]);
+			if (err)
+			{
+				for (j = 0; j < i; j++)
+					free_grp_irqs(&priv->gfargrp[j]);
+				goto irq_fail;
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		#endif 		
+		
+		
+		
+		
+		
+		/* Allocate memory for the buffer descriptors */
+		   //vaddr = 0;//alloc_bds(priv, &addr);
 		 // region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
 		 // printk("allocate_reg_size2744\n\r");
 		   phy_start(priv->phydev);
 		 //vaddr = alloc_bds(priv, &addr);
 		 //printk("allocate_vaddr_2744\n\r"); 
-		 gfar_start(dev);
+		   gfar_start(dev);
 		 //phy_start(priv->phydev);
 
 		 
@@ -3308,40 +3451,31 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	       {
 			
-	    	length=skb->len;
-	    	in_high_level_data=skb->data;
-	    	printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",length);
-	    	
+	    	/////////GO TO THE Cyclone 3 PLIS///////////
+	    	Tdm_Direction0_write (skb->data ,skb->len,32);
+	    	//length=skb->len;
+	    	//in_high_level_data=skb->data;
+	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",length)
+	    	/*
 	    	for(i=0;i<20;i++)
 	    	{
-	    		
-	    		printk("data =0x%x\n\r",in_high_level_data[i]);
-	    		
+	    		printk("data =0x%x\n\r",in_high_level_data[i]);	
 	    	}
-	    	
-		    
+	    	*/
 			return;
 	       }
 	      
 	  
-	
-	
 	  	 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 			#ifdef DEBUG_PHY_TRANSMIT	
 		    printk("+gfar_start_xmit_skb->queue_mapping->>>>> rq=0x%x+\n\r",rq);
 		    #endif		
 		 }
-	
-	
+	     
 	  	 
 	  	 
-	  	 
-	  	 
-	  	 
-	
-	
-	   //blank for eth3 device ,phy ,eth0,eth1,eth2 ->OK
+	  	 //blank for eth3 device ,phy ,eth0,eth1,eth2 ->OK
 		 tx_queue = priv->tx_queue[rq];
 		 txq = netdev_get_tx_queue(dev, rq);
 		 base = tx_queue->tx_bd_base;
@@ -3389,8 +3523,6 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 }
 	
 	
-
-	
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	if (!priv->sps)
 #endif
@@ -3415,8 +3547,6 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	txq->tx_packets++;
 	txbdp = txbdp_start = tx_queue->cur_tx;
 
-	
-	
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 	  {	
         #ifdef DEBUG_PHY_TRANSMIT	
@@ -3424,11 +3554,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
         #endif		
 	  }
 	
-	
-	
-
-	
-	
+		
 	if (nr_frags == 0) 
 	{
 		lstatus = txbdp->lstatus | BD_LFLAG(TXBD_LAST | TXBD_INTERRUPT);
@@ -3474,8 +3600,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 		lstatus = txbdp_start->lstatus;
 		
-		
-		
+	
 		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 			 {
               #ifdef DEBUG_PHY_TRANSMIT	
@@ -3908,7 +4033,6 @@ static void gfar_timeout(struct net_device *dev)
 }
 
 
-
 /**************************************************************************************************
 Syntax:      	    3897_static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
 Parameters:     	*tx_queue
@@ -3941,7 +4065,9 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
 #endif
     
 	
+#ifdef DEBUG_PHY_TRANSMIT	
 	printk("++gfar_clean_tx_ring_3930()/name=%s ++\n\r",dev->name);
+#endif
 	
 	rx_queue = priv->rx_queue[tx_queue->qindex];
 	bdp = tx_queue->dirty_tx;
@@ -4046,6 +4172,12 @@ static void gfar_schedule_cleanup_tx(struct gfar_priv_grp *gfargrp)
 	spin_unlock_irqrestore(&gfargrp->grplock, flags);
 }
 #else
+/**************************************************************************************************
+Syntax:      	    4037_static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
+Parameters:     	*gfargrp
+Remarks:			
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+***************************************************************************************************/
 static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
 {
 	unsigned long flags;
@@ -4104,15 +4236,28 @@ static irqreturn_t gfar_transmit(int irq, void *grp_id)
 	return IRQ_HANDLED;
 }
 
+/**************************************************************************************************
+Syntax:      	    4095_static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,struct sk_buff *skb)
+Parameters:     	*rx_queue,*bdp,skb
+Remarks:			
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,struct sk_buff *skb)
 {
 	struct net_device *dev = rx_queue->dev;
 	struct gfar_private *priv = netdev_priv(dev);
 	u32 lstatus;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
 	
 
 #ifdef DEBUG_PHY_RECIEVE	
-	   printk("+gfar_new_rxbdp_3751+\n\r");
+		if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		 //printk("+gfar_new_rxbdp_4115+=%s\n\r",dev->name);
+		 }
 #endif 
 	
 	
@@ -4258,7 +4403,7 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		 //#ifdef DEBUG_PHY_RECIEVE	
-		 printk("+gfar_new_skb_3885+\n\r");  
+		// printk("+gfar_new_skb_4256+\n\r");  
 		 //#endif 			
 		 }
 	
@@ -4354,15 +4499,23 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	unsigned char *data;
 	u16 len;
 	int ret;
-
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
 #ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_receive_wakeup_3964+\n\r");
+	
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		  printk("+gfar_receive_wakeup_4364+\n\r");
+		 }
 #endif 		
 	
 	/* get the first full descriptor */
-	while (!(bdp->status & RXBD_EMPTY)) {
+	while (!(bdp->status & RXBD_EMPTY))
+	{
 		rmb();
-		if (bdp->status & RXBD_ERR) {
+		if (bdp->status & RXBD_ERR)
+		{
 			printk(KERN_ERR "Wake up packet error!\n");
 			goto out;
 		}
@@ -4371,7 +4524,8 @@ static void gfar_receive_wakeup(struct net_device *dev)
 		len = bdp->length;
 		/* allocate the skb */
 		skb = netdev_alloc_skb(dev, len);
-		if (!skb) {
+		if (!skb) 
+		{
 			dev->stats.rx_dropped++;
 			priv->extra_stats.rx_skbmissing++;
 			goto out;
@@ -4413,6 +4567,16 @@ out:
 	rx_queue->cur_rx = bdp;
 }
 
+
+
+
+/**************************************************************************************************
+Syntax:      	    4429_irqreturn_t gfar_receive(int irq, void *grp_id)
+Parameters:     	irq,*grp_id
+Remarks:			
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 irqreturn_t gfar_receive(int irq, void *grp_id)
 {
 	struct gfar_priv_grp *gfargrp = grp_id;
@@ -4420,21 +4584,21 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	struct gfar_private *priv = gfargrp->priv;
 	struct net_device *dev = priv->ndev;
 	u32 ievent;
-	
-	
+	const char *virt_dev=0;
+	virt_dev=dev->name;
 
 #ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_receive_4058+\n\r");
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		  printk("+gfar_receive_4446+= %s\n\r",dev->name);	
+		 } 
 #endif 		
-	
-	
-	
-
 	
 	
 	ievent = gfar_read(&regs->ievent);
 
-	if ((ievent & IEVENT_FGPI) == IEVENT_FGPI) {
+	if ((ievent & IEVENT_FGPI) == IEVENT_FGPI) 
+	{
 		gfar_write(&regs->ievent, ievent & IEVENT_RX_MASK);
 		gfar_receive_wakeup(dev);
 		return IRQ_HANDLED;
@@ -4460,18 +4624,30 @@ static inline void gfar_rx_checksum(struct sk_buff *skb, struct rxfcb *fcb)
 }
 
 
-/* gfar_process_frame() -- handle one incoming packet if skb
- * isn't NULL.  */
+/**************************************************************************************************
+Syntax:      	    4489_static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull)
+Parameters:     	*tx_queue
+Remarks:			gfar_process_frame() -- handle one incoming packet if skb isn't NULL.
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	struct rxfcb *fcb = NULL;
-
 	int ret;
+	const char *virt_dev=0;
+	virt_dev=dev->name;
 	
 	
 #ifdef 	DEBUG_PHY_RECIEVE
-	printk("+gfar_process_frame_4063+\n\r");
+	  
+	
+	     if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		  printk("+gfar_process_frame_4505+\n\r");
+		 }
+
 #endif	
 	
 	
@@ -4518,10 +4694,14 @@ static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int am
 	return 0;
 }
 
-/* gfar_clean_rx_ring() -- Processes each frame in the rx ring
- *   until the budget/quota has been reached. Returns the number
- *   of frames handled
- */
+/**************************************************************************************************
+Syntax:      	    4563_int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
+Parameters:     	*rx_queue,rx_work_limit
+Remarks:			Processes each frame in the rx ring until the budget/quota has been reached. Returns the number
+                    of frames handled
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
 int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 {
 	struct net_device *dev = rx_queue->dev;
@@ -4546,12 +4726,12 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 	int temp;
 #endif
 #endif
+	const char *virt_dev=0;
+	virt_dev=dev->name;
 	
-	
-	
-#ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_clean_rx_ring_4135+\n\r");
-#endif 	
+//#ifdef DEBUG_PHY_RECIEVE	
+	//printk("+gfar_clean_rx_ring_4135+\n\r");
+//#endif 	
 	
 	
 	
@@ -4645,7 +4825,8 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 			rx_queue->stats.rx_packets++;
 			howmany++;
 
-			if (likely(skb)) {
+			if (likely(skb)) 
+			{
 				pkt_len = bdp->length - ETH_FCS_LEN;
 				/* Remove the FCS from the packet length */
 				skb_put(skb, pkt_len);
@@ -4671,7 +4852,9 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 #else
 				gfar_process_frame(dev, skb, amount_pull);
 #endif
-			} else {
+			} 
+			else
+			{
 				if (netif_msg_rx_err(priv))
 					printk(KERN_WARNING
 					       "%s: Missing skb!\n", dev->name);
@@ -4690,9 +4873,7 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 		bdp = next_bd(bdp, base, rx_queue->rx_ring_size);
 
 		/* update to point at the next skb */
-		rx_queue->skb_currx =
-		    (rx_queue->skb_currx + 1) &
-		    RX_RING_MOD_MASK(rx_queue->rx_ring_size);
+		rx_queue->skb_currx = (rx_queue->skb_currx + 1) & RX_RING_MOD_MASK(rx_queue->rx_ring_size);
 	}
 
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
@@ -4738,7 +4919,10 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 	rx_queue->cur_rx = bdp;
 	
 #ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_clean_rx_ring_4316=%d frame\n\r",howmany);
+	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+		 {
+		  printk("+gfar_clean_rx_ring_4787()/frame=%d \n\r",howmany);	
+		 }	
 #endif
 	
 	return howmany;
@@ -4901,10 +5085,11 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	u32 rstat, rstat_local, rstat_rhalt = 0;
 
 	
+/*	
 #ifdef DEBUG_PHY_RECIEVE	
-	printk("+gfar_poll_4474+\n\r");
+	printk("+gfar_poll_4954+\n\r");
 #endif 		
-	
+*/	
 	
 	
 	
@@ -4917,7 +5102,8 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	rstat = rstat & RSTAT_RXF_ALL_MASK;
 	rstat_local = rstat;
 
-	while (rstat_local) {
+	while (rstat_local) 
+	{
 		num_act_qs++;
 		rstat_local &= (rstat_local - 1);
 	}
@@ -4928,25 +5114,28 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	gfar_write(&regs->ievent, IEVENT_RTX_MASK);
 
 	mask = TSTAT_TXF0_MASK;
-	for (i = 0; i < priv->num_tx_queues; i++) {
-		if (tstat & mask) {
+	for (i = 0; i < priv->num_tx_queues; i++)
+	{
+		if (tstat & mask)
+		{
 			tx_queue = priv->tx_queue[i];
-			if (spin_trylock_irqsave(&tx_queue->txlock, flags)) {
+			if (spin_trylock_irqsave(&tx_queue->txlock, flags)) 
+			{
 				tstat_thalt |= (TSTAT_CLEAR_THALT >> i);
 				tx_cleaned += gfar_clean_tx_ring(tx_queue);
-				spin_unlock_irqrestore(&tx_queue->txlock,
-								flags);
+				spin_unlock_irqrestore(&tx_queue->txlock,flags);
 			}
 		}
 		mask = mask >> 0x1;
 	}
 	mask =  RSTAT_RXF0_MASK;
-	for (i = 0; i < priv->num_rx_queues; i++) {
-		if (rstat & mask) {
+	for (i = 0; i < priv->num_rx_queues; i++) 
+	{
+		if (rstat & mask) 
+		{
 			rstat_rhalt |= (RSTAT_CLEAR_RHALT >> i);
 			rx_queue = priv->rx_queue[i];
-			rx_cleaned_per_queue = gfar_clean_rx_ring(rx_queue,
-							budget_per_queue);
+			rx_cleaned_per_queue = gfar_clean_rx_ring(rx_queue,budget_per_queue);
 			rx_cleaned += rx_cleaned_per_queue;
 		}
 		mask = mask >> 0x1;
@@ -4957,7 +5146,8 @@ static int gfar_poll(struct napi_struct *napi, int budget)
 	if (tx_cleaned)
 		return budget;
 
-	if (rx_cleaned < budget) {
+	if (rx_cleaned < budget) 
+	{
 		napi_complete(napi);
 
 		/* Clear the halt bit in RSTAT */
