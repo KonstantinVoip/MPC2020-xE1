@@ -629,10 +629,10 @@ static void free_SAs(struct pktgen_dev *pkt_dev)
 	}
 }
 
-static int process_ipsec(struct pktgen_dev *pkt_dev,
-			      struct sk_buff *skb, __be16 protocol)
+static int process_ipsec(struct pktgen_dev *pkt_dev,struct sk_buff *skb, __be16 protocol)
 {
-	if (pkt_dev->flags & F_IPSEC_ON) {
+	if (pkt_dev->flags & F_IPSEC_ON) 
+	{
 		struct xfrm_state *x = pkt_dev->flows[pkt_dev->curfl].x;
 		int nhead = 0;
 		if (x) {
@@ -1013,8 +1013,7 @@ static inline int f_pick(struct pktgen_dev *pkt_dev)
 
 
 
-static inline __be16 build_tci(unsigned int id, unsigned int cfi,
-			       unsigned int prio)
+static inline __be16 build_tci(unsigned int id, unsigned int cfi,unsigned int prio)
 {
 	return htons(id | (cfi << 12) | (prio << 13));
 }

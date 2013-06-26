@@ -134,7 +134,7 @@
 #define DEBUG_GFAR_PRIV_GRP                  1
 
 #define   DEBUG_PHY_RECIEVE    1
-//#define DEBUG_PHY_TRANSMIT  1
+#define   DEBUG_PHY_TRANSMIT  1
 
 
 
@@ -742,8 +742,8 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 		priv->device_flags =
 			//FSL_GIANFAR_DEV_HAS_GIGABIT |           //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
-			FSL_GIANFAR_DEV_HAS_RMON |
-			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
+			FSL_GIANFAR_DEV_HAS_RMON ;
+			//FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	
 	if (model && !strcasecmp(model, "TSEC"))
 		priv->device_flags =
@@ -2727,12 +2727,8 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	
 	
 #ifdef  DEBUG_IRQ_INTERRUPT
-	
-	    printk("++register_grp_irqs_2674_()=%s|grp=%s ++\n\r",dev->name,grp->int_name_er);
-	
+	    printk("++register_grp_irqs_2674_()=%s|grp=%s|=%d ++\n\r",dev->name,grp->int_name_er,grp->interruptTransmit);
 #endif 	
-	
-	
 	
 	/* If the device has multiple interrupts, register for
 	 * them.  Otherwise, only register for the one */
@@ -2772,12 +2768,24 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 		#ifdef DEBUG_IRQ_INTERRUPT
 	    printk("++register_grp_irqs_2674_()/HAS_ONE_INTR=0x%x ++\n\r",priv->device_flags);
 		#endif
-		if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
+		
+	    if ((err = request_irq(81, gfar_interrupt, 0,"ppc", NULL)) < 0) 
+			{
+				if (netif_msg_intr(priv))
+				printk(KERN_ERR "%s: Can't get IRQ %d,err=%d\n",dev->name, grp->interruptTransmit,err);
+				goto err_irq_fail;
+			}
+	    
+	    
+	    
+	    
+	    
+	    /*if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
 		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
-		}
+		}*/
 	}
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -2922,6 +2930,7 @@ int startup_gfar(struct net_device *dev)
 		for (i = 0; i < priv->num_grps; i++)
 		{
 			err = register_grp_irqs(&priv->gfargrp[i]);
+			
 			if (err)
 			{
 				for (j = 0; j < i; j++)
@@ -3457,12 +3466,12 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	
 	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	       {
-			
+	    	//enable_irq(81);
 	    	/////////GO TO THE Cyclone 3 PLIS///////////
-	    	Tdm_Direction0_write (skb->data ,skb->len,32);
+	    	 //Tdm_Direction0_write (skb->data ,skb->len,32);
 	    	//length=skb->len;
 	    	//in_high_level_data=skb->data;
-	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",length)
+	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
 	    	/*
 	    	for(i=0;i<20;i++)
 	    	{
@@ -4190,10 +4199,13 @@ static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
 	unsigned long flags;
 
 	spin_lock_irqsave(&gfargrp->grplock, flags);
-	if (napi_schedule_prep(&gfargrp->napi)) {
+	if (napi_schedule_prep(&gfargrp->napi)) 
+	{
 		gfar_write(&gfargrp->regs->imask, IMASK_RTX_DISABLED);
 		__napi_schedule(&gfargrp->napi);
-	} else {
+	} 
+	else 
+	{
 		/*
 		 * Clear IEVENT, so interrupts aren't called again
 		 * because of the packets that have already arrived.
@@ -4406,18 +4418,12 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	virt_dev=dev->name;
 	
 	
-	
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		 //#ifdef DEBUG_PHY_RECIEVE	
 		// printk("+gfar_new_skb_4256+\n\r");  
 		 //#endif 			
 		 }
-	
-	
-	
-	
-
 		
 	skb = netdev_alloc_skb(dev, priv->rx_buffer_size + RXBUF_ALIGNMENT);
 
@@ -4573,9 +4579,6 @@ out:
 	}
 	rx_queue->cur_rx = bdp;
 }
-
-
-
 
 /**************************************************************************************************
 Syntax:      	    4429_irqreturn_t gfar_receive(int irq, void *grp_id)
@@ -5209,22 +5212,26 @@ static void gfar_netpoll(struct net_device *dev)
 static irqreturn_t gfar_interrupt(int irq, void *grp_id)
 {
 	struct gfar_priv_grp *gfargrp = grp_id;
-
-	/* Save ievent for future reference */
+    
+#ifdef DEBUG_PHY_RECIEVE	
+		  printk("++gfar_interrupt()_5212+=grp_id =%x|irq=%x+++\n\r",grp_id,irq);	
+#endif 
+	
+	
+/*
+	// Save ievent for future reference 
 	u32 events = gfar_read(&gfargrp->regs->ievent);
-
-	/* Check for reception */
+	// Check for reception 
 	if (events & IEVENT_RX_MASK)
 		gfar_receive(irq, grp_id);
 
-	/* Check for transmit completion */
+	// Check for transmit completion 
 	if (events & IEVENT_TX_MASK)
 		gfar_transmit(irq, grp_id);
-
-	/* Check for errors */
+	// Check for errors 
 	if (events & IEVENT_ERR_MASK)
 		gfar_error(irq, grp_id);
-
+ */
 	return IRQ_HANDLED;
 }
 

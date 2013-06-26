@@ -83,6 +83,144 @@ struct fsl_lbc_regs __iomem    *lbc;
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
+static irqreturn_t local_interrupt(int irq, void *dev_id);
+static int my_dev_id,irq_counter=0;
+
+
+
+/**************************************************************************************************
+Syntax:      	  SINT32 p2020Init_irq()
+
+Remarks:		  This Function test size of loff_t and size_t lenght. 
+
+   
+Return Value:	  Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 p2020Init_irq()
+{
+	int err;
+	
+	if ((err = request_irq(81, local_interrupt, IRQF_SHARED,"test_ppc", &my_dev_id)) < 0) 
+		{
+		printk(KERN_ERR "Can't get IRQ ,err=%d\n",err);
+		}
+	
+	enable_irq(81);
+	
+	
+	
+return 1;
+}
+
+
+
+/**************************************************************************************************
+Syntax:      	  SINT32 p2020Exit_irq()
+
+Remarks:		  This Function test size of loff_t and size_t lenght. 
+
+   
+Return Value:	  Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+SINT32 p2020Exit_irq()
+{
+
+	synchronize_irq(81);
+	free_irq(81,&my_dev_id);
+	
+		    
+return 1;
+}
+
+
+
+
+
+/* The interrupt handler for devices with one interrupt */
+static irqreturn_t local_interrupt(int irq, void *grp_id)
+{
+
+	
+	//printk("get_urq%d\n\r",irq);
+	irq_counter++;
+	
+	printk("ISR =%d\n\r",irq_counter);
+
+	return IRQ_NONE; 
+	//return IRQ_HANDLED;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**************************************************************************************************
 Syntax:      	  SINT32  p2020test_loff_t_data(loff_t from, size_t len)

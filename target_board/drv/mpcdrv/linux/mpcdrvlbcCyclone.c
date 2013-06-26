@@ -214,6 +214,17 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	u16 i=0;
 	u16 value=0xeeee;
 	
+    enable_irq(81);
+    
+   // plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
+    
+    
+   // disable_irq(81);
+    
+#if 0	
+	
+	
+	
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
@@ -252,7 +263,7 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
 	
-	
+#endif 	
 	
 }
 

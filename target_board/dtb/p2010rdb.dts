@@ -380,6 +380,8 @@
 			compatible = "gianfar";
 			reg = <0x22000 0x1000>;
 			local-mac-address = [ 00 00 00 00 00 00 ];
+			interrupts = <81 2 82 2 84 2>;
+			interrupt-parent = <&mpic>;
 			fixed-link = <1 1 100 0 0>;
 			phy-connection-type = "rmii";
 		};

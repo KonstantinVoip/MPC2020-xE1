@@ -57,6 +57,9 @@ GENERAL NOTES
 #include <linux/cpufreq.h>
 #include <linux/of_platform.h>
 
+
+#include <asm/irq.h>
+#include <asm/hardirq.h>
 #include <asm/prom.h>
 #include <asm/time.h>
 #include <asm/reg.h>
@@ -122,7 +125,6 @@ static  size_t glen;
 //#define PMJCR		0x50D0   //
 //#define PMJCR     0xE00A0  //PVR Processor version register 0x80211040
 //#define PMJCR     0xE0070 
-  
 
 /* KERNEL MODULE HANDLING */
 static int mpcdrv_ioctl(struct inode*, struct file*, unsigned int, unsigned long);
@@ -441,21 +443,36 @@ u16 *in_buf=0;
 u16 *out_buf=0;
 u16 *out_size=0;
 u8  *out_num_of_tdm_ch=0;
-
+int err;
 //loff_t from=0x0000000000000000;
 //size_t len=0x000000100;
- address =5;
+ //address =5;
 //u16 lbc_buf[128];
 
-    printk("SUPER_MODULE_SET_Cyclone4_Lbc_Kosta_Revision\n\r");    
-	PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
+    //printk("SUPER_MODULE_SET_Cyclone5_Lbc_Kosta_Revision\n\r");    
+    
+
+    printk("init irq\n\r"); 
+    p2020Init_irq();
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //PRINTK(KERN_ALERT "mpcdrv: %s\n", "init_module");
 	/*
 	** We use the miscfs to register our device.
 	*/
 	//initialzate nor flash memory device.
 	//p2020TestBus();
 	
-	
+	//p2020Init_irq();
 	//test_Cyc3Init();
 	//Tdm_Direction0_write (in_buf , in_size,in_num_of_tdm_ch);
 	//Tdm_Direction0_read  (out_buf,out_size,out_num_of_tdm_ch);
@@ -494,13 +511,13 @@ u8  *out_num_of_tdm_ch=0;
 	// InitEthipv4drv();
 	/////////////////////////Initialize ethernet configurations/////////
 	
-	
+	/*
 	
 	if (misc_register(&mpcdrv_misc))
 	{
 		PRINTK(KERN_ALERT "mpcdrv: cannot register misc device\n");
 		return -EIO;
-	}
+	}*/
 	//pmjcr = ioremap(l_get_immrbase()+ PMJCR, 4);
 	return 0;
 }
@@ -516,11 +533,17 @@ Return Value:	    none
 void mpc_cleanup_module(void)
 {
 	
+	
+	printk("exit irq\n\r");
+	p2020Exit_irq();
+	//synchronize_irq(irq);
+	//free_irq(irq,&my_dev_id);
+	
 	//kthread_stop(tdm_thread_task);
 	
-	PRINTK(KERN_ALERT "mpcdrv: %s\n", "cleanup_module");
-	iounmap(pmjcr);
-	misc_deregister(&mpcdrv_misc);
+	//PRINTK(KERN_ALERT "mpcdrv: %s\n", "cleanup_module");
+	//iounmap(pmjcr);
+	//misc_deregister(&mpcdrv_misc);
 }
 
 /*****************************************************************************/

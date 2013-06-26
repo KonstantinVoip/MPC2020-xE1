@@ -68,6 +68,14 @@ SINT32 p2020TestBus(void);
 SINT32  MPCInitlocalBus(void);
 SINT32  MPCDumplocalbusreg(void);
 
+
+
+/*Register IRQ Functions*/
+SINT32 p2020Init_irq();
+SINT32 p2020Exit_irq();
+
+
+
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
