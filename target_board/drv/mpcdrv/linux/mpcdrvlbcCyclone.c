@@ -62,7 +62,7 @@ GENERAL NOTES
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
 //#define TDM_DIRECTION0_WRITE_DEBUG 1
-#define TDM_DIRECTION0_READ_DEBUG  1
+//#define TDM_DIRECTION0_READ_DEBUG  1
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -213,15 +213,9 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	u16 dannie30 =1;
 	u16 i=0;
 	u16 value=0xeeee;
-	
-    enable_irq(81);
+
     
-   // plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
-    
-    
-   // disable_irq(81);
-    
-#if 0	
+//#if 0	
 	
 	
 	
@@ -255,15 +249,15 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	for(i=0;i<in_size+1;i++)
 	{
 		
-		plis_write16(DIR0_ADDRESS_WRITE_DATA,value);
+		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 		
 		
 	}
-	
+
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
 	
-#endif 	
+//#endif 	
 	
 }
 

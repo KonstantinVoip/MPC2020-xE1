@@ -3468,7 +3468,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	       {
 	    	//enable_irq(81);
 	    	/////////GO TO THE Cyclone 3 PLIS///////////
-	    	 //Tdm_Direction0_write (skb->data ,skb->len,32);
+	    	 Tdm_Direction0_write (skb->data ,skb->len,32);
 	    	//length=skb->len;
 	    	//in_high_level_data=skb->data;
 	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
