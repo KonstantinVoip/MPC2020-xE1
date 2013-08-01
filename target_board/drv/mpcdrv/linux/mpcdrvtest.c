@@ -162,66 +162,6 @@ static irqreturn_t local_interrupt(int irq, void *grp_id)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	  SINT32  p2020test_loff_t_data(loff_t from, size_t len)
 
@@ -429,7 +369,6 @@ SINT32  MPCDumplocalbusreg(void)
 return STATUS_OK;
 
 }
-
 
 /*****************************************************************************/
 /*	PRIVATE FUNCTION DEFINITIONS					     */

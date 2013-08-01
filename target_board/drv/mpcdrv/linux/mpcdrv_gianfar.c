@@ -85,78 +85,8 @@ GENERAL NOTES
 
 //#include "gianfar.h"
 //#include "fsl_pq_mdio.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //#include "mpcdrveth_gianfar.h"
 
-
-
-/**************************************************************************************************
-Syntax:      	  SINT32 InitMpcGianfar()
-
-Remarks:		  Init function for module send Ipv4 Packet
-
-Return Value:	  Returns 1 on success and negative value on failure.
-
- 				Value		 									Description
-				-------------------------------------------------------------------------------------
-				= 1												Success
-				=-1												Failure
-***************************************************************************************************/
-SINT32 InitEthipv4drv()
-{
-int cpu;
-
-
-return 1;
-}
 
 
 

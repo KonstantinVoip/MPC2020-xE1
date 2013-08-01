@@ -916,7 +916,6 @@ static void spin(struct pktgen_dev *pkt_dev, ktime_t spin_until)
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-
 static inline void set_pkt_overhead(struct pktgen_dev *pkt_dev)
 {
 	pkt_dev->pkt_overhead = 0;
@@ -925,10 +924,8 @@ static inline void set_pkt_overhead(struct pktgen_dev *pkt_dev)
 	pkt_dev->pkt_overhead += SVLAN_TAG_SIZE(pkt_dev);
 }
 ///////////////////////////////////////////////////////////////////////////////////
-
 static void set_cur_queue_map(struct pktgen_dev *pkt_dev)
 {
-
 	if (pkt_dev->flags & F_QUEUE_MAP_CPU)
 		pkt_dev->cur_queue_map = smp_processor_id();
 
@@ -1383,24 +1380,18 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_de
 	
 	printk("iph->saddr=%x,iph->daddr=%x,skb->protocol\n\r",iph->saddr,iph->daddr,skb->protocol);
 	if (pkt_dev->nfrags <= 0) 
-	{
-		
+	{	
 		//printk("+++++pkt_dev->nfrags <= 0\n\r");
 		pgh = (struct pktgen_hdr *)skb_put(skb, datalen);
 		//printk("pgh =%p,datalen=%x \n\r",pgh,datalen);
 		//printk("summary=%x\n\r",datalen - sizeof(struct pktgen_hdr));
-		
 		memset(pgh + 1, 0, datalen - sizeof(struct pktgen_hdr));
-	
-	
 	} 
 	else 
 	{
 		int frags = pkt_dev->nfrags;
 		int i, len;
-
 		pgh = (struct pktgen_hdr *)(((char *)(udph)) + 8);
-
 		if (frags > MAX_SKB_FRAGS)
 			frags = MAX_SKB_FRAGS;
 		if (datalen > frags * PAGE_SIZE) 

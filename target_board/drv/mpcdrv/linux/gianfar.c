@@ -123,18 +123,18 @@
 //#define DEBUG_PHY_ETHERNET
 
 
-#define DEBUG_RECIEVE_VIRTUAL_ETHERNET
-#define DEBUG_TRANSMIT_VIRTUAL_ETHERNET
-#define DEBUG_IRQ_INTERRUPT
+//#define   DEBUG_RECIEVE_VIRTUAL_ETHERNET
+//#define   DEBUG_TRANSMIT_VIRTUAL_ETHERNET
+#define   DEBUG_IRQ_INTERRUPT      1
 
 
-#define DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP 1
-#define DEBUG_GFAR_PROBE                     1
-#define DEBUG_STARTUP_GIANFAR                1
-#define DEBUG_GFAR_PRIV_GRP                  1
+  #define   DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP 1
+//#define   DEBUG_GFAR_PROBE                     1
+//#define   DEBUG_STARTUP_GIANFAR                1
+//#define   DEBUG_GFAR_PRIV_GRP                  1
 
-#define   DEBUG_PHY_RECIEVE    1
-#define   DEBUG_PHY_TRANSMIT  1
+//#define   DEBUG_PHY_RECIEVE                    1
+//#define   DEBUG_PHY_TRANSMIT                   1
 
 
 
@@ -2927,6 +2927,7 @@ int startup_gfar(struct net_device *dev)
 		
 		//printk("++startup_gfar_2760_(i=%d)name=%s|gfargrp->name=%s++\n\r",i,dev->name,priv->gfargrp[0].int_name_er);
 		
+		
 		for (i = 0; i < priv->num_grps; i++)
 		{
 			err = register_grp_irqs(&priv->gfargrp[i]);
@@ -3472,13 +3473,13 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	    	//length=skb->len;
 	    	//in_high_level_data=skb->data;
 	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
-	    	/*
+	    	/*roo
 	    	for(i=0;i<20;i++)
 	    	{
 	    		printk("data =0x%x\n\r",in_high_level_data[i]);	
 	    	}
 	    	*/
-			return;
+	    	 return;
 	       }
 	      
 	  
@@ -3575,13 +3576,13 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	{
 		lstatus = txbdp->lstatus | BD_LFLAG(TXBD_LAST | TXBD_INTERRUPT);
 	
-		
+		/*
 		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 			#ifdef DEBUG_PHY_TRANSMIT	
 			printk("+gfar_start_xmit_3164_S_lstatus =%x+\n\r", lstatus);
             #endif 
-		 }
+		 }*/
 	
 	} 
 	else 
@@ -3677,7 +3678,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
       {	
 	     #ifdef DEBUG_PHY_TRANSMIT	
-	     printk("+gfar_start_xmit_txbdp_start->bufPtr=0x%x\n\r",txbdp_start->bufPtr);
+	     printk("+gfar_start_xmit|txbdp_start->bufPtr=0x%x,txbdp_start->lstatus=0x%x+\n\r",txbdp_start->bufPtr);
 		 #endif
       }
 	
@@ -4250,6 +4251,8 @@ static irqreturn_t gfar_transmit(int irq, void *grp_id)
 	}
 #endif
 #else
+	printk("++gfar_transmit_4253/irq=%d++\n\r",irq); 
+	
 	gfar_schedule_cleanup((struct gfar_priv_grp *)grp_id);
 #endif
 	return IRQ_HANDLED;

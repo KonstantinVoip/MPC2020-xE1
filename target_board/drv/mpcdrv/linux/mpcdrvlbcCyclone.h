@@ -71,7 +71,7 @@
 #define  PLIS_ADDRESS800  800
 #define  PLIS_ADDRESS1000 1000
 
-
+#define  PLIS_ADDRESS1200 1200    //this output size of ip packet
 
 
 /*****************************************************************************/

@@ -116,13 +116,13 @@ Return Value:	Returns 1 on success and negative value on failure.
 void LocalBusCyc3_Init()
 {
 	
-    
 	printk("++LocalBusCyc3_Init()_120++\n\r");
-	
 	//printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
 	map = kzalloc(sizeof(*map), GFP_KERNEL);
-	if (!map) {printk(KERN_WARNING "Failed to allocate memory for MAP_INFO_Structure\n");
-	   		   return NULL;}
+	if (!map) 
+	{
+		printk(KERN_WARNING "Failed to allocate memory for MAP_INFO_Structure\n");	   
+	return NULL;}
 	
 	map->name="Cyclone3";//dev_name(&dev->dev);
 	map->phys=0xef000000;//res.start;
@@ -147,8 +147,7 @@ Syntax:      	    UINT16 plis_read16 (const u16 addr)
 
 Remarks:			This Function wait for complete operations Read/Write. 
 
-   
-Return Value:	Returns 1 on success and negative value on failure.
+Return Value:	    Returns 1 on success and negative value on failure.
 
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -213,12 +212,12 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	u16 dannie30 =1;
 	u16 i=0;
 	u16 value=0xeeee;
-
+    static u16 iteration=0;
     
 //#if 0	
 	
-	
-	
+   printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iteration);
+   //iteration++;
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
@@ -248,10 +247,7 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	
 	for(i=0;i<in_size+1;i++)
 	{
-		
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
-		
-		
 	}
 
 	//WRITE to PLIS SUCCESS
@@ -287,9 +283,6 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
   {
 	  if(iteration<20)
 	  {
-		 
-	  
-	  
 	  dannie1000=plis_read16 (PLIS_ADDRESS1000);
 	  printk("+++visim dannie1000=0x%x\n\r",dannie1000);
       
@@ -304,8 +297,11 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
       
   }
 	
-   printk("dannie1000=0x%x\n\r",dannie1000);
   
+  
+  
+  
+   printk("dannie1000=0x%x\n\r",dannie1000);
   
    dannie800=plis_read16 (PLIS_ADDRESS800);
    printk("dannie800=0x%x\n\r",dannie800);
@@ -321,11 +317,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
    
 
 
-
-
 }
-
-
 
 
 /**************************************************************************************************
@@ -357,7 +349,6 @@ UINT16 y;
 
 return 1;
 }
-
 
 /**************************************************************************************************
 Syntax:      	    SINT32 Cyc3Write()

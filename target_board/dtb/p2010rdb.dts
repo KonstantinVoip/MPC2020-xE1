@@ -386,11 +386,6 @@
 			phy-connection-type = "rmii";
 		};
         
-        
-        
-
-
-
 		mpic: pic@40000 {
 			interrupt-controller;
 			#address-cells = <0>;
