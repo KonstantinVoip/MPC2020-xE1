@@ -49,6 +49,7 @@ GENERAL NOTES
 #include <linux/module.h> // Needed by all modules
 #include <linux/kernel.h> // Needed for KERN_ALERT
 #include <linux/init.h>   // Needed for the macros
+#include <linux/delay.h>  // mdelay ,msleep,
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
 #include <linux/ioctl.h>
@@ -83,8 +84,10 @@ extern void LocalBusCyc3_Init();
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
+#define DPRINT(fmt,args...) \
+	           printk(KERN_INFO "%s,%i:" fmt "\n",__FUNCTION__,__LINE__,##args);
 
-//////////////////////////////////////////
+
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -101,8 +104,9 @@ extern void LocalBusCyc3_Init();
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
-UINT16  tdm_thread_state;
-static struct task_struct *tdm_thread_task=NULL;
+UINT16  tdm_transmit_state,tdm_recieve_state ;
+static struct task_struct *tdm_transmit_task=NULL;
+static struct task_struct *tdm_recieve_task=NULL;
 
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
@@ -123,11 +127,19 @@ Remarks:
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static int tdm_thread(void *ptr)
+static int tdm_thread(void *data)
 {
 	tdm_thread_state =1;
 	
 	
+	
+	
+	while(1)
+	{
+		DPRINT("in kernel thread");
+		mdelay(500);msleep(1);
+		if (kthread_should_stop()) return 0;
+	}
 	
 	
 	
@@ -157,7 +169,7 @@ int mpc_init_module(void)
 	LocalBusCyc3_Init();
 	
 	tdm_thread_state =0;
-	
+	DPRINT("init_module() called\n");
 	tdm_thread_task=kthread_run(tdm_thread,NULL,"tdm_thread");
 	
 
@@ -174,8 +186,10 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	if(tdm_thread_state)
-	   kthread_stop(tdm_thread_task);
+	//if(tdm_thread_state)
+	   
+	DPRINT("exit_module() called\n");
+	kthread_stop(tdm_thread_task);
 	
 }
 

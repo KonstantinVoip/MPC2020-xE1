@@ -274,6 +274,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 {
   u16 dannie1000=0;
   u16 dannie800=0;
+  u16 dannie1200=0; 
   u16 plis_read_data=0;
   u16 i=0;		  
   u16 data_size=1;
@@ -284,8 +285,10 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 	  if(iteration<20)
 	  {
 	  dannie1000=plis_read16 (PLIS_ADDRESS1000);
-	  printk("+++visim dannie1000=0x%x\n\r",dannie1000);
-      
+
+#ifdef TDM_DIRECTION0_READ_DEBUG 	  
+	   printk("+++visim dannie1000=0x%x\n\r",dannie1000);
+#endif      
 	  iteration++;
 	  
 	  }  
@@ -298,20 +301,30 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
   }
 	
   
-  
-  
-  
+#ifdef TDM_DIRECTION0_READ_DEBUG 
    printk("dannie1000=0x%x\n\r",dannie1000);
-  
+#endif 
+   
+
+#ifdef TDM_DIRECTION0_READ_DEBUG    
    dannie800=plis_read16 (PLIS_ADDRESS800);
    printk("dannie800=0x%x\n\r",dannie800);
+#endif  
+  
    
+   dannie1200 = plis_read16 (PLIS_ADDRESS1200);
+   *out_size =  dannie1200; 
    
+  // #ifdef TDM_DIRECTION0_READ_DEBUG 
+   printk("dannie1200=0x%x\n\r",dannie1200);
+   //#endif  
    do
    {
 
 	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
+#ifdef TDM_DIRECTION0_READ_DEBUG	   
 	   printk("plis_read_data =0x%x\n\r",plis_read_data);
+#endif 	
 	   i++;
    }while( i< data_size+1);
    
