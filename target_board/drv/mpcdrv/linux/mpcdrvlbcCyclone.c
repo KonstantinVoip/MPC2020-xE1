@@ -61,7 +61,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-//#define TDM_DIRECTION0_WRITE_DEBUG 1
+  #define TDM_DIRECTION0_WRITE_DEBUG 1
 //#define TDM_DIRECTION0_READ_DEBUG  1
 
 /*****************************************************************************/
@@ -116,7 +116,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 void LocalBusCyc3_Init()
 {
 	
-	printk("++LocalBusCyc3_Init()_120++\n\r");
+	printk("++LocalBusCyc3_Init_func()_120++\n\r");
 	//printk("+++++++++++++++++++++Init MAP_INFO_Structure++++++++++++++++++++++++++\n\r");	
 	map = kzalloc(sizeof(*map), GFP_KERNEL);
 	if (!map) 
@@ -216,25 +216,27 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
     
 //#if 0	
 	
-   printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iteration);
-   //iteration++;
+printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iteration);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
 #endif	
 	   
+/*	   
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   for(i=0;i<in_size;i++)
 	   {	   
 	   printk("in_data = 0x%04x \n\r",in_buf[i]);  	    
 	   }
 #endif	
+*/   
 	   
+/*	   
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
       printk("+++++++++++++++++++++++++++++++++++++++++++\n\r");  
 #endif	   
-	   
-	   
+*/	
+    //Read dannie on LBC 30  
 	while (dannie30)
 	{
 		dannie30=plis_read16 (PLIS_ADDRESS30);	
@@ -245,14 +247,19 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 	printk("dannie30=%x\n\r",dannie30);
 #endif
 	
+	//Write dannie 
+	
 	for(i=0;i<in_size+1;i++)
 	{
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 	}
 
+	//Write dannie
+	
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
-	
+	iteration++;
+	printk("+++++++++++++++++++++++++++++++++++++++++++\n\r"); 
 //#endif 	
 	
 }
@@ -277,9 +284,12 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
   u16 dannie1200=0; 
   u16 plis_read_data=0;
   u16 i=0;		  
-  u16 data_size=1;
+  u16 data_size=0;
   u16 iteration=0;
   
+  
+  
+  //Read dannie
   while (!dannie1000)
   {
 	  if(iteration<20)
@@ -312,24 +322,36 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
 #endif  
   
    
+   //Read dannie 1200
+   
    dannie1200 = plis_read16 (PLIS_ADDRESS1200);
    *out_size =  dannie1200; 
    
   // #ifdef TDM_DIRECTION0_READ_DEBUG 
    printk("dannie1200=0x%x\n\r",dannie1200);
    //#endif  
+  
+   //Read dannie
    do
    {
+	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
+   #ifdef TDM_DIRECTION0_READ_DEBUG	   
+	   printk("plis_read_data =0x%x\n\r",plis_read_data);
+   #endif 	
+	   i++;
+   }while( i< dannie1200+1);
+   
 
+/*    
+   do
+   {
 	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
 #ifdef TDM_DIRECTION0_READ_DEBUG	   
 	   printk("plis_read_data =0x%x\n\r",plis_read_data);
 #endif 	
 	   i++;
    }while( i< data_size+1);
-   
-
-
+*/   
 }
 
 

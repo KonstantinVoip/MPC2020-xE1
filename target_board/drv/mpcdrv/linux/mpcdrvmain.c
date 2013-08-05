@@ -81,6 +81,9 @@ GENERAL NOTES
 /*External Header*/
 ////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
 extern void LocalBusCyc3_Init();
+extern void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
+extern void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch);
+
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -92,6 +95,9 @@ extern void LocalBusCyc3_Init();
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
+#define IN_PACKET_SIZE_DIRCTION0    256
+#define IN_NUM_OF_TDMCH_DIRECTION0   1
+
 
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
@@ -120,35 +126,55 @@ static struct task_struct *tdm_recieve_task=NULL;
 
 
 /**************************************************************************************************
-Syntax:      	    static int tdm_thread(void *ptr)
+Syntax:      	    static int tdm_transmit_task(void *ptr)
 Parameters:     	void *ptr
 Remarks:			 
 
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static int tdm_thread(void *data)
+static int tdm_transmit(void *data)
 {
-	tdm_thread_state =1;
-	
-	
+u16 *out_buf=0;
+u8  *out_size=0;
+u8  *out_num_of_tdm_ch=0;
+    while(1)
+	{
+    	
+		//Tdm_Direction0_write (test_full_packet_mas ,in_size,in_num_of_tdm_ch);							
+    	  Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
+    	  mdelay(500);msleep(1);
+		  Tdm_Direction0_read  (&out_buf,&out_size,&out_num_of_tdm_ch);
+		
+		
+		if (kthread_should_stop()) return 0;
+	}
+
+return 0;
+}
+
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_recieve(void *data)
+Parameters:     	void *ptr
+Remarks:			 
+
+Return Value:	    1  =>  Success  ,-1 => Failure
+
+***************************************************************************************************/
+static int tdm_recieve(void *data)
+{
 	
 	
 	while(1)
 	{
-		DPRINT("in kernel thread");
-		mdelay(500);msleep(1);
-		if (kthread_should_stop()) return 0;
+		//DPRINT("tdm_thread_recieve");
+		//mdelay(500);msleep(1);
+		//if (kthread_should_stop()) return 0;
 	}
 	
-	
-	
-	
-	tdm_thread_state =0;
 	return 0;
 }
-
-
 
 
 
@@ -167,11 +193,10 @@ int mpc_init_module(void)
 	** We use the miscfs to register our device.
 	*/
 	LocalBusCyc3_Init();
-	
-	tdm_thread_state =0;
-	DPRINT("init_module() called\n");
-	tdm_thread_task=kthread_run(tdm_thread,NULL,"tdm_thread");
-	
+
+	DPRINT("init_module_tdm() called\n");
+	tdm_transmit_task=kthread_run(tdm_transmit,NULL,"tdm_transmit");
+	//tdm_recieve_task= kthread_run(tdm_recieve,NULL,"tdm_trecieve");
 
 return 0;
 }
@@ -186,11 +211,10 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	//if(tdm_thread_state)
-	   
+   
 	DPRINT("exit_module() called\n");
-	kthread_stop(tdm_thread_task);
-	
+	kthread_stop(tdm_transmit_task);
+	//kthread_stop(tdm_recieve_task); 
 }
 
 
