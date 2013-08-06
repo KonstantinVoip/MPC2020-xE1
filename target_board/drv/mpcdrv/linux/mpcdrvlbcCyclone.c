@@ -211,17 +211,16 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 {
 	u16 dannie30 =1;
 	u16 i=0;
-	u16 value=0xeeee;
     static u16 iteration=0;
     
 //#if 0	
 	
-printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iteration);
+printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",iteration);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
 #endif	
-	   
+	   printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
 /*	   
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   for(i=0;i<in_size;i++)
@@ -244,7 +243,7 @@ printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iterati
 	
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG	
-	printk("dannie30=%x\n\r",dannie30);
+	//printk("dannie30=%x\n\r",dannie30);
 #endif
 	
 	//Write dannie 
@@ -259,7 +258,7 @@ printk("++++Tdm_Direction0_write= %d+++++++++++++++++++++++++++++++\n\r",iterati
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
 	iteration++;
-	printk("+++++++++++++++++++++++++++++++++++++++++++\n\r"); 
+	//printk("+++++++++++++++++++++++++++++++++++++++++++\n\r"); 
 //#endif 	
 	
 }
@@ -277,17 +276,17 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
+void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
 {
   u16 dannie1000=0;
   u16 dannie800=0;
   u16 dannie1200=0; 
-  u16 plis_read_data=0;
   u16 i=0;		  
-  u16 data_size=0;
   u16 iteration=0;
+  static u16 riteration=0;
+  u16 packet_size;
   
-  
+  printk("++++++++++++++++++++Tdm_Direction0_read = %d+++++++++++++++++\n\r",riteration);
   
   //Read dannie
   while (!dannie1000)
@@ -325,33 +324,28 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
    //Read dannie 1200
    
    dannie1200 = plis_read16 (PLIS_ADDRESS1200);
-   *out_size =  dannie1200; 
+   packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+   out_size_byte=512;//packet_size;
    
-  // #ifdef TDM_DIRECTION0_READ_DEBUG 
-   printk("dannie1200=0x%x\n\r",dannie1200);
-   //#endif  
+   out_num_of_tdm_ch=1;
+   
+   //printk("out_size=%d\n\r",out_size_byte);
+   #ifdef TDM_DIRECTION0_READ_DEBUG 
+   //printk("dannie1200=0x%x\n\r",dannie1200);
+   //printk("dannie1200=0x%x\n\r",out_size);
+   #endif  
   
-   //Read dannie
+   //Read dannie   
    do
    {
-	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
-   #ifdef TDM_DIRECTION0_READ_DEBUG	   
+	   out_buf[i]=plis_read16 (DIR0_ADDRESS_READ_DATA);  
+	   #ifdef TDM_DIRECTION0_READ_DEBUG	   
 	   printk("plis_read_data =0x%x\n\r",plis_read_data);
-   #endif 	
+       #endif 	   
 	   i++;
-   }while( i< dannie1200+1);
+   }while( i< packet_size+1);
    
-
-/*    
-   do
-   {
-	   plis_read_data=plis_read16 (DIR0_ADDRESS_READ_DATA);  
-#ifdef TDM_DIRECTION0_READ_DEBUG	   
-	   printk("plis_read_data =0x%x\n\r",plis_read_data);
-#endif 	
-	   i++;
-   }while( i< data_size+1);
-*/   
+   riteration++; 
 }
 
 

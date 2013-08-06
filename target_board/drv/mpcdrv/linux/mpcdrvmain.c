@@ -95,8 +95,8 @@ extern void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-#define IN_PACKET_SIZE_DIRCTION0    256
-#define IN_NUM_OF_TDMCH_DIRECTION0   1
+#define IN_PACKET_SIZE_DIRCTION0    256   //256 element = 512 bait
+#define IN_NUM_OF_TDMCH_DIRECTION0   1    
 
 
 /*****************************************************************************/
@@ -135,18 +135,17 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 static int tdm_transmit(void *data)
 {
-u16 *out_buf=0;
-u8  *out_size=0;
+u16  out_buf[759];//1518 bait;
+u16  out_size;
 u8  *out_num_of_tdm_ch=0;
     while(1)
-	{
-    	
-		//Tdm_Direction0_write (test_full_packet_mas ,in_size,in_num_of_tdm_ch);							
+	{							
     	  Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
-    	  mdelay(500);msleep(1);
-		  Tdm_Direction0_read  (&out_buf,&out_size,&out_num_of_tdm_ch);
-		
-		
+    	  mdelay(800);msleep(1);
+		  Tdm_Direction0_read  (out_buf,&out_size,&out_num_of_tdm_ch);
+		  
+		  printk("out_size=%d\n\r",out_size);
+		  printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
 		if (kthread_should_stop()) return 0;
 	}
 
