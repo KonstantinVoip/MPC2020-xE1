@@ -299,17 +299,12 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
 	   printk("+++visim dannie1000=0x%x\n\r",dannie1000);
 #endif      
 	  iteration++;
-	  
 	  }  
 	  else
 	  {
 	  break;
 	  }
-	  
-      
   }
-	
-  
 #ifdef TDM_DIRECTION0_READ_DEBUG 
    printk("dannie1000=0x%x\n\r",dannie1000);
 #endif 
@@ -322,9 +317,11 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
   
    
    //Read dannie 1200
-   
    dannie1200 = plis_read16 (PLIS_ADDRESS1200);
    packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+   
+   
+   
    out_size_byte=512;//packet_size;
    
    out_num_of_tdm_ch=1;

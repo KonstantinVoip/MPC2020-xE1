@@ -47,13 +47,14 @@ GENERAL NOTES
 /*	INCLUDES							     */
 /*****************************************************************************/
 
-#include <stdio.h>						 /* snprintf */
-#include <stdlib.h>					     /* malloc, free */
-#include <string.h>					     /* memset, strncmp */
+//#include <stdio.h>						 /* snprintf */
+//#include <stdlib.h>					     /* malloc, free */
+//#include <string.h>					     /* memset, strncmp */
 
+//#include <sys/types.h>
+//#include <sys/stat.h>
 
-
-#include <mpcapp_user.h> /* user support functions */
+//#include <mpcapp_user.h> /* user support functions */
 
 
 /*****************************************************************************/
@@ -69,7 +70,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
-static void print_usage(char *name);
+
 
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
@@ -103,54 +104,13 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 int main(int argc, char **argv)
 {
-	int result = 0;
-	//printf("Help menu p2020router\n\r");
-    // start application, no additional parameters 
-    result = mpcapp_Start(NULL);
-		
-/*		
-	while(--argc) 
-    {
-		if(strncmp(argv[argc], "-?", 32) == 0) 
-		{
-		printf("Help menu p2020router\n\r");
-		result = 1;
-		}
-		else if(strncmp(argv[argc], "\dbg", 32) == 0)
-		{
-		// result 
-	    // start application, no additional parameters 
-	    result = mpcapp_Start(NULL);
-		}
-		else 
-		{
-		printf("%s: unknown option '%s'\n",argv[0], argv[argc]);
-		print_usage(argv[0]);
-		return(-1);
-		}
-	}
-*/   
 
-return(result);
+	
+//printf("START_APPLICATION\n\r");	
+	
+
+return 0;
 }
 
-/*****************************************************************************/
-/*	PRIVATE FUNCTION DEFINITIONS					     */
-/*****************************************************************************/
-/*---------------------------------------------------------------------------*
-Function:	print usage
-Parameters:	name: application's name
-Return:		none
-*----------------------------------------------------------------------------*/
-static void print_usage(char *name)
-{
 
-	if(!name)
-		name = "mpcapp";
-    
-	printf("Example usage: %s [-?] | [\dbg] \n", name);
-	printf(" dbg, Start Main debug menu p2020 \n");
-	printf(" -? , print help and exit\n");
-    
-}
 

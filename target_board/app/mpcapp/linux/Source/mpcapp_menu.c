@@ -148,7 +148,7 @@ a++;
 
 //If Debugging is on =1 
 #ifdef DEBUGGING 
-req = user_par("------>", 0);
+//req = user_par("------>", 0);
 #endif
 
 
@@ -203,7 +203,7 @@ else
 	 }
 
 }
-req = user_par("------>", 0);
+//req = user_par("------>", 0);
 
 return 1;
 }
@@ -240,7 +240,7 @@ SINT32 mpcapp_create_MainMenu(void)
 	    
 	    
 #ifdef DEBUGGING	   
- req = user_par("->", 0);
+ //req = user_par("->", 0);
 #endif        
 		
 		switch(req) {
