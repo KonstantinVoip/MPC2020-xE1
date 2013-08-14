@@ -143,6 +143,55 @@ void LocalBusCyc3_Init()
 }
 
 /**************************************************************************************************
+Syntax:      	    UINT16 TDM0_direction_READ_READY(void)
+
+Remarks:			 
+
+Return Value:	    Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM0_direction_READ_READY(void)
+{
+ u16 dannie1000;
+ 
+ dannie1000=plis_read16 (PLIS_ADDRESS1000);
+ //#ifdef TDM_DIRECTION0_READ_DEBUG 
+   printk("dannie1000=0x%x\n\r",dannie1000);
+ //#endif 
+ if(dannie1000==0xabc1) return 1;
+ else return 0;
+ 
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM0_direction_WRITE_READY(void)
+
+Remarks:			 
+
+Return Value:	    Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM0_direction_WRITE_READY(void)
+{
+ u16 dannie30;
+	
+ dannie30=plis_read16 (PLIS_ADDRESS30);
+ #ifdef TDM_DIRECTION0_WRITE_DEBUG	
+	printk("dannie30=%x\n\r",dannie30);
+ #endif
+ if (dannie30 ==0) return 1; //WRITE READY
+ else return 0;
+ 
+}
+
+/**************************************************************************************************
 Syntax:      	    UINT16 plis_read16 (const u16 addr)
 
 Remarks:			This Function wait for complete operations Read/Write. 
@@ -236,23 +285,30 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",itera
 #endif	   
 */	
     //Read dannie on LBC 30  
+
+	/*
 	while (dannie30)
 	{
 		dannie30=plis_read16 (PLIS_ADDRESS30);	
 	}
-	
+	*/
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG	
 	//printk("dannie30=%x\n\r",dannie30);
 #endif
 	
-	//Write dannie 
 	
+	   //Read dannie   
+	   //memcpy(out_buf,in_buf,in_size+1);   
+	   
+	   
+	  
+	//Write dannie 
 	for(i=0;i<in_size+1;i++)
 	{
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 	}
-
+    
 	//Write dannie
 	
 	//WRITE to PLIS SUCCESS
@@ -278,7 +334,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
 {
-  u16 dannie1000=0;
+  //u16 dannie1000=0;
   u16 dannie800=0;
   u16 dannie1200=0; 
   u16 i=0;		  
@@ -289,6 +345,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
   printk("++++++++++++++++++++Tdm_Direction0_read = %d+++++++++++++++++\n\r",riteration);
   
   //Read dannie
+  /*
   while (!dannie1000)
   {
 	  if(iteration<20)
@@ -308,7 +365,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
 #ifdef TDM_DIRECTION0_READ_DEBUG 
    printk("dannie1000=0x%x\n\r",dannie1000);
 #endif 
-   
+  */   
 
 #ifdef TDM_DIRECTION0_READ_DEBUG    
    dannie800=plis_read16 (PLIS_ADDRESS800);
@@ -333,6 +390,9 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
    #endif  
   
    //Read dannie   
+   //memcpy(out_buf,plis_read16 (DIR0_ADDRESS_READ_DATA),out_size_byte);
+   
+   
    do
    {
 	   out_buf[i]=plis_read16 (DIR0_ADDRESS_READ_DATA);  
@@ -341,7 +401,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
        #endif 	   
 	   i++;
    }while( i< packet_size+1);
-   
+   printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
    riteration++; 
 }
 

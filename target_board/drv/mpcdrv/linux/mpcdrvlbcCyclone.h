@@ -88,6 +88,19 @@ SINT32 test_Cyc3Write();
 UINT16 plis_read16 (const u16 addr);
 void   plis_write16(const u16 addr,const u16 value);
 
+
+//Functions read_data_on Local_bus _ready
+UINT16 TDM0_direction_READ_READY(void);
+UINT16 TDM1_direction_READ_READY(void);
+UINT16 TDM2_direction_READ_READY(void);
+
+//Functions write_data_on_Local_bus _ready
+UINT16 TDM0_direction_WRITE_READY(void);
+UINT16 TDM1_direction_WRITE_READY(void);
+UINT16 TDM2_direction_WRITE_READY(void);
+
+
+
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
