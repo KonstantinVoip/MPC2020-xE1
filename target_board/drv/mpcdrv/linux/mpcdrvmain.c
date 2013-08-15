@@ -78,7 +78,9 @@ GENERAL NOTES
 
 //#include "mpcdrvtest.h"
 //#include "mpcdrvlbcnor.h"
-#include "mpcdrvlbcCyclone.h" 
+#include "mpcdrvlbcCyclone.h"  //P2020 Local bus <->PLIS  API function
+#include "mpcdrv_gianfar.h"    //P2020 Ethernet tsec <->  API function
+ *
 //#include "mpcdrveth_ipv4.h"
 
 /*External Header*/
@@ -146,11 +148,6 @@ static inline ktime_t ktime_now(void)
 
 
 
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	    void timer1_routine(unsigned long data)
 Parameters:     	void data
@@ -209,9 +206,6 @@ UINT16 lbcwrite_state;
 
 
 }
-
-
-
 
 
 
@@ -283,12 +277,17 @@ int mpc_init_module(void)
 	/*
 	** We use the miscfs to register our device.
 	*/
-	LocalBusCyc3_Init();   //__Initialization Local bus 
-
+	//LocalBusCyc3_Init();   //__Initialization Local bus 
+	  InitIp_Ethernet() ;    //__Initialization P2020Ethernet
+	
+	
+	
+	
 	DPRINT("init_module_tdm() called\n");
 	//TIMER INITIALIZATION
 	//mdelay(600);
 	
+	/*
 	//Timer1
 	init_timer(&timer1);
 	timer1.function = timer1_routine;
@@ -302,7 +301,7 @@ int mpc_init_module(void)
 	
 	add_timer(&timer1);  //Starting the timer1
 	add_timer(&timer2);  //Starting the timer2
-	
+	*/
 	//Task module
 	//tdm_transmit_task=kthread_run(tdm_transmit,NULL,"tdm_transmit");
 	//tdm_recieve_task= kthread_run(tdm_recieve,NULL,"tdm_trecieve");

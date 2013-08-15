@@ -92,7 +92,26 @@ GENERAL NOTES
 #include "mpcdrv_gianfar.h"
 
 
+/**************************************************************************************************
+Syntax:      	    InitIp_Ethernet()
+Parameters:     	
+Remarks:			Initialize ethernet tsec1,tsec2,tsec3 function
 
+Return Value:	    
+
+***************************************************************************************************/
+InitIp_Ethernet()
+{
+//Имена наших device "eth0"<->Tsec 1 ,"eth1"<->Tsec 2,"eth2"<->Tsec 3
+//const char *ifname="eth0";
+ const char *ifname="eth2"; 
+	
+	
+ //Get and open ethernet device
+ 
+ 
+	
+}
 
 
 
