@@ -1734,14 +1734,12 @@ static void pktgen_xmit(struct pktgen_dev *pkt_dev)
 	struct netdev_queue *txq;
 	u16 queue_map;
 	int ret;
-    
+   
 	
 	printk("pkt_dev->odev =%p\n\r",pkt_dev->odev);
- 
     /////////////////////////////////////////////
 	//printk("pkt_dev->odev =%p\n\r",pkt_dev->odev);
     printk("returning %s rx_packet=%x \n\r",odev->name,odev->stats.rx_packets);
-	
 	
 	//
 	//////////////////Create and Fill packet to Send///////////////

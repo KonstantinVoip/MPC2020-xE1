@@ -188,7 +188,6 @@ UINT16 TDM0_direction_WRITE_READY(void)
  #endif
  if (dannie30 ==0) return 1; //WRITE READY
  else return 0;
- 
 }
 
 /**************************************************************************************************
@@ -256,7 +255,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch)
+void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 dannie30 =1;
 	u16 i=0;
@@ -267,7 +266,7 @@ void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_
 printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",iteration);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
-	   printk("in_size=%d |in_num_of_tdm_ch = %d\n\r",in_size,in_num_of_tdm_ch);  	    
+	   printk("in_size=%d \n\r",in_size);  	    
 #endif	
 	   printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
 /*	   
@@ -332,7 +331,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
+void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte)
 {
   //u16 dannie1000=0;
   u16 dannie800=0;
@@ -381,7 +380,7 @@ void Tdm_Direction0_read  (u16 *out_buf,u16 out_size_byte,u8 *out_num_of_tdm_ch)
    
    out_size_byte=512;//packet_size;
    
-   out_num_of_tdm_ch=1;
+   //out_num_of_tdm_ch=1;
    
    //printk("out_size=%d\n\r",out_size_byte);
    #ifdef TDM_DIRECTION0_READ_DEBUG 

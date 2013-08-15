@@ -40,6 +40,7 @@
 
 /*****************************************************************************/
 /*	INCLUDES							     */
+/*
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/string.h>
@@ -63,6 +64,7 @@
 #include <linux/crc32.h>
 #include <linux/workqueue.h>
 #include <linux/ethtool.h>
+*/
 
 #ifdef CONFIG_GIANFAR_L2SRAM
 #include <asm/fsl_85xx_cache_sram.h>

@@ -37,6 +37,8 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	INCLUDES							     */
 /*****************************************************************************/
+
+/*
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/errno.h>
@@ -82,10 +84,12 @@ GENERAL NOTES
 #include <net/ip.h>
 #include <linux/jhash.h>
 #endif
+*/
+
 
 //#include "gianfar.h"
 //#include "fsl_pq_mdio.h"
-//#include "mpcdrveth_gianfar.h"
+#include "mpcdrv_gianfar.h"
 
 
 

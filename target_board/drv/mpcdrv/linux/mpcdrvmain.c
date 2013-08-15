@@ -83,10 +83,6 @@ GENERAL NOTES
 
 /*External Header*/
 ////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
-extern void LocalBusCyc3_Init();
-extern void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
-extern void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch);
-
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -179,8 +175,7 @@ u8  *out_num_of_tdm_ch=0;
 	lbcread_state=TDM0_direction_READ_READY();
 	if(lbcread_state==1)
 	{
-		
-		Tdm_Direction0_read (out_buf,&out_size,&out_num_of_tdm_ch);
+		TDM0_dierction_read  (out_buf,&out_size);
 		
 	}
 
@@ -200,7 +195,7 @@ void timer2_routine(unsigned long data)
 UINT16 lbcwrite_state;
 		
 	printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
-	mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
+	mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
 	ktime_now();
 	
 	
@@ -208,22 +203,12 @@ UINT16 lbcwrite_state;
 	lbcwrite_state=TDM0_direction_WRITE_READY();
     if(lbcwrite_state==1)
     {
-    	Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
+    	 TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
+  
     }
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -247,9 +232,9 @@ u16  out_size;
 u8  *out_num_of_tdm_ch=0;
     while(1)
 	{							
-    	  Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
+    	  //Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
     	  mdelay(800);msleep(1);
-		  Tdm_Direction0_read  (out_buf,&out_size,&out_num_of_tdm_ch);
+		  //Tdm_Direction0_read  (out_buf,&out_size,&out_num_of_tdm_ch);
 		  
 		  printk("out_size=%d\n\r",out_size);
 		  printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
@@ -295,7 +280,6 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 int mpc_init_module(void)
 {
 
-	
 	/*
 	** We use the miscfs to register our device.
 	*/
@@ -305,19 +289,16 @@ int mpc_init_module(void)
 	//TIMER INITIALIZATION
 	//mdelay(600);
 	
-	
 	//Timer1
 	init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
-	timer1.expires = jiffies + msecs_to_jiffies(2000);//HZ; // 1 second 
+	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	//Timer2
 	init_timer(&timer2);
 	timer2.function = timer2_routine;
 	timer2.data = 1;
-	timer2.expires = jiffies + msecs_to_jiffies(2000);//HZ; // 1 second
-	
-	
+	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	add_timer(&timer1);  //Starting the timer1
 	add_timer(&timer2);  //Starting the timer2
@@ -339,13 +320,10 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-   
-	del_timer_sync(&timer1); /* Deleting the timer */
-	del_timer_sync(&timer2); /* Deleting the timer */
+	del_timer_sync(&timer1);             /* Deleting the timer */
+	del_timer_sync(&timer2);             /* Deleting the timer */
 	DPRINT("exit_module() called\n");
-	
-	
-	//kthread_stop(tdm_transmit_task); //Stop Thread func
+	//kthread_stop(tdm_transmit_task);   //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }
 

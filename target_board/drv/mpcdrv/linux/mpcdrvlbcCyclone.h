@@ -55,9 +55,18 @@
  * this logical memory for read and write 
  */
 
+
+
+////////////PLIS_Direction0_DEFENITION////////////////////
+
+#define  PLIS_WRITE_SUCCESS               0x0003
+#define  DIR0_ADDRESS_WRITE_SUCCESS       30  //0x1E
+#define  DIR0_ADDRESS_WRITE_DATA          200 //0xC8
+#define  DIR0_ADDRESS_READ_DATA           400 //0x190
+
+
+
 ///////////DEFINE for GLOBAL PLIS CONFIGURATIONs
-
-
 #define PLIS_LINUX_START_DATA_OFFSET  0x0000000000000000
 #define PLIS_PHYSICAL_RESOURCE_START  0xef000000
 #define PLIS_PHYSICAL_RESOURCE_SIZE   0x01000000
@@ -77,7 +86,9 @@
 /*****************************************************************************/
 /*	PUBLIC DATA YPES						     */
 /*****************************************************************************/
-//SINT32 test_Cyc3Init();
+//Initialization function of Cyclon3 <-> P2020
+void LocalBusCyc3_Init();
+
 SINT32 test_Cyc3Read();
 SINT32 test_Cyc3Write();
 
@@ -87,6 +98,14 @@ SINT32 test_Cyc3Write();
 /*****************************************************************************/
 UINT16 plis_read16 (const u16 addr);
 void   plis_write16(const u16 addr,const u16 value);
+
+
+
+//Write Buffer to PLIS
+void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
+//Read Buffer from PLIS 
+void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+
 
 
 //Functions read_data_on Local_bus _ready
