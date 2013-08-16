@@ -2769,23 +2769,22 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	    printk("++register_grp_irqs_2674_()/HAS_ONE_INTR=0x%x ++\n\r",priv->device_flags);
 		#endif
 		
+	    /*
 	    if ((err = request_irq(81, gfar_interrupt, 0,"ppc", NULL)) < 0) 
 			{
 				if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d,err=%d\n",dev->name, grp->interruptTransmit,err);
 				goto err_irq_fail;
 			}
+	  
+	     */
 	    
-	    
-	    
-	    
-	    
-	    /*if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
+	    if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
 		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
-		}*/
+		}
 	}
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -3469,7 +3468,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	       {
 	    	//enable_irq(81);
 	    	/////////GO TO THE Cyclone 3 PLIS///////////
-	    	 Tdm_Direction0_write (skb->data ,skb->len,32);
+	    	 //Tdm_Direction0_write (skb->data ,skb->len,32);
 	    	//length=skb->len;
 	    	//in_high_level_data=skb->data;
 	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
@@ -4526,7 +4525,48 @@ static void gfar_receive_wakeup(struct net_device *dev)
 		 }
 #endif 		
 	
-	/* get the first full descriptor */
+	  
+	  /*
+	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	       {
+               //////////Socket_buffer_naverch//////////
+		       //allocate the skb
+	    	   //Get Data and Length
+	    	
+	    	
+	    	
+			   skb = netdev_alloc_skb(dev, len);
+			   if (!skb) 
+			   {
+				dev->stats.rx_dropped++;
+				priv->extra_stats.rx_skbmissing++;
+				goto out;
+			   }	
+				// copy received packet to skb buffer 
+				memcpy(skb->data, data, len);
+				// Prep the skb for the packet 
+				skb_put(skb, len);
+				// Tell the skb what kind of packet this is 
+				skb->protocol = eth_type_trans(skb, dev);
+
+				ret = netif_rx(skb);
+				if (NET_RX_DROP == ret) 
+				{
+					priv->extra_stats.kernel_dropped++;
+				} 
+				else 
+				{
+					// Increment the number of packets 
+					dev->stats.rx_packets++;
+					dev->stats.rx_bytes += len;
+				}
+			   
+	       }
+	  */
+	  
+	  
+	  
+	// get the first full descriptor 
 	while (!(bdp->status & RXBD_EMPTY))
 	{
 		rmb();
@@ -4538,7 +4578,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 
 		data = (u8 *)__wk_phy_to_virt(dev, bdp->bufPtr);
 		len = bdp->length;
-		/* allocate the skb */
+		// allocate the skb 
 		skb = netdev_alloc_skb(dev, len);
 		if (!skb) 
 		{
@@ -4546,23 +4586,23 @@ static void gfar_receive_wakeup(struct net_device *dev)
 			priv->extra_stats.rx_skbmissing++;
 			goto out;
 		}
-		/* The wake up packet has the FCB */
+		// The wake up packet has the FCB 
 		data += (GMAC_FCB_LEN + priv->padding);
 		len -= (GMAC_FCB_LEN + priv->padding);
-		/* remove the FCS from the packet length */
+		// remove the FCS from the packet length 
 		len -= 4;
-		/* copy received packet to skb buffer */
+		// copy received packet to skb buffer 
 		memcpy(skb->data, data, len);
-		/* Prep the skb for the packet */
+		// Prep the skb for the packet 
 		skb_put(skb, len);
-		/* Tell the skb what kind of packet this is */
+		// Tell the skb what kind of packet this is 
 		skb->protocol = eth_type_trans(skb, dev);
 
 		ret = netif_rx(skb);
 		if (NET_RX_DROP == ret) {
 			priv->extra_stats.kernel_dropped++;
 		} else {
-			/* Increment the number of packets */
+			// Increment the number of packets 
 			dev->stats.rx_packets++;
 			dev->stats.rx_bytes += len;
 		}

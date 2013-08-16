@@ -96,6 +96,8 @@
 /*****************************************************************************/
 #endif /* MPCDRVETHIPV4_H */
 
+
+//Start Ethernet Initialization
 void InitIp_Ethernet();
 
 

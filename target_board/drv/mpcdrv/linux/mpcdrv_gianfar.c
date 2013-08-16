@@ -86,32 +86,142 @@ GENERAL NOTES
 #endif
 */
 
+#include <linux/netdevice.h>
+#include <linux/etherdevice.h>
+#include <linux/skbuff.h>
+#include <linux/if_arp.h>
+#include <linux/if_vlan.h>
+#include <linux/in.h>
+#include <linux/ip.h>
+
+
+
+
 
 //#include "gianfar.h"
 //#include "fsl_pq_mdio.h"
 #include "mpcdrv_gianfar.h"
 
 
+
+
+static struct net_device *tsec_get_device_by_name(const char *ifname);
+static int tsec_get_device(const char *ifname);
+
+
+
+
+
+
+
+
 /**************************************************************************************************
-Syntax:      	    InitIp_Ethernet()
+Syntax:      	    void InitIp_Ethernet()
 Parameters:     	
 Remarks:			Initialize ethernet tsec1,tsec2,tsec3 function
 
 Return Value:	    
 
 ***************************************************************************************************/
-InitIp_Ethernet()
+void InitIp_Ethernet()
 {
+ UINT16 status;
 //Имена наших device "eth0"<->Tsec 1 ,"eth1"<->Tsec 2,"eth2"<->Tsec 3
-//const char *ifname="eth0";
- const char *ifname="eth2"; 
-	
-	
+  const char *ifname="eth0";
+//const char *ifname="eth1"; 
+//const char *ifname="eth2"; 
+   status=tsec_get_device(ifname);	
+   	
  //Get and open ethernet device
  
  
 	
 }
+
+
+/**************************************************************************************************
+Syntax:      	  static struct net_device *pktgen_dev_get_by_name(const char *ifname)
+
+Remarks:		  Важная функция позволяет нам получить структуру struct net_device по имени устройства,"eth0","eth1","eth2"
+
+Return Value:	  Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+static struct net_device *tsec_get_device_by_name(const char *ifname)
+{
+	char b[IFNAMSIZ+5];
+	int i = 0;	
+	for (i = 0; ifname[i] != '@'; i++) 
+	{
+		if (i == IFNAMSIZ)
+			break;
+
+		b[i] = ifname[i];
+	}
+	b[i] = 0;
+
+	return dev_get_by_name(&init_net, b);
+}
+
+
+/**************************************************************************************************
+Syntax:      	    static int tsec_get_device(const char *ifname)
+Parameters:     	
+Remarks:			Get p2020 tsec ethernt device 
+
+Return Value:	    
+
+***************************************************************************************************/
+static int tsec_get_device(const char *ifname)
+{
+	struct net_device *odev;
+    UINT16 status;
+	
+	odev = tsec_get_device_by_name(ifname);
+	if (!odev)
+	{
+		printk(KERN_ERR "mpcdv: no such netdevice: \"%s\"\n", ifname);
+		return STATUS_ERR;
+	}
+
+
+	if (odev->type != ARPHRD_ETHER)
+	{
+		printk(KERN_ERR "mpcdrv: not an ethernet device: \"%s\"\n", ifname);
+		status = STATUS_ERR;
+	} 
+	
+	else if (!netif_running(odev)) 
+	{
+		printk(KERN_ERR "mpcdrv: device is down: \"%s\"\n", ifname);
+		status = STATUS_ERR;
+	} 
+	else 
+	{
+		
+		printk("mpcdrv:Get the Tsec device is name %s,alias %s\n\r",odev->name,odev->ifalias);
+		lsm
+		return STATUS_OK;
+	}
+
+	dev_put(odev);
+	return status;
+
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
