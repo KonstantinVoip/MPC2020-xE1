@@ -101,6 +101,15 @@
 void InitIp_Ethernet();
 
 
+//Recieve and transmit packet on ethernet
+/*
+void mpc_recieve_ippacket(struct net_device *dev);
+void mpc_transmit_ippcket(struct net_device *dev);
+*/
+
+
+
+
 
 
 

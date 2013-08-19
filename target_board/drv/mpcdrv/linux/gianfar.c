@@ -119,24 +119,22 @@
 
 
   #define VIRTUAL_ETHERNET     1
-//#define DEBUG_VIRTUAL_ETHERNET    
+  #define DEBUG_VIRTUAL_ETHERNET    
 //#define DEBUG_PHY_ETHERNET
 
 
-//#define   DEBUG_RECIEVE_VIRTUAL_ETHERNET
-//#define   DEBUG_TRANSMIT_VIRTUAL_ETHERNET
-#define   DEBUG_IRQ_INTERRUPT      1
+#define DEBUG_RECIEVE_VIRTUAL_ETHERNET
+#define DEBUG_TRANSMIT_VIRTUAL_ETHERNET
+#define DEBUG_IRQ_INTERRUPT
 
 
-  #define   DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP 1
-//#define   DEBUG_GFAR_PROBE                     1
-//#define   DEBUG_STARTUP_GIANFAR                1
-//#define   DEBUG_GFAR_PRIV_GRP                  1
+//#define DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP 1
+#define DEBUG_GFAR_PROBE                     1
+#define DEBUG_STARTUP_GIANFAR                1
+#define DEBUG_GFAR_PRIV_GRP                  1
 
-//#define   DEBUG_PHY_RECIEVE                    1
-//#define   DEBUG_PHY_TRANSMIT                   1
-
-
+#define   DEBUG_PHY_RECIEVE    1
+#define   DEBUG_PHY_TRANSMIT  1
 
 
 
@@ -146,6 +144,25 @@
 
 const char gfar_driver_name[] = "Gianfar Ethernet";
 const char gfar_driver_version[] = "1.4-skbr1.1.4";
+
+
+
+/************************************************/
+/***********Export SYMBOL functions*************/
+/************************************************/
+
+
+
+/* Recieve functions */
+int mpc_recieve_packet(int a,int b);
+
+
+
+
+
+
+
+
 
 static int gfar_enet_open(struct net_device *dev);
 static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev);
@@ -218,6 +235,24 @@ static void gfar_config_filer_table(struct net_device *dev);
 MODULE_AUTHOR("Freescale Semiconductor, Inc");
 MODULE_DESCRIPTION("Gianfar Ethernet Driver");
 MODULE_LICENSE("GPL");
+
+
+int mpc_recieve_packet(int a,int b)
+{
+	
+	printk("+++++++++++++++++++++++++++++++++++++++++ \n\r");
+	printk("Gianfar Ethernet Driver module functions  \n\r");
+	printk("+++++++++data_A=%d+++data_B=%d++++++++++++++++++++++++++ \n\r",a,b);
+	
+	return 58;
+	
+}
+
+EXPORT_SYMBOL (mpc_recieve_packet);
+
+
+
+
 
 static const struct net_device_ops gfar_netdev_ops = {
 	.ndo_open = gfar_enet_open,
@@ -421,7 +456,7 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
     if (model && !strcasecmp(model, "KeTSEC"))
     {   	
     	//printk("++VIRTUAL_ETH_445+++ \n");
-    	LocalBusCyc3_Init();
+    	//LocalBusCyc3_Init();
     	printk("++gfar_parse_group_410_() model=%s+++++++\n",model);
           
     	  #ifdef DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP
@@ -753,7 +788,7 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	if (model && !strcasecmp(model, "eTSEC"))
 		priv->device_flags =
-			//FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
+			FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
 			FSL_GIANFAR_DEV_HAS_RMON |
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR |
@@ -2051,7 +2086,7 @@ static int init_phy(struct net_device *dev)
 	   {
 				
 		priv->phydev = of_phy_connect_fixed_link(dev, &adjust_link,interface);
-		//printk("VIRTUAL_ETHERNET_2002\n\r");
+		printk("VIRTUAL_ETHERNET_2054\n\r");
 		priv->phydev->supported &= (GFAR_SUPPORTED | gigabit_support);
 		priv->phydev->advertising = priv->phydev->supported;
 		//printk("VIRTUAL_ETHERNET_2005\n\r");
@@ -2769,22 +2804,23 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	    printk("++register_grp_irqs_2674_()/HAS_ONE_INTR=0x%x ++\n\r",priv->device_flags);
 		#endif
 		
-	    /*
 	    if ((err = request_irq(81, gfar_interrupt, 0,"ppc", NULL)) < 0) 
 			{
 				if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d,err=%d\n",dev->name, grp->interruptTransmit,err);
 				goto err_irq_fail;
 			}
-	  
-	     */
 	    
-	    if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
+	    
+	    
+	    
+	    
+	    /*if ((err = request_irq(grp->interruptTransmit, gfar_interrupt, 0,grp->int_name_tx, grp)) < 0) 
 		{
 			if (netif_msg_intr(priv))
 				printk(KERN_ERR "%s: Can't get IRQ %d\n",dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
-		}
+		}*/
 	}
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -2924,8 +2960,7 @@ int startup_gfar(struct net_device *dev)
 			return -ENOMEM;
 		}
 		
-		//printk("++startup_gfar_2760_(i=%d)name=%s|gfargrp->name=%s++\n\r",i,dev->name,priv->gfargrp[0].int_name_er);
-		
+		//printk("++startup_gfar_2928_(i=%d)name=%s|gfargrp->name=%s++\n\r",i,dev->name,priv->gfargrp[0].int_name_er);
 		
 		for (i = 0; i < priv->num_grps; i++)
 		{
@@ -2953,15 +2988,10 @@ int startup_gfar(struct net_device *dev)
 		
 		
 		
-		/* Allocate memory for the buffer descriptors */
-		   //vaddr = 0;//alloc_bds(priv, &addr);
-		 // region_size = sizeof(struct txbd8) * priv->total_tx_ring_size +sizeof(struct rxbd8) * priv->total_rx_ring_size;
-		 // printk("allocate_reg_size2744\n\r");
+
 		   phy_start(priv->phydev);
-		 //vaddr = alloc_bds(priv, &addr);
-		 //printk("allocate_vaddr_2744\n\r"); 
 		   gfar_start(dev);
-		 //phy_start(priv->phydev);
+	
 
 		 
 		 /*
@@ -3472,13 +3502,13 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	    	//length=skb->len;
 	    	//in_high_level_data=skb->data;
 	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
-	    	/*roo
+	    	/*
 	    	for(i=0;i<20;i++)
 	    	{
 	    		printk("data =0x%x\n\r",in_high_level_data[i]);	
 	    	}
 	    	*/
-	    	 return;
+			return;
 	       }
 	      
 	  
@@ -3575,13 +3605,13 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	{
 		lstatus = txbdp->lstatus | BD_LFLAG(TXBD_LAST | TXBD_INTERRUPT);
 	
-		/*
+		
 		 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 			#ifdef DEBUG_PHY_TRANSMIT	
 			printk("+gfar_start_xmit_3164_S_lstatus =%x+\n\r", lstatus);
             #endif 
-		 }*/
+		 }
 	
 	} 
 	else 
@@ -3677,7 +3707,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
       {	
 	     #ifdef DEBUG_PHY_TRANSMIT	
-	     printk("+gfar_start_xmit|txbdp_start->bufPtr=0x%x,txbdp_start->lstatus=0x%x+\n\r",txbdp_start->bufPtr);
+	     printk("+gfar_start_xmit_txbdp_start->bufPtr=0x%x\n\r",txbdp_start->bufPtr);
 		 #endif
       }
 	
@@ -4250,8 +4280,6 @@ static irqreturn_t gfar_transmit(int irq, void *grp_id)
 	}
 #endif
 #else
-	printk("++gfar_transmit_4253/irq=%d++\n\r",irq); 
-	
 	gfar_schedule_cleanup((struct gfar_priv_grp *)grp_id);
 #endif
 	return IRQ_HANDLED;
@@ -4517,56 +4545,16 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-#ifdef DEBUG_PHY_RECIEVE	
+	
+     #ifdef DEBUG_PHY_RECIEVE	
 	
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		  printk("+gfar_receive_wakeup_4364+\n\r");
 		 }
-#endif 		
+     #endif 		
 	
-	  
-	  /*
-	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
-	       {
-               //////////Socket_buffer_naverch//////////
-		       //allocate the skb
-	    	   //Get Data and Length
-	    	
-	    	
-	    	
-			   skb = netdev_alloc_skb(dev, len);
-			   if (!skb) 
-			   {
-				dev->stats.rx_dropped++;
-				priv->extra_stats.rx_skbmissing++;
-				goto out;
-			   }	
-				// copy received packet to skb buffer 
-				memcpy(skb->data, data, len);
-				// Prep the skb for the packet 
-				skb_put(skb, len);
-				// Tell the skb what kind of packet this is 
-				skb->protocol = eth_type_trans(skb, dev);
-
-				ret = netif_rx(skb);
-				if (NET_RX_DROP == ret) 
-				{
-					priv->extra_stats.kernel_dropped++;
-				} 
-				else 
-				{
-					// Increment the number of packets 
-					dev->stats.rx_packets++;
-					dev->stats.rx_bytes += len;
-				}
-			   
-	       }
-	  */
-	  
-	  
-	  
-	// get the first full descriptor 
+	// get the first full descriptor
 	while (!(bdp->status & RXBD_EMPTY))
 	{
 		rmb();
@@ -4586,7 +4574,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 			priv->extra_stats.rx_skbmissing++;
 			goto out;
 		}
-		// The wake up packet has the FCB 
+		// The wake up packet has the FCB
 		data += (GMAC_FCB_LEN + priv->padding);
 		len -= (GMAC_FCB_LEN + priv->padding);
 		// remove the FCS from the packet length 
@@ -4613,7 +4601,7 @@ out:
 		bdp->length = 0;
 
 		mb();
-		/* Update to the next pointer */
+		// Update to the next pointer
 		if (bdp->status & RXBD_WRAP)
 			bdp = priv->wk_bd_base;
 		else

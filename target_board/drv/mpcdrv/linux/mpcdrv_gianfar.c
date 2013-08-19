@@ -204,7 +204,7 @@ static int tsec_get_device(const char *ifname)
 	{
 		
 		printk("mpcdrv:Get the Tsec device is name %s,alias %s\n\r",odev->name,odev->ifalias);
-		lsm
+		
 		return STATUS_OK;
 	}
 

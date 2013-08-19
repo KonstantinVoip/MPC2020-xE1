@@ -85,6 +85,11 @@ GENERAL NOTES
 
 /*External Header*/
 ////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
+
+
+extern int mpc_recieve_packet(int a,int b);
+
+
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -273,17 +278,19 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 int mpc_init_module(void)
 {
-
+ UINT16 nazad;
 	/*
 	** We use the miscfs to register our device.
 	*/
 	//LocalBusCyc3_Init();   //__Initialization Local bus 
-	  InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+	//InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
 	
 	
 	DPRINT("init_module_tdm() called\n");
+	nazad=mpc_recieve_packet(33,28);
+	printk("nazd= %d\n\r",nazad);
 	//TIMER INITIALIZATION
 	//mdelay(600);
 	
