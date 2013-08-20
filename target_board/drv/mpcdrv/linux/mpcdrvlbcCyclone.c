@@ -57,7 +57,7 @@ GENERAL NOTES
 //#include "mpcdrvlbcnor.h"
 
 #include "mpcdrvlbcCyclone.h"
-
+#include "mpcdrv_gianfar.h"
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -88,7 +88,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
-
+extern void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 *buf,u16 len);
 
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
@@ -400,7 +400,10 @@ void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte)
        #endif 	   
 	   i++;
    }while( i< packet_size+1);
-   printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
+   printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
+   
+   p2020_get_recieve_virttsec_packet_buf(get_virt_tsec3(),out_buf,packet_size);
+     
    riteration++; 
 }
 

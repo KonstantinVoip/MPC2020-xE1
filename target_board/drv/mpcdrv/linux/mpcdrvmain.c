@@ -84,11 +84,9 @@ GENERAL NOTES
 //#include "mpcdrveth_ipv4.h"
 
 /*External Header*/
-////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
-
-
+////////////////////Extern function defeniton on another module mpcdrvgiafar.ko/////////////////
 extern int mpc_recieve_packet(int a,int b);
-
+//extern void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 *buf,u16 len)
 
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */

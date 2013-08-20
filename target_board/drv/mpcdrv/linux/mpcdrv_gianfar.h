@@ -99,13 +99,14 @@
 
 //Start Ethernet Initialization
 void InitIp_Ethernet();
+struct net_device * get_tsec0();
+struct net_device * get_tsec1();
+struct net_device * get_tsec2();
+struct net_device * get_virt_tsec3();
+struct net_device * get_virt_tsec4();
 
 
 //Recieve and transmit packet on ethernet
-/*
-void mpc_recieve_ippacket(struct net_device *dev);
-void mpc_transmit_ippcket(struct net_device *dev);
-*/
 
 
 

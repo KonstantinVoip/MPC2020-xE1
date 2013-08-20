@@ -104,11 +104,57 @@ GENERAL NOTES
 
 
 
+struct ethernet_devaces
+{
+	struct net_device device
+ 	
+	
+};
+
+struct ethernet_devaces  dev0,dev1,dev2,virt_dev3,virt_dev4;
+
+
 
 static struct net_device *tsec_get_device_by_name(const char *ifname);
 static int tsec_get_device(const char *ifname);
 
 
+struct net_device * get_tsec0()
+{
+ return dev0.device;
+}
+		
+		
+struct net_device * get_tsec1()
+{
+
+	return dev1.device;
+	
+}
+		
+		
+struct net_device * get_tsec2()
+{
+	
+	return dev2.device;
+}
+		
+		
+struct net_device * get_virt_tsec3()
+{
+	
+	
+	return virt_dev3.device;
+}
+
+
+struct net_device * get_virt_tsec4()
+{
+	
+	
+	return virt_dev4.device;
+	
+}
 
 
 
@@ -126,13 +172,23 @@ Return Value:
 void InitIp_Ethernet()
 {
  UINT16 status;
+ //struct net_device *dev0,*dev1,*dev2,*virt_dev3,*virt_dev4;
 //Имена наших device "eth0"<->Tsec 1 ,"eth1"<->Tsec 2,"eth2"<->Tsec 3
-  const char *ifname="eth0";
-//const char *ifname="eth1"; 
-//const char *ifname="eth2"; 
-   status=tsec_get_device(ifname);	
-   	
- //Get and open ethernet device
+ const char *ifname0="eth0";
+ const char *ifname1="eth1"; 
+ const char *ifname2="eth2";
+////////////////Get virtual ethernet device/////////////////
+ const char *ifname3="eth3";
+ const char *ifname4="eth4";
+
+  
+ dev0.device=tsec_get_device(ifname0)
+ dev1.device=tsec_get_device(ifname1);	
+ dev2.device= tsec_get_device(ifname2);
+ virt_dev3.device=tsec_get_device(ifname3);
+ virt_dev4.device=tsec_get_device(ifname4);
+  
+  //Get and open ethernet device
  
  
 	

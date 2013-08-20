@@ -147,23 +147,6 @@ const char gfar_driver_version[] = "1.4-skbr1.1.4";
 
 
 
-/************************************************/
-/***********Export SYMBOL functions*************/
-/************************************************/
-
-
-
-/* Recieve functions */
-int mpc_recieve_packet(int a,int b);
-
-
-
-
-
-
-
-
-
 static int gfar_enet_open(struct net_device *dev);
 static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev);
 static void gfar_reset_task(struct work_struct *work);
@@ -237,6 +220,31 @@ MODULE_DESCRIPTION("Gianfar Ethernet Driver");
 MODULE_LICENSE("GPL");
 
 
+
+/************************************************/
+/***********Export SYMBOL functions*************/
+/************************************************/
+// Recieve functions
+//int mpc_recieve_packet(int a,int b);
+//void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len);
+void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 *buf,u16 len);
+static inline u16* get_virttsec_data();
+static inline u16  get_virttsec_length();
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    int mpc_recieve_packet(int a,int b)
+Parameters:     	int a,int b
+Remarks:			Test EXPORT module function 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+/*
 int mpc_recieve_packet(int a,int b)
 {
 	
@@ -247,8 +255,104 @@ int mpc_recieve_packet(int a,int b)
 	return 58;
 	
 }
+EXPORT_SYMBOL (mpc_recieve_packet);*/
 
-EXPORT_SYMBOL (mpc_recieve_packet);
+
+static struct data_packet
+{
+ 
+ u16 *data ;
+ u16 length;
+
+};
+
+static struct data_packet  recieve_tsec,transmit_tsec,recieve_virttsec,transmit_virttsec;
+
+
+
+/**************************************************************************************************
+Syntax:      	    static inline u16* get_virttsec_data()
+Parameters:     	
+Remarks:			
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16* get_virttsec_data()
+{
+	return recieve_virttsec.data;
+}
+
+/**************************************************************************************************
+Syntax:      	    static inline u16 get_virttsec_length()
+Parameters:     	
+Remarks:			
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16 get_virttsec_length()
+{
+	return recieve_virttsec.length;
+}
+
+
+/*************************************************************************************************
+Syntax:      	    void p2020_get_recieve_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
+Parameters:     	
+Remarks:			
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
+{
+	
+	
+	//////////Processing Recieve Packet////////////
+	
+	
+	
+	
+}
+/**************************************************************************************************
+Syntax:      	    p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,unsugned char *buf,u16 len)
+Parameters:     	
+Remarks:			 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u16 len)
+{
+
+	//Virtual Ethernet devices
+	//eth3,eth4,eth5,eth6.,eth7,eth8;
+	recieve_virttsec.data=buf;
+	recieve_virttsec.length=len;
+	
+	printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	
+	
+	
+	//gfar_receive_wakeup(dev);
+}
+
+EXPORT_SYMBOL (p2020_get_recieve_virttsec_packet_buf);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4466,6 +4570,8 @@ struct sk_buff * gfar_new_skb(struct net_device *dev)
 	/* We need the data buffer to be aligned properly.  We will reserve
 	 * as many bytes as needed to align the data properly
 	 */
+	 
+
 	skb_reserve(skb, alignamount);
 
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
@@ -4546,14 +4652,39 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	virt_dev=dev->name;
 	
 	
-     #ifdef DEBUG_PHY_RECIEVE	
-	
-	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
-		 {
-		  printk("+gfar_receive_wakeup_4364+\n\r");
-		 }
-     #endif 		
-	
+	 //Virtual Ethernet Recieve Packet processing 
+	 //////////////////////////////////////////////////////////
+	 //////////////////////////////////////////////////////////
+	 /////////////////////////////////////////////////////////
+	 ////////////////////////////////////////////////////////
+      if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	  {
+    	  data = get_virttsec_data();
+    	  len =  get_virttsec_length();
+    	  skb = netdev_alloc_skb(dev, len);
+    	  if (!skb) 
+    	  {
+    		dev->stats.rx_dropped++;
+    		priv->extra_stats.rx_skbmissing++;
+    		printk("no cannot allocate Virtual Ethernt SKB buffer \n\r");
+    		//goto out;
+    	  }
+    		// copy received packet to skb buffer 
+    		memcpy(skb->data, data, len);
+    	    skb_put(skb, len);
+    		// Tell the skb what kind of packet this is 
+    		skb->protocol = eth_type_trans(skb, dev);
+    		
+    		
+    		/*ret = netif_rx(skb);
+    		if (NET_RX_DROP == ret) 
+    		{priv->extra_stats.kernel_dropped++;} 
+    		else {
+    			// Increment the number of packets 
+    		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}*/
+    	    
+	  }
+	  
 	// get the first full descriptor
 	while (!(bdp->status & RXBD_EMPTY))
 	{
@@ -4581,15 +4712,23 @@ static void gfar_receive_wakeup(struct net_device *dev)
 		len -= 4;
 		// copy received packet to skb buffer 
 		memcpy(skb->data, data, len);
+		
+		
+		//Get Kosta Recieve data on Socket buffer
+		p2020_get_recieve_tsec_packet_buf(dev,skb,len);
+		//p2020_get_recieve_packet_buf(dev,skb,len);
 		// Prep the skb for the packet 
 		skb_put(skb, len);
 		// Tell the skb what kind of packet this is 
 		skb->protocol = eth_type_trans(skb, dev);
 
 		ret = netif_rx(skb);
-		if (NET_RX_DROP == ret) {
+		if (NET_RX_DROP == ret) 
+		{
 			priv->extra_stats.kernel_dropped++;
-		} else {
+		} 
+		else 
+		{
 			// Increment the number of packets 
 			dev->stats.rx_packets++;
 			dev->stats.rx_bytes += len;
