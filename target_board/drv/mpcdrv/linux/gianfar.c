@@ -211,10 +211,90 @@ static int gfar_get_ip(struct net_device *dev);
 static void gfar_config_filer_table(struct net_device *dev);
 #endif
 
+
+static struct net_device *tsec_get_device_by_name(const char *ifname);
+static int tsec_get_device(const char *ifname);
+
+
 MODULE_AUTHOR("Freescale Semiconductor, Inc");
 MODULE_DESCRIPTION("Gianfar Ethernet Driver");
 MODULE_LICENSE("GPL");
 
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	  static struct net_device *pktgen_dev_get_by_name(const char *ifname)
+
+Remarks:		  Важная функция позволяет нам получить структуру struct net_device по имени устройства,"eth0","eth1","eth2"
+
+Return Value:	  Returns 1 on success and negative value on failure.
+
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+static struct net_device *tsec_get_device_by_name(const char *ifname)
+{
+	char b[IFNAMSIZ+5];
+	int i = 0;	
+	for (i = 0; ifname[i] != '@'; i++) 
+	{
+		if (i == IFNAMSIZ)
+			break;
+
+		b[i] = ifname[i];
+	}
+	b[i] = 0;
+
+	return dev_get_by_name(&init_net, b);
+}
+
+
+/**************************************************************************************************
+Syntax:      	    static int tsec_get_device(const char *ifname)
+Parameters:     	
+Remarks:			Get p2020 tsec ethernt device 
+
+Return Value:	    
+
+***************************************************************************************************/
+static int tsec_get_device(const char *ifname)
+{
+	struct net_device *odev;
+    u16 status;
+	
+	odev = tsec_get_device_by_name(ifname);
+	if (!odev)
+	{
+		printk(KERN_ERR "mpcdv: no such netdevice: \"%s\"\n", ifname);
+		return -1;//STATUS_ERR;
+	}
+
+
+
+	
+	else if (!netif_running(odev)) 
+	{
+		printk(KERN_ERR "mpcdrv: device is down: \"%s\"\n", ifname);
+		status = -1;//STATUS_ERR;
+	} 
+	else 
+	{
+		
+		printk("mpcdrv:Get the Tsec device is name %s,alias %s\n\r",odev->name,odev->ifalias);
+		
+		return 1;//STATUS_OK;
+	}
+
+	dev_put(odev);
+	return status;
+
+
+}
 
 
 /************************************************/
@@ -322,7 +402,7 @@ Return Value:	    0  =>  Success  ,-EINVAL => Failure
 void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u16 len)
 {
 
-	
+	const char *ifname3="eth3";
 	printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
 	
 	//Virtual Ethernet devices
@@ -336,7 +416,7 @@ void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u
 	
 	//buf ++ ok;
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
-	//gfar_receive_wakeup(dev);
+	 gfar_receive_wakeup(tsec_get_device_by_name(ifname3));
 }
 
 EXPORT_SYMBOL (p2020_get_recieve_virttsec_packet_buf);
@@ -1712,7 +1792,7 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	// Carrier starts down, phylib will bring it up 
 	netif_carrier_off(dev);
 	err = register_netdev(dev);
-	printk("++gfar_probe_1260_()/register_netdev(dev)=0x%x+++++++\n\r",err);
+	printk("++gfar_probe_1260_()/registerdev_netdev(dev)=0x%x+++++++\n\r",err);
 	
 	if (err)
 	{
@@ -3081,20 +3161,12 @@ int startup_gfar(struct net_device *dev)
 		
 		//printk("++startup_gfar_2760_(i=%d)name=%s|gfargrp->name=%s++\n\r",i,dev->name,priv->gfargrp[0].int_name_er);
 		
-		
-		
-		
-		
-		
-		
 		#endif 		
-		
-		
-		
 		
 		
 
 		   phy_start(priv->phydev);
+		   //priv->phydev->state = PHY_UP;
 		   gfar_start(dev);
 	
 
@@ -3476,8 +3548,40 @@ static int gfar_enet_open(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
 	int err;
-    
+	const char *virt_dev=0;
+	virt_dev=dev->name;
+	
+	
+	
+	
+	
+	
 	printk("++gfar_enet_open_3170_()++\n\r");
+	
+	/*if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+	   {
+		enable_napi(priv);
+		err = startup_gfar(dev);
+		if (err) {
+			disable_napi(priv);
+			return err;
+		}
+		printk("++VIRT_Eth3_gfar_enet_open_3170_()++\n\r");
+		netif_tx_start_all_queues(dev);
+
+			device_set_wakeup_enable(&priv->ofdev->dev, priv->wol_en);
+		
+		return 1;
+	   }*/
+	
+	
+	
+	
+	
+	
+	
+	
+
 	enable_napi(priv);
 
 	/* Initialize a bunch of registers */

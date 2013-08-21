@@ -83,6 +83,9 @@ GENERAL NOTES
  
 //#include "mpcdrveth_ipv4.h"
 
+
+
+
 /*External Header*/
 ////////////////////Extern function defeniton on another module mpcdrvgiafar.ko/////////////////
 extern int mpc_recieve_packet(int a,int b);
@@ -170,13 +173,20 @@ u8  *out_num_of_tdm_ch=0;
 	printk(KERN_ALERT"Inside Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
 	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
 	ktime_now();
+
+	
+	#ifdef  P2020_RDBKIT
+	lbcread_state=1;
+    #endif
 	
 	
+    #ifdef P2020_MPC
 	lbcread_state=TDM0_direction_READ_READY();
+    #endif
+	
 	if(lbcread_state==1)
 	{
-		TDM0_dierction_read  (out_buf,&out_size);
-		
+		TDM0_dierction_read  (out_buf,&out_size);	
 	}
 
 }
@@ -199,9 +209,17 @@ UINT16 lbcwrite_state;
 	ktime_now();
 	
 	
-	
+	#ifdef  P2020_RDBKIT
+	lbcwrite_state=1;
+    #endif
+
+    #ifdef P2020_MPC
 	lbcwrite_state=TDM0_direction_WRITE_READY();
-    if(lbcwrite_state==1)
+    #endif
+	
+
+	
+	if(lbcwrite_state==1)
     {
     	 TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
   
@@ -282,7 +300,7 @@ int mpc_init_module(void)
 	*/
       DPRINT("init_module_tdm() called\n"); 
     
-      LocalBusCyc3_Init();   //__Initialization Local bus 
+      //LocalBusCyc3_Init();   //__Initialization Local bus 
 	  InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
