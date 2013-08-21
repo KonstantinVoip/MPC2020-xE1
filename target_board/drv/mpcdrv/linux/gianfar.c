@@ -115,13 +115,9 @@
 
 /*Add Kosta Debugging Information */
 
-
-
-
   #define VIRTUAL_ETHERNET     1
   #define DEBUG_VIRTUAL_ETHERNET    
-//#define DEBUG_PHY_ETHERNET
-
+  //#define DEBUG_PHY_ETHERNET
 
 #define DEBUG_RECIEVE_VIRTUAL_ETHERNET
 #define DEBUG_TRANSMIT_VIRTUAL_ETHERNET
@@ -145,7 +141,7 @@
 const char gfar_driver_name[] = "Gianfar Ethernet";
 const char gfar_driver_version[] = "1.4-skbr1.1.4";
 
-
+static void gfar_receive_wakeup(struct net_device *dev);
 
 static int gfar_enet_open(struct net_device *dev);
 static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev);
@@ -326,15 +322,20 @@ Return Value:	    0  =>  Success  ,-EINVAL => Failure
 void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u16 len)
 {
 
+	
+	printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
+	
 	//Virtual Ethernet devices
 	//eth3,eth4,eth5,eth6.,eth7,eth8;
-	recieve_virttsec.data=buf;
-	recieve_virttsec.length=len;
-	
-	printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	
 	
 	
+	//recieve_virttsec.data=buf;
+	//recieve_virttsec.length=len;
+	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev->name,dev->ifalias);
+	
+	//buf ++ ok;
+	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	//gfar_receive_wakeup(dev);
 }
 
@@ -4651,6 +4652,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
+	printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
 	
 	 //Virtual Ethernet Recieve Packet processing 
 	 //////////////////////////////////////////////////////////
@@ -4659,8 +4661,15 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	 ////////////////////////////////////////////////////////
       if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	  {
-    	  data = get_virttsec_data();
-    	  len =  get_virttsec_length();
+    	  
+    	  printk("?????????????????????Virtual Ethernet3 Recieve????????????????????\n\r");
+    	  
+    	  
+    	  //data =(unsigned char)get_virttsec_data();
+    	 // len =  get_virttsec_length();
+    	  //printk("???????????????????virt_device_len =%d\n\r",len);
+          //printk("virt_device|0x%x|0x%x|0x%x|0x%x\n\r",data[0],data[1],data[2],data[3]);
+    	  /*
     	  skb = netdev_alloc_skb(dev, len);
     	  if (!skb) 
     	  {
@@ -4676,13 +4685,15 @@ static void gfar_receive_wakeup(struct net_device *dev)
     		skb->protocol = eth_type_trans(skb, dev);
     		
     		
-    		/*ret = netif_rx(skb);
+    		
+    		
+    		ret = netif_rx(skb);
     		if (NET_RX_DROP == ret) 
     		{priv->extra_stats.kernel_dropped++;} 
     		else {
     			// Increment the number of packets 
-    		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}*/
-    	    
+    		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
+    	   */ 
 	  }
 	  
 	// get the first full descriptor

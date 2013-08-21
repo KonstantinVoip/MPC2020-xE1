@@ -62,10 +62,14 @@
 
 
 ////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
-extern void LocalBusCyc3_Init(); 
-extern void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
+//extern void LocalBusCyc3_Init(); 
+//extern void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
 //Read Buffer from PLIS 
-extern void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+//extern void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+
+
+
+
 
 /*
 extern void LocalBusCyc3_Init();
