@@ -300,7 +300,7 @@ int mpc_init_module(void)
 	*/
       DPRINT("init_module_tdm() called\n"); 
     
-      //LocalBusCyc3_Init();   //__Initialization Local bus 
+      LocalBusCyc3_Init();   //__Initialization Local bus 
 	  InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	

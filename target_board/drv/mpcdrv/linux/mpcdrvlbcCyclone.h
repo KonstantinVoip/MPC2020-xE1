@@ -55,8 +55,8 @@
  * this logical memory for read and write 
  */
 
-#define P2020_RDBKIT  1
-//#define P2020_MPC     1
+//#define P2020_RDBKIT  1
+  #define P2020_MPC     1
 
 ////////////PLIS_Direction0_DEFENITION////////////////////
 

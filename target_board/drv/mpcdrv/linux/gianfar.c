@@ -407,9 +407,6 @@ void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u
 	
 	//Virtual Ethernet devices
 	//eth3,eth4,eth5,eth6.,eth7,eth8;
-	
-	
-	
 	//recieve_virttsec.data=buf;
 	//recieve_virttsec.length=len;
 	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev->name,dev->ifalias);
@@ -4767,8 +4764,6 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	  {
     	  
     	  printk("?????????????????????Virtual Ethernet3 Recieve????????????????????\n\r");
-    	  
-    	  
     	  //data =(unsigned char)get_virttsec_data();
     	 // len =  get_virttsec_length();
     	  //printk("???????????????????virt_device_len =%d\n\r",len);
@@ -4798,6 +4793,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
     			// Increment the number of packets 
     		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
     	   */ 
+	  return ;
 	  }
 	  
 	// get the first full descriptor
