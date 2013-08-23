@@ -175,14 +175,14 @@ u8  *out_num_of_tdm_ch=0;
 	ktime_now();
 
 	
-	#ifdef  P2020_RDBKIT
-	lbcread_state=1;
-    #endif
+	//#ifdef  P2020_RDBKIT
+	 lbcread_state=1;
+   // #endif
 	
 	
-    #ifdef P2020_MPC
-	lbcread_state=TDM0_direction_READ_READY();
-    #endif
+    //#ifdef P2020_MPC
+	//lbcread_state=TDM0_direction_READ_READY();
+   // #endif
 	
 	if(lbcread_state==1)
 	{
@@ -300,8 +300,8 @@ int mpc_init_module(void)
 	*/
       DPRINT("init_module_tdm() called\n"); 
     
-      LocalBusCyc3_Init();   //__Initialization Local bus 
-	  InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+      //LocalBusCyc3_Init();   //__Initialization Local bus 
+	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
 	
@@ -314,18 +314,23 @@ int mpc_init_module(void)
 	
 	
 	//Timer1
+	
 	init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	
 	//Timer2
-	init_timer(&timer2);
+	
+	
+	/*init_timer(&timer2);
 	timer2.function = timer2_routine;
 	timer2.data = 1;
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	*/
 	
-	add_timer(&timer1);  //Starting the timer1
-	add_timer(&timer2);  //Starting the timer2
+	  add_timer(&timer1);  //Starting the timer1
+	//add_timer(&timer2);  //Starting the timer2
     
 	
 	//Task module
@@ -345,8 +350,8 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	del_timer_sync(&timer1);             /* Deleting the timer */
-	del_timer_sync(&timer2);             /* Deleting the timer */
+	 del_timer_sync(&timer1);             /* Deleting the timer */
+	//del_timer_sync(&timer2);             /* Deleting the timer */
 	DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);   //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 

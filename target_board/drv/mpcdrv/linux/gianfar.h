@@ -52,6 +52,14 @@
 #define ALIGNMENT 0x20
 #endif
 
+
+
+
+#include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcUniDef.h"
+
+
+
+
 /* The maximum number of packets to be handled in one call of gfar_poll */
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
 #define GFAR_DEV_WEIGHT 16
@@ -62,28 +70,10 @@
 
 
 ////////////////////Extern Local BUS_CYCLONE3 Defenition/////////////////
-//extern void LocalBusCyc3_Init(); 
-//extern void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
 //Read Buffer from PLIS 
-//extern void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
-
-
-
-
-
-/*
 extern void LocalBusCyc3_Init();
-extern void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch);
-extern void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch); 
-*/ 
- 
-
-
-
-
-
-
-
+extern void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
+extern UINT16 TDM0_direction_WRITE_READY(void);
 
 
 

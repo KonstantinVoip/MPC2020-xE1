@@ -303,7 +303,7 @@ static int tsec_get_device(const char *ifname)
 // Recieve functions
 //int mpc_recieve_packet(int a,int b);
 //void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len);
-void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 *buf,u16 len);
+void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
 static inline u16* get_virttsec_data();
 static inline u16  get_virttsec_length();
 
@@ -383,13 +383,9 @@ Return Value:	    0  =>  Success  ,-EINVAL => Failure
 ***************************************************************************************************/
 void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
 {
-	
-	
-	//////////Processing Recieve Packet////////////
-	
-	
-	
-	
+
+	//////////Processing Recieve Packet///////////
+
 }
 /**************************************************************************************************
 Syntax:      	    p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,unsugned char *buf,u16 len)
@@ -399,21 +395,25 @@ Remarks:
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
-void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 buf[758],u16 len)
+void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 {
 
 	const char *ifname3="eth3";
+	//unsigned char *l_data;
 	printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
 	
 	//Virtual Ethernet devices
 	//eth3,eth4,eth5,eth6.,eth7,eth8;
-	//recieve_virttsec.data=buf;
-	//recieve_virttsec.length=len;
+	  recieve_virttsec.data=buf;
+	  recieve_virttsec.length=len;
 	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev->name,dev->ifalias);
 	
+	  //l_data=get_virttsec_data();
 	//buf ++ ok;
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
-	 gfar_receive_wakeup(tsec_get_device_by_name(ifname3));
+	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
+	  
+	   gfar_receive_wakeup(tsec_get_device_by_name(ifname3));
 }
 
 EXPORT_SYMBOL (p2020_get_recieve_virttsec_packet_buf);
@@ -638,7 +638,7 @@ static int gfar_parse_group(struct device_node *np,struct gfar_private *priv, co
     if (model && !strcasecmp(model, "KeTSEC"))
     {   	
     	//printk("++VIRTUAL_ETH_445+++ \n");
-    	//LocalBusCyc3_Init();
+    	LocalBusCyc3_Init();
     	printk("++gfar_parse_group_410_() model=%s+++++++\n",model);
           
     	  #ifdef DEBUG_IRQ_INTERRUPT_GFAR_PARSE_GROUP
@@ -838,16 +838,10 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 	//Get model field on enet P2020 -> on p2010 rdb.dts
 	  model = of_get_property(np, "model", NULL);
 	  printk("++gfar_of_init_503/of_get_property()model=%s ++\n\r",model);   
-	  
-	  
-	
-	
-	
+	 
 	for (i = 0; i < MAXGROUPS; i++)
 		priv->gfargrp[i].regs = NULL;
    
-    
-	
 	/* Parse and initialize group specific information */
 	if (of_device_is_compatible(np, "fsl,etsec2")) 
 	{
@@ -2191,8 +2185,6 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-
-	
 	
 	if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	{
@@ -2201,8 +2193,6 @@ static phy_interface_t gfar_get_interface(struct net_device *dev)
 		//printk("VIRTUAL_ETHERNET_1930\n\r");
 		return PHY_INTERFACE_MODE_RMII;
 	}
-	
-	
 	
 	  ecntrl = gfar_read(&regs->ecntrl);
 	  printk("++gfar_get_interface_1920_() ecntrl=0x%x\n",ecntrl);
@@ -2366,9 +2356,6 @@ static void init_registers(struct net_device *dev)
 		return;
 	}
     		
-	
-	
-	
 	 for (i = 0; i < priv->num_grps; i++) 
 		{
 		regs = priv->gfargrp[i].regs;
@@ -3688,6 +3675,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	const char *virt_dev=0;
 	unsigned char *in_high_level_data;
 	virt_dev=dev->name;
+	u16 lbcwrite_ready;
 	
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -3702,22 +3690,24 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	
 	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	       {
-	    	//enable_irq(81);
-	    	/////////GO TO THE Cyclone 3 PLIS///////////
-	    	 //Tdm_Direction0_write (skb->data ,skb->len,32);
-	    	//length=skb->len;
-	    	//in_high_level_data=skb->data;
-	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
-	    	/*
-	    	for(i=0;i<20;i++)
-	    	{
-	    		printk("data =0x%x\n\r",in_high_level_data[i]);	
-	    	}
-	    	*/
+	    	//Go to the PLIS CYCLONE3 ->Local Bus
+	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);	    	
+	    	
+	    	mdelay(200);
+	    	
+	    	lbcwrite_ready=TDM0_direction_WRITE_READY();
+	    	
+	    	if(lbcwrite_ready==1)
+	    	    {
+	    		printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
+	    		TDM0_direction_write (skb->data ,skb->len);
+	    	    }
+	    	//txq->tx_bytes += skb->len;
+	    	//txq->tx_packets++;
 			return;
 	       }
 	      
-	  
+	   
 	  	 if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 			#ifdef DEBUG_PHY_TRANSMIT	
@@ -4754,45 +4744,47 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	virt_dev=dev->name;
 	
 	printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
-	
 	 //Virtual Ethernet Recieve Packet processing 
 	 //////////////////////////////////////////////////////////
-	 //////////////////////////////////////////////////////////
+	 /////////////////////////////////////////////////////////
 	 /////////////////////////////////////////////////////////
 	 ////////////////////////////////////////////////////////
       if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	  {
-    	  
-    	  printk("?????????????????????Virtual Ethernet3 Recieve????????????????????\n\r");
-    	  //data =(unsigned char)get_virttsec_data();
-    	 // len =  get_virttsec_length();
-    	  //printk("???????????????????virt_device_len =%d\n\r",len);
-          //printk("virt_device|0x%x|0x%x|0x%x|0x%x\n\r",data[0],data[1],data[2],data[3]);
-    	  /*
+
+    	  len =  get_virttsec_length();
+    	 // printk("???????????????????virt_device_len =%d\n\r",len);
+    	  data =get_virttsec_data();
+    	 // printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",data[0],data[1],data[2],data[3]);
     	  skb = netdev_alloc_skb(dev, len);
     	  if (!skb) 
     	  {
     		dev->stats.rx_dropped++;
     		priv->extra_stats.rx_skbmissing++;
     		printk("no cannot allocate Virtual Ethernt SKB buffer \n\r");
-    		//goto out;
+    		return;
     	  }
-    		// copy received packet to skb buffer 
+    	
+    	   //printk("+++++++++++++++++SKB _OK+++++++++++++++\n\r"); 
+    	   //copy received packet to skb buffer 
     		memcpy(skb->data, data, len);
-    	    skb_put(skb, len);
-    		// Tell the skb what kind of packet this is 
+    		//printk("+++++++++++++++++MEMCPY_OK+++++++++++++++\n\r");
+    		
+    		skb_put(skb, len);
+    		//printk("+++++++++++++++++SKB_PUT_OK+++++++++++++++\n\r");
+    	    
+    	    // Tell the skb what kind of packet this is 
     		skb->protocol = eth_type_trans(skb, dev);
-    		
-    		
-    		
+    		//printk("+++++++++++++++++skb->protocol_OK+++++++++++++++\n\r");
     		
     		ret = netif_rx(skb);
+    		//printk("+++++++++++++++++netif_rx_OK+++++++++++++++\n\r");
     		if (NET_RX_DROP == ret) 
     		{priv->extra_stats.kernel_dropped++;} 
     		else {
     			// Increment the number of packets 
     		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
-    	   */ 
+    	    
 	  return ;
 	  }
 	  
