@@ -73,8 +73,9 @@
 //Read Buffer from PLIS 
 extern void LocalBusCyc3_Init();
 extern void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
+extern void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
 extern UINT16 TDM0_direction_WRITE_READY(void);
-
+extern UINT16 TDM0_direction_READ_READY(void);
 
 
 /* Length for FCB */

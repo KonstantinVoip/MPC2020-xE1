@@ -220,6 +220,76 @@ MODULE_AUTHOR("Freescale Semiconductor, Inc");
 MODULE_DESCRIPTION("Gianfar Ethernet Driver");
 MODULE_LICENSE("GPL");
 
+struct timer_list timer1;          //default timer  
+
+
+
+
+
+
+
+
+
+/************************************************/
+/***********Export SYMBOL functions*************/
+/************************************************/
+// Recieve functions
+//int mpc_recieve_packet(int a,int b);
+//void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len);
+void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
+
+static inline u16* get_virttsec_data();
+static inline u16  get_virttsec_length();
+
+
+void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
+
+
+
+/**************************************************************************************************
+Syntax:      	    void timer1_routine(unsigned long data)
+Parameters:     	void data
+Remarks:			timer functions 
+
+Return Value:	    1  =>  Success  ,-1 => Failure
+
+***************************************************************************************************/
+void timer1_routine(unsigned long data)
+{
+	UINT16 lbcread_state;
+	u16  out_buf[759];//1518 bait;
+	u16  out_size;
+	
+	
+	printk("TIMER1_ROUTENE\n\r");
+	lbcread_state=TDM0_direction_READ_READY();
+	if(lbcread_state==1)
+	{
+		TDM0_dierction_read  (out_buf,&out_size);	
+	}
+	
+	
+	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
+	
+	
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -297,15 +367,6 @@ static int tsec_get_device(const char *ifname)
 }
 
 
-/************************************************/
-/***********Export SYMBOL functions*************/
-/************************************************/
-// Recieve functions
-//int mpc_recieve_packet(int a,int b);
-//void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len);
-void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
-static inline u16* get_virttsec_data();
-static inline u16  get_virttsec_length();
 
 
 
@@ -330,8 +391,8 @@ int mpc_recieve_packet(int a,int b)
 	
 	return 58;
 	
-}
-EXPORT_SYMBOL (mpc_recieve_packet);*/
+}*/
+//EXPORT_SYMBOL (mpc_recieve_packet);
 
 
 static struct data_packet
@@ -412,14 +473,67 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 	//buf ++ ok;
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
-	  
-	   gfar_receive_wakeup(tsec_get_device_by_name(ifname3));
+	  //gfar_receive_wakeup(tsec_get_device_by_name(ifname3));
+	  p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
 }
 
 EXPORT_SYMBOL (p2020_get_recieve_virttsec_packet_buf);
 
 
 
+void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
+{
+	struct gfar_private *priv = netdev_priv(dev);
+	struct gfar_priv_rx_q *rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+	struct rxbd8 *bdp = rx_queue->cur_rx;
+	struct sk_buff *skb;
+	unsigned char *data;
+	u16 len;
+	int ret;
+	//const char *virt_dev=0;
+	//virt_dev=dev->name;
+	
+	
+	
+	  printk("++++++p2020_get_from_tdmdir_and_put_to_ethernet+++\n\r");
+	
+	
+	  len =  get_virttsec_length();
+	  printk("???????????????????virt_device_len =%d\n\r",len);
+	  data =get_virttsec_data();
+	 
+	  //Char Buffer only
+	  printk("virt_TSEC_|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x\n\r",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+	  skb = netdev_alloc_skb(dev, len);
+	  if (!skb) 
+	  {
+		dev->stats.rx_dropped++;
+		priv->extra_stats.rx_skbmissing++;
+		printk("no cannot allocate Virtual Ethernt SKB buffer \n\r");
+		return;
+	  }
+	
+	  // printk("+++++++++++++++++SKB _OK+++++++++++++++\n\r"); 
+	   //copy received packet to skb buffer 
+		memcpy(skb->data, data, len);
+	   // printk("+++++++++++++++++MEMCPY_OK+++++++++++++++\n\r");
+		
+		skb_put(skb, len);
+		//printk("+++++++++++++++++SKB_PUT_OK+++++++++++++++\n\r");
+	    
+	    // Tell the skb what kind of packet this is 
+		skb->protocol = eth_type_trans(skb, dev);
+		//printk("+++++++++++++++++skb->protocol_OK+++++++++++++++\n\r");
+		
+		ret = netif_rx(skb);
+		//printk("+++++++++++++++++netif_rx_OK+++++++++++++++\n\r");
+		if (NET_RX_DROP == ret) 
+		{priv->extra_stats.kernel_dropped++;} 
+		else {
+			// Increment the number of packets 
+		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
+	
+}
 
 
 
@@ -1522,10 +1636,9 @@ static int gfar_probe(struct of_device *ofdev,const struct of_device_id *match)
 	u32 isrg = 0;
 	u32 __iomem *baddr;
 	u16 static count=0;
-	
+		
 	//printk("++gfar_probe_1260_()/name=%x+++++++\n\r",match->name);
-	
-	
+
 
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	int j;
@@ -3169,6 +3282,7 @@ int startup_gfar(struct net_device *dev)
 		    //gfar_start(dev); 
 		    //printk("VIRTUAL_ETHERNET_2826n\r");
 		 printk("++startup_gfar_2982_()/RETURN_OK++\n\r");	
+		 add_timer(&timer1);  //Starting the timer1
 		 return 0;
 	  }
 	
@@ -3541,7 +3655,11 @@ static int gfar_enet_open(struct net_device *dev)
 	
 	
 	printk("++gfar_enet_open_3170_()++\n\r");
-	
+	/////////////////////////WARNING!WARNING!WARNING!WARNING!WARNING!//////////////////////////
+	/////////////////////////WARNING!WARNING!WARNING!WARNING!WARNING!//////////////////////////
+	/////////////////////////WARNING!WARNING!WARNING!WARNING!WARNING!//////////////////////////
+	/////////////////////////WARNING!WARNING!WARNING!WARNING!WARNING!//////////////////////////
+	/////////////////////////WARNING!WARNING!WARNING!WARNING!WARNING!//////////////////////////
 	/*if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	   {
 		enable_napi(priv);
@@ -3557,14 +3675,6 @@ static int gfar_enet_open(struct net_device *dev)
 		
 		return 1;
 	   }*/
-	
-	
-	
-	
-	
-	
-	
-	
 
 	enable_napi(priv);
 
@@ -3648,8 +3758,10 @@ static inline struct txbd8 *next_txbd(struct txbd8 *bdp, struct txbd8 *base,int 
 	return skip_txbd(bdp, 1, base, ring_size);
 }
 
+
+
 /**************************************************************************************************
-Syntax:      	    3250_static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
+Syntax:      	    3744_static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 Remarks:			This is called by the kernel when a frame is ready for transmission.
                     It is pointed to by the dev->hard_start_xmit function pointer
@@ -3686,22 +3798,26 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	
 		
 	//HIGH Lewel Packet to transmit
-	rq = skb->queue_mapping;
+	  rq = skb->queue_mapping;
 	
 	    if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	       {
 	    	//Go to the PLIS CYCLONE3 ->Local Bus
 	    	//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);	    	
 	    	
-	    	mdelay(200);
+	    	mdelay(3000);
 	    	
 	    	lbcwrite_ready=TDM0_direction_WRITE_READY();
 	    	
 	    	if(lbcwrite_ready==1)
 	    	    {
-	    		printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
+	    		//printk("++gfar_start_xmit_3310()/skb->len=%x++\n\r",skb->len);
 	    		TDM0_direction_write (skb->data ,skb->len);
 	    	    }
+	    	
+	    	 
+	    	 //!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!disable kernel panic!!!!!!!!!!!!!!! 
+	    	
 	    	//txq->tx_bytes += skb->len;
 	    	//txq->tx_packets++;
 			return;
@@ -3715,7 +3831,7 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		    #endif		
 		 }
 	     
-	  	 
+	  
 	  	 
 	  	 //blank for eth3 device ,phy ,eth0,eth1,eth2 ->OK
 		 tx_queue = priv->tx_queue[rq];
@@ -4749,7 +4865,10 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	 /////////////////////////////////////////////////////////
 	 /////////////////////////////////////////////////////////
 	 ////////////////////////////////////////////////////////
-      if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
+      
+	  /*
+	
+	  if (virt_dev && !strcasecmp(virt_dev ,"eth3"))
 	  {
 
     	  len =  get_virttsec_length();
@@ -4786,7 +4905,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
     		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
     	    
 	  return ;
-	  }
+	  }*/
 	  
 	// get the first full descriptor
 	while (!(bdp->status & RXBD_EMPTY))
@@ -4818,7 +4937,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 		
 		
 		//Get Kosta Recieve data on Socket buffer
-		p2020_get_recieve_tsec_packet_buf(dev,skb,len);
+		//p2020_get_recieve_tsec_packet_buf(dev,skb,len);
 		//p2020_get_recieve_packet_buf(dev,skb,len);
 		// Prep the skb for the packet 
 		skb_put(skb, len);
@@ -5907,6 +6026,14 @@ static int __init gfar_init(void)
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	gfar_cpu_dev_init();
 #endif
+	
+	
+	init_timer(&timer1);
+	timer1.function = timer1_routine;
+	timer1.data = 1;
+	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	
+	//add_timer(&timer1);  //Starting the timer1
 	return of_register_platform_driver(&gfar_driver);
 }
 
@@ -5915,6 +6042,7 @@ static void __exit gfar_exit(void)
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 	gfar_cpu_dev_exit();
 #endif
+	del_timer_sync(&timer1); 
 	of_unregister_platform_driver(&gfar_driver);
 }
 

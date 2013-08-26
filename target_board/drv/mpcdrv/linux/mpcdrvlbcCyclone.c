@@ -271,7 +271,7 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",itera
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   printk("in_size=%d \n\r",in_size);  	    
 #endif	
-	   printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
+	  // printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
 /*	   
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   for(i=0;i<in_size;i++)
@@ -361,11 +361,11 @@ void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte)
    //Read dannie 1200
 //#ifdef P2020_MPC
    
-   //dannie1200 = plis_read16 (PLIS_ADDRESS1200);
-   //packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+     dannie1200 = plis_read16 (PLIS_ADDRESS1200);
+     packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
 //#endif  
    
-   
+     //printk("packet_size->>>>>>>>>>%d\n\r",packet_size);
    
    
    //out_num_of_tdm_ch=1;
@@ -378,34 +378,28 @@ void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte)
   
 
  //#ifdef  P2020_RDBKIT
+ /*
    do
      {
   	   out_buf[i]=test_full_packet_mas[i];	   
   	   i++;
-     }while( i< out_size_byte);
+     }while( i< out_size_byte);*/
  //#endif
 	
 	
  //#ifdef P2020_MPC
-  // do
-  // {
-	//   out_buf[i]=plis_read16 (DIR0_ADDRESS_READ_DATA);  
+   do
+   {
+	   out_buf[i]=plis_read16 (DIR0_ADDRESS_READ_DATA);  
 	 //  #ifdef TDM_DIRECTION0_READ_DEBUG	   
-	//   printk("plis_read_data =0x%x\n\r",plis_read_data);
+	 //  printk("plis_read_data =0x%x\n\r",plis_read_data);
      //  #endif 	   
-	 //  i++;
-  // }while( i< packet_size+1);
+	   i++;
+   }while( i< packet_size+1);
 //#endif
    
+   //printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
    
-   
-   
-   
-   printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
-   
-   
-   
-      
      //get_virt_tsec3(local);
      //printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",local->name,local->ifalias);
      //p2020_get_recieve_virttsec_packet_buf(get_virt_tsec3(),out_buf,packet_size);
