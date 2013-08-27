@@ -122,7 +122,8 @@ struct net_device *  get_tsec0()
 	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev0->name,dev0->ifalias);
 	return dev0;
 }
-		
+
+
 /*		
 struct net_device * get_tsec1()
 {

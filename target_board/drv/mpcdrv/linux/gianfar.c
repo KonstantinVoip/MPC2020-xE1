@@ -142,7 +142,6 @@ const char gfar_driver_name[] = "Gianfar Ethernet";
 const char gfar_driver_version[] = "1.4-skbr1.1.4";
 
 static void gfar_receive_wakeup(struct net_device *dev);
-
 static int gfar_enet_open(struct net_device *dev);
 static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev);
 static void gfar_reset_task(struct work_struct *work);
@@ -212,13 +211,16 @@ static void gfar_config_filer_table(struct net_device *dev);
 #endif
 
 
-static struct net_device *tsec_get_device_by_name(const char *ifname);
-static int tsec_get_device(const char *ifname);
 
 
 MODULE_AUTHOR("Freescale Semiconductor, Inc");
 MODULE_DESCRIPTION("Gianfar Ethernet Driver");
 MODULE_LICENSE("GPL");
+
+
+///////////////////////TIMER_LIST///////////////////////////////
+
+
 
 struct timer_list timer1;          //default timer  
 
@@ -227,53 +229,61 @@ struct timer_list timer1;          //default timer
 
 
 
-
+//int mpc_recieve_packet(int a,int b);
 
 
 /************************************************/
 /***********Export SYMBOL functions*************/
 /************************************************/
+static struct net_device *tsec_get_device_by_name(const char *ifname);
+static int tsec_get_device(const char *ifname);
 // Recieve functions
-//int mpc_recieve_packet(int a,int b);
-//void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len);
-void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
 
+void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
 static inline u16* get_virttsec_data();
 static inline u16  get_virttsec_length();
-
-
 void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
 
 
 
-/**************************************************************************************************
-Syntax:      	    void timer1_routine(unsigned long data)
-Parameters:     	void data
-Remarks:			timer functions 
+extern void callback_functions(UINT16 *data);
 
+
+//Get Recieve packet buf functions
+void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,unsigned char* data,u16 len);
+
+
+
+
+
+
+//////////// GET _ TDM DATA FUNCTIONS/////////////
+/**************************************************************************************************
+Syntax:      	    void get_timer1_tdmdir1_data(unsigned long data)
+Parameters:     	unsigned long data
+Remarks:			tdm timer functions 
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-void timer1_routine(unsigned long data)
+void get_timer1_tdmdir1_data(unsigned long data)
 {
 	UINT16 lbcread_state;
 	u16  out_buf[759];//1518 bait;
-	u16  out_size;
+	UINT16   out_size;
+	
 	
 	
 	printk("TIMER1_ROUTENE\n\r");
-	lbcread_state=TDM0_direction_READ_READY();
-	if(lbcread_state==1)
-	{
-		TDM0_dierction_read  (out_buf,&out_size);	
-	}
+	callback_functions(&out_size);
+	//lbcread_state=TDM0_direction_READ_READY();
+	//if(lbcread_state==1)
+	//{
+		//TDM0_dierction_read  (out_buf,&out_size);	
+	//}
 	
+	//printk("packet_size= %d\n\r",out_size);
+	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); //restarting timer
 	
-	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
-	
-	
-	
-
 }
 
 
@@ -442,9 +452,15 @@ Remarks:
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
-void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
+void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,unsigned char* buf,UINT16 len)
 {
 
+	printk("???????p2020_get_recieve_tsec_packet_buf????????\n\r");
+	printk("%x\n\r",len);
+	
+	
+	
+	
 	//////////Processing Recieve Packet///////////
 
 }
@@ -1078,7 +1094,7 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	if (model && !strcasecmp(model, "eTSEC"))
 		priv->device_flags =
-			FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
+			//FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
 			FSL_GIANFAR_DEV_HAS_RMON |
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR |
@@ -3815,9 +3831,8 @@ static int gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	    		TDM0_direction_write (skb->data ,skb->len);
 	    	    }
 	    	
-	    	 
-	    	 //!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!disable kernel panic!!!!!!!!!!!!!!! 
-	    	
+	
+	    	 //!!!!!WARNING!!!!!!!!!!!!!!!!!!!!!!!disable kernel panic!!!!!!!!!!!!!!!  	
 	    	//txq->tx_bytes += skb->len;
 	    	//txq->tx_packets++;
 			return;
@@ -4424,7 +4439,7 @@ static int gfar_clean_tx_ring(struct gfar_priv_tx_q *tx_queue)
     
 	
 #ifdef DEBUG_PHY_TRANSMIT	
-	printk("++gfar_clean_tx_ring_3930()/name=%s ++\n\r",dev->name);
+	//printk("++gfar_clean_tx_ring_3930()/name=%s ++\n\r",dev->name);
 #endif
 	
 	rx_queue = priv->rx_queue[tx_queue->qindex];
@@ -4531,7 +4546,7 @@ static void gfar_schedule_cleanup_tx(struct gfar_priv_grp *gfargrp)
 }
 #else
 /**************************************************************************************************
-Syntax:      	    4037_static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
+Syntax:      	    4549_static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
 Parameters:     	*gfargrp
 Remarks:			
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
@@ -4540,6 +4555,8 @@ static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
 {
 	unsigned long flags;
 
+	//printk("+++++++++++++++4558___gfar_schedule_cleanup\n\r"); 
+	
 	spin_lock_irqsave(&gfargrp->grplock, flags);
 	if (napi_schedule_prep(&gfargrp->napi)) 
 	{
@@ -4598,7 +4615,7 @@ static irqreturn_t gfar_transmit(int irq, void *grp_id)
 }
 
 /**************************************************************************************************
-Syntax:      	    4095_static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,struct sk_buff *skb)
+Syntax:      	    4630_static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,struct sk_buff *skb)
 Parameters:     	*rx_queue,*bdp,skb
 Remarks:			
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
@@ -4612,23 +4629,26 @@ static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,st
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-	
+	printk("+++++++++++++++++gfar_new_rxbdp_4630++++++++++++++++++++++++++++=%s\n\r",dev->name);
 
+	/*
 #ifdef DEBUG_PHY_RECIEVE	
 		if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		 //printk("+gfar_new_rxbdp_4115+=%s\n\r",dev->name);
 		 }
-#endif 
+#endif */
 	
 	
 	bdp->bufPtr = dma_map_single(&priv->ofdev->dev, skb->data,priv->rx_buffer_size, DMA_FROM_DEVICE);
-
+	
 	lstatus = BD_LFLAG(RXBD_EMPTY | RXBD_INTERRUPT);
 
 	if (bdp == rx_queue->rx_bd_base + rx_queue->rx_ring_size - 1)
 		lstatus |= BD_LFLAG(RXBD_WRAP);
 
+	//p2020_get_recieve_tsec_packet_buf(dev,skb->data,skb->len); 
+	
 	eieio();
 
 	bdp->lstatus = lstatus;
@@ -4856,10 +4876,11 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	unsigned char *data;
 	u16 len;
 	int ret;
-	const char *virt_dev=0;
-	virt_dev=dev->name;
 	
-	printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+	
+	//const char *virt_dev=0;
+	//virt_dev=dev->name;
+	 printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
 	 //Virtual Ethernet Recieve Packet processing 
 	 //////////////////////////////////////////////////////////
 	 /////////////////////////////////////////////////////////
@@ -4937,8 +4958,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 		
 		
 		//Get Kosta Recieve data on Socket buffer
-		//p2020_get_recieve_tsec_packet_buf(dev,skb,len);
-		//p2020_get_recieve_packet_buf(dev,skb,len);
+		//p2020_get_recieve_tsec_packet_buf(dev,data,len); 
 		// Prep the skb for the packet 
 		skb_put(skb, len);
 		// Tell the skb what kind of packet this is 
@@ -4973,7 +4993,7 @@ out:
 }
 
 /**************************************************************************************************
-Syntax:      	    4429_irqreturn_t gfar_receive(int irq, void *grp_id)
+Syntax:      	    4982_irqreturn_t gfar_receive(int irq, void *grp_id)
 Parameters:     	irq,*grp_id
 Remarks:			
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
@@ -4989,12 +5009,20 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 
-#ifdef DEBUG_PHY_RECIEVE	
-	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
+	
+	
+	
+	//printk("+??irq_gfar_receive_5012+???= %s|grp_id =%x|irq=%x\n\r",dev->name,grp_id,irq);	
+	
+	
+	
+	
+//#ifdef DEBUG_PHY_RECIEVE	
+/*	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		  printk("+gfar_receive_4446+= %s|grp_id =%x|irq=%x\n\r",dev->name,grp_id,irq);	
-		 } 
-#endif 		
+		 } */
+//#endif 		
 	
 	
 	ievent = gfar_read(&regs->ievent);
@@ -5130,6 +5158,12 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 #endif
 	const char *virt_dev=0;
 	virt_dev=dev->name;
+	
+	
+	//printk("+gfar_clean_rx_ring_5161+\n\r");
+	
+	
+	
 	
 //#ifdef DEBUG_PHY_RECIEVE	
 	//printk("+gfar_clean_rx_ring_4135+\n\r");
@@ -5605,12 +5639,12 @@ static irqreturn_t gfar_interrupt(int irq, void *grp_id)
 {
 	struct gfar_priv_grp *gfargrp = grp_id;
     
-#ifdef DEBUG_PHY_RECIEVE	
+//#ifdef DEBUG_PHY_RECIEVE	
 		  printk("++gfar_interrupt()_5212+=grp_id =%x|irq=%x+++\n\r",grp_id,irq);	
-#endif 
+//#endif 
 	
 	
-/*
+
 	// Save ievent for future reference 
 	u32 events = gfar_read(&gfargrp->regs->ievent);
 	// Check for reception 
@@ -5623,7 +5657,7 @@ static irqreturn_t gfar_interrupt(int irq, void *grp_id)
 	// Check for errors 
 	if (events & IEVENT_ERR_MASK)
 		gfar_error(irq, grp_id);
- */
+ 
 	return IRQ_HANDLED;
 }
 
@@ -6029,11 +6063,9 @@ static int __init gfar_init(void)
 	
 	
 	init_timer(&timer1);
-	timer1.function = timer1_routine;
+	timer1.function = get_timer1_tdmdir1_data;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
-	
-	//add_timer(&timer1);  //Starting the timer1
 	return of_register_platform_driver(&gfar_driver);
 }
 
