@@ -1094,7 +1094,7 @@ static int gfar_of_init(struct of_device *ofdev, struct net_device **pdev)
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR;
 	if (model && !strcasecmp(model, "eTSEC"))
 		priv->device_flags =
-			//FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
+			FSL_GIANFAR_DEV_HAS_GIGABIT |              //p2020mpc _no gigabit 100m/bit
 			FSL_GIANFAR_DEV_HAS_COALESCE |
 			FSL_GIANFAR_DEV_HAS_RMON |
 			FSL_GIANFAR_DEV_HAS_MULTI_INTR |
@@ -4646,7 +4646,8 @@ static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,st
 
 	if (bdp == rx_queue->rx_bd_base + rx_queue->rx_ring_size - 1)
 		lstatus |= BD_LFLAG(RXBD_WRAP);
-
+    
+	 //printk("size =0x%x\n\r",rx_queue->rx_ring_size);
 	//p2020_get_recieve_tsec_packet_buf(dev,skb->data,skb->len); 
 	
 	eieio();
@@ -5055,7 +5056,7 @@ static inline void gfar_rx_checksum(struct sk_buff *skb, struct rxfcb *fcb)
 
 
 /**************************************************************************************************
-Syntax:      	    4489_static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull)
+Syntax:      	    5059_static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int amount_pull)
 Parameters:     	*tx_queue
 Remarks:			gfar_process_frame() -- handle one incoming packet if skb isn't NULL.
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
@@ -5125,7 +5126,7 @@ static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int am
 }
 
 /**************************************************************************************************
-Syntax:      	    4563_int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
+Syntax:      	    5129_int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 Parameters:     	*rx_queue,rx_work_limit
 Remarks:			Processes each frame in the rx ring until the budget/quota has been reached. Returns the number
                     of frames handled
@@ -5213,7 +5214,8 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 		rmb();
 
 #ifdef CONFIG_GFAR_SKBUFF_RECYCLING
-		if (!free_skb && sh->recycle_count) {
+		if (!free_skb && sh->recycle_count) 
+		{
 			/* refill local buffer */
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
 			if (!(rcv_pkt_steering && priv->sps))
@@ -5228,13 +5230,15 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 #endif
 				spin_unlock_irqrestore(&sh->lock, flags);
 		}
-		if (local_head) {
+		if (local_head) 
+		{
 			newskb = local_head;
 			local_head = newskb->next;
 			newskb->next = NULL;
 			free_skb--;
 			howmany_reuse++;
-		} else
+		} 
+		else
 			newskb = gfar_new_skb(dev);
 #else
 		/* Add another skb for the future */
@@ -5266,6 +5270,9 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 				pkt_len = bdp->length - ETH_FCS_LEN;
 				/* Remove the FCS from the packet length */
 				skb_put(skb, pkt_len);
+				printk("input_packet_len =0x%x\n\r",skb->data_len);
+				
+				
 				rx_queue->stats.rx_bytes += pkt_len;
 
 				if (in_irq() || irqs_disabled())

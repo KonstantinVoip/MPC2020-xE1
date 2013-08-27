@@ -306,7 +306,7 @@ int mpc_init_module(void)
 	
 	
 	
-	DPRINT("init_module_tdm() called\n");
+	//DPRINT("init_module_tdm() called\n");
 	//nazad=mpc_recieve_packet(33,28);
 	//printk("nazd= %d\n\r",nazad);
 	//TIMER INITIALIZATION
