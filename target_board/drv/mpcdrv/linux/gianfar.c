@@ -130,7 +130,7 @@
 #define DEBUG_GFAR_PRIV_GRP                  1
 
 #define   DEBUG_PHY_RECIEVE    1
-#define   DEBUG_PHY_TRANSMIT  1
+//#define   DEBUG_PHY_TRANSMIT  1
 
 
 
@@ -445,7 +445,7 @@ static inline u16 get_virttsec_length()
 
 
 /*************************************************************************************************
-Syntax:      	    void p2020_get_recieve_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
+Syntax:      	   448_void p2020_get_recieve_packet_buf(struct net_device *dev,struct sk_buff *skb,u16 len)
 Parameters:     	
 Remarks:			
 
@@ -456,10 +456,9 @@ void p2020_get_recieve_tsec_packet_buf(struct net_device *dev,unsigned char* buf
 {
 
 	printk("???????p2020_get_recieve_tsec_packet_buf????????\n\r");
-	printk("%x\n\r",len);
-	
-	
-	
+	printk("dev=%s|data_len= 0x%x|%d bytes\n\r",dev->name,len,len);
+
+	//printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	
 	//////////Processing Recieve Packet///////////
 
@@ -4555,6 +4554,7 @@ static void gfar_schedule_cleanup(struct gfar_priv_grp *gfargrp)
 {
 	unsigned long flags;
 
+
 	//printk("+++++++++++++++4558___gfar_schedule_cleanup\n\r"); 
 	
 	spin_lock_irqsave(&gfargrp->grplock, flags);
@@ -4629,7 +4629,7 @@ static void gfar_new_rxbdp(struct gfar_priv_rx_q *rx_queue, struct rxbd8 *bdp,st
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
-	printk("+++++++++++++++++gfar_new_rxbdp_4630++++++++++++++++++++++++++++=%s\n\r",dev->name);
+	//printk("+++++++++++++++++gfar_new_rxbdp_4630++++++++++++++++++++++++++++=%s\n\r",dev->name);
 
 	/*
 #ifdef DEBUG_PHY_RECIEVE	
@@ -4881,7 +4881,7 @@ static void gfar_receive_wakeup(struct net_device *dev)
 	
 	//const char *virt_dev=0;
 	//virt_dev=dev->name;
-	 printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+	// printk("!!!!!!!!!!!!!!!!!!!!gfar_recieve_wakeup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
 	 //Virtual Ethernet Recieve Packet processing 
 	 //////////////////////////////////////////////////////////
 	 /////////////////////////////////////////////////////////
@@ -5013,8 +5013,10 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	
 	
 	
-	//printk("+??irq_gfar_receive_5012+???= %s|grp_id =%x|irq=%x\n\r",dev->name,grp_id,irq);	
 	
+	
+	//printk("+??irq_gfar_receive_5012+???= %s|grp_id =%x|irq=%x\n\r",dev->name,grp_id,irq);	
+	//gfar_receive_wakeup(dev);
 	
 	
 	
@@ -5032,12 +5034,14 @@ irqreturn_t gfar_receive(int irq, void *grp_id)
 	{
 		gfar_write(&regs->ievent, ievent & IEVENT_RX_MASK);
 		gfar_receive_wakeup(dev);
+		//printk("----------gfar_receive_wakeup-------------------\n\r");
 		return IRQ_HANDLED;
 	}
 
 #ifdef CONFIG_GIANFAR_TXNAPI
 	gfar_schedule_cleanup_rx((struct gfar_priv_grp *)grp_id);
 #else
+	//printk("-----gfar_schedule_cleanup------------\n\r");
 	gfar_schedule_cleanup((struct gfar_priv_grp *)grp_id);
 #endif
 	return IRQ_HANDLED;
@@ -5070,16 +5074,20 @@ static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int am
 	const char *virt_dev=0;
 	virt_dev=dev->name;
 	
+	//p2020_get_recieve_tsec_packet_buf(dev,skb->data,skb->len);
+	//printk("+gfar_process_frame_5079+\n\r");
+	//p2020_get_recieve_tsec_packet_buf(dev,skb->data,skb->len);
 	
+	/*	
 #ifdef 	DEBUG_PHY_RECIEVE
 	  
 	
 	     if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
-		  printk("+gfar_process_frame_4505+\n\r");
+		  printk("+gfar_process_frame_5079+\n\r");
 		 }
 
-#endif	
+#endif*/	
 	
 	
 	/* fcb is at the beginning if exists */                                                                                                              
@@ -5118,7 +5126,7 @@ static int gfar_process_frame(struct net_device *dev, struct sk_buff *skb,int am
 		ret = vlan_hwaccel_receive_skb(skb, priv->vlgrp, fcb->vlctl);
 	else
 		ret = netif_receive_skb(skb);
-
+	//p2020_get_recieve_tsec_packet_buf(dev,skb->data,skb->len);
 	if (NET_RX_DROP == ret)
 		priv->extra_stats.kernel_dropped++;
 
@@ -5177,6 +5185,12 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 	bdp = rx_queue->cur_rx;
 	base = rx_queue->rx_bd_base;
 
+	
+      
+	//p2020_get_recieve_tsec_packet_buf(dev,bdp->bufPtr,bdp->length);
+	 // p2020_get_recieve_tsec_packet_buf(dev,bdp->bufPtr,bdp->length);
+	
+	
 	if (priv->ptimer_present)
 		amount_pull = (gfar_uses_fcb(priv) ? GMAC_FCB_LEN : 0);
 	else
@@ -5268,13 +5282,17 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 			if (likely(skb)) 
 			{
 				pkt_len = bdp->length - ETH_FCS_LEN;
-				/* Remove the FCS from the packet length */
+				// Remove the FCS from the packet length */
 				skb_put(skb, pkt_len);
-				printk("input_packet_len =0x%x\n\r",skb->data_len);
+				
+				
+				
+				//printk("input_packet_len =0x%x|dev=%s\n\r",bdp->length,dev->name);
+				//printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",bdp->bufPtr[0],bdp->bufPtr[1],bdp->bufPtr[2],bdp->bufPtr[3]); 
+				//printk("0x%04x\n\r",bdp->bufPtr); 
 				
 				
 				rx_queue->stats.rx_bytes += pkt_len;
-
 				if (in_irq() || irqs_disabled())
 					printk("Interrupt problem!\n");
 #ifdef CONFIG_GFAR_SW_PKT_STEERING
@@ -5360,13 +5378,14 @@ int gfar_clean_rx_ring(struct gfar_priv_rx_q *rx_queue, int rx_work_limit)
 
 	/* Update the current rxbd pointer to be the next one */
 	rx_queue->cur_rx = bdp;
-	
+
+/*	
 #ifdef DEBUG_PHY_RECIEVE	
 	  if (virt_dev && strcasecmp(virt_dev ,"eth0"))
 		 {
 		  printk("+gfar_clean_rx_ring_4787()/frame=%d \n\r",howmany);	
 		 }	
-#endif
+#endif*/
 	
 	return howmany;
 }

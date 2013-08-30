@@ -71,6 +71,17 @@ GENERAL NOTES
 
 #include <sysdev/fsl_soc.h>
 
+//////////Net Filter Functions//////////
+
+#include <linux/skbuff.h>
+#include <linux/ip.h>
+#include <linux/tcp.h>
+
+
+#include <linux/netfilter.h>
+#include <linux/netfilter_ipv4.h>
+
+
 
 #include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcUniDef.h"
 #include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcP2020drvreg.x"
@@ -109,6 +120,11 @@ extern int mpc_recieve_packet(int a,int b);
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
+////NET FILTER STRUCTURE///////////////////////////////////////////////
+//// Структура для регистрации функции перехватчика входящих ip пакетов
+struct nf_hook_ops bundle;
+
+
 /////////////////////////Timer structures//////////////////////////////////////
 struct timer_list timer1,timer2;          //default timer   
 static struct hrtimer hr_timer;    //high resolution timer 
@@ -133,7 +149,16 @@ static struct task_struct *tdm_recieve_task=NULL;
 /*****************************************************************************/
 /*	KERNEL MODULE HANDLING						     */
 /*****************************************************************************/
-
+unsigned int Hook_Func(uint hooknum,
+                  struct sk_buff *skb,
+                  const struct net_device *in,
+                  const struct net_device *out,
+                  int (*okfn)(struct sk_buff *)  )
+{
+    /* Получаем очень надежный firewall */
+    /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
+    return NF_DROP;
+}
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)
 Parameters:     	void 
@@ -218,7 +243,6 @@ UINT16 lbcwrite_state;
     #endif
 	
 
-	
 	if(lbcwrite_state==1)
     {
     	 TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
@@ -227,10 +251,6 @@ UINT16 lbcwrite_state;
 
 
 }
-
-
-
-
 
 /**************************************************************************************************
 Syntax:      	    static int tdm_transmit_task(void *ptr)
@@ -300,6 +320,25 @@ int mpc_init_module(void)
 	*/
       DPRINT("init_module_tdm() called\n"); 
     
+      /* Заполняем структуру для регистрации hook функции */
+      /* Указываем имя функции, которая будет обрабатывать пакеты */
+         bundle.hook = Hook_Func;
+      /* Устанавливаем указатель на модуль, создавший hook */
+         bundle.owner = THIS_MODULE;
+      /* Указываем семейство протоколов */
+         bundle.pf = PF_INET;
+      /* Указываем, в каком месте будет срабатывать функция */
+         bundle.hooknum = NF_INET_PRE_ROUTING;
+      /* Выставляем самый высокий приоритет для функции */
+         bundle.priority = NF_IP_PRI_FIRST;
+      /* Регистрируем */
+         nf_register_hook(&bundle);
+      
+      
+      
+      
+      
+   
       //LocalBusCyc3_Init();   //__Initialization Local bus 
 	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
@@ -351,9 +390,12 @@ Return Value:	    none
 void mpc_cleanup_module(void)
 {	
 	 del_timer_sync(&timer1);             /* Deleting the timer */
-	//del_timer_sync(&timer2);             /* Deleting the timer */
+	 /* Регистрируем */
+	 nf_unregister_hook(&bundle);
+	  
+	 //del_timer_sync(&timer2);             /* Deleting the timer */
 	DPRINT("exit_module() called\n");
-	//kthread_stop(tdm_transmit_task);   //Stop Thread func
+	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }
 
