@@ -155,9 +155,44 @@ unsigned int Hook_Func(uint hooknum,
                   const struct net_device *out,
                   int (*okfn)(struct sk_buff *)  )
 {
-    /* Получаем очень надежный firewall */
+   
+unsigned char buf[1514];	
+	/* Указатель на структуру заголовка протокола ip в пакете */
+	    struct iphdr *ip;
+	    /* Указатель на структуру заголовка протокола tcp в пакете */
+	    struct tcphdr *tcp;
+	    /* Проверяем что это IP пакет */
+	       if (skb->protocol == htons(ETH_P_IP))
+	       {
+	    	   /* Сохраняем указатель на структуру заголовка IP */
+	    	       ip = (struct iphdr *)skb_network_header(skb);
+	    	       printk("SA_addr=0x%x|DA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	               printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
+	    	
+	    	       
+	    	       
+	    	       memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len);
+	    	       printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	    	       printk("-----------------------------------------------------------------------\n\r");
+	    	       
+	    	       //memcpy(skb->data, data, len);
+	    	       /*
+	    	       unsigned int		len,
+	    	       				data_len;
+	    	       	__u16			mac_len,
+	    	       				hdr_len;
+	              */ 
+	       
+	       
+	       }
+	/* Получаем очень надежный firewall */
     /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
-    return NF_DROP;
+	    return   NF_ACCEPT;
+	    
+	//return NF_DROP;
+
+
+
 }
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)
@@ -353,12 +388,12 @@ int mpc_init_module(void)
 	
 	
 	//Timer1
-	
+	/*
 	init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
-	
+	*/
 	//Timer2
 	
 	
@@ -368,7 +403,7 @@ int mpc_init_module(void)
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	*/
 	
-	  add_timer(&timer1);  //Starting the timer1
+	 // add_timer(&timer1);  //Starting the timer1
 	//add_timer(&timer2);  //Starting the timer2
     
 	
@@ -389,7 +424,7 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	 del_timer_sync(&timer1);             /* Deleting the timer */
+	 //del_timer_sync(&timer1);             /* Deleting the timer */
 	 /* Регистрируем */
 	 nf_unregister_hook(&bundle);
 	  
