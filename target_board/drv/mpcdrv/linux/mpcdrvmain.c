@@ -78,6 +78,7 @@ GENERAL NOTES
 #include <linux/tcp.h>
 
 
+
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
 
@@ -147,7 +148,7 @@ static struct task_struct *tdm_recieve_task=NULL;
  * kernel module identification
  */
 /*****************************************************************************/
-/*	KERNEL MODULE HANDLING						     */
+/*	KERNEL MODULE HANDLING						                             */
 /*****************************************************************************/
 unsigned int Hook_Func(uint hooknum,
                   struct sk_buff *skb,
@@ -155,14 +156,52 @@ unsigned int Hook_Func(uint hooknum,
                   const struct net_device *out,
                   int (*okfn)(struct sk_buff *)  )
 {
-   
-unsigned char buf[1514];	
-	/* Указатель на структуру заголовка протокола ip в пакете */
-	    struct iphdr *ip;
-	    /* Указатель на структуру заголовка протокола tcp в пакете */
-	    struct tcphdr *tcp;
+static u16 count=0;   
+const char *virt_dev=0;
+unsigned char buf[1514];
+unsigned char header[128];
+
+
+
+
+/* Указатель на структуру заголовка протокола eth в пакете */
+struct ethhdr *eth;
+/* Указатель на структуру заголовка протокола ip в пакете */
+struct iphdr *ip;
+/* Указатель на структуру заголовка протокола tcp в пакете */
+struct tcphdr *tcp;
+
+
+
+
+
+
+virt_dev=skb->dev->name;
+
+
+//ONLY Ethernet2 device
+if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+   {
+       
+	  
+	    /* this is correct. pull padding already */
+		eth = (struct ethhdr *) (skb->data);		
+	    
+		
+		
+		
+		//Copy MAC address Source and Destination
+		//memcpy(eth->h_source, odev->dev_addr,MAC_ADDR_LEN);
+		//memcpy(eth->h_dest, rt->u.dst.neighbour->ha,MAC_ADDR_LEN);
+		
+	
+	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
+        memcpy(header,skb->head,(uint)skb->mac_len);
+        printk("head0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",header[0],header[1],header[2],header[3]);
+        
+        
 	    /* Проверяем что это IP пакет */
-	       if (skb->protocol == htons(ETH_P_IP))
+	       if (skb->protocol ==htons(ETH_P_IP))
 	       {
 	    	   /* Сохраняем указатель на структуру заголовка IP */
 	    	       ip = (struct iphdr *)skb_network_header(skb);
@@ -170,26 +209,26 @@ unsigned char buf[1514];
 	               printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
 	    	
 	    	       
+	               
+	             
 	    	       
 	    	       memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len);
 	    	       printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	    	       printk("-----------------------------------------------------------------------\n\r");
 	    	       
 	    	       //memcpy(skb->data, data, len);
-	    	       /*
-	    	       unsigned int		len,
-	    	       				data_len;
-	    	       	__u16			mac_len,
-	    	       				hdr_len;
-	              */ 
-	       
+	    
 	       
 	       }
-	/* Получаем очень надежный firewall */
-    /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
-	    return   NF_ACCEPT;
-	    
-	//return NF_DROP;
+	      /* Получаем очень надежный firewall */
+          /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
+	       count++;
+	       return   NF_ACCEPT; //пропускаем пакеты
+	
+    }      
+   return NF_ACCEPT; 	     
+
+//return NF_DROP;  //не пропускаем пакеты
 
 
 

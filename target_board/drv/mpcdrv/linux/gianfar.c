@@ -5834,14 +5834,17 @@ static void gfar_set_multi(struct net_device *dev)
 		tempval = gfar_read(&regs->rctrl);
 		tempval |= RCTRL_PROM;
 		gfar_write(&regs->rctrl, tempval);
-	} else {
+	} 
+	else
+	{
 		/* Set RCTRL to not PROM */
 		tempval = gfar_read(&regs->rctrl);
 		tempval &= ~(RCTRL_PROM);
 		gfar_write(&regs->rctrl, tempval);
 	}
 
-	if (dev->flags & IFF_ALLMULTI) {
+	if (dev->flags & IFF_ALLMULTI)
+	{
 		/* Set the hash to rx all multicast frames */
 		gfar_write(&regs->igaddr0, 0xffffffff);
 		gfar_write(&regs->igaddr1, 0xffffffff);
@@ -5859,7 +5862,9 @@ static void gfar_set_multi(struct net_device *dev)
 		gfar_write(&regs->gaddr5, 0xffffffff);
 		gfar_write(&regs->gaddr6, 0xffffffff);
 		gfar_write(&regs->gaddr7, 0xffffffff);
-	} else {
+	} 
+	else 
+	{
 		int em_num;
 		int idx;
 
