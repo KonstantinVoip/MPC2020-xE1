@@ -76,7 +76,7 @@ GENERAL NOTES
 #include <linux/skbuff.h>
 #include <linux/ip.h>
 #include <linux/tcp.h>
-
+#include <linux/if_ether.h>
 
 
 #include <linux/netfilter.h>
@@ -109,7 +109,7 @@ extern int mpc_recieve_packet(int a,int b);
 #define DPRINT(fmt,args...) \
 	           printk(KERN_INFO "%s,%i:" fmt "\n",__FUNCTION__,__LINE__,##args);
 
-
+#define MAC_ADDR_LEN 6
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -157,11 +157,14 @@ unsigned int Hook_Func(uint hooknum,
                   int (*okfn)(struct sk_buff *)  )
 {
 static u16 count=0;   
+u16 i=0;
 const char *virt_dev=0;
 unsigned char buf[1514];
 unsigned char header[128];
-
-
+unsigned char  buf_mac_src[6];
+unsigned char  buf_mac_dst[6];
+//unsigned char  *src_mac;
+//unsigned char  *dst_mac;
 
 
 /* Указатель на структуру заголовка протокола eth в пакете */
@@ -180,29 +183,45 @@ virt_dev=skb->dev->name;
 
 
 //ONLY Ethernet2 device
-if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+//if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
    {
        
-	  
-	    /* this is correct. pull padding already */
-		eth = (struct ethhdr *) (skb->data);		
-	    
-		
-		
-		
-		//Copy MAC address Source and Destination
-		//memcpy(eth->h_source, odev->dev_addr,MAC_ADDR_LEN);
-		//memcpy(eth->h_dest, rt->u.dst.neighbour->ha,MAC_ADDR_LEN);
-		
+	    eth=(struct ethhdr *)skb_mac_header(skb);
 	
+	    
+		//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
+	   
+	   // print_mac(buf_mac_dst,eth->h_dest);
+	    //print_mac(buf_mac_src,eth->h_source);
+	    //printk("DA_MAC =%s\n\r",buf_mac_dst);
+	    //printk("SA_MAC =%s\n\r",buf_mac_src);  
+		
+	      memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
+		    	       //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
+		    	       
+		    	       for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
+		    	       {
+		    	    	 printk("0x%02x",buf[i]);  
+		    	    	   
+		    	       }
+		    	       
+	    
+	    
+	    
+	    
+		/*  
 	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
         memcpy(header,skb->head,(uint)skb->mac_len);
         printk("head0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",header[0],header[1],header[2],header[3]);
-        
+        */
         
 	    /* Проверяем что это IP пакет */
-	       if (skb->protocol ==htons(ETH_P_IP))
-	       {
+	        if (skb->protocol ==htons(ETH_P_IP))
+		 // if (skb->protocol ==htons(ETH_P_ALL))
+		  
+		 
+		    {
 	    	   /* Сохраняем указатель на структуру заголовка IP */
 	    	       ip = (struct iphdr *)skb_network_header(skb);
 	    	       printk("SA_addr=0x%x|DA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
@@ -211,9 +230,18 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	    	       
 	               
 	             
+	               /*
 	    	       
 	    	       memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len);
-	    	       printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	    	       //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	    	       
+	    	       for(i=0;i<(uint)skb->len;i++)
+	    	       {
+	    	    	 printk("0x%02x",buf[i]);  
+	    	    	   
+	    	       }
+	    	       */
+	    	       
 	    	       printk("-----------------------------------------------------------------------\n\r");
 	    	       
 	    	       //memcpy(skb->data, data, len);
