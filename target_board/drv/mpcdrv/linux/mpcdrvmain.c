@@ -62,6 +62,7 @@ GENERAL NOTES
 #include <linux/of_platform.h>
 
 
+
 #include <asm/irq.h>
 #include <asm/hardirq.h>
 #include <asm/prom.h>
@@ -77,7 +78,11 @@ GENERAL NOTES
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/if_ether.h>
-
+#include <linux/socket.h>
+#include <linux/ioctl.h>
+#include <linux/if.h>
+#include <linux/in.h>
+#include <linux/if_packet.h>
 
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
@@ -110,7 +115,8 @@ extern int mpc_recieve_packet(int a,int b);
 	           printk(KERN_INFO "%s,%i:" fmt "\n",__FUNCTION__,__LINE__,##args);
 
 #define MAC_ADDR_LEN 6
-
+#define PROMISC_MODE_ON  1   //флаг включения неразборчивый режим
+#define PROMISC_MODE_OFF 0  //флаг выключения неразборчивого режима
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
@@ -124,7 +130,7 @@ extern int mpc_recieve_packet(int a,int b);
 ////NET FILTER STRUCTURE///////////////////////////////////////////////
 //// Структура для регистрации функции перехватчика входящих ip пакетов
 struct nf_hook_ops bundle;
-
+struct ifparam *ifp;
 
 /////////////////////////Timer structures//////////////////////////////////////
 struct timer_list timer1,timer2;          //default timer   
@@ -183,32 +189,52 @@ virt_dev=skb->dev->name;
 
 
 //ONLY Ethernet2 device
-//if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
-if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
+if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+//if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
    {
-       
-	    eth=(struct ethhdr *)skb_mac_header(skb);
+      
 	
+#if 0
+	// this is correct. pull padding already
+	//eth = (struct ethhdr *) (skb->data);
+	  /*
+	  for(i=0;i<=100;i++)
+	  {
+	  printk("0x%02x",eth[i]);  
+	  }
+	  */
+	//printk("++only_eth+++++\n\r");	
+	/*
+	// Only route ethernet IP packets
+	if (eth->h_proto != __constant_htons(ETH_P_IP))
+		return NF_ACCEPT;
+	
+	printk("++ETH_P_IP+++++\n\r");
+	ip = (struct iphdr *)(skb->data + ETH_HLEN);
+	*/ 
+#endif
+	
+//#if 0
+	
+	    eth=(struct ethhdr *)skb_mac_header(skb);
+		printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
 	    
-		//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	   
-	   // print_mac(buf_mac_dst,eth->h_dest);
+	    print_mac(buf_mac_dst,eth->h_dest);
 	    //print_mac(buf_mac_src,eth->h_source);
-	    //printk("DA_MAC =%s\n\r",buf_mac_dst);
-	    //printk("SA_MAC =%s\n\r",buf_mac_src);  
-		
-	      memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
-		    	       //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
-		    	       
+	    printk("DA_MAC =%s\n\r",buf_mac_dst);
+	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
+	    memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
+		 
+
+	    
+	      /*
+	                   //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
 		    	       for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
 		    	       {
 		    	    	 printk("0x%02x",buf[i]);  
 		    	    	   
 		    	       }
-		    	       
-	    
-	    
-	    
+		  */  	       
 	    
 		/*  
 	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
@@ -231,7 +257,6 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth0"))
 	               
 	             
 	               /*
-	    	       
 	    	       memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len);
 	    	       //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	    	       
@@ -252,9 +277,13 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth0"))
           /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
 	       count++;
 	       return   NF_ACCEPT; //пропускаем пакеты
-	
+
+//#endif 	       
     }      
-   return NF_ACCEPT; 	     
+  
+
+
+return NF_ACCEPT; 	     
 
 //return NF_DROP;  //не пропускаем пакеты
 
