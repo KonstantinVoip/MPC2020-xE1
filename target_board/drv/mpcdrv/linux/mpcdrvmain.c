@@ -189,10 +189,32 @@ virt_dev=skb->dev->name;
 
 
 //ONLY Ethernet2 device
-if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
-//if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
+//if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
    {
-      
+	
+	//skb->head + skb->mac_header
+	
+	
+	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
+	  memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    
+                 //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	    	       for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
+	    	       {
+	    	    	 printk("0x%02x",buf[i]);  
+	    	    	   
+	    	       }
+	   	       
+  
+	
+	
+	
+	
+	
+	
+	
+	
 	
 #if 0
 	// this is correct. pull padding already
@@ -215,15 +237,15 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 #endif
 	
 //#if 0
-	
-	    eth=(struct ethhdr *)skb_mac_header(skb);
-		printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
+
+	    //eth=(struct ethhdr *)skb_mac_header(skb);
+		//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
 	    
-	    print_mac(buf_mac_dst,eth->h_dest);
+	   // print_mac(buf_mac_dst,eth->h_dest);
 	    //print_mac(buf_mac_src,eth->h_source);
-	    printk("DA_MAC =%s\n\r",buf_mac_dst);
+	    //printk("DA_MAC =%s\n\r",buf_mac_dst);
 	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
-	    memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
+	    //memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
 		 
 
 	    
