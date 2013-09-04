@@ -134,12 +134,68 @@ struct ifparam *ifp;
 
 /////////////////////////Timer structures//////////////////////////////////////
 struct timer_list timer1,timer2;          //default timer   
-static struct hrtimer hr_timer;    //high resolution timer 
+static struct hrtimer hr_timer;           //high resolution timer 
 
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
-UINT16 i;
+static struct ethdata_packet
+{ 
+	u16 data[1514] ;
+	u16 length;
+    u16 state;
+};
+
+static struct ethdata_packet  recieve_tsec_packet;
+/**************************************************************************************************
+Syntax:      	    static inline u16* get_tsec_packet_data()
+Parameters:     	
+Remarks:			get data from input tsec packet 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16* get_tsec_packet_data()
+{
+	return recieve_tsec_packet.data;
+}
+
+/**************************************************************************************************
+Syntax:      	    static inline get_tsec_packet_length()
+Parameters:     	
+Remarks:			get length from input packet
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16 get_tsec_packet_length()
+{
+	return recieve_tsec_packet.length;
+}
+
+/**************************************************************************************************/
+/*                                static inline put()                                            */
+/**************************************************************************************************/
+static inline put()
+{
+	
+	printk("???put_function=1???\n\r");
+	recieve_tsec_packet.state=1;//TRUE;
+}
+
+/**************************************************************************************************/
+/*                                static inline get()                                            */
+/**************************************************************************************************/
+static inline get()
+{
+	printk("???get_function=0????????\n\r");
+	recieve_tsec_packet.state=0;//FALSE;
+	
+}
+
+
+
+
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
@@ -182,81 +238,41 @@ struct tcphdr *tcp;
 
 
 
-
-
-
 virt_dev=skb->dev->name;
 
-
 //ONLY Ethernet2 device
-//if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
-if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
-   {
-	
-	//skb->head + skb->mac_header
-	
-	
+if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+//if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
+{
+		
 	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
-	  memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    
-                 //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
-	    	       for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
-	    	       {
-	    	    	 printk("0x%02x",buf[i]);  
-	    	    	   
-	    	       }
-	   	       
-  
-	
-	
-	
-	
-	
-	
-	
-	
-	
-#if 0
-	// this is correct. pull padding already
-	//eth = (struct ethhdr *) (skb->data);
-	  /*
-	  for(i=0;i<=100;i++)
+	 
+   if(recieve_tsec_packet.state==0)	 
+   {	 
+	 //memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	 //recieve_tsec_packet.data   =  (u16)buf;
+	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+	   recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+	   
+	   put();
+   }	 
+	 
+      /*
+	  for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
 	  {
-	  printk("0x%02x",eth[i]);  
-	  }
-	  */
-	//printk("++only_eth+++++\n\r");	
-	/*
-	// Only route ethernet IP packets
-	if (eth->h_proto != __constant_htons(ETH_P_IP))
-		return NF_ACCEPT;
-	
-	printk("++ETH_P_IP+++++\n\r");
-	ip = (struct iphdr *)(skb->data + ETH_HLEN);
-	*/ 
-#endif
-	
-//#if 0
-
-	    //eth=(struct ethhdr *)skb_mac_header(skb);
-		//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	    
-	   // print_mac(buf_mac_dst,eth->h_dest);
+	  printk("0x%02x",buf[i]);  
+	  }   	       
+	  */  
+	  eth=(struct ethhdr *)skb_mac_header(skb);
+	  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
+	  print_mac(buf_mac_dst,eth->h_dest);
 	    //print_mac(buf_mac_src,eth->h_source);
-	    //printk("DA_MAC =%s\n\r",buf_mac_dst);
+	  printk("DA_MAC =%s\n\r",buf_mac_dst);
 	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
 	    //memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
-		 
-
-	    
-	      /*
-	                   //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
-		    	       for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
-		    	       {
-		    	    	 printk("0x%02x",buf[i]);  
-		    	    	   
-		    	       }
-		  */  	       
+	  	 
+	       
 	    
 		/*  
 	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
@@ -266,35 +282,13 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth0"))
         
 	    /* Проверяем что это IP пакет */
 	        if (skb->protocol ==htons(ETH_P_IP))
-		 // if (skb->protocol ==htons(ETH_P_ALL))
-		  
-		 
 		    {
 	    	   /* Сохраняем указатель на структуру заголовка IP */
 	    	       ip = (struct iphdr *)skb_network_header(skb);
-	    	       printk("SA_addr=0x%x|DA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	    	       printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
 	               printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
-	    	
-	    	       
-	               
-	             
-	               /*
-	    	       memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len);
-	    	       //printk("TDM0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",buf[0],buf[1],buf[2],buf[3]);
-	    	       
-	    	       for(i=0;i<(uint)skb->len;i++)
-	    	       {
-	    	    	 printk("0x%02x",buf[i]);  
-	    	    	   
-	    	       }
-	    	       */
-	    	       
 	    	       printk("-----------------------------------------------------------------------\n\r");
-	    	       
-	    	       //memcpy(skb->data, data, len);
-	    
-	       
-	       }
+	        }
 	      /* Получаем очень надежный firewall */
           /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
 	       count++;
@@ -329,9 +323,6 @@ static inline ktime_t ktime_now(void)
 }
 
 
-
-
-
 /**************************************************************************************************
 Syntax:      	    void timer1_routine(unsigned long data)
 Parameters:     	void data
@@ -342,6 +333,8 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer1_routine(unsigned long data)
 {
+static u16 i=0;
+	
 UINT16 lbcread_state;
 u16  out_buf[759];//1518 bait;
 u16  out_size;
@@ -352,7 +345,6 @@ u8  *out_num_of_tdm_ch=0;
 	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
 	ktime_now();
 
-	
 	//#ifdef  P2020_RDBKIT
 	 lbcread_state=1;
    // #endif
@@ -381,12 +373,12 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 void timer2_routine(unsigned long data)
 {
 UINT16 lbcwrite_state;
-		
+static u16 i=0;		
 	printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
 	mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
 	ktime_now();
 	
-	
+	/*
 	#ifdef  P2020_RDBKIT
 	lbcwrite_state=1;
     #endif
@@ -394,14 +386,34 @@ UINT16 lbcwrite_state;
     #ifdef P2020_MPC
 	lbcwrite_state=TDM0_direction_WRITE_READY();
     #endif
+	*/
+	//if success packet to transmit ->>ready
+	if(recieve_tsec_packet.state==1)
+	{
 	
-
-	if(lbcwrite_state==1)
-    {
-    	 TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
-  
-    }
-
+	   lbcwrite_state=TDM0_direction_WRITE_READY();
+	   if(lbcwrite_state==1)
+	   {
+    	 
+		   /*
+		   printk("++++++WRITE_PLIS_SUCCESS+++\n\r");
+		   printk("packet_len=0x%x\n\r",get_tsec_packet_length());
+		   printk("packet_data=0x%x\n\r",get_tsec_packet_data());
+		   */
+		   
+		   
+		  //test function for default mas and size; 
+		 //TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
+	       TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		   
+	   }
+    
+	  //get ethernet packet and transmit to cyclone3 local bus //transmit success;
+	  //set transmission success;
+	  get();
+	}
+	  
+	
 
 }
 
@@ -488,11 +500,9 @@ int mpc_init_module(void)
          nf_register_hook(&bundle);
       
       
-      
-      
-      
-   
-      //LocalBusCyc3_Init();   //__Initialization Local bus 
+         //Init Structure 
+         recieve_tsec_packet.state=0;
+         LocalBusCyc3_Init();   //__Initialization Local bus 
 	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
@@ -512,17 +522,15 @@ int mpc_init_module(void)
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	*/
-	//Timer2
 	
-	
-	/*init_timer(&timer2);
+    //Timer2
+	init_timer(&timer2);
 	timer2.function = timer2_routine;
 	timer2.data = 1;
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
-	*/
 	
-	 // add_timer(&timer1);  //Starting the timer1
-	//add_timer(&timer2);  //Starting the timer2
+	 //add_timer(&timer1);  //Starting the timer1
+	 add_timer(&timer2);  //Starting the timer2
     
 	
 	//Task module
@@ -546,12 +554,11 @@ void mpc_cleanup_module(void)
 	 /* Регистрируем */
 	 nf_unregister_hook(&bundle);
 	  
-	 //del_timer_sync(&timer2);             /* Deleting the timer */
+	del_timer_sync(&timer2);             /* Deleting the timer */
 	DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }
-
 
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */

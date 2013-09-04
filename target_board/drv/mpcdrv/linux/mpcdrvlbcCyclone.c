@@ -298,9 +298,9 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",iteration);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
-	   printk("in_size=%d \n\r",in_size);  	    
+	   //printk("in_size=%d \n\r",in_size);  	    
 #endif	
-	  // printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
+	   //printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
 /*	   
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   for(i=0;i<in_size;i++)
@@ -319,24 +319,18 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",itera
 #ifdef TDM_DIRECTION0_WRITE_DEBUG	
 	//printk("dannie30=%x\n\r",dannie30);
 #endif
-	
-	
+
 	   //Read dannie   
 	   //memcpy(out_buf,in_buf,in_size+1);   
-	   
-		
-
-	   
 	  // #ifdef  P2020_RDBKIT
-
       // printk("???????????write operation????????????????????????????????\n\r");
-	   
 	  // #endif
 
 
-	   
 //#ifdef P2020_MPC	   
 	//Write dannie 
+	   
+
 	for(i=0;i<in_size+1;i++)
 	{
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
@@ -345,13 +339,9 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",itera
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR0_ADDRESS_WRITE_SUCCESS ,PLIS_WRITE_SUCCESS );
 //#endif  	
+
 	
-	iteration++;
-	
-	
-	
-	
-	
+	iteration++;	
 }
 
 /**************************************************************************************************
