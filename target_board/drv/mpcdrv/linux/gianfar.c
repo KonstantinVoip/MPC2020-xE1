@@ -219,16 +219,7 @@ MODULE_LICENSE("GPL");
 
 
 ///////////////////////TIMER_LIST///////////////////////////////
-
-
-
 struct timer_list timer1;          //default timer  
-
-
-
-
-
-
 //int mpc_recieve_packet(int a,int b);
 
 
@@ -285,24 +276,6 @@ void get_timer1_tdmdir1_data(unsigned long data)
 	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); //restarting timer
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**************************************************************************************************

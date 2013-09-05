@@ -179,7 +179,7 @@ static inline u16 get_tsec_packet_length()
 static inline put()
 {
 	
-	printk("???put_function=1???\n\r");
+	printk("???put_input_packet_to_lbc=1???\n\r");
 	recieve_tsec_packet.state=1;//TRUE;
 }
 
@@ -188,7 +188,7 @@ static inline put()
 /**************************************************************************************************/
 static inline get()
 {
-	printk("???get_function=0????????\n\r");
+	printk("???get_lbc_transmit_complete=0????????\n\r");
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
@@ -244,7 +244,9 @@ virt_dev=skb->dev->name;
 if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 //if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
 {
-		
+	
+	
+	//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);		
 	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
 	 
    if(recieve_tsec_packet.state==0)	 
@@ -252,18 +254,13 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	 //memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	 //recieve_tsec_packet.data   =  (u16)buf;
 	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-	   recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
 	   
+	   //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
+	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+	   recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;
 	   put();
    }	 
-	 
-      /*
-	  for(i=0;i<(uint)skb->len+(uint)skb->mac_len;i++)
-	  {
-	  printk("0x%02x",buf[i]);  
-	  }   	       
-	  */  
+	    
 	  eth=(struct ethhdr *)skb_mac_header(skb);
 	  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
 	  print_mac(buf_mac_dst,eth->h_dest);
@@ -272,7 +269,7 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
 	    //memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
 	  	 
-	       
+	  printk("-------------------------end RECIEVE Packet------------------------------------\n\r");      
 	    
 		/*  
 	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
@@ -285,9 +282,9 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 		    {
 	    	   /* Сохраняем указатель на структуру заголовка IP */
 	    	       ip = (struct iphdr *)skb_network_header(skb);
-	    	       printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-	               printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
-	    	       printk("-----------------------------------------------------------------------\n\r");
+	    	      // printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	              // printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
+	    	       //printk("-----------------------------------------------------------------------\n\r");
 	        }
 	      /* Получаем очень надежный firewall */
           /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
@@ -341,17 +338,15 @@ u16  out_size;
 u8  *out_num_of_tdm_ch=0;
 
 
-	printk(KERN_ALERT"Inside Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
+	printk(KERN_ALERT"Recieve lbc Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
 	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
 	ktime_now();
-
+    
 	//#ifdef  P2020_RDBKIT
-	 lbcread_state=1;
+	//lbcread_state=1;
    // #endif
-	
-	
     //#ifdef P2020_MPC
-	//lbcread_state=TDM0_direction_READ_READY();
+	lbcread_state=TDM0_direction_READ_READY();
    // #endif
 	
 	if(lbcread_state==1)
@@ -516,20 +511,23 @@ int mpc_init_module(void)
 	
 	
 	//Timer1
-	/*
+	
 	init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
-	*/
+	
 	
     //Timer2
+	
 	init_timer(&timer2);
 	timer2.function = timer2_routine;
 	timer2.data = 1;
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
-	 //add_timer(&timer1);  //Starting the timer1
+	
+	
+	 add_timer(&timer1);  //Starting the timer1
 	 add_timer(&timer2);  //Starting the timer2
     
 	
@@ -550,11 +548,11 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	 //del_timer_sync(&timer1);             /* Deleting the timer */
+	 del_timer_sync(&timer1);             /* Deleting the timer */
+	 del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
 	 nf_unregister_hook(&bundle);
-	  
-	del_timer_sync(&timer2);             /* Deleting the timer */
+
 	DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 

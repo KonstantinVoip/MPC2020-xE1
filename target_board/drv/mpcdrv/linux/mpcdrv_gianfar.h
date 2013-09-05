@@ -99,13 +99,14 @@
 
 //Start Ethernet Initialization
 void InitIp_Ethernet();
-struct net_device * get_tsec0();
+/*struct net_device * get_tsec0();
 struct net_device * get_tsec1();
 struct net_device * get_tsec2();
 struct net_device * get_virt_tsec3();
 struct net_device * get_virt_tsec4();
+*/
 
-
+void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
 //Recieve and transmit packet on ethernet
 
 

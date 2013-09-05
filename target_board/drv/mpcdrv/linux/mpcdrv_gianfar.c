@@ -95,114 +95,67 @@ GENERAL NOTES
 #include <linux/ip.h>
 
 
-
-
-
-//#include "gianfar.h"
+#include "gianfar.h"
 //#include "fsl_pq_mdio.h"
 #include "mpcdrv_gianfar.h"
 
 
 
-
-
-//struct net_device *dev0,*dev1,*dev2,*virt_dev3,*virt_dev4;
- 	
-	
-static struct net_device *tsec_get_device_by_name(const char *ifname);
-
-static int tsec_get_device(const char *ifname);
-
-
-struct net_device *  get_tsec0()
-{
-	struct net_device *dev0;
-	const char *ifname0="eth0";
-	dev0=tsec_get_device_by_name(ifname0);
-	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev0->name,dev0->ifalias);
-	return dev0;
-}
-
-
-/*		
-struct net_device * get_tsec1()
-{
-
-	return dev1;
-	
-}
-		
-		
-struct net_device * get_tsec2()
-{
-	
-	return dev2;
-}
-*/		
-
-
-struct net_device * get_virt_tsec3()
-{
-	struct net_device *virt_dev3=NULL;
-	//const char *ifname3="eth3";
-	//virt_dev3=tsec_get_device_by_name(ifname3);
-	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",virt_dev3->name,virt_dev3->ifalias);
-	return virt_dev3;
-}
+static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
 
 
 
-/*
-struct net_device * get_virt_tsec4()
-{
-	
-	
-	return virt_dev4;
-	
-}
-*/
+
+static struct ethdata_packet1
+{ 
+	//u16 data[759] ; //packet test buffer massive;
+	u16 *data;
+	u16 length;
+    u16 state;
+};
+
+
+static struct ethdata_packet1 transmit_tsec_packet;
 
 
 /**************************************************************************************************
 Syntax:      	    void InitIp_Ethernet()
 Parameters:     	
-Remarks:			Initialize ethernet tsec1,tsec2,tsec3 function
+Remarks:			Initialize ethernet tsec1,tsec2,tsec3 and virtual tsec function
 
 Return Value:	    
 
 ***************************************************************************************************/
 void InitIp_Ethernet()
+{printk("+++++++InitIp_Ethernet()+++++++\n\r");}
+
+
+/**************************************************************************************************
+Syntax:      	    static inline u16* get_tdmdir_packet_data()
+Parameters:     	
+Remarks:			get data from input local bus tdm direction 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16* get_tdmdir_packet_data()
 {
- UINT16 status;
- 
- printk("++++++++++++++InitIp_Ethernet()+++++++++++++++++++\n\r");
- 
- //struct net_device *dev0,*dev1,*dev2,*virt_dev3,*virt_dev4;
-//Имена наших device "eth0"<->Tsec 1 ,"eth1"<->Tsec 2,"eth2"<->Tsec 3
- //const char *ifname0="eth0";
- //const char *ifname1="eth1"; 
- //const char *ifname2="eth2";
-////////////////Get virtual ethernet device/////////////////
-  //const char *ifname3="eth3";
- //const char *ifname4="eth4";
-
-  
- //dev0=tsec_get_device(ifname0);
- //printk("+++dev0.device=%s+++++++++++++++++\n\r",dev0->name);
- //dev1=tsec_get_device(ifname1);
- //printk("+++dev1.device=%s+++++++++++++++++\n\r",dev1->name);
- //dev2= tsec_get_device(ifname2);
- //printk("+++dev2.device=%s+++++++++++++++++\n\r",dev2->name);
- //virt_dev3=tsec_get_device(ifname3);
- //printk("+++virt_dev3.device=%s+++++++++++++++++\n\r",virt_dev3->name);
-
- //virt_dev4=tsec_get_device(ifname4);
- //printk("+++virt_dev4.device=0x%x+++++++++++++++++\n\r",virt_dev4);
-  //Get and open ethernet device
- 
- 
-	
+	return transmit_tsec_packet.data;
 }
+
+/**************************************************************************************************
+Syntax:      	    static inline u16 get_tdmdir_packet_length()
+Parameters:     	
+Remarks:			get length from input local bus tdm direction
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+static inline u16 get_tdmdir_packet_length()
+{
+	return transmit_tsec_packet.length;
+}
+
 
 
 /**************************************************************************************************
@@ -277,12 +230,114 @@ static int tsec_get_device(const char *ifname)
 	dev_put(odev);
 	return status;
 
-
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/**********************************************************************/
+/*                        Test1                                       */
+/**********************************************************************/
+
+//#if 0
+void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
+{
+	//Real and Virtual Ethernet devices
+	//eth0,eth1,eth2,eth3,eth4,eth5,eth6.,eth7,eth8;
+	const char *ifname3="eth2";
+	printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
+	
+	transmit_tsec_packet.data  = buf;
+	transmit_tsec_packet.length= len;
+	
+    /*	
+    memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+	*/
+	//printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",dev->name,dev->ifalias);
+	
+	//buf ++ ok;
+	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
+	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
+	  p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+}
+
+//#endif
 
 
+/**********************************************************************/
+/*                    Test2                                            */
+/**********************************************************************/
+void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
+{
+	struct gfar_private *priv = netdev_priv(dev);
+	struct gfar_priv_rx_q *rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+	struct rxbd8 *bdp = rx_queue->cur_rx;
+	struct sk_buff *skb=NULL;
+	__u8 *eth;
+	__be16 protocol = htons(ETH_P_IP);
+	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= dev->netdev_ops->ndo_start_xmit;
+	unsigned char *data;
+    u16 len;
+	u16 ret;
+	
+	printk("++++++p2020_get_from_tdmdir_and_put_to_ethernet+++\n\r");
+	len =  get_tdmdir_packet_length();      
+	len=len*2;
+	printk("???????????????????virt_device_len =%d\n\r",len);
+	data = get_tdmdir_packet_data();      
+	//Char Buffer only
+	printk("virt_TSEC_|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x\n\r",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+	  
+	
+	skb = netdev_alloc_skb(dev, len);
+	  if (!skb) 
+	  {
+		dev->stats.rx_dropped++;
+		priv->extra_stats.rx_skbmissing++;
+		printk("no cannot allocate Virtual Ethernt SKB buffer \n\r");
+		//return;
+	  }
+	 
 
+	  
+	    //printk("+++++++++++++++++SKB _OK+++++++++++++++\n\r"); 
+	   //copy received packet to skb buffer 
+	    memcpy(skb->data, data, len);
+	    //  Reserve for ethernet and IP header 
+		eth = (__u8 *) skb_push(skb, 14);
+		memcpy(eth, data, 12);
+	     *(__be16 *) & eth[12] = protocol;		
+	    //printk("+++++++++++++++++MEMCPY_OK+++++++++++++++\n\r");
+		skb_put(skb, len);
+		//printk("+++++++++++++++++SKB_PUT_OK+++++++++++++++\n\r");
+	    // Tell the skb what kind of packet this is 
+		skb->protocol = eth_type_trans(skb, dev);
+		//printk("+++++++++++++++++skb->protocol_OK+++++++++++++++\n\r");
+		//////////////////Create and Fill packet to Send///////////////
+	    ret = (*xmit)(skb, dev);
+		
+	    switch (ret) 
+		{
+		 case NETDEV_TX_OK:
+		 printk("++++++mpcdrv:NETDEV_Transmit_OK+++++\n");
+		 break;
+	
+	
+		 case NETDEV_TX_BUSY:
+		 printk("++++++mpcdrv:NETDEV_Transmit_bUSY+++\n");
+		 break;
+	
+		 default:
+		 printk("+++++++++++mpcdrv:Unriable +++++++++\n");
+		 break;
+	     }
+		
+		if (NET_RX_DROP == ret) 
+		{priv->extra_stats.kernel_dropped++;} 
+		else {
+		// Increment the number of packets 
+		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
+	   
+}
 
 
 

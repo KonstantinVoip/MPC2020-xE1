@@ -89,7 +89,6 @@ GENERAL NOTES
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
 extern void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
-
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
@@ -106,25 +105,8 @@ void callback_functions(UINT16 *data)
 {
 UINT16 test_size=500;
 
-	
-*data=	test_size;
-	
-	
-	
-	
-	
+*data=	test_size;	
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -218,8 +200,6 @@ UINT16 TDM0_direction_WRITE_READY(void)
  if (dannie30 ==0) return 1; //WRITE READY
  else return 0;
  
-
-
 }
 
 /**************************************************************************************************
@@ -295,7 +275,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     
 //#if 0	
 	
-printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",iteration);
+printk("++++++++++++++++++++Tdm_Direction0_write= %d|in_size=%d+++++++++++++++++\n\r",iteration,in_size);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   //printk("in_size=%d \n\r",in_size);  	    
@@ -331,7 +311,7 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d+++++++++++++++++\n\r",itera
 	//Write dannie 
 	   
 
-	for(i=0;i<in_size+1;i++)
+	for(i=0;i<(in_size/2)+1;i++)
 	{
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 	}
@@ -377,13 +357,18 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
    printk("dannie800=0x%x\n\r",dannie800);
 #endif  
   
+
    
-   //Read dannie 1200
+
+   
+//Read dannie packet size on 1200 registers
 //#ifdef P2020_MPC
    
-    // dannie1200 = plis_read16 (PLIS_ADDRESS1200);
-    // packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
-     //
+       dannie1200 = plis_read16 (PLIS_ADDRESS1200);
+       packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+       printk("packet_size->>>>>>>>>>%d\n\r",packet_size);
+       
+   //
    //out_size_byte=512;//packet_size;
      
 //#endif  
@@ -401,18 +386,17 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
   
 
  //#ifdef  P2020_RDBKIT
- /*
+  /* 
    do
      {
   	   out_buf[i]=test_full_packet_mas[i];	   
   	   i++;
      }while( i< out_size_byte);
- */ 
+  */
  //#endif
 	
 	
  //#ifdef P2020_MPC
-  /*
   do
    {
 	   out_buf[i]=plis_read16 (DIR0_ADDRESS_READ_DATA);  
@@ -420,17 +404,18 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
 	 //  printk("plis_read_data =0x%x\n\r",plis_read_data);
      //  #endif 	   
 	   i++;
-   }while( i< packet_size+1);*/
+   }while( i< packet_size+1);
 //#endif
    
-    //printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
+   printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
    
      //get_virt_tsec3(local);
      //printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",local->name,local->ifalias);
      //p2020_get_recieve_virttsec_packet_buf(get_virt_tsec3(),out_buf,packet_size);
-     //p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);  
    
    
+     p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);
+   //p2020_get_recieve_virttsec_packet_buf(out_buf,512/*out_size_byte*/);
    riteration++; 
 }
 
