@@ -106,6 +106,13 @@ static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
 
 
 
+
+/*
+static u8 eth_preambula_mas[8]=
+{0x55,0x55,0x55,0x55,0x55,0x55,0x55,0x5d};
+*/
+
+
 static struct ethdata_packet1
 { 
 	//u16 data[759] ; //packet test buffer massive;
@@ -243,7 +250,7 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 	//Real and Virtual Ethernet devices
 	//eth0,eth1,eth2,eth3,eth4,eth5,eth6.,eth7,eth8;
 	const char *ifname3="eth2";
-	printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
+	//printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
 	
 	transmit_tsec_packet.data  = buf;
 	transmit_tsec_packet.length= len;
@@ -257,7 +264,7 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 	//buf ++ ok;
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
-	  p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+	p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
 }
 
 //#endif
@@ -279,13 +286,21 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
     u16 len;
 	u16 ret;
 	
-	printk("++++++p2020_get_from_tdmdir_and_put_to_ethernet+++\n\r");
+	
 	len =  get_tdmdir_packet_length();      
 	len=len*2;
-	printk("???????????????????virt_device_len =%d\n\r",len);
+	printk("+p2020_get_from_tdmdir_and_put_to_ethernet|len=%d \n\r",len);
+	
+	
+	//printk("???????????????????virt_device_len =%d\n\r",len);
 	data = get_tdmdir_packet_data();      
 	//Char Buffer only
-	printk("virt_TSEC_|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x\n\r",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+	   
+	  printk("+put_to_eth_rfirst|0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[0],data[1],data[2],data[3]);
+	  printk("+put_to_eth_rlast |0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[len-3],data[len-2],data[len-1],data[len]);
+	
+	
+	//printk("virt_TSEC_|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x\n\r",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
 	  
 	
 	skb = netdev_alloc_skb(dev, len);

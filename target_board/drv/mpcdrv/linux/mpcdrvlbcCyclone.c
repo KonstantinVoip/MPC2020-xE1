@@ -83,6 +83,7 @@ GENERAL NOTES
   /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
+#define ADD_ETHERNET_PREAMBULA 1
 
 
 /*****************************************************************************/
@@ -92,6 +93,14 @@ extern void p2020_get_recieve_virttsec_packet_buf(u16 *buf,u16 len);
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
+/*
+static u8 eth_preambula_mas[8]=
+{0x55,0x55,0x55,0x55,0x55,0x55,0x55,0x5d};
+*/
+
+static u16 eth_preambula_mas[4]=
+{0x5555,0x5555,0x5555,0x555d};
+
 
 
 /*****************************************************************************/
@@ -167,14 +176,50 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM0_direction_READ_READY(void)
 {
- u16 dannie1000;
+ u16 dannie1000=0;
+ u16 count_visim=0;
+ u16 dannie800=0;
  
- dannie1000=plis_read16 (PLIS_ADDRESS1000);
+ 
+ ////////////////////Future timing read data form plis///////////////
+ dannie800=plis_read16 (PLIS_ADDRESS800);
+ //printk("READ_800=0x%x\n\r",dannie800);
+ 
+ 
+ if(dannie800==1)
+ {
+ 
+ 	 while(!dannie1000)
+ 	 {	 
+	 
+ 		 if(count_visim==20)return 0;
+	 
+ 		 dannie1000=plis_read16 (PLIS_ADDRESS1000);
+ 		 if(dannie1000==0xabc0)
+ 		 {
+		 dannie1000=0; 
+		 printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+ 		 }
+	 count_visim++; 
+    }
+ 
+ 	printk("OK_READ_READY=0x%x\n\r",dannie1000);
+ 	return 1;
+ 
+ }
+ else
+ {
+	 
+	return 0 ;
+ }
+ 
+
+ 
  //#ifdef TDM_DIRECTION0_READ_DEBUG 
-   printk("dannie1000=0x%x\n\r",dannie1000);
+ //printk("dannie1000=0x%x\n\r",dannie1000);
  //#endif 
- if(dannie1000==0xabc1) return 1;
- else return 0;
+ //if(dannie1000==0xabc1) return 1;
+ //else return 0;
  
 }
 /**************************************************************************************************
@@ -191,15 +236,26 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM0_direction_WRITE_READY(void)
 {
- u16 dannie30;
- 	
- dannie30=plis_read16 (PLIS_ADDRESS30);
-// #ifdef TDM_DIRECTION0_WRITE_DEBUG	
-//printk("dannie30=%x\n\r",dannie30);
- //#endif
- if (dannie30 ==0) return 1; //WRITE READY
- else return 0;
+ u16 dannie30=1;
  
+ 
+ //Next step Set delay to write succes operations !!!!!!!!!!!
+ ////////////////////////////////////////////////////////////
+ 
+ while(dannie30)
+ {
+  dannie30=plis_read16 (PLIS_ADDRESS30); 	 
+ }
+ printk("WRITE_READY=%d\n\r",dannie30);
+ return 1; //WRITE READY SUCCESS
+ 
+ // #ifdef TDM_DIRECTION0_WRITE_DEBUG	
+ /*printk("WRITE_READY=%d\n\r",dannie30);
+ //#endif
+ if (dannie30 ==0) return 1; //WRITE READY SUCCESS
+ if (dannie30 ==1) return 0; //NOT READY to write to PLIS
+ */
+ //else return 0;
 }
 
 /**************************************************************************************************
@@ -272,10 +328,13 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 	u16 dannie30 =1;
 	u16 i=0;
     static u16 iteration=0;
+    u16 hex_element_size=0;
     
+    //Add preambula to input packet
+    //eth_preambula_mas; 
+ 
 //#if 0	
-	
-printk("++++++++++++++++++++Tdm_Direction0_write= %d|in_size=%d+++++++++++++++++\n\r",iteration,in_size);
+//printk("++++++++++++++++++++Tdm_Direction0_write= %d|in_size=%d+++++++++++++++++\n\r",iteration,in_size);
 	
 #ifdef TDM_DIRECTION0_WRITE_DEBUG
 	   //printk("in_size=%d \n\r",in_size);  	    
@@ -305,13 +364,26 @@ printk("++++++++++++++++++++Tdm_Direction0_write= %d|in_size=%d+++++++++++++++++
 	  // #ifdef  P2020_RDBKIT
       // printk("???????????write operation????????????????????????????????\n\r");
 	  // #endif
-
-
-//#ifdef P2020_MPC	   
+    
+    
+    //Warning Add preambula to packet
+    hex_element_size=in_size/2;
+    
+    
+    
+    //#ifdef P2020_MPC	   
 	//Write dannie 
-	   
-
-	for(i=0;i<(in_size/2)+1;i++)
+    printk("+Tdm_Direction0_write\iteration= %d+\n\r",iteration);  
+    printk("+Tdm_Direction0_write\in_size_mas_byte= %d+\n\r",in_size);
+    printk("+Tdm_Direction0_write\in_size_mas_element= %d+\n\r",in_size/2);
+	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
+	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+    
+    
+    
+    
+	for(i=0;i<hex_element_size+1;i++)
 	{
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 	}
@@ -348,7 +420,8 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
   u16 packet_size;
   UINT16 out_data=54;
   //out_size_byte=256;//512 bait;
-  printk("++++++++++++++++++++Tdm_Direction0_read = %d+++++++++++++++++\n\r",riteration);
+ 
+  printk("+Tdm_Direction0_read\iteration= %d+\n\r",riteration);
   
    
 
@@ -364,9 +437,12 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
 //Read dannie packet size on 1200 registers
 //#ifdef P2020_MPC
    
-       dannie1200 = plis_read16 (PLIS_ADDRESS1200);
-       packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
-       printk("packet_size->>>>>>>>>>%d\n\r",packet_size);
+  dannie1200 = plis_read16 (PLIS_ADDRESS1200);
+  packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+  
+  printk("+Tdm_Direction0_read\in_size_mas_in2byte= %d+\n\r",packet_size);
+   
+ 
        
    //
    //out_size_byte=512;//packet_size;
@@ -407,15 +483,12 @@ void TDM0_dierction_read  (u16 *out_buf,UINT16  out_size_byte)
    }while( i< packet_size+1);
 //#endif
    
-   printk("TDM0_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
-   
-     //get_virt_tsec3(local);
-     //printk("p2020_get:Get the Tsec device is name %s,alias %s\n\r",local->name,local->ifalias);
-     //p2020_get_recieve_virttsec_packet_buf(get_virt_tsec3(),out_buf,packet_size);
-   
-   
-     p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);
-   //p2020_get_recieve_virttsec_packet_buf(out_buf,512/*out_size_byte*/);
+  printk("+Tdm_Dir0_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
+  printk("+Tdm_Dir0_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+  
+  
+  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);
+
    riteration++; 
 }
 

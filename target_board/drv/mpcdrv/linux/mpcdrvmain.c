@@ -236,40 +236,46 @@ struct iphdr *ip;
 /* Указатель на структуру заголовка протокола tcp в пакете */
 struct tcphdr *tcp;
 
-
-
 virt_dev=skb->dev->name;
 
-//ONLY Ethernet2 device
-if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
-//if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
-{
+   //ONLY Ethernet2 device
+   if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+   //if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
+   {
 	
 	
 	//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);		
 	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
 	 
-   if(recieve_tsec_packet.state==0)	 
-   {	 
+	// if(recieve_tsec_packet.state==0)	 
+	 //{	 
 	 //memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	 //recieve_tsec_packet.data   =  (u16)buf;
 	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	   
+	   eth=(struct ethhdr *)skb_mac_header(skb);
+		  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
+	   print_mac(buf_mac_dst,eth->h_dest);
+		    //print_mac(buf_mac_src,eth->h_source);
+	   printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+	   printk("+Hook_Func+|in_pac_len_byte =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len); 
+	   printk("+Hook_Func+|iteration =%d\n\r",count); 	 
+	   count++;	 
 	   //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
 	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
 	   recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;
 	   put();
-   }	 
+       
+	 //}	 
 	    
-	  eth=(struct ethhdr *)skb_mac_header(skb);
+	  //eth=(struct ethhdr *)skb_mac_header(skb);
 	  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	  print_mac(buf_mac_dst,eth->h_dest);
+	  //print_mac(buf_mac_dst,eth->h_dest);
 	    //print_mac(buf_mac_src,eth->h_source);
-	  printk("DA_MAC =%s\n\r",buf_mac_dst);
+	  //printk("DA_MAC =%s\n\r",buf_mac_dst);
 	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
 	    //memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
 	  	 
-	  printk("-------------------------end RECIEVE Packet------------------------------------\n\r");      
+	  //printk("-------------------------end RECIEVE Packet------------------------------------\n\r");      
 	    
 		/*  
 	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
@@ -278,6 +284,8 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
         */
         
 	    /* Проверяем что это IP пакет */
+	      
+        #if 0
 	        if (skb->protocol ==htons(ETH_P_IP))
 		    {
 	    	   /* Сохраняем указатель на структуру заголовка IP */
@@ -286,12 +294,11 @@ if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	              // printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
 	    	       //printk("-----------------------------------------------------------------------\n\r");
 	        }
-	      /* Получаем очень надежный firewall */
+       #endif
+	        /* Получаем очень надежный firewall */
           /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
-	       count++;
-	       return   NF_ACCEPT; //пропускаем пакеты
-
-//#endif 	       
+	
+	 return   NF_ACCEPT; //пропускаем пакеты дальше	        
     }      
   
 
@@ -332,14 +339,15 @@ void timer1_routine(unsigned long data)
 {
 static u16 i=0;
 	
-UINT16 lbcread_state;
+UINT16 lbcread_state=0;
 u16  out_buf[759];//1518 bait;
 u16  out_size;
 u8  *out_num_of_tdm_ch=0;
 
 
-	printk(KERN_ALERT"Recieve lbc Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
-	mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
+	//printk(KERN_ALERT"Recieve lbc Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
+    printk(KERN_ALERT"+timer1_routine+\n\r"); 
+    mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
 	ktime_now();
     
 	//#ifdef  P2020_RDBKIT
@@ -347,7 +355,8 @@ u8  *out_num_of_tdm_ch=0;
    // #endif
     //#ifdef P2020_MPC
 	lbcread_state=TDM0_direction_READ_READY();
-   // #endif
+    printk("+timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
+	// #endif
 	
 	if(lbcread_state==1)
 	{
@@ -355,7 +364,6 @@ u8  *out_num_of_tdm_ch=0;
 	}
 
 }
-
 
 /**************************************************************************************************
 Syntax:      	    void timer2_routine(unsigned long data)
@@ -367,11 +375,17 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer2_routine(unsigned long data)
 {
-UINT16 lbcwrite_state;
-static u16 i=0;		
-	printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
-	mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
+UINT16 lbcwrite_state=0;
+//static u16 i=0;		
+	
+
+    //printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
+    printk(KERN_ALERT"+timer2_routine+\n\r");
+    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
 	ktime_now();
+    
+	
+	//TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
 	
 	/*
 	#ifdef  P2020_RDBKIT
@@ -382,33 +396,31 @@ static u16 i=0;
 	lbcwrite_state=TDM0_direction_WRITE_READY();
     #endif
 	*/
+	
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
-	{
-	
+	 {
+	     
 	   lbcwrite_state=TDM0_direction_WRITE_READY();
+
 	   if(lbcwrite_state==1)
 	   {
-    	 
 		   /*
 		   printk("++++++WRITE_PLIS_SUCCESS+++\n\r");
 		   printk("packet_len=0x%x\n\r",get_tsec_packet_length());
 		   printk("packet_data=0x%x\n\r",get_tsec_packet_data());
-		   */
-		   
-		   
+		   */   
 		  //test function for default mas and size; 
 		 //TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
-	       TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		   
+	       TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
+	       get();
 	   }
-    
 	  //get ethernet packet and transmit to cyclone3 local bus //transmit success;
 	  //set transmission success;
-	  get();
-	}
 	  
-	
+	}
+
+
 
 }
 
@@ -512,10 +524,12 @@ int mpc_init_module(void)
 	
 	//Timer1
 	
-	init_timer(&timer1);
+         
+    init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	
 	
 	
     //Timer2
@@ -525,10 +539,11 @@ int mpc_init_module(void)
 	timer2.data = 1;
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
+	add_timer(&timer2);  //Starting the timer2
 	
 	
-	 add_timer(&timer1);  //Starting the timer1
-	 add_timer(&timer2);  //Starting the timer2
+	add_timer(&timer1);  //Starting the timer1
+	
     
 	
 	//Task module

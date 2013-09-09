@@ -106,6 +106,7 @@ struct net_device * get_virt_tsec3();
 struct net_device * get_virt_tsec4();
 */
 
+
 void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
 //Recieve and transmit packet on ethernet
 
