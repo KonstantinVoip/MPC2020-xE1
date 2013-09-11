@@ -90,27 +90,46 @@ GENERAL NOTES
 
 
 #include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcUniDef.h"
-#include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcP2020drvreg.x"
+//#include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcP2020drvreg.x"
 /*driver interface */
 
 //#include "mpcdrvtest.h"
 //#include "mpcdrvlbcnor.h"
 #include "mpcdrvlbcCyclone.h"  //P2020 Local bus <->PLIS  API function
 #include "mpcdrv_gianfar.h"    //P2020 Ethernet tsec <->  API function
- 
+#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
+
+
 //#include "mpcdrveth_ipv4.h"
 
 
+#define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  /* 10.0.0.2 */
+#define BASE_IP_ADDRESS	            0x0A000001  /* 10.0.0.1   */
+#define RECEIVER_IP_ADDRESS			0x0A000064	/* 10.0.0.100 */
 
 
-/*External Header*/
-////////////////////Extern function defeniton on another module mpcdrvgiafar.ko/////////////////
-extern int mpc_recieve_packet(int a,int b);
-//extern void p2020_get_recieve_virttsec_packet_buf(struct net_device *dev,u16 *buf,u16 len)
+#define P2020_IP_ADDRESS	0xACA8820A 			 /* 172.168.130.10 */
+
+
+
+char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
+char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
+char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
+char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
+char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
+
 
 /*****************************************************************************/
-/*	PRIVATE MACROS							     */
+/***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
+//extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
+
+//extern void ngraf_get(); 
+
+//extern int mpc_recieve_packet(int a,int b);
+
+
+
 #define DPRINT(fmt,args...) \
 	           printk(KERN_INFO "%s,%i:" fmt "\n",__FUNCTION__,__LINE__,##args);
 
@@ -136,6 +155,15 @@ struct ifparam *ifp;
 struct timer_list timer1,timer2;          //default timer   
 static struct hrtimer hr_timer;           //high resolution timer 
 
+
+
+unsigned char nms_mac_dst[6];
+
+
+
+
+
+
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
@@ -145,6 +173,10 @@ static struct ethdata_packet
 	u16 length;
     u16 state;
 };
+
+
+
+
 
 static struct ethdata_packet  recieve_tsec_packet;
 /**************************************************************************************************
@@ -220,29 +252,124 @@ unsigned int Hook_Func(uint hooknum,
 {
 static u16 count=0;   
 u16 i=0;
-const char *virt_dev=0;
+u16 result_comparsion=0; 
 unsigned char buf[1514];
-unsigned char header[128];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
-//unsigned char  *src_mac;
-//unsigned char  *dst_mac;
+__be32	curr_ipaddr = P2020_IP_ADDRESS ;
+
+
 
 
 /* Указатель на структуру заголовка протокола eth в пакете */
 struct ethhdr *eth;
 /* Указатель на структуру заголовка протокола ip в пакете */
 struct iphdr *ip;
-/* Указатель на структуру заголовка протокола tcp в пакете */
-struct tcphdr *tcp;
 
-virt_dev=skb->dev->name;
+
+
+   //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
+    //Если пришёл пакет типа 0x800 (IPv4)    
+    if (skb->protocol ==htons(ETH_P_IP))
+    {
+    	
+    	 //Пока делаю программную фильтрацию 2 го уровня временно.
+    	 eth=(struct ethhdr *)skb_mac_header(skb);
+    	 print_mac(buf_mac_dst,eth->h_dest);
+    	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+        
+    	 
+    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 {
+    		
+    		  memcpy(buf,skb->data,(uint)skb->len); 
+    		  
+    		  //ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
+    		  
+    		  
+    		  //Здесь должна быть функции кладения в буфер FIFO
+    		  //пока напрямую работаем	  
+    		  //здесь будет собираю пакет для построение ГРАФА
+    		 //Пакет предназначен моему МПС в DA мой mac адрес
+    		 //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
+    		 //memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    		 //recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;	 
+    	 }
+    	 
+    	 
+    	 ////////////Дальше доделаю эту фишку
+    	 
+ 	 	 #if 0
+    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 {
+    	     		 
+    	     		 //здесь будет собираю пакет для отправки в служебный канал
+    	     		 
+    	  
+    	 }
+    	 
+    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 {
+    	    	     		 
+    	    	     //здесь будет информационный пакет
+    	    	     		 
+    	    	  
+    	 }
+         
+    	 
+    	 
+    	 
+    	 
+   
+		 #endif    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 /* Сохраняем указатель на структуру заголовка IP */
+	     ip = (struct iphdr *)skb_network_header(skb);
+	    
+	     if (curr_ipaddr== (uint)ip->daddr)
+	     {
+	    	 /*Фильтрация 3 го уровня по ip адресу нашего НМС.*/
+	    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);
+	    	 printk("-----------------------------------------------------------------------\n\r");
+	    	 return   NF_DROP;
+	         
+	     }
+     
+    
+    
+    
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//virt_dev=skb->dev->name;
 
    //ONLY Ethernet2 device
-   if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+   //if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
    //if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
-   {
-	
+   //{
 	
 	//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);		
 	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
@@ -252,18 +379,44 @@ virt_dev=skb->dev->name;
 	 //memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	 //recieve_tsec_packet.data   =  (u16)buf;
 	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	   eth=(struct ethhdr *)skb_mac_header(skb);
+	  
+
+
+
+
+
+
+
+       //eth=(struct ethhdr *)skb_mac_header(skb);
 		  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	   print_mac(buf_mac_dst,eth->h_dest);
+	   //print_mac(buf_mac_dst,eth->h_dest);
 		    //print_mac(buf_mac_src,eth->h_source);
-	   printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-	   printk("+Hook_Func+|in_pac_len_byte =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len); 
-	   printk("+Hook_Func+|iteration =%d\n\r",count); 	 
-	   count++;	 
+   	   
+	   //printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+	   //printk("+Hook_Func+|in_pac_len_byte =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len); 
+	   //printk("+Hook_Func+|iteration =%d\n\r",count); 	 
+	   //count++;	 
+	   
+	   
+	   
+	   
+	   
+	   //put_service_channel_fifo_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len)
+	   //put_graph_construction_fifo_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+	   //put_nazad_eth(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+	   //
+	   //
+	   //
+	   //
+	   //
+	   //
+	   //
+	   //
+	
 	   //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
-	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-	   recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;
-	   put();
+	   //memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+	   //recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;
+	   //put();
        
 	 //}	 
 	    
@@ -285,21 +438,12 @@ virt_dev=skb->dev->name;
         
 	    /* Проверяем что это IP пакет */
 	      
-        #if 0
-	        if (skb->protocol ==htons(ETH_P_IP))
-		    {
-	    	   /* Сохраняем указатель на структуру заголовка IP */
-	    	       ip = (struct iphdr *)skb_network_header(skb);
-	    	      // printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-	              // printk("LEN =0x%x|data_len=0x%x|mac_len=0x%x|hdr_len=0x%x\n\r",(uint)skb->len,(uint)skb->data_len,(uint)skb->mac_len,(uint)skb->hdr_len);
-	    	       //printk("-----------------------------------------------------------------------\n\r");
-	        }
-       #endif
+
 	        /* Получаем очень надежный firewall */
           /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
 	
-	 return   NF_ACCEPT; //пропускаем пакеты дальше	        
-    }      
+	 //return   NF_ACCEPT; //пропускаем пакеты дальше	        
+    //}      
   
 
 
@@ -513,8 +657,6 @@ int mpc_init_module(void)
 	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
-	
-	
 	//DPRINT("init_module_tdm() called\n");
 	//nazad=mpc_recieve_packet(33,28);
 	//printk("nazd= %d\n\r",nazad);
@@ -523,25 +665,19 @@ int mpc_init_module(void)
 	
 	
 	//Timer1
-	
-         
     init_timer(&timer1);
 	timer1.function = timer1_routine;
 	timer1.data = 1;
 	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
-	
-	
     //Timer2
-	
 	init_timer(&timer2);
 	timer2.function = timer2_routine;
 	timer2.data = 1;
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
+	
 	add_timer(&timer2);  //Starting the timer2
-	
-	
 	add_timer(&timer1);  //Starting the timer1
 	
     
