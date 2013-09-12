@@ -46,6 +46,23 @@ GENERAL NOTES
 #include <linux/autoconf.h>
 #endif
 
+
+//Механизмы синхронизации 
+# if 0 
+#include <linux/sched.h> //все предусмотренные версией ядра примитивы синхронизации
+#include <linux/percpu.h> //переменные, локальные для каждого процессора (per-CPU variables)
+#include <linux/spinlock.h> //спин-блокировки
+#include <linux/seqlock.h> //сериальные (последовательные) блокировки
+
+
+#include <linux/rwsem.h> //семафоры чтения и записи 
+#include <linux/semaphore.h> //семафоры
+#include <linux/rtmutex.h>   //мьютексы реального времени
+
+
+#include <linux/completion.h> //механизмы ожидания завершения
+#endif
+
 #include <linux/module.h> // Needed by all modules
 #include <linux/kernel.h> // Needed for KERN_ALERT
 #include <linux/init.h>   // Needed for the macros
@@ -97,7 +114,8 @@ GENERAL NOTES
 //#include "mpcdrvlbcnor.h"
 #include "mpcdrvlbcCyclone.h"  //P2020 Local bus <->PLIS  API function
 #include "mpcdrv_gianfar.h"    //P2020 Ethernet tsec <->  API function
-#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
+#include "mpcdrvnbuf.h"        //FIFO buffer
+//#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
 
 
 //#include "mpcdrveth_ipv4.h"
@@ -123,7 +141,7 @@ char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
 extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-
+extern void nbuf_get_datapacket  (const u16 *in_buf ,const u16 in_size);
 
 
 #define DPRINT(fmt,args...) \
@@ -269,6 +287,11 @@ struct iphdr *ip;
     	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
         
     	 
+    	 //Функция складирования пакета в буфер FIFO
+    	 
+    	 
+    	 
+    	 
     	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {
@@ -279,6 +302,11 @@ struct iphdr *ip;
     	   //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
     	 }
    
+    	 
+    	 
+    	 
+    	 
+    	 
     	 ////////////Дальше доделаю эту фишку
     	 /* Сохраняем указатель на структуру заголовка IP */
 	     ip = (struct iphdr *)skb_network_header(skb);
@@ -307,60 +335,6 @@ struct iphdr *ip;
     
     
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//virt_dev=skb->dev->name;
-
-   //ONLY Ethernet2 device
-   //if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
-   //if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
-   //{
-	
-	//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);		
-	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
-	 
-		 
-	    
-	  //eth=(struct ethhdr *)skb_mac_header(skb);
-	  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	  //print_mac(buf_mac_dst,eth->h_dest);
-	    //print_mac(buf_mac_src,eth->h_source);
-	  //printk("DA_MAC =%s\n\r",buf_mac_dst);
-	    //printk("SA_MAC =%s\n\r",buf_mac_src);  	
-	    //memcpy(buf,skb->head,(uint)skb->mac_len+(uint)skb->len);
-	  	 
-	  //printk("-------------------------end RECIEVE Packet------------------------------------\n\r");      
-	    
-		/*  
-	    printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-        memcpy(header,skb->head,(uint)skb->mac_len);
-        printk("head0_|0x%02x|0x%02x|0x%02x|0x%02x\n\r",header[0],header[1],header[2],header[3]);
-        */
-        
-	    /* Проверяем что это IP пакет */
-	      
-
-	        /* Получаем очень надежный firewall */
-          /* который будет удалять (блокировать) абсолютно все входящие пакеты :) */
-	
-	 //return   NF_ACCEPT; //пропускаем пакеты дальше	        
-    //}      
-  
-
-
 return NF_ACCEPT; 	     
 
 //return NF_DROP;  //не пропускаем пакеты
@@ -567,7 +541,7 @@ int mpc_init_module(void)
       
          //Init Structure 
          recieve_tsec_packet.state=0;
-         LocalBusCyc3_Init();   //__Initialization Local bus 
+         //LocalBusCyc3_Init();   //__Initialization Local bus 
 	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
@@ -591,8 +565,8 @@ int mpc_init_module(void)
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	
-	add_timer(&timer2);  //Starting the timer2
-	add_timer(&timer1);  //Starting the timer1
+	//add_timer(&timer2);  //Starting the timer2
+	//add_timer(&timer1);  //Starting the timer1
 	
     
 	
@@ -613,8 +587,8 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	 del_timer_sync(&timer1);             /* Deleting the timer */
-	 del_timer_sync(&timer2);             /* Deleting the timer */
+	 //del_timer_sync(&timer1);             /* Deleting the timer */
+	 //del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
 	 nf_unregister_hook(&bundle);
 
