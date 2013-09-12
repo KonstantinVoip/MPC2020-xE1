@@ -109,7 +109,7 @@ GENERAL NOTES
 
 
 #define P2020_IP_ADDRESS	0xACA8820A 			 /* 172.168.130.10 */
-
+#define P2020_IP1_ADDRESS	0xACA88214 			 /* 172.168.130.20 */
 
 
 char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
@@ -122,11 +122,7 @@ char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-//extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-
-//extern void ngraf_get(); 
-
-//extern int mpc_recieve_packet(int a,int b);
+extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 
 
 
@@ -154,12 +150,6 @@ struct ifparam *ifp;
 /////////////////////////Timer structures//////////////////////////////////////
 struct timer_list timer1,timer2;          //default timer   
 static struct hrtimer hr_timer;           //high resolution timer 
-
-
-
-unsigned char nms_mac_dst[6];
-
-
 
 
 
@@ -282,67 +272,35 @@ struct iphdr *ip;
     	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {
-    		
-    		  memcpy(buf,skb->data,(uint)skb->len); 
-    		  
-    		  //ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-    		  
-    		  
-    		  //Здесь должна быть функции кладения в буфер FIFO
-    		  //пока напрямую работаем	  
-    		  //здесь будет собираю пакет для построение ГРАФА
-    		 //Пакет предназначен моему МПС в DA мой mac адрес
-    		 //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
-    		 //memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-    		 //recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;	 
+   		  //Здесь должна быть функции кладения в буфер FIFO
+   		  //пока напрямую работаем	  
+   		  //здесь будет собираю пакет для построение ГРАФА
+   		  //Пакет предназначен моему МПС в DA мой mac адрес 
+    	   //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
     	 }
-    	 
-    	 
-    	 ////////////Дальше доделаю эту фишку
-    	 
- 	 	 #if 0
-    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
-    	 if(result_comparsion==0)
-    	 {
-    	     		 
-    	     		 //здесь будет собираю пакет для отправки в служебный канал
-    	     		 
-    	  
-    	 }
-    	 
-    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
-    	 if(result_comparsion==0)
-    	 {
-    	    	     		 
-    	    	     //здесь будет информационный пакет
-    	    	     		 
-    	    	  
-    	 }
-         
-    	 
-    	 
-    	 
-    	 
    
-		 #endif    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
+    	 ////////////Дальше доделаю эту фишку
     	 /* Сохраняем указатель на структуру заголовка IP */
 	     ip = (struct iphdr *)skb_network_header(skb);
 	    
 	     if (curr_ipaddr== (uint)ip->daddr)
 	     {
-	    	 /*Фильтрация 3 го уровня по ip адресу нашего НМС.*/
-	    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-	    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);
-	    	 printk("-----------------------------------------------------------------------\n\r");
-	    	 return   NF_DROP;
-	         
+
+	    	 if(recieve_tsec_packet.state==0)	 
+	    	   {	 
+		    	 /*Фильтрация 3 го уровня по ip адресу нашего НМС.*/
+		    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);
+		    	 printk("-----------------------------------------------------------------------\n\r");   
+	    		   
+	    		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	    	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+	    	 	 put();
+	    	        
+	    	   }
+	    	 
+	    	 //return   NF_DROP;
+	    	 return NF_ACCEPT;
 	     }
      
     
@@ -374,51 +332,7 @@ struct iphdr *ip;
 	//printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);		
 	//memcpy(buf,skb->data,(uint)skb->mac_len+(uint)skb->len) ; 
 	 
-	// if(recieve_tsec_packet.state==0)	 
-	 //{	 
-	 //memcpy(buf,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-	 //recieve_tsec_packet.data   =  (u16)buf;
-	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	  
-
-
-
-
-
-
-
-       //eth=(struct ethhdr *)skb_mac_header(skb);
-		  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
-	   //print_mac(buf_mac_dst,eth->h_dest);
-		    //print_mac(buf_mac_src,eth->h_source);
-   	   
-	   //printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-	   //printk("+Hook_Func+|in_pac_len_byte =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len); 
-	   //printk("+Hook_Func+|iteration =%d\n\r",count); 	 
-	   //count++;	 
-	   
-	   
-	   
-	   
-	   
-	   //put_service_channel_fifo_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len)
-	   //put_graph_construction_fifo_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-	   //put_nazad_eth(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-	   //
-	   //
-	   //
-	   //
-	   //
-	   //
-	   //
-	   //
-	
-	   //printk("LEN =0x%x\n\r",(uint)skb->mac_len+(uint)skb->len);
-	   //memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-	   //recieve_tsec_packet.length =(uint)skb->mac_len+(uint)skb->len;
-	   //put();
-       
-	 //}	 
+		 
 	    
 	  //eth=(struct ethhdr *)skb_mac_header(skb);
 	  //printk("p2020_get:Get the Tsec device is name %s packet=%d\n\r",virt_dev,count);
@@ -484,13 +398,13 @@ void timer1_routine(unsigned long data)
 static u16 i=0;
 	
 UINT16 lbcread_state=0;
-u16  out_buf[759];//1518 bait;
+u16  out_buf[1518];//1518 bait;
 u16  out_size;
 u8  *out_num_of_tdm_ch=0;
 
 
 	//printk(KERN_ALERT"Recieve lbc Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
-    printk(KERN_ALERT"+timer1_routine+\n\r"); 
+    //printk(KERN_ALERT"+timer1_routine+\n\r"); 
     mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
 	ktime_now();
     
@@ -499,7 +413,7 @@ u8  *out_num_of_tdm_ch=0;
    // #endif
     //#ifdef P2020_MPC
 	lbcread_state=TDM0_direction_READ_READY();
-    printk("+timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
+    printk("+RE_timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
 	// #endif
 	
 	if(lbcread_state==1)
@@ -524,7 +438,7 @@ UINT16 lbcwrite_state=0;
 	
 
     //printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
-    printk(KERN_ALERT"+timer2_routine+\n\r");
+    printk(KERN_ALERT"+WR_timer2_routine+\n\r");
     mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
 	ktime_now();
     
@@ -544,9 +458,9 @@ UINT16 lbcwrite_state=0;
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
 	 {
-	     
+		 
 	   lbcwrite_state=TDM0_direction_WRITE_READY();
-
+	   printk("lbcwrite_state=%d\n\r",lbcwrite_state); 
 	   if(lbcwrite_state==1)
 	   {
 		   /*

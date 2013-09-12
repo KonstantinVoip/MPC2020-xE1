@@ -186,8 +186,8 @@ UINT16 TDM0_direction_READ_READY(void)
  //printk("READ_800=0x%x\n\r",dannie800);
  
  
- if(dannie800==1)
- {
+ //if(dannie800==1)
+ //{
  
  	 while(!dannie1000)
  	 {	 
@@ -203,15 +203,15 @@ UINT16 TDM0_direction_READ_READY(void)
 	 count_visim++; 
     }
  
- 	printk("OK_READ_READY=0x%x\n\r",dannie1000);
+ 	//printk("OK_READ_READY=0x%x\n\r",dannie1000);
  	return 1;
  
- }
- else
- {
+ //}
+ //else
+ //{
 	 
-	return 0 ;
- }
+	//return 0 ;
+ //}
  
 
  
@@ -245,8 +245,14 @@ UINT16 TDM0_direction_WRITE_READY(void)
  while(dannie30)
  {
   dannie30=plis_read16 (PLIS_ADDRESS30); 	 
+
+ 
  }
- printk("WRITE_READY=%d\n\r",dannie30);
+
+ 
+ 
+ 
+ //printk("WRITE_READY_OK=%d\n\r",dannie30);
  return 1; //WRITE READY SUCCESS
  
  // #ifdef TDM_DIRECTION0_WRITE_DEBUG	

@@ -40,7 +40,7 @@
 
 /*****************************************************************************/
 /*	INCLUDES							     */
-
+#include <linux/kfifo.h>
 
 /*****************************************************************************/
 /*	PUBLIC MACROS							     */
@@ -50,16 +50,7 @@
 /*****************************************************************************/
 /*	                 EXTERN FUNCTIONS AND DATA TYPES						     */
 /******************************************************************************/
-//void put_to_dir0_fifobuf(,);
-//struct *packet_buf get_into_dir0_fifobuf();
 
-/*
-typedef struct in_packet
-{
-	u16 data[1514];
-	u16 length;
-};
-*/
 
 
 /*****************************************************************************/
@@ -69,15 +60,8 @@ typedef struct in_packet
  * ring buffer related
  */
 
-typedef struct FIFO_tr_buffer {
-	int put;
-	int get;
-	int num;
-	int obj_num;
-	int obj_size;
-	int rbufd_size;
-	unsigned char *buf;
-} TRBUFDIR0;
+
+
 
 
 
