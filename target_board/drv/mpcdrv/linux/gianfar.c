@@ -114,7 +114,7 @@
 
 
 /*Add Kosta Debugging Information */
-
+  #define SUPER
   #define VIRTUAL_ETHERNET     1
   #define DEBUG_VIRTUAL_ETHERNET    
   //#define DEBUG_PHY_ETHERNET
