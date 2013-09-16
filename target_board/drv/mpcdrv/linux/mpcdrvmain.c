@@ -284,14 +284,14 @@ struct iphdr *ip;
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
+    	 
     	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-        
+		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+	 	 put();
+    	 
     	 
     	 //Функция складирования пакета в буфер FIFO
-    	 
-    	 
-    	 
-    	 
     	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {
@@ -311,25 +311,27 @@ struct iphdr *ip;
     	 /* Сохраняем указатель на структуру заголовка IP */
 	     ip = (struct iphdr *)skb_network_header(skb);
 	    
+	     
+	     /*
 	     if (curr_ipaddr== (uint)ip->daddr)
 	     {
 
 	    	 if(recieve_tsec_packet.state==0)	 
 	    	   {	 
-		    	 /*Фильтрация 3 го уровня по ip адресу нашего НМС.*/
+		    	 printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
+	    		 //Фильтрация 3 го уровня по ip адресу нашего НМС.
 		    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);
-		    	 printk("-----------------------------------------------------------------------\n\r");   
-	    		   
+		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
 	    		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	    	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	    	 	 put();
+	    	 	 
+	    	 	 //put();
 	    	        
 	    	   }
 	    	 
 	    	 //return   NF_DROP;
 	    	 return NF_ACCEPT;
-	     }
+	     }*/
      
     
     
@@ -387,7 +389,7 @@ u8  *out_num_of_tdm_ch=0;
    // #endif
     //#ifdef P2020_MPC
 	lbcread_state=TDM0_direction_READ_READY();
-    printk("+RE_timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
+    printk("+READ_timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
 	// #endif
 	
 	if(lbcread_state==1)
@@ -431,7 +433,7 @@ UINT16 lbcwrite_state=0;
 	
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
-	 {
+	  {
 		 
 	   lbcwrite_state=TDM0_direction_WRITE_READY();
 	   printk("lbcwrite_state=%d\n\r",lbcwrite_state); 
@@ -443,11 +445,20 @@ UINT16 lbcwrite_state=0;
 		   printk("packet_data=0x%x\n\r",get_tsec_packet_data());
 		   */   
 		  //test function for default mas and size; 
-		 //TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
-	       TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
+		   //TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
+	       
+		   
+		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
 	       get();
 	   }
-	  //get ethernet packet and transmit to cyclone3 local bus //transmit success;
+	   else
+	   {
+		  printk("!!!!NO_PACKET_TO_RECIEVE\n\r");  
+		   
+	   }
+	   
+	   
+	   //get ethernet packet and transmit to cyclone3 local bus //transmit success;
 	  //set transmission success;
 	  
 	}
@@ -541,7 +552,7 @@ int mpc_init_module(void)
       
          //Init Structure 
          recieve_tsec_packet.state=0;
-         //LocalBusCyc3_Init();   //__Initialization Local bus 
+         LocalBusCyc3_Init();   //__Initialization Local bus 
 	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
@@ -565,8 +576,8 @@ int mpc_init_module(void)
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	
-	//add_timer(&timer2);  //Starting the timer2
-	//add_timer(&timer1);  //Starting the timer1
+	    add_timer(&timer2);  //Starting the timer2
+	    add_timer(&timer1);  //Starting the timer1
 	
     
 	
@@ -587,8 +598,8 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	 //del_timer_sync(&timer1);             /* Deleting the timer */
-	 //del_timer_sync(&timer2);             /* Deleting the timer */
+	del_timer_sync(&timer1);             /* Deleting the timer */
+	del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
 	 nf_unregister_hook(&bundle);
 
