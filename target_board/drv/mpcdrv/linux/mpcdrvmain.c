@@ -130,6 +130,15 @@ GENERAL NOTES
 #define P2020_IP1_ADDRESS	0xACA88214 			 /* 172.168.130.20 */
 
 
+
+
+const char * lbc_ready_toread     =    "data_read_ready_OK";
+const char * lbc_notready_to_read =    "data_read_ready_NOT";
+
+const char * lbc_ready_towrite    =    "data_write_ready_OK";
+const char * lbc_notready_to_write =   "data_write_ready_NOT";
+
+
 char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
 char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
 char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
@@ -219,7 +228,7 @@ static inline u16 get_tsec_packet_length()
 static inline put()
 {
 	
-	printk("???put_input_packet_to_lbc=1???\n\r");
+	//printk("???put_input_packet_to_lbc=1???\n\r");
 	recieve_tsec_packet.state=1;//TRUE;
 }
 
@@ -228,7 +237,7 @@ static inline put()
 /**************************************************************************************************/
 static inline get()
 {
-	printk("???get_lbc_transmit_complete=0????????\n\r");
+	//printk("???get_lbc_transmit_complete=0????????\n\r");
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
@@ -371,31 +380,33 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer1_routine(unsigned long data)
 {
-static u16 i=0;
-	
-UINT16 lbcread_state=0;
-u16  out_buf[1518];//1518 bait;
-u16  out_size;
-u8  *out_num_of_tdm_ch=0;
+
+UINT16  lbcread_state=0;
+UINT16  out_buf[1518];//1518 bait;
+UINT16  out_size=0;
 
 
-	//printk(KERN_ALERT"Recieve lbc Timer1 Routine count-> %d data passed %ld\n\r",i++,data);
-    //printk(KERN_ALERT"+timer1_routine+\n\r"); 
-    mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); /* restarting timer */
-	ktime_now();
-    
-	//#ifdef  P2020_RDBKIT
-	//lbcread_state=1;
-   // #endif
-    //#ifdef P2020_MPC
+
+
+ 
 	lbcread_state=TDM0_direction_READ_READY();
-    printk("+READ_timer1_routine|lbcread_state=%d+\n\r",lbcread_state);
-	// #endif
-	
+   
+	if(lbcread_state==0)
+	{
+	printk("+timer1_routine----->%s+\n\r",lbc_notready_to_read );		
+	}
+    
+    
 	if(lbcread_state==1)
 	{
-		TDM0_dierction_read  (out_buf,&out_size);	
+	printk("+timer1_routine------>%s+\n\r",lbc_ready_toread );		
+	TDM0_dierction_read  (out_buf,&out_size);	
 	}
+
+
+    //printk(KERN_ALERT"+timer1_routine+\n\r"); 
+    mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); // restarting timer
+    //ktime_now();
 
 }
 
@@ -410,52 +421,43 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 void timer2_routine(unsigned long data)
 {
 UINT16 lbcwrite_state=0;
-//static u16 i=0;		
-	
 
-    //printk(KERN_ALERT"Inside Timer2 Routine count-> %d data passed %ld\n\r",i++,data);
-    printk(KERN_ALERT"+WR_timer2_routine+\n\r");
-    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); /* restarting timer 2sec or 2000msec */
-	ktime_now();
-    
-	
-	//TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
-	
-	/*
-	#ifdef  P2020_RDBKIT
-	lbcwrite_state=1;
-    #endif
+const char * lbc_ready_towrite    =    "data_write_ready_OK";
+const char * lbc_notready_to_write =   "data_write_ready_NOT"
 
-    #ifdef P2020_MPC
-	lbcwrite_state=TDM0_direction_WRITE_READY();
-    #endif
-	*/
-	
+
+
+
+
+
+
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
 	  {
 		 
 	   lbcwrite_state=TDM0_direction_WRITE_READY();
-	   printk("lbcwrite_state=%d\n\r",lbcwrite_state); 
+	   
+	   
+	   if (lbcwrite_state==0)
+	   {
+		   printk("+timer2_routine----->%s+\n\r",lbc_notready_to_write);   
+		   
+	   }
+	   
+	  
 	   if(lbcwrite_state==1)
-	   {
-		   /*
-		   printk("++++++WRITE_PLIS_SUCCESS+++\n\r");
-		   printk("packet_len=0x%x\n\r",get_tsec_packet_length());
-		   printk("packet_data=0x%x\n\r",get_tsec_packet_data());
-		   */   
-		  //test function for default mas and size; 
-		   //TDM0_direction_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0);
-	       
-		   
+	   {	       
+		   printk("+timer2_routine----->%s+\n\r",lbc_notready_to_write); 
 		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
-	       get();
+		   get();
 	   }
-	   else
-	   {
-		  printk("!!!!NO_PACKET_TO_RECIEVE\n\r");  
-		   
-	   }
+	 
+
+	   
+	   mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
+	   ktime_now();
+	   
+	   
 	   
 	   
 	   //get ethernet packet and transmit to cyclone3 local bus //transmit success;

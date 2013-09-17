@@ -391,6 +391,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     
 	for(i=0;i<hex_element_size+1;i++)
 	{
+		
 		plis_write16(DIR0_ADDRESS_WRITE_DATA,in_buf[i]);
 	}
 	//Write dannie
