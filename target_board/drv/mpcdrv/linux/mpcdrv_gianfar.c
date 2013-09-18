@@ -289,15 +289,15 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 	
 	len =  get_tdmdir_packet_length();      
 	len=len*2;
-	printk("+p2020_get_from_tdmdir_and_put_to_ethernet|len=%d \n\r",len);
+	//printk("+p2020_get_from_tdmdir_and_put_to_ethernet|len=%d \n\r",len);
 	
 	
 	//printk("???????????????????virt_device_len =%d\n\r",len);
 	data = get_tdmdir_packet_data();      
 	//Char Buffer only
 	   
-	  printk("+put_to_eth_rfirst|0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[0],data[1],data[2],data[3]);
-	  printk("+put_to_eth_rlast |0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[len-3],data[len-2],data[len-1],data[len]);
+	 // printk("+put_to_eth_rfirst|0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[0],data[1],data[2],data[3]);
+	 // printk("+put_to_eth_rlast |0x%02x|0x%02x|0x%02x|0x%02x+\n\r",data[len-3],data[len-2],data[len-1],data[len]);
 	
 	
 	//printk("virt_TSEC_|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x\n\r",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
@@ -333,7 +333,7 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 	    switch (ret) 
 		{
 		 case NETDEV_TX_OK:
-		 printk("++++++mpcdrv:NETDEV_Transmit_OK+++++\n");
+		 printk("mpcdrv:->>>>>>>>>>>>>>>>>>>>NETDEV_Transmit_OK\n");
 		 break;
 	
 	

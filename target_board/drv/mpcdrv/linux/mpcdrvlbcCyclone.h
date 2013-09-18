@@ -58,12 +58,6 @@
     //#define P2020_RDBKIT  1
 //  #define P2020_MPC     1
 
-////////////PLIS_Direction0_DEFENITION////////////////////
-
-#define  PLIS_WRITE_SUCCESS               0x0003
-#define  DIR0_ADDRESS_WRITE_SUCCESS       30  //0x1E
-#define  DIR0_ADDRESS_WRITE_DATA          200 //0xC8
-#define  DIR0_ADDRESS_READ_DATA           400 //0x190
 
 
 
@@ -73,22 +67,92 @@
 #define PLIS_PHYSICAL_RESOURCE_SIZE   0x01000000
 
 
+/*  Registers offset on Cyclone 3 ->lbc MAP */
 
+
+typedef enum{
+   //PLIS_ADDRESS0     		= 0,
+  
+   
+   //TDM DIR 0 REGISTER
+     DIR0_PLIS_ADDRESS30 			= 30,  //0x1E  plis write success address
+     DIR0_PLIS_ADDRESS800 			= 800,
+     DIR0_PLIS_ADDRESS1000  		= 1000,
+     DIR0_PLIS_ADDRESS1200          = 1200,//       plis read  packet size 
+     DIR0_PLIS_ADDRESS200           = 200, //0xC8   plis read data
+     DIR0_PLIS_ADDRESS400           = 400 //0x190   plis write data
+     
+     
+   //TDM DIR 1 REGISTER
+   
+     
+     
+   //TDM DIR 2 REGISTER
+   
+   
+   //TDM DIR 3 REGISTER
+   
+   
+   //TDM DIR 4 REGISTER
+   
+   
+   //TDM DIR 5 REGISTER
+   
+   
+   //TDM DIR 6 REGISTER
+   
+  
+   //TDM DIR 7 REGISTER
+   
+   
+   //TDM DIR 8 REGISTER
+   
+   
+   //TDM DIR 9 REGISTER
  
-#define  PLIS_ADDRESS0    0
-#define  PLIS_ADDRESS30   30       
+}Plis_register_address;
 
-#define  PLIS_ADDRESS800  800
-#define  PLIS_ADDRESS1000 1000
 
-#define  PLIS_ADDRESS1200 1200    //this output size of ip packet
+
+
+typedef enum
+{
+	
+	PLIS_VALUE =54
+	
+	//TDM DIR 0 REGISTER
+	//TDM DIR 1 REGISTER
+	//TDM DIR 2 REGISTER
+	//TDM DIR 3 REGISTER
+	//TDM DIR 4 REGISTER
+	//TDM DIR 5 REGISTER
+	//TDM DIR 6 REGISTER
+	//TDM DIR 7 REGISTER
+	//TDM DIR 8 REGISTER
+	//TDM DIR 9 REGISTER
+	
+	
+}Plis_register_value;
+
+
+
+
+
+
+
+
+
+
+
+////////////PLIS_Direction0_DEFENITION////////////////////
+
+#define  PLIS_WRITE_SUCCESS               0x0003
+
+
 
 /*****************************************************************************/
 /********************	TESTING FUNCTIONS ********						     */
 /*****************************************************************************/
-void callback_functions(UINT16 *data);
-
-
 
 /*****************************************************************************/
 /*	PUBLIC DATA YPES						     */
@@ -103,32 +167,64 @@ SINT32 test_Cyc3Write();
 /*****************************************************************************/
 /*	PUBLIC FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
-UINT16 plis_read16 (const u16 addr);
-void   plis_write16(const u16 addr,const u16 value);
 
-
-
-//Write Buffer to PLIS
-void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
-//Read Buffer from PLIS 
+//
 void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM1_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM2_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM3_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM4_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM5_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM6_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM7_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM8_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM9_dierction_read  (u16 *out_buf,u16 out_size_byte);
 
 
 
-//Functions read_data_on Local_bus _ready
+
+//Write Buffer to PLIS on 10 Direction
+void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM1_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM2_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM3_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM4_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM5_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM6_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM7_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM8_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM9_direction_write (const u16 *in_buf ,const u16 in_size);
+
+
+
+
+//10 READ READY functions DIRECTION ON MK8 DEVICE
 UINT16 TDM0_direction_READ_READY(void);
 UINT16 TDM1_direction_READ_READY(void);
 UINT16 TDM2_direction_READ_READY(void);
+UINT16 TDM3_direction_READ_READY(void);
+UINT16 TDM4_direction_READ_READY(void);
+UINT16 TDM5_direction_READ_READY(void);
+UINT16 TDM6_direction_READ_READY(void);
+UINT16 TDM7_direction_READ_READY(void);
+UINT16 TDM8_direction_READ_READY(void);
+UINT16 TDM9_direction_READ_READY(void);
 
-//Functions write_data_on_Local_bus _ready
+
+
+//10 WRITE READY functions DIRECTION ON MK8 DEVICE
 UINT16 TDM0_direction_WRITE_READY(void);
 UINT16 TDM1_direction_WRITE_READY(void);
 UINT16 TDM2_direction_WRITE_READY(void);
+UINT16 TDM3_direction_WRITE_READY(void);
+UINT16 TDM4_direction_WRITE_READY(void);
+UINT16 TDM5_direction_WRITE_READY(void);
+UINT16 TDM6_direction_WRITE_READY(void);
+UINT16 TDM7_direction_WRITE_READY(void);
+UINT16 TDM8_direction_WRITE_READY(void);
+UINT16 TDM9_direction_WRITE_READY(void);
 
 
 
-/*****************************************************************************/
-/*	PUBLIC GLOBALS							     */
-/*****************************************************************************/
 #endif /* MPCDRVLBCCYCLONE_H */
 

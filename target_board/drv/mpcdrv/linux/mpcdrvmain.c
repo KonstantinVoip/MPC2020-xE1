@@ -385,9 +385,6 @@ UINT16  lbcread_state=0;
 UINT16  out_buf[1518];//1518 bait;
 UINT16  out_size=0;
 
-
-
-
  
 	lbcread_state=TDM0_direction_READ_READY();
    
@@ -422,15 +419,8 @@ void timer2_routine(unsigned long data)
 {
 UINT16 lbcwrite_state=0;
 
-const char * lbc_ready_towrite    =    "data_write_ready_OK";
-const char * lbc_notready_to_write =   "data_write_ready_NOT"
-
-
-
-
-
-
-
+    printk("++timer2_routin++\n\r");
+    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
 	  {
@@ -441,21 +431,21 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT"
 	   if (lbcwrite_state==0)
 	   {
 		   printk("+timer2_routine----->%s+\n\r",lbc_notready_to_write);   
-		   
+		   get();
 	   }
 	   
 	  
 	   if(lbcwrite_state==1)
 	   {	       
-		   printk("+timer2_routine----->%s+\n\r",lbc_notready_to_write); 
+		   printk("+timer2_routine----->%s+\n\r",lbc_ready_towrite); 
 		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
 		   get();
 	   }
 	 
 
 	   
-	   mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-	   ktime_now();
+	  // mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
+	   //ktime_now();
 	   
 	   
 	   
@@ -552,6 +542,13 @@ int mpc_init_module(void)
          nf_register_hook(&bundle);
       
       
+         
+         
+         //Инициализация структуры
+         //memset(&recieve_tsec_packet, 0, sizeof(recieve_tsec_packet)); // инициализируем область памяти структуры XX
+         
+         
+         
          //Init Structure 
          recieve_tsec_packet.state=0;
          LocalBusCyc3_Init();   //__Initialization Local bus 
