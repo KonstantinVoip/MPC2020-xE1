@@ -116,9 +116,27 @@ GENERAL NOTES
 #include "mpcdrv_gianfar.h"    //P2020 Ethernet tsec <->  API function
 #include "mpcdrvnbuf.h"        //FIFO buffer
 //#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
-
-
 //#include "mpcdrveth_ipv4.h"
+
+
+
+
+///////////////////////TDM DIRECTION TEST//////////////
+ // #define TDM0_DIR_TEST  1
+  //#define TDM1_DIR_TEST  1
+  //#define TDM2_DIR_TEST  1
+  // #define TDM3_DIR_TEST  1
+  //  #define TDM4_DIR_TEST  1       //kosiak/est
+  //#define TDM5_DIR_TEST  1
+ //#define TDM6_DIR_TEST  1
+  //#define TDM7_DIR_TEST  1
+//#define TDM8_DIR_TEST  1
+//  #define TDM9_DIR_TEST  1
+///////////////////////////////////////////////////////////
+
+
+
+
 
 
 #define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  /* 10.0.0.2 */
@@ -380,24 +398,104 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer1_routine(unsigned long data)
 {
-
-UINT16  lbcread_state=0;
-UINT16  out_buf[1518];//1518 bait;
-UINT16  out_size=0;
+ UINT16  lbcread_state=0;
+ UINT16  out_buf[1518];//1518 bait;
+ UINT16  out_size=0;
 
  
-	lbcread_state=TDM0_direction_READ_READY();
+
+
+ #ifdef TDM0_DIR_TEST
+ lbcread_state=TDM0_direction_READ_READY();
+ #endif
+
+
+ #ifdef TDM1_DIR_TEST
+ lbcread_state=TDM1_direction_READ_READY();
+ #endif
+
+ #ifdef TDM2_DIR_TEST
+ lbcread_state=TDM2_direction_READ_READY();
+ #endif
+
+ #ifdef TDM3_DIR_TEST
+ lbcread_state=TDM3_direction_READ_READY();
+ #endif
+
+ #ifdef TDM4_DIR_TEST
+ lbcread_state=TDM4_direction_READ_READY();
+ #endif
+
+ #ifdef TDM5_DIR_TEST
+ lbcread_state=TDM5_direction_READ_READY();
+ #endif
+		
+ #ifdef TDM6_DIR_TEST
+ lbcread_state=TDM6_direction_READ_READY();
+ #endif		
+		
+ #ifdef TDM7_DIR_TEST
+ lbcread_state=TDM7_direction_READ_READY();
+ #endif			
+		
+ #ifdef TDM8_DIR_TEST
+ lbcread_state=TDM8_direction_READ_READY();
+ #endif			
+		
+ #ifdef TDM9_DIR_TEST
+ lbcread_state=TDM9_direction_READ_READY();
+ #endif			
+		
    
 	if(lbcread_state==0)
 	{
-	printk("+timer1_routine----->%s+\n\r",lbc_notready_to_read );		
+	printk("------------READtimer1_routine----->%s---------------\n\r",lbc_notready_to_read );		
 	}
     
     
 	if(lbcread_state==1)
 	{
-	printk("+timer1_routine------>%s+\n\r",lbc_ready_toread );		
-	TDM0_dierction_read  (out_buf,&out_size);	
+	printk("------------READtimer1_routine------>%s---------------\n\r",lbc_ready_toread );		
+	
+    #ifdef TDM0_DIR_TEST
+	TDM0_dierction_read  (out_buf,&out_size);
+    #endif
+	
+	#ifdef TDM1_DIR_TEST
+	TDM1_dierction_read  (out_buf,&out_size);
+	#endif
+
+	#ifdef TDM2_DIR_TEST
+	TDM2_dierction_read  (out_buf,&out_size);
+	#endif
+
+	#ifdef TDM3_DIR_TEST
+	TDM3_dierction_read  (out_buf,&out_size);
+	#endif
+
+	#ifdef TDM4_DIR_TEST
+	TDM4_dierction_read  (out_buf,&out_size);
+	#endif
+
+	#ifdef TDM5_DIR_TEST
+	TDM5_dierction_read  (out_buf,&out_size);
+	#endif
+		
+	#ifdef TDM6_DIR_TEST
+	TDM6_dierction_read  (out_buf,&out_size);
+	#endif		
+		
+	#ifdef TDM7_DIR_TEST
+	TDM7_dierction_read  (out_buf,&out_size);
+	#endif			
+		
+	#ifdef TDM8_DIR_TEST
+	TDM8_dierction_read  (out_buf,&out_size);
+	#endif			
+		
+	#ifdef TDM9_DIR_TEST
+	TDM9_dierction_read  (out_buf,&out_size);
+	#endif		
 	}
 
 
@@ -411,50 +509,120 @@ UINT16  out_size=0;
 Syntax:      	    void timer2_routine(unsigned long data)
 Parameters:     	void data
 Remarks:			timer functions 
-
 Return Value:	    1  =>  Success  ,-1 => Failure
-
 ***************************************************************************************************/
 void timer2_routine(unsigned long data)
 {
 UINT16 lbcwrite_state=0;
 
-    printk("++timer2_routin++\n\r");
-    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
+    //printk("++timer2_routin++\n\r");
+    //mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
 	//if success packet to transmit ->>ready
 	if(recieve_tsec_packet.state==1)
 	  {
-		 
-	   lbcwrite_state=TDM0_direction_WRITE_READY();
-	   
-	   
+	
+	  	  #ifdef TDM0_DIR_TEST
+		  lbcwrite_state=TDM0_direction_WRITE_READY();
+ 	  	  #endif	
+		
+	  	  #ifdef TDM1_DIR_TEST
+		  lbcwrite_state=TDM1_direction_WRITE_READY();
+		  #endif	 
+	
+	  	  #ifdef TDM2_DIR_TEST
+	      lbcwrite_state=TDM2_direction_WRITE_READY();
+ 	      #endif
+		
+          #ifdef TDM3_DIR_TEST
+	      lbcwrite_state=TDM3_direction_WRITE_READY();
+		  #endif
+	  
+          #ifdef TDM4_DIR_TEST
+	      lbcwrite_state=TDM4_direction_WRITE_READY();
+ 	      #endif
+	  
+          #ifdef TDM5_DIR_TEST
+	      lbcwrite_state=TDM5_direction_WRITE_READY();
+ 	      #endif
+	  
+          #ifdef TDM6_DIR_TEST
+	      lbcwrite_state=TDM6_direction_WRITE_READY();
+ 	      #endif
+	  
+          #ifdef TDM7_DIR_TEST
+	      lbcwrite_state=TDM7_direction_WRITE_READY();
+ 	      #endif
+	  
+          #ifdef TDM8_DIR_TEST
+	      lbcwrite_state=TDM8_direction_WRITE_READY();
+	      #endif
+	  
+          #ifdef TDM9_DIR_TEST
+	      lbcwrite_state=TDM9_direction_WRITE_READY();
+	      #endif
+	  
+
 	   if (lbcwrite_state==0)
 	   {
-		   printk("+timer2_routine----->%s+\n\r",lbc_notready_to_write);   
+		   printk("-----------WRITEtimer2_routine----->%s---------------\n\r",lbc_notready_to_write);   
 		   get();
 	   }
 	   
 	  
 	   if(lbcwrite_state==1)
 	   {	       
-		   printk("+timer2_routine----->%s+\n\r",lbc_ready_towrite); 
-		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());    
-		   get();
+		  printk("-----------WRITEtimer2_routine----->%s------------------\n\r",lbc_ready_towrite); 
+		   
+          #ifdef TDM0_DIR_TEST
+		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+	      #endif
+		   
+  	  	  #ifdef TDM1_DIR_TEST
+		   TDM1_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		  #endif	 
+
+  	  	  #ifdef TDM2_DIR_TEST
+		   TDM2_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+ 	 	  #endif
+
+		  #ifdef TDM3_DIR_TEST
+		   TDM3_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		  #endif
+
+		  #ifdef TDM4_DIR_TEST
+		   TDM4_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+ 	 	  #endif
+
+		  #ifdef TDM5_DIR_TEST
+		   TDM5_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+ 	 	  #endif
+
+		  #ifdef TDM6_DIR_TEST
+		   TDM6_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
+ 	 	  #endif
+
+		  #ifdef TDM7_DIR_TEST
+		   TDM7_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+ 	 	  #endif
+
+		  #ifdef TDM8_DIR_TEST
+		   TDM8_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		  #endif
+
+		  #ifdef TDM9_DIR_TEST
+		   TDM9_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		  #endif
+		  
+	   get();
 	   }
 	 
-
-	   
 	  // mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
 	   //ktime_now();
-	   
-	   
-	   
-	   
 	   //get ethernet packet and transmit to cyclone3 local bus //transmit success;
 	  //set transmission success;
 	  
 	}
-
+mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
 
 
 }

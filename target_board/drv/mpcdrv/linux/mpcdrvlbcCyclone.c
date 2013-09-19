@@ -62,7 +62,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-static inline UINT16 plis_read16 (const UINT16 addr);
+static inline UINT16  plis_read16 (const UINT16 addr);
 static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
@@ -161,18 +161,13 @@ inline UINT16 plis_read16 (const UINT16 addr)
 //UINT16 out_data=0x0000;
 //byte_offset = addr*2;
 //out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
-
   out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));	
 return out_data;
 }
 /**************************************************************************************************
 Syntax:      	    void   plis_write16(const u16 addr,u16 value)
-
 Remarks:			This Write to PLIS  address value. 
-
-   
-Return Value:	Returns 1 on success and negative value on failure.
-
+Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -180,14 +175,10 @@ Return Value:	Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 inline void   plis_write16(const UINT16 addr,const  UINT16 value)
 {
- 
  //UINT16 byte_offset=0x0000; 	
  //byte_offset = addr*2;
-	
  //__raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
    __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));  
-   
-	
 }
 
 
@@ -196,38 +187,24 @@ inline void   plis_write16(const UINT16 addr,const  UINT16 value)
 
 
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM0_direction_READ_READY(void)
-
-Remarks:			 
-
+Syntax:      	    UINT16 TDM0_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
-
- 				Value		 									Description
-				-------------------------------------------------------------------------------------
-				= 1												Success
-				=-1												Failure
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
 ***************************************************************************************************/
 UINT16 TDM0_direction_READ_READY(void)
 {
-	UINT16 dannie1000=0;
-	UINT16 count_visim=0;
-	UINT16 dannie800=0;
- 
- 
- ////////////////////Future timing read data form plis///////////////
- //dannie800=plis_read16 (PLIS_ADDRESS800);
- //printk("READ_800=0x%x\n\r",dannie800);
- 
- 
- //if(dannie800==1)
- //{
+UINT16 dannie1000=0;
+UINT16 count_visim=0;
+UINT16 dannie800=0;
  
  	 while(!dannie1000)
  	 {	 
-	 
  		 if(count_visim==20)return 0;
 	 
- 		 dannie1000=plis_read16 (DIR0_PLIS_ADDRESS1000);
+ 		 dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
  		 if(dannie1000==0xabc0)
  		 {
 		 dannie1000=0; 
@@ -235,52 +212,293 @@ UINT16 TDM0_direction_READ_READY(void)
  		 }
 	 count_visim++; 
     }
- 	dannie800=plis_read16 (DIR0_PLIS_ADDRESS800);
- 	
- 	 
- 	 
- 	//printk("OK_READ_READY=0x%x\n\r",dannie1000);
+ 	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
  	return 1;
- 
- //}
- //else
- //{
-	 
-	//return 0 ;
- //}
- 
 
- 
- //#ifdef TDM_DIRECTION0_READ_DEBUG 
- //printk("dannie1000=0x%x\n\r",dannie1000);
- //#endif 
- //if(dannie1000==0xabc1) return 1;
- //else return 0;
- 
+}
+
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM1_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM1_direction_READ_READY(void)
+{
+UINT16 dannie1002=0;
+UINT16 tdmdir1_count_visim=0;
+UINT16 dannie802=0;
+
+	 	 while(!dannie1002)
+	 	 {	 
+	 		 if(tdmdir1_count_visim==20)return 0;
+		 
+	 		dannie1002=plis_read16 (DIR1_PLIS_READOK_ADDR1002);
+	 		 if(dannie1002==0xabc0)
+	 		 {
+	 			dannie1002=0; 
+			 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+	 		 }
+	 		tdmdir1_count_visim++; 
+	    }
+	 	dannie802=plis_read16 (DIR1_PLIS_READ_BUG_ADDR802);
+	 	return 1;
+		
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM2_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM2_direction_READ_READY(void)
+{
+	UINT16 dannie1004=0;
+	UINT16 tdmdir2_count_visim=0;
+	UINT16 dannie804=0;
+
+		 	 while(!dannie1004)
+		 	 {	 
+		 		 if(tdmdir2_count_visim==20)return 0;
+			 
+		 		dannie1004=plis_read16 (DIR2_PLIS_READOK_ADDR1004);
+		 		 if(dannie1004==0xabc0)
+		 		 {
+		 			dannie1004=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir2_count_visim++; 
+		    }
+		 	dannie804=plis_read16 (DIR2_PLIS_READ_BUG_ADDR804);
+		 	return 1;
+
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM3_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM3_direction_READ_READY(void)
+{
+	UINT16 dannie1006=0;
+	UINT16 tdmdir3_count_visim=0;
+	UINT16 dannie806=0;
+
+		 	 while(!dannie1006)
+		 	 {	 
+		 		 if(tdmdir3_count_visim==20)return 0;
+			 
+		 		dannie1006=plis_read16 (DIR3_PLIS_READOK_ADDR1006);
+		 		 if(dannie1006==0xabc0)
+		 		 {
+		 			dannie1006=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir3_count_visim++; 
+		    }
+		 	dannie806=plis_read16 (DIR3_PLIS_READ_BUG_ADDR806);
+		 	return 1;
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM4_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM4_direction_READ_READY(void)
+{
+	
+	UINT16 dannie1008=0;
+	UINT16 tdmdir4_count_visim=0;
+	UINT16 dannie808=0;
+
+		 	 while(!dannie1008)
+		 	 {	 
+		 		 if(tdmdir4_count_visim==20)return 0;
+			 
+		 		dannie1008=plis_read16 (DIR4_PLIS_READOK_ADDR1008);
+		 		 if(dannie1008==0xabc0)
+		 		 {
+		 			dannie1008=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir4_count_visim++; 
+		    }
+	dannie808=plis_read16 (DIR4_PLIS_READ_BUG_ADDR808);
+	return 1;
+	
+}
+			
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM5_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM5_direction_READ_READY(void)
+{
+	UINT16 dannie1010=0;
+	UINT16 tdmdir5_count_visim=0;
+	UINT16 dannie810=0;
+
+		 	 while(!dannie1010)
+		 	 {	 
+		 		 if(tdmdir5_count_visim==20)return 0;
+			 
+		 		dannie1010=plis_read16 (DIR5_PLIS_READOK_ADDR1010);
+		 		 if(dannie1010==0xabc0)
+		 		 {
+		 			dannie1010=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir5_count_visim++; 
+		    }
+	dannie810=plis_read16 (DIR5_PLIS_READ_BUG_ADDR810);
+	return 1;
+
+}
+								
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM6_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM6_direction_READ_READY(void)
+{
+	UINT16 dannie1012=0;
+	UINT16 tdmdir6_count_visim=0;
+	UINT16 dannie812=0;
+
+		 	 while(!dannie1012)
+		 	 {	 
+		 		 if(tdmdir6_count_visim==20)return 0;
+			 
+		 		dannie1012=plis_read16 (DIR6_PLIS_READOK_ADDR1012);
+		 		 if(dannie1012==0xabc0)
+		 		 {
+		 			dannie1012=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir6_count_visim++; 
+		    }
+	dannie812=plis_read16 (DIR6_PLIS_READ_BUG_ADDR812);
+	return 1;
+}								
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM7_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM7_direction_READ_READY(void)
+{
+	UINT16 dannie1014=0;
+	UINT16 tdmdir7_count_visim=0;
+	UINT16 dannie814=0;
+
+		 	 while(!dannie1014)
+		 	 {	 
+		 		 if(tdmdir7_count_visim==20)return 0;
+			 
+		 		dannie1014=plis_read16 (DIR7_PLIS_READOK_ADDR1014);
+		 		 if(dannie1014==0xabc0)
+		 		 {
+		 			dannie1014=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir7_count_visim++; 
+		    }
+	dannie814=plis_read16 (DIR7_PLIS_READ_BUG_ADDR814);
+	return 1;
+}
+	
+	
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM8_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM8_direction_READ_READY(void)
+{
+
+	UINT16 dannie1016=0;
+	UINT16 tdmdir8_count_visim=0;
+	UINT16 dannie816=0;
+
+		 	 while(!dannie1016)
+		 	 {	 
+		 		 if(tdmdir8_count_visim==20)return 0;
+			 
+		 		dannie1016=plis_read16 (DIR8_PLIS_READOK_ADDR1016);
+		 		 if(dannie1016==0xabc0)
+		 		 {
+		 			dannie1016=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir8_count_visim++; 
+		    }
+	dannie816=plis_read16 (DIR8_PLIS_READ_BUG_ADDR816);	
+	return 1;
+}
+		
+		
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM9_direction_READ_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+UINT16 TDM9_direction_READ_READY(void)
+{
+	UINT16 dannie1018=0;
+	UINT16 tdmdir9_count_visim=0;
+	UINT16 dannie818=0;
+
+		 	 while(!dannie1018)
+		 	 {	 
+		 		 if(tdmdir9_count_visim==20)return 0;
+			 
+		 		dannie1018=plis_read16 (DIR9_PLIS_READOK_ADDR1018);
+		 		 if(dannie1018==0xabc0)
+		 		 {
+		 			dannie1018=0; 
+				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 		 }
+		 		tdmdir9_count_visim++; 
+		    }
+	dannie818=plis_read16 (DIR9_PLIS_READ_BUG_ADDR818);	
+	return 1;
+
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//*************************************WRITE_READY******************************//
+//*****************************************************************************//
+//*****************************************************************************//
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM0_direction_WRITE_READY(void)
-
-Remarks:			 
-
+Syntax:      	    UINT16 TDM0_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -288,25 +506,17 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM0_direction_WRITE_READY(void)
 {
-	UINT16  dannie30=1;
- 
- 
+  UINT16  dannie30=1;
+  
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
- 
  while(dannie30)
  {
-  dannie30=plis_read16 (DIR0_PLIS_ADDRESS30); 	 
+  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 	 
 
- 
  }
-
- 
- 
- 
  //printk("WRITE_READY_OK=%d\n\r",dannie30);
  return 1; //WRITE READY SUCCESS
- 
  // #ifdef TDM_DIRECTION0_WRITE_DEBUG	
  /*printk("WRITE_READY=%d\n\r",dannie30);
  //#endif
@@ -317,19 +527,212 @@ UINT16 TDM0_direction_WRITE_READY(void)
 }
 
 
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM1_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM1_direction_WRITE_READY(void)
+{
+UINT16  dannie32=1; 
+     //Next step Set delay to write succes operations !!!!!!!!!!!
+	 while(dannie32)
+	 {
+	  dannie32=plis_read16 (DIR1_PLIS_WRITEOK_ADDR32); 
+	 }
+	 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+return 1; //WRITE READY SUCCESS
+
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM2_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM2_direction_WRITE_READY(void)
+{
+
+	UINT16  dannie34=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie34)
+		 {
+		  dannie34=plis_read16 (DIR2_PLIS_WRITEOK_ADDR34); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;	
+	
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM3_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM3_direction_WRITE_READY(void)
+{
+	UINT16  dannie36=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie36)
+		 {
+		  dannie36=plis_read16 (DIR3_PLIS_WRITEOK_ADDR36); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;	
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM4_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM4_direction_WRITE_READY(void)
+{
+	UINT16  dannie38=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie38)
+		 {
+		  dannie38=plis_read16 (DIR4_PLIS_WRITEOK_ADDR38); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;		
+}			
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM5_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM5_direction_WRITE_READY(void)
+{
+	UINT16  dannie40=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie40)
+		 {
+		  dannie40=plis_read16 (DIR5_PLIS_WRITEOK_ADDR40); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;			
+				
+}				
+				
+				
+				
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM6_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM6_direction_WRITE_READY(void)
+{
+	UINT16  dannie42=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie42)
+		 {
+		  dannie42=plis_read16 (DIR6_PLIS_WRITEOK_ADDR42); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;				
+					
+									
+}					
+					
+					
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM7_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM7_direction_WRITE_READY(void)
+{
+	UINT16  dannie44=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie44)
+		 {
+		  dannie44=plis_read16 (DIR7_PLIS_WRITEOK_ADDR44); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;					
+												
+						
+}					
+						
+						
+						
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM8_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM8_direction_WRITE_READY(void)
+{
+	UINT16  dannie46=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie46)
+		 {
+		  dannie46=plis_read16 (DIR8_PLIS_WRITEOK_ADDR46); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;
+	
+}	
+	
+	
+	
+	
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM9_direction_WRITE_READY(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+UINT16 TDM9_direction_WRITE_READY(void)
+{
+	UINT16  dannie48=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+		 while(dannie48)
+		 {
+		  dannie48=plis_read16 (DIR9_PLIS_WRITEOK_ADDR48); 
+		 }
+		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+	return 1;
+
+}
 
 
 
+
+//*************************************WRITE_DATA_TO_PLIS******************************//
+//*****************************************************************************//
+//*****************************************************************************//
 
 
 /**************************************************************************************************
-Syntax:      	   void Tdm_Direction0_write (const u16 *in_buf ,const u16 in_size,const u8 in_num_of_tdm_ch
-
-Remarks:			This Write to PLIS  address value. 
-
-   
+Syntax:      	void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)num_of_tdm_ch
+Remarks:		This Write to PLIS  address value. 
 Return Value:	Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -337,86 +740,304 @@ Return Value:	Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 {
-	u16 dannie30 =1;
 	u16 i=0;
-    static u16 iteration=0;
+    static UINT16 tdm0_write_iteration=0;
     u16 hex_element_size=0;
     
-    //Add preambula to input packet
-    //eth_preambula_mas; 
- 
-//#if 0	
-//printk("++++++++++++++++++++Tdm_Direction0_write= %d|in_size=%d+++++++++++++++++\n\r",iteration,in_size);
-	
-#ifdef TDM_DIRECTION0_WRITE_DEBUG
-	   //printk("in_size=%d \n\r",in_size);  	    
-#endif	
-	   //printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]); 
-/*	   
-#ifdef TDM_DIRECTION0_WRITE_DEBUG
-	   for(i=0;i<in_size;i++)
-	   {	   
-	   printk("in_data = 0x%04x \n\r",in_buf[i]);  	    
-	   }
-#endif	
-*/   
-	   
-/*	   
-#ifdef TDM_DIRECTION0_WRITE_DEBUG
-      printk("+++++++++++++++++++++++++++++++++++++++++++\n\r");  
-#endif	   
-*/	
-	
-#ifdef TDM_DIRECTION0_WRITE_DEBUG	
-	//printk("dannie30=%x\n\r",dannie30);
-#endif
-
-	   //Read dannie   
-	   //memcpy(out_buf,in_buf,in_size+1);   
-	  // #ifdef  P2020_RDBKIT
-      // printk("???????????write operation????????????????????????????????\n\r");
-	  // #endif
-    
-    
-    //Warning Add preambula to packet
     hex_element_size=in_size/2;
-    
-    
-    
-    //#ifdef P2020_MPC	   
-	//Write dannie 
-    printk("+Tdm_Direction0_write\iteration= %d+\n\r",iteration);  
-    printk("+Tdm_Direction0_write\in_size_mas_byte= %d+\n\r",in_size);
-    printk("+Tdm_Direction0_write\in_size_mas_element= %d+\n\r",in_size/2);
-	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
-	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-    
-    
-    
-    
+    printk("+Tdm_Dir0_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     
 	for(i=0;i<hex_element_size+1;i++)
 	{
-		
-		plis_write16(DIR0_PLIS_ADDRESS400 ,in_buf[i]);
+		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
-	//Write dannie
 	//WRITE to PLIS SUCCESS
-	plis_write16(DIR0_PLIS_ADDRESS30 ,PLIS_WRITE_SUCCESS );
-//#endif  	
-
-	
-	iteration++;	
+	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
+	tdm0_write_iteration++;	
 }
 
 /**************************************************************************************************
-Syntax:      	   void Tdm_Direction0_read  (u16 *out_buf,u16 *out_size,u8 *out_num_of_tdm_ch)
-
-Remarks:		   This Read from PLIS0 tdm direction  
-
-   
+Syntax:      	void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
 Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm1_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir1_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir1_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR1_PLIS_WRITE_ADDR202 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR1_PLIS_WRITEOK_ADDR32 ,PLIS_WRITE_SUCCESS);
+	tdm1_write_iteration++;
 
+}
+
+
+/**************************************************************************************************
+Syntax:      	void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	
+	u16 i=0;
+    static UINT16 tdm2_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR2_PLIS_WRITE_ADDR204  ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR2_PLIS_WRITEOK_ADDR34 ,PLIS_WRITE_SUCCESS);
+	tdm2_write_iteration++;
+
+}	
+	
+/**************************************************************************************************
+Syntax:      	void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	
+	u16 i=0;
+    static UINT16 tdm3_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR3_PLIS_WRITE_ADDR206  ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR3_PLIS_WRITEOK_ADDR36 ,PLIS_WRITE_SUCCESS);
+	tdm3_write_iteration++;
+
+}		
+		
+/**************************************************************************************************
+Syntax:      	void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm4_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir4_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm4_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir4_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir4_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR4_PLIS_WRITE_ADDR208 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR4_PLIS_WRITEOK_ADDR38 ,PLIS_WRITE_SUCCESS);
+	tdm4_write_iteration++;	
+			
+}			
+					
+/**************************************************************************************************
+Syntax:      	void TDM5_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM5_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm5_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir5_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm5_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir5_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir5_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR5_PLIS_WRITE_ADDR210 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR5_PLIS_WRITEOK_ADDR40 ,PLIS_WRITE_SUCCESS);
+	tdm5_write_iteration++;			
+				
+}							
+/*************************************************************************************************
+Syntax:      	void TDM6_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM6_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm6_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir6_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir6_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir6_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR6_PLIS_WRITE_ADDR212 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR6_PLIS_WRITEOK_ADDR42 ,PLIS_WRITE_SUCCESS);
+	tdm6_write_iteration++;				
+}
+
+/**************************************************************************************************
+Syntax:      	void TDM7_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM7_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm7_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir7_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm7_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir7_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir7_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR7_PLIS_WRITE_ADDR214 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR7_PLIS_WRITEOK_ADDR44 ,PLIS_WRITE_SUCCESS);
+	tdm7_write_iteration++;			
+				
+}
+
+/**************************************************************************************************
+Syntax:      	void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm8_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir8_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm8_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir8_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir8_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR8_PLIS_WRITE_ADDR216 ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR8_PLIS_WRITEOK_ADDR46,PLIS_WRITE_SUCCESS);
+	tdm8_write_iteration++;					
+}
+
+/**************************************************************************************************
+Syntax:      	void TDM9_direction_write (const u16 *in_buf ,const u16 in_size)
+Remarks:		This Write to PLIS  address value. 
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM9_direction_write (const u16 *in_buf ,const u16 in_size)
+{
+	u16 i=0;
+    static UINT16 tdm9_write_iteration=0;
+    u16 hex_element_size=0;
+    
+    hex_element_size=in_size/2;
+    printk("+Tdm_Dir9_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm9_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir9_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir9_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    
+	for(i=0;i<hex_element_size+1;i++)
+	{
+		plis_write16(DIR9_PLIS_WRITE_ADDR218  ,in_buf[i]);
+	}
+	//WRITE to PLIS SUCCESS
+	plis_write16(DIR9_PLIS_WRITEOK_ADDR48 ,PLIS_WRITE_SUCCESS);
+	tdm9_write_iteration++;					
+}
+
+
+
+//*************************************READ_DATA_FROM_PLIS******************************//
+//*****************************************************************************//
+//*****************************************************************************//
+
+
+/**************************************************************************************************
+Syntax:      	   void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -426,51 +1047,14 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 {
   UINT16 dannie1200=0; 
   UINT16 i=0;		  
-  static UINT16 riteration=0;
-  UINT16 packet_size;
+  static UINT16 tdm0_read_iteration=0;
+  UINT16 packet_size=0;
   //out_size_byte=256;//512 bait;
- 
-  //printk("+Tdm_Direction0_read\iteration= %d+\n\r",riteration);
-  
    
-
-#ifdef TDM_DIRECTION0_READ_DEBUG    
-   dannie800=plis_read16 (PLIS_ADDRESS800);
-   printk("dannie800=0x%x\n\r",dannie800);
-#endif  
-  
-
-   
-
-   
-//Read dannie packet size on 1200 registers
-//#ifdef P2020_MPC
-   
-  dannie1200 = plis_read16 (DIR0_PLIS_ADDRESS1200);
+  dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200);
   packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200+1,packet_size);   
   
-  
-  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",riteration,dannie1200+1,packet_size);
-   
- 
-       
-   //
-   //out_size_byte=512;//packet_size;
-     
-//#endif  
-   
-     //printk("packet_size->>>>>>>>>>%d\n\r",packet_size);
-   
-   
-   //out_num_of_tdm_ch=1;
-   
-   //printk("out_size=%d\n\r",out_size_byte);
-   #ifdef TDM_DIRECTION0_READ_DEBUG 
-   //printk("dannie1200=0x%x\n\r",dannie1200);
-   //printk("dannie1200=0x%x\n\r",out_size);
-   #endif  
-  
-
  //#ifdef  P2020_RDBKIT
   /* 
    do
@@ -480,100 +1064,379 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
      }while( i< out_size_byte);
   */
  //#endif
-	
- 
  //#ifdef P2020_MPC
   do
    {
-	   out_buf[i]=plis_read16 (DIR0_PLIS_ADDRESS200);  
-	 //  #ifdef TDM_DIRECTION0_READ_DEBUG	   
-	 //  printk("plis_read_data =0x%x\n\r",plis_read_data);
-     //  #endif 	   
-	   i++;
+	 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+	 out_buf[i]=plis_read16 (DIR0_PLIS_READ_ADDR400);  
+	 i++;
    }while( i< packet_size+1);
 //#endif
    
-  printk("+Tdm_Dir0_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
-  printk("+Tdm_Dir0_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
   
+  printk("+Tdm_Dir0_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+  printk("+Tdm_Dir0_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
   
-  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);
-
-   riteration++; 
+  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);//send to eternet
+  tdm0_read_iteration++; 
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
-Syntax:      	    SINT32 Cyc3Read()
-
-Remarks:			This Function wait for complete operations Read/Write. 
-
-   
+Syntax:      	   void TDM1_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-SINT32 test_Cyc3Read()
+void TDM1_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 {
-int i;
-loff_t start_offset=0x0000000000000000;
-UINT16 y;
 
-    printk("++++++++++mpcCyclone3Readata-+++++++++++\n\r") ;    
-	for(i=0;i<=16;i++)
-	{
-		y= __raw_readw(map->virt + start_offset+i);
-		//printk("iter%d  0x%04x\n\r",i,t_buf[i]);
-		printk("iter%d  0x%04x\n\r",i,y);  
-	}
+	  UINT16 dannie1202=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm1_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202 );
+	  packet_size=(dannie1202+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir1_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202+1,packet_size);   
+	  
 
-return 1;
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR1_PLIS_READ_ADDR402);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir1_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir1_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm1_read_iteration++; 
+	
 }
 
+
 /**************************************************************************************************
-Syntax:      	    SINT32 Cyc3Write()
-
-Remarks:			This Function wait for complete operations Read/Write. 
-
-   
+Syntax:      	   void TDM2_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-SINT32 test_Cyc3Write()
+void TDM2_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 {
-UINT16  x=0x2222;	
-loff_t  ofs=0x0000000000000000;
+	  UINT16 dannie1204=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm2_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204);
+	  packet_size=(dannie1204+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir2_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_read_iteration,dannie1204+1,packet_size);   
+	  
 
-printk("Start_write_to_PLIS\n\r");      
-			 //__raw_writeb(x, map->virt + ofs);
-			  __raw_writew(x, map->virt + ofs);
-			//__raw_writel(x, map->virt + ofs);
-	//map_write(map, CMD(0xB0), chip->in_progress_block_addr);
-	//map_write(map, datum, adr);
-	return 1;
-
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR2_PLIS_READ_ADDR404);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir2_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir2_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm2_read_iteration++; 
+	
+	
 }
+	
+	
+	
+/**************************************************************************************************
+Syntax:      	   void TDM3_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM3_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	  UINT16 dannie1206=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm3_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1206 = plis_read16 (DIR3_PLIS_PACKSIZE_ADDR1206);
+	  packet_size=(dannie1206+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir3_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_read_iteration,dannie1206+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR3_PLIS_READ_ADDR406);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir3_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir3_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm3_read_iteration++; 
+		
+		
+}
+		
+		
+		
+		
+		
+/**************************************************************************************************
+Syntax:      	   void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	  UINT16 dannie1208=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm4_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1208 = plis_read16 (DIR4_PLIS_PACKSIZE_ADDR1208);
+	  packet_size=(dannie1208+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir4_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm4_read_iteration,dannie1208+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR4_PLIS_READ_ADDR408);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir4_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir4_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm4_read_iteration++; 
+		
+			
+}
+			
+			
+			
+			
+/**************************************************************************************************
+Syntax:      	   void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	  UINT16 dannie1210=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm5_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1210 = plis_read16 (DIR5_PLIS_PACKSIZE_ADDR1210);
+	  packet_size=(dannie1210+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir5_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm5_read_iteration,dannie1210+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR5_PLIS_READ_ADDR410);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir5_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir5_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm5_read_iteration++; 
+				
+				
+				
+}
+						
+/**************************************************************************************************
+Syntax:      	   void TDM6_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM6_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	  UINT16 dannie1212=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm6_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1212 = plis_read16 (DIR6_PLIS_PACKSIZE_ADDR1212);
+	  packet_size=(dannie1212+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir6_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_read_iteration,dannie1212+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR6_PLIS_READ_ADDR412);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir6_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir6_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm6_read_iteration++; 
+					
+					
+					
+}
+					
+					
+					
+/***************************************************************************************************
+Syntax:      	   void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	  UINT16 dannie1214=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm7_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1214 = plis_read16 (DIR7_PLIS_PACKSIZE_ADDR1214);
+	  packet_size=(dannie1214+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir7_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm7_read_iteration,dannie1214+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR7_PLIS_READ_ADDR414);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir7_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir7_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm7_read_iteration++; 			
+}						
+						
+						
+/**************************************************************************************************
+Syntax:      	   void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+	
+	  UINT16 dannie1216=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm8_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1216 = plis_read16 (DIR8_PLIS_PACKSIZE_ADDR1216);
+	  packet_size=(dannie1216+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir8_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm8_read_iteration,dannie1216+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR8_PLIS_READ_ADDR416);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir8_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir8_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm8_read_iteration++; 
+	
+	
+}
+	
+	
+	
+	
+/**************************************************************************************************
+Syntax:      	   void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Remarks:		   This Read from PLIS0 tdm direction  
+Return Value:	Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				-------------------------------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+***************************************************************************************************/
+void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+{
+
+	  UINT16 dannie1218=0; 
+	  UINT16 i=0;		  
+	  static UINT16 tdm9_read_iteration=0;
+	  UINT16 packet_size=0;
+	  //out_size_byte=256;//512 bait;
+	   
+	  dannie1218 = plis_read16 (DIR9_PLIS_PACKSIZE_ADDR1218);
+	  packet_size=(dannie1218+1)/2; //convert byte to element of massive in hex 
+	  printk("+Tdm_Dir9_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm9_read_iteration,dannie1218+1,packet_size);   
+	  
+
+	  do
+	   {
+		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
+		 out_buf[i]=plis_read16 (DIR9_PLIS_READ_ADDR418);  
+		 i++;
+	   }while( i< packet_size+1);
+	//#endif
+	    
+	  printk("+Tdm_Dir1_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir1_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  tdm9_read_iteration++; 
+	
+}
+
+
+
+
+
+
 
 
 
