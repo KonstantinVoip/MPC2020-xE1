@@ -197,12 +197,15 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM0_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
-UINT16 count_visim=0;
+//UINT16 count_visim=0;
 UINT16 dannie800=0;
- 
+
+
+dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
+
  	 while(!dannie1000)
  	 {	 
- 		 if(count_visim==20)return 0;
+ 		 //if(count_visim==200)return 0;
 	 
  		 dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
  		 if(dannie1000==0xabc0)
@@ -210,7 +213,7 @@ UINT16 dannie800=0;
 		 dannie1000=0; 
 		 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
  		 }
-	 count_visim++; 
+	 // count_visim++; 
     }
  	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
  	return 1;
@@ -1074,8 +1077,8 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 //#endif
    
   
-  printk("+Tdm_Dir0_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-  printk("+Tdm_Dir0_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
   
   p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);//send to eternet
   tdm0_read_iteration++; 
@@ -1113,8 +1116,8 @@ void TDM1_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	   }while( i< packet_size+1);
 	//#endif
 	    
-	  printk("+Tdm_Dir1_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir1_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  printk("+Tdm_Dir1_rfirst	|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir1_rlast 	|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
 	  tdm1_read_iteration++; 
 	
 }
@@ -1426,10 +1429,12 @@ void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	   }while( i< packet_size+1);
 	//#endif
 	    
-	  printk("+Tdm_Dir1_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir1_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  printk("+Tdm_Dir9_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir9_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+	  
+	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);//send to eternet
 	  tdm9_read_iteration++; 
-	
+	  
 }
 
 

@@ -122,16 +122,16 @@ GENERAL NOTES
 
 
 ///////////////////////TDM DIRECTION TEST//////////////
- // #define TDM0_DIR_TEST  1
+   // #define TDM0_DIR_TEST  1
   //#define TDM1_DIR_TEST  1
   //#define TDM2_DIR_TEST  1
-  // #define TDM3_DIR_TEST  1
-  //  #define TDM4_DIR_TEST  1       //kosiak/est
+  //#define TDM3_DIR_TEST  1
+  //#define TDM4_DIR_TEST  1       
   //#define TDM5_DIR_TEST  1
- //#define TDM6_DIR_TEST  1
+  //#define TDM6_DIR_TEST  1
   //#define TDM7_DIR_TEST  1
-//#define TDM8_DIR_TEST  1
-//  #define TDM9_DIR_TEST  1
+  //#define TDM8_DIR_TEST  1
+  #define TDM9_DIR_TEST  1
 ///////////////////////////////////////////////////////////
 
 
@@ -159,6 +159,7 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 
 char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
 char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
+char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
 char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
 char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
 char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
@@ -292,7 +293,7 @@ unsigned char buf[1514];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
 __be32	curr_ipaddr = P2020_IP_ADDRESS ;
-
+UINT16 ostatok_of_size_packet=0;
 
 
 
@@ -308,21 +309,34 @@ struct iphdr *ip;
     if (skb->protocol ==htons(ETH_P_IP))
     {
     	
+      	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+        //например 341 или что-то похожеею    	
+    	
+    	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
+    	if(ostatok_of_size_packet==1)
+    	{
+    	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+    	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС
+    	}
+    
+    	
+    	
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
-    	 
-    	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	 	 put();
-    	 
-    	 
+   
+  	 
     	 //Функция складирования пакета в буфер FIFO
-    	 result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 result_comparsion=strcmp(p2020_default_mac_addr,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {
-   		  //Здесь должна быть функции кладения в буфер FIFO
+    	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+    	     memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    		 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+    		 put();
+    		 return NF_ACCEPT;
+
+    		 //Здесь должна быть функции кладения в буфер FIFO
    		  //пока напрямую работаем	  
    		  //здесь будет собираю пакет для построение ГРАФА
    		  //Пакет предназначен моему МПС в DA мой mac адрес 
@@ -336,10 +350,10 @@ struct iphdr *ip;
     	 
     	 ////////////Дальше доделаю эту фишку
     	 /* Сохраняем указатель на структуру заголовка IP */
-	     ip = (struct iphdr *)skb_network_header(skb);
+	     /*ip = (struct iphdr *)skb_network_header(skb);
 	    
 	     
-	     /*
+	     
 	     if (curr_ipaddr== (uint)ip->daddr)
 	     {
 
