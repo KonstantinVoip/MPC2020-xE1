@@ -120,9 +120,11 @@ GENERAL NOTES
 
 
 
+#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 
 ///////////////////////TDM DIRECTION TEST//////////////
-   // #define TDM0_DIR_TEST  1
+  //#define TDM0_DIR_TEST  1
   //#define TDM1_DIR_TEST  1
   //#define TDM2_DIR_TEST  1
   //#define TDM3_DIR_TEST  1
@@ -131,8 +133,16 @@ GENERAL NOTES
   //#define TDM6_DIR_TEST  1
   //#define TDM7_DIR_TEST  1
   //#define TDM8_DIR_TEST  1
-  #define TDM9_DIR_TEST  1
+  //#define TDM9_DIR_TEST  1
 ///////////////////////////////////////////////////////////
+
+
+/*****************************************************************************/
+/***********************	PRIVATE STATIC FUNCTION DEFENITION****************/
+/*****************************************************************************/
+static void loopback_write();
+static void loopback_read();
+
 
 
 
@@ -197,6 +207,15 @@ struct ifparam *ifp;
 struct timer_list timer1,timer2;          //default timer   
 static struct hrtimer hr_timer;           //high resolution timer 
 
+/*****************************************************************************/
+/*	PUBLIC GLOBALS							     */
+/*****************************************************************************/
+UINT16  tdm_transmit_state,tdm_recieve_state ;
+static struct task_struct *tdm_transmit_task=NULL;
+static struct task_struct *tdm_recieve_task=NULL;
+
+
+
 
 
 
@@ -209,9 +228,6 @@ static struct ethdata_packet
 	u16 length;
     u16 state;
 };
-
-
-
 
 
 static struct ethdata_packet  recieve_tsec_packet;
@@ -262,14 +278,76 @@ static inline get()
 }
 
 
+/**************************************************************************************************/
+/*                                void loopback_write();                                       */
+/**************************************************************************************************/
+#ifdef TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
 
 
-/*****************************************************************************/
-/*	PUBLIC GLOBALS							     */
-/*****************************************************************************/
-UINT16  tdm_transmit_state,tdm_recieve_state ;
-static struct task_struct *tdm_transmit_task=NULL;
-static struct task_struct *tdm_recieve_task=NULL;
+void loopback_write()
+{
+UINT16 	loopbacklbcwrite_state=0;
+	
+	
+	if(recieve_tsec_packet.state==1)
+	{
+		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
+
+	
+		if (loopbacklbcwrite_state==0)
+		{
+		printk("-----------WRITELoopback_routine----->%s---------------\n\r",lbc_notready_to_write);   
+		get();
+		}
+			   	  
+		if(loopbacklbcwrite_state==1)
+	    {
+		printk("-----------WRITEtimer2_routine----->%s------------------\n\r",lbc_ready_towrite); 
+		
+		TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		// TDM0_direction_write (test_full_packet_mas ,1514); 
+		get();	
+	    }
+	
+	}
+	
+}
+#endif
+
+/**************************************************************************************************/
+/*                                 void loopback_read();                                        */
+/**************************************************************************************************/
+#ifdef TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+
+void loopback_read()
+{
+UINT16 loopbacklbcread_state=0;	
+UINT16 loopbackout_buf[1518];//1518 bait;
+UINT16 loopbackout_size=0;
+
+
+	 loopbacklbcread_state=TDM0_direction_READ_READY();
+	 if(loopbacklbcread_state==0)
+	 {
+	 printk("------------READLoopback_routine----->%s---------------\n\r",lbc_notready_to_read );		
+	 }
+	    
+	    
+	 if(loopbacklbcread_state==1)
+	 {
+		printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
+		TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
+	 }
+	 
+	 
+}
+#endif
+
+
+
+
+
+
 
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
@@ -334,7 +412,19 @@ struct iphdr *ip;
     	     memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
     		 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
     		 put();
-    		 return NF_ACCEPT;
+    		  
+		  	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+    		  //Test Function only recieve packet
+    		  loopback_write();
+			  #endif 
+    		  
+    		  
+              #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+    		  //Test Function READ function
+    		  loopback_read();
+			  #endif
+    		  
+    		return NF_ACCEPT;
 
     		 //Здесь должна быть функции кладения в буфер FIFO
    		  //пока напрямую работаем	  
@@ -417,8 +507,6 @@ void timer1_routine(unsigned long data)
  UINT16  out_size=0;
 
  
-
-
  #ifdef TDM0_DIR_TEST
  lbcread_state=TDM0_direction_READ_READY();
  #endif
@@ -460,7 +548,11 @@ void timer1_routine(unsigned long data)
  lbcread_state=TDM9_direction_READ_READY();
  #endif			
 		
-   
+
+ 
+
+
+  
 	if(lbcread_state==0)
 	{
 	printk("------------READtimer1_routine----->%s---------------\n\r",lbc_notready_to_read );		
@@ -512,11 +604,10 @@ void timer1_routine(unsigned long data)
 	#endif		
 	}
 
-
     //printk(KERN_ALERT"+timer1_routine+\n\r"); 
     mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); // restarting timer
     //ktime_now();
-
+      
 }
 
 /**************************************************************************************************
@@ -589,7 +680,9 @@ UINT16 lbcwrite_state=0;
 		   
           #ifdef TDM0_DIR_TEST
 		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-	      #endif
+		  // TDM0_direction_write (test_full_packet_mas ,1514); 
+		  
+		  #endif
 		   
   	  	  #ifdef TDM1_DIR_TEST
 		   TDM1_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
@@ -757,8 +850,8 @@ int mpc_init_module(void)
 	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	
-	    add_timer(&timer2);  //Starting the timer2
-	    add_timer(&timer1);  //Starting the timer1
+	//add_timer(&timer2);  //Starting the timer2
+	//add_timer(&timer1);  //Starting the timer1
 	
     
 	
@@ -782,7 +875,7 @@ void mpc_cleanup_module(void)
 	del_timer_sync(&timer1);             /* Deleting the timer */
 	del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
-	 nf_unregister_hook(&bundle);
+	nf_unregister_hook(&bundle);
 
 	DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func

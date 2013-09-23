@@ -48,17 +48,27 @@ GENERAL NOTES
 #include <linux/of.h>
 #include <linux/of_platform.h>
 /*External Header*/
+#include <linux/delay.h>  // mdelay ,msleep,
 
-//#include "mpcdrvlbcnor.h"
 
 #include "mpcdrvlbcCyclone.h"
 #include "mpcdrv_gianfar.h"
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-  #define TDM_DIRECTION0_WRITE_DEBUG 1
-//#define TDM_DIRECTION0_READ_DEBUG  1
+ ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
+ //#define TDM0_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM1_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM2_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM3_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM4_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM5_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM6_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM7_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM8_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM8_DIR_TEST_ETHERNET_SEND  1
 
+///////////////////////////////////////////////////////////
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
@@ -157,11 +167,11 @@ Return Value:	    Returns 1 on success and negative value on failure.
 inline UINT16 plis_read16 (const UINT16 addr)
 {
   UINT16 out_data=0x0000;
-//UINT16 byte_offset=0x0000; 
+UINT16 byte_offset=0x0000; 
 //UINT16 out_data=0x0000;
-//byte_offset = addr*2;
-//out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
-  out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));	
+byte_offset = addr*2;
+out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+ // out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));	
 return out_data;
 }
 /**************************************************************************************************
@@ -175,10 +185,10 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 inline void   plis_write16(const UINT16 addr,const  UINT16 value)
 {
- //UINT16 byte_offset=0x0000; 	
- //byte_offset = addr*2;
- //__raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
-   __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));  
+ UINT16 byte_offset=0x0000; 	
+ byte_offset = addr*2;
+ __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+  // __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));  
 }
 
 
@@ -197,27 +207,50 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM0_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
-//UINT16 count_visim=0;
+UINT16 count_visim=0;
 UINT16 dannie800=0;
+UINT16 status =0; 
 
 
-dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
+
+mdelay(200);
+
+//#if 0
 
  	 while(!dannie1000)
  	 {	 
- 		 //if(count_visim==200)return 0;
-	 
+ 		 if(count_visim==1000)
+ 		 {
+ 		 status=0;
+ 		 printk("visim=1000\n\r");
+ 		 break; //return 0;
+ 		 }
+ 		 
  		 dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
  		 if(dannie1000==0xabc0)
  		 {
 		 dannie1000=0; 
-		 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
  		 }
-	 // count_visim++; 
+	  count_visim++; 
     }
  	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
- 	return 1;
+ 	if(dannie800==0x1)
+ 	{
+ 		status =1;
+ 	}
+ 	if(dannie800==0xabc1)
+ 	{
+ 		status =1;
+ 	}
+ 		
+ 	
+ 	printk("dannie800=0x%x\n\r",dannie800);
+ 	return status;
 
+//#endif 	
+ 	
+ 	
 }
 
 /**************************************************************************************************
@@ -748,15 +781,16 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     u16 hex_element_size=0;
     
     hex_element_size=in_size/2;
-    printk("+Tdm_Dir0_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-    
-	for(i=0;i<hex_element_size+1;i++)
+     
+	for(i=0;i<757/*hex_element_size*/+1;i++)
 	{
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
+    printk("+Tdm_Dir0_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+	
 	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
 	tdm0_write_iteration++;	
 }
@@ -1055,8 +1089,13 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
   //out_size_byte=256;//512 bait;
    
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200);
-  packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200+1,packet_size);   
+  //packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
+  
+  packet_size=(dannie1200/2);
+  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200/*+1*/,packet_size);   
+  
+  
+  
   
  //#ifdef  P2020_RDBKIT
   /* 
@@ -1073,14 +1112,24 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
 	 out_buf[i]=plis_read16 (DIR0_PLIS_READ_ADDR400);  
 	 i++;
-   }while( i< packet_size+1);
+   }while(i<=packet_size+1);
 //#endif
    
   
   printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
   printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
   
+  
+#ifdef TDM0_DIR_TEST_ETHERNET_SEND
   p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size);//send to eternet
+#endif
+  
+
+ 
+  
+  
+  
+  
   tdm0_read_iteration++; 
 }
 
