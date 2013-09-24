@@ -120,8 +120,41 @@ GENERAL NOTES
 
 
 
+
+/////////TEST LOOPBACK FUNCTION 
+/*This test  Recieve packet  write to PLIS and theb Read packet from PLIS
+ * no TIMER  for channel 0 and 1*/
+
+//DIRECTION 0 Loopback Test
 #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 #define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
+//DIRECTION 0 Loopback Test
+
+//DIRECTION 1 Loopback Test
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+
+//DIRECTION 2 Loopback Test
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+//DIRECTION 3 Loopback Test
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+//DIRECTION 4 Loopback Test
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+//DIRECTION 5 Loopback Test
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+//DIRECTION 6 Loopback Test
+
+//DIRECTION 7 Loopback Test
+
+//DIRECTION 8 Loopback Test
+
+//DIRECTION 9 Loopback Test
+
+
 
 ///////////////////////TDM DIRECTION TEST//////////////
   //#define TDM0_DIR_TEST  1
@@ -291,8 +324,16 @@ UINT16 	loopbacklbcwrite_state=0;
 	
 	if(recieve_tsec_packet.state==1)
 	{
+		
+		 TDM0_direction_write (test_full_packet_mas ,1514); 
+		 get();
+		 
+		
+		
+		
+		/*
+		
 		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
-
 	
 		if (loopbacklbcwrite_state==0)
 		{
@@ -308,6 +349,9 @@ UINT16 	loopbacklbcwrite_state=0;
 		// TDM0_direction_write (test_full_packet_mas ,1514); 
 		get();	
 	    }
+	    */
+	
+	
 	
 	}
 	
@@ -326,6 +370,14 @@ UINT16 loopbackout_buf[1518];//1518 bait;
 UINT16 loopbackout_size=0;
 
 
+
+
+         TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
+
+
+
+/*
+
 	 loopbacklbcread_state=TDM0_direction_READ_READY();
 	 if(loopbacklbcread_state==0)
 	 {
@@ -338,6 +390,8 @@ UINT16 loopbackout_size=0;
 		printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
 		TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
 	 }
+*/	
+	
 	 
 	 
 }

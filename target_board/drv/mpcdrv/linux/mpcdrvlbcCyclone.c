@@ -56,7 +56,16 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
- ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
+
+
+//PLIS DEBUG DEFENITION
+
+#define PLIS_DEBUG_1400  1
+
+
+
+
+///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
  //#define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
@@ -167,11 +176,11 @@ Return Value:	    Returns 1 on success and negative value on failure.
 inline UINT16 plis_read16 (const UINT16 addr)
 {
   UINT16 out_data=0x0000;
-UINT16 byte_offset=0x0000; 
-//UINT16 out_data=0x0000;
-byte_offset = addr*2;
-out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
- // out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));	
+ // UINT16 byte_offset=0x0000; 
+  //UINT16 out_data=0x0000;
+  //byte_offset = addr*2;
+  //out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+byte_offset);
+  out_data= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));	
 return out_data;
 }
 /**************************************************************************************************
@@ -211,10 +220,7 @@ UINT16 count_visim=0;
 UINT16 dannie800=0;
 UINT16 status =0; 
 
-
-
-mdelay(200);
-
+mdelay(2000);  //2 secumd
 //#if 0
 
  	 while(!dannie1000)
@@ -230,9 +236,10 @@ mdelay(200);
  		 if(dannie1000==0xabc0)
  		 {
 		 dannie1000=0; 
-		 printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
+		 
  		 }
-	  count_visim++; 
+ 		printk("VISIM_READ_READY=0x%x\n\r",dannie1000);  
+ 	count_visim++; 
     }
  	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
  	if(dannie800==0x1)
@@ -243,7 +250,6 @@ mdelay(200);
  	{
  		status =1;
  	}
- 		
  	
  	printk("dannie800=0x%x\n\r",dannie800);
  	return status;
@@ -543,13 +549,13 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM0_direction_WRITE_READY(void)
 {
   UINT16  dannie30=1;
-  
+
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
  while(dannie30)
  {
   dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 	 
-
+  //printk("register 30 dannie= %d ready\n\r",dannie30);
  }
  //printk("WRITE_READY_OK=%d\n\r",dannie30);
  return 1; //WRITE READY SUCCESS
@@ -776,13 +782,64 @@ Return Value:	Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 {
+
+	u16 dannie30=1;
+	u16 m;
+	static UINT16 tdm0_write_iteration=0;
+	
+	
+	while(dannie30)
+	 {
+	  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 	 
+	  //printk("register 30 dannie= %d ready\n\r",dannie30);
+	 }
+	 //printk("WRITE_READY_OK=%d\n\r",dannie30);
+
+	
+	 printk("+++++++++++++++++Write_Iter->%d++++++++++++++++++++++++++++++++++++++\n\r",tdm0_write_iteration);
+		for(m=0;m<in_size/2;m++)
+	 	{
+
+			plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[m]);
+	 		if(m<3)
+	  		{
+	  	 	printk("Write_Iter =%d, Waddress=0x%x -> Wdata= 0x%04x|\n\r",m,DIR0_PLIS_WRITE_ADDR200,in_buf[m] /*test_mas[m]*/ /*data_to_write*/);
+	  		}
+	 
+	  		if(m>753)
+	  		{
+	 		// __flash_write16(test_mas[m]/*data_to_write*/ , flash_map(l_adress_write)); 
+	   		printk("Write_Iter =%d, Waddress=0x%x -> Wdata= 0x%04x|\n\r",m,DIR0_PLIS_WRITE_ADDR200,in_buf[m] /*test_mas[m]*/ /*data_to_write*/);
+	    	// printf("0x%x|",inpacket_data[m]);
+	        }
+	 
+	 	}
+	 
+	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
+	 
+	 
+	 
+	 
+	 
+	
+	
+	
+	
+	
+	
+	
+#if 0	
+	
 	u16 i=0;
     static UINT16 tdm0_write_iteration=0;
     u16 hex_element_size=0;
+#ifdef PLIS_DEBUG_1400 
+    u16 dannie1400 =0; 
+#endif	   
     
     hex_element_size=in_size/2;
      
-	for(i=0;i<757/*hex_element_size*/+1;i++)
+	for(i=0;i<hex_element_size+1;i++)
 	{
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
@@ -790,9 +847,19 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     printk("+Tdm_Dir0_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-	
 	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
+	
+	
+#ifdef PLIS_DEBUG_1400
+	dannie1400 =plis_read16 (PLIS_ADDR1400);
+	printk("Read_Iter_dannie1400_After30_Success->Rdata=0x%x|\n\r",dannie1400);
+#endif	
+	
+	
+#endif	
 	tdm0_write_iteration++;	
+
+
 }
 
 /**************************************************************************************************
@@ -1086,13 +1153,104 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
   UINT16 i=0;		  
   static UINT16 tdm0_read_iteration=0;
   UINT16 packet_size=0;
+  UINT16 packet_size_hex=0;
   //out_size_byte=256;//512 bait;
+  UINT16 dannie1000=0;
+  UINT16 count_visim=0;
+  UINT16 dannie800=0;
+  UINT16 status =0; 
+  
+  
+  
+  //u16 plis_raw_data_mas[759];
+  //memset(&plis_raw_data_mas, 0x0000, sizeof(plis_raw_data_mas));
+  
+  
+  
+  
+  
+  while(!dannie1000)
+     {  
+     
+         dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);;
+         
+         if(dannie1000==0xabc0)
+         {
+         	
+         	dannie1000=0;
+         }
+       
+         printk("WHILE_Ctenie__1000 =0x%x\n\r",dannie1000);
+ 
+    
+     }
+  
+     //PATCH _read 3 time_slots
+     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
+     printk("Ctenie__800 =0x%x\n\r",dannie800);
+
+     dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200);
+     printk("Razmer_in1200, Addr=0x%x--->Rdata=0x%04x|\n\r",DIR0_PLIS_PACKSIZE_ADDR1200,dannie1200);
    
+     packet_size_hex=dannie1200/2;
+  
+    printk("--------------------READ_Iter=%d----------------------------------\n\r",tdm0_read_iteration);     
+  
+    do
+     {
+        
+    	out_buf[i]=plis_read16 (DIR0_PLIS_READ_ADDR400);
+    	
+    	//plis_raw_data_mas[i]=plis_read16 (DIR0_PLIS_READ_ADDR400);
+    	
+    	
+    	
+ 
+    	
+//#if 0	 
+    
+     
+      if(i<3)
+      {
+      printk("Read_Iter =%d,Raddress=0x%x -> Rdata= 0x%04x|\n\r",i,0xff000320,out_buf[i] /*test_mas[m]*/ /*data_to_write*/);
+      }
+              
+              
+          
+               
+      if(i>753)
+      {
+             	
+      printk("Read_Iter =%d, Raddress=0x%x -> Rdata= 0x%x|\n\r",i,0xff000320,out_buf[i] /*test_mas[m]*/ /*data_to_write*/);
+               	
+      }
+              
+//#endif
+               i++;
+                 
+            }while(i<=packet_size_hex+1);
+  
+  
+    
+    
+  /*   
+  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size-6],out_buf[packet_size-5],out_buf[packet_size-4],out_buf[packet_size-3],out_buf[packet_size-2],out_buf[packet_size-1]);
+  */  
+   
+    
+    
+#if 0 
+  
+  
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200);
+  printk("+Tdm_Dir0_read1200->>=0x%x|Tdm_Dir0_read1200+1=0x%x\n\r",dannie1200,dannie1200+1);   
+  
   //packet_size=(dannie1200+1)/2; //convert byte to element of massive in hex 
   
-  packet_size=(dannie1200/2);
-  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200/*+1*/,packet_size);   
+ //packet_size=(dannie1200/2)+1;
+  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200+1,packet_size);   
+  printk("+Tdm_Dir0_read->>iteration=%d|in_byte=%d|in_hex=%0x%x+\n\r",tdm0_read_iteration,dannie1200,packet_size);   
   
   
   
@@ -1107,12 +1265,14 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
   */
  //#endif
  //#ifdef P2020_MPC
+  printk("wait 2 sec\n\r");
+  mdelay(2000);  //2 secumd
   do
    {
 	 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
 	 out_buf[i]=plis_read16 (DIR0_PLIS_READ_ADDR400);  
 	 i++;
-   }while(i<=packet_size+1);
+   }while(i</*(packet_size*/757 +1);
 //#endif
    
   
@@ -1127,7 +1287,7 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 
  
   
-  
+#endif
   
   
   tdm0_read_iteration++; 

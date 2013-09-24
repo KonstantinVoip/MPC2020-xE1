@@ -55,31 +55,8 @@
  * this logical memory for read and write 
  */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//debug plis address 1400
+#define PLIS_ADDR1400           	1400
 
 
 
