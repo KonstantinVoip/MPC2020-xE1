@@ -257,7 +257,7 @@ static struct task_struct *tdm_recieve_task=NULL;
 /*****************************************************************************/
 static struct ethdata_packet
 { 
-	u16 data[1514] ;
+	u16 data[759] ;
 	u16 length;
     u16 state;
 };
@@ -321,38 +321,33 @@ void loopback_write()
 {
 UINT16 	loopbacklbcwrite_state=0;
 	
-	
 	if(recieve_tsec_packet.state==1)
 	{
-		
-		 TDM0_direction_write (test_full_packet_mas ,1514); 
-		 get();
-		 
-		
-		
-		
-		/*
-		
+		//Easy variant
+		// TDM0_direction_write (test_full_packet_mas ,1514); 
+		// get();	
 		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
-	
 		if (loopbacklbcwrite_state==0)
 		{
 		printk("-----------WRITELoopback_routine----->%s---------------\n\r",lbc_notready_to_write);   
 		get();
 		}
-			   	  
+			
 		if(loopbacklbcwrite_state==1)
 	    {
 		printk("-----------WRITEtimer2_routine----->%s------------------\n\r",lbc_ready_towrite); 
 		
-		TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		// TDM0_direction_write (test_full_packet_mas ,1514); 
+		 //TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		    //TDM0_direction_write (softperfect_switch ,1514); 
+
+		
+		
+		   TDM0_direction_write (softperfect_switch_hex ,1514);
+		 //TDM0_direction_write (test_full_packet_mas ,1514);
+		
 		get();	
 	    }
-	    */
-	
-	
-	
+
 	}
 	
 }
@@ -366,17 +361,17 @@ UINT16 	loopbacklbcwrite_state=0;
 void loopback_read()
 {
 UINT16 loopbacklbcread_state=0;	
-UINT16 loopbackout_buf[1518];//1518 bait;
+UINT16 loopbackout_buf[760];//1518 bait;
 UINT16 loopbackout_size=0;
 
 
+  
+  memset(&loopbackout_buf, 0x0000, sizeof(loopbackout_buf));  
+  
+  
+  //TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
 
 
-         TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
-
-
-
-/*
 
 	 loopbacklbcread_state=TDM0_direction_READ_READY();
 	 if(loopbacklbcread_state==0)
@@ -390,7 +385,7 @@ UINT16 loopbackout_size=0;
 		printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
 		TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
 	 }
-*/	
+
 	
 	 
 	 
@@ -463,15 +458,21 @@ struct iphdr *ip;
     	 if(result_comparsion==0)
     	 {
     	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-    	     memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    		 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+    	     
+    	 	 
+    	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    		   
+    	 	 //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
+    	     recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
     		 put();
-    		  
+    		    		 
+    		 
 		  	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
     		  //Test Function only recieve packet
     		  loopback_write();
 			  #endif 
     		  
+    		
     		  
               #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
     		  //Test Function READ function
