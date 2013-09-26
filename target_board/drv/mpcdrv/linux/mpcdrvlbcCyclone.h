@@ -57,6 +57,9 @@
 
 //debug plis address 1400
 #define PLIS_ADDR1400           	1400
+#define PATCHlbc_ONE_ITERATION_READ    1
+#define PATCHlbc_ONE_ITERATION_WRITE   1
+#define PATCH_READ_PACKET_SIZE_ADD_ONE 1
 
 
 

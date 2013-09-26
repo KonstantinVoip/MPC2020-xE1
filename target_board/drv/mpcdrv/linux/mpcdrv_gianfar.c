@@ -101,10 +101,14 @@ GENERAL NOTES
 
 
 
+
+static UINT16 my_kus_mac_addr [6]={0x0025,0x0100,0x112D};
+ 
+
+struct net_device *tsec0_dev,*tsec1_dev,*tsec2_dev;
+
 static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
-
-
-
+static struct net_device *tsec_get_device_by_name(const char *ifname);
 
 
 /*
@@ -134,7 +138,89 @@ Return Value:
 
 ***************************************************************************************************/
 void InitIp_Ethernet()
-{printk("+++++++InitIp_Ethernet()+++++++\n\r");}
+{
+const char *ifname0="eth0";
+const char *ifname1="eth1";
+const char *ifname2="eth2";
+
+//tsec 0 ,tsec1 ,tsec2 ethernet controller
+printk("+++++++InitIp_Ethernet()_and_get_ethernet_device_structure+++++++\n\r");
+//Clear Hlam on structure for reinitializate
+memset(&tsec0_dev, 0x0000, sizeof(tsec0_dev));  
+memset(&tsec1_dev, 0x0000, sizeof(tsec1_dev));  
+memset(&tsec2_dev, 0x0000, sizeof(tsec2_dev));  
+
+tsec0_dev=tsec_get_device_by_name(ifname0);
+if(!tsec0_dev){printk("No Device Found %s\n\r",ifname0);}
+
+tsec1_dev=tsec_get_device_by_name(ifname1);
+if(!tsec1_dev){printk("No Device Found %s\n\r",ifname1);}
+
+tsec2_dev=tsec_get_device_by_name(ifname2);
+if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
+
+}
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size
+Parameters:     	
+Remarks:			Set DA address my_kos only Input Packet
+Return Value:	    
+
+***************************************************************************************************/
+void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size)
+{
+	 printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
+	 memcpy(in_buf, my_kus_mac_addr, 6);
+	 
+	 //podmena MAC adressa
+	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
+	 printk("memset_OK\n\r");
+	 
+	  //put to buffer 
+	 
+     transmit_tsec_packet.data  = in_buf;
+	 transmit_tsec_packet.length= in_size;
+	
+	 
+	 
+	 
+	 
+	 
+	 
+	 //Send Packet to ethernet eTSEC2
+	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+	 
+	 
+	 
+	//printk("OK\n\r");
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**************************************************************************************************
@@ -167,11 +253,8 @@ static inline u16 get_tdmdir_packet_length()
 
 /**************************************************************************************************
 Syntax:      	  static struct net_device *pktgen_dev_get_by_name(const char *ifname)
-
 Remarks:		  Важная функция позволяет нам получить структуру struct net_device по имени устройства,"eth0","eth1","eth2"
-
 Return Value:	  Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -185,59 +268,14 @@ static struct net_device *tsec_get_device_by_name(const char *ifname)
 	{
 		if (i == IFNAMSIZ)
 			break;
-
 		b[i] = ifname[i];
 	}
 	b[i] = 0;
-
 	return dev_get_by_name(&init_net, b);
 }
 
 
-/**************************************************************************************************
-Syntax:      	    static int tsec_get_device(const char *ifname)
-Parameters:     	
-Remarks:			Get p2020 tsec ethernt device 
 
-Return Value:	    
-
-***************************************************************************************************/
-static int tsec_get_device(const char *ifname)
-{
-	struct net_device *odev;
-    UINT16 status;
-	
-	odev = tsec_get_device_by_name(ifname);
-	if (!odev)
-	{
-		printk(KERN_ERR "mpcdv: no such netdevice: \"%s\"\n", ifname);
-		return STATUS_ERR;
-	}
-
-
-	if (odev->type != ARPHRD_ETHER)
-	{
-		printk(KERN_ERR "mpcdrv: not an ethernet device: \"%s\"\n", ifname);
-		status = STATUS_ERR;
-	} 
-	
-	else if (!netif_running(odev)) 
-	{
-		printk(KERN_ERR "mpcdrv: device is down: \"%s\"\n", ifname);
-		status = STATUS_ERR;
-	} 
-	else 
-	{
-		
-		printk("mpcdrv:Get the Tsec device is name %s,alias %s\n\r",odev->name,odev->ifalias);
-		
-		return STATUS_OK;
-	}
-
-	dev_put(odev);
-	return status;
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /**********************************************************************/
@@ -249,12 +287,10 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 {
 	//Real and Virtual Ethernet devices
 	//eth0,eth1,eth2,eth3,eth4,eth5,eth6.,eth7,eth8;
-	const char *ifname3="eth2";
+	//const char *ifname3="eth2";
 	//printk("++++++p2020_get_recieve_virttsec_packet_buf+++\n\r");
-	
 	transmit_tsec_packet.data  = buf;
 	transmit_tsec_packet.length= len;
-	
     /*	
     memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
     recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
@@ -264,7 +300,9 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 	//buf ++ ok;
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
-	p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+	//p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+	p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+    
 }
 
 //#endif
@@ -288,11 +326,6 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 	
 	
 	len =  get_tdmdir_packet_length();      
-	len=len*2;
-	//printk("+p2020_get_from_tdmdir_and_put_to_ethernet|len=%d \n\r",len);
-	
-	
-	//printk("???????????????????virt_device_len =%d\n\r",len);
 	data = get_tdmdir_packet_data();      
 	//Char Buffer only
 	   
@@ -353,6 +386,66 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
 	   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    static int tsec_get_device(const char *ifname)
+Parameters:     	
+Remarks:			Get p2020 tsec ethernt device 
+Return Value:	    Potom Razbrus
+***************************************************************************************************/
+#if 0
+
+static int tsec_get_device(const char *ifname)
+{
+	struct net_device *odev;
+    UINT16 status;
+	
+	odev = tsec_get_device_by_name(ifname);
+	if (!odev)
+	{
+		printk(KERN_ERR "mpcdv: no such netdevice: \"%s\"\n", ifname);
+		return STATUS_ERR;
+	}
+
+
+	if (odev->type != ARPHRD_ETHER)
+	{
+		printk(KERN_ERR "mpcdrv: not an ethernet device: \"%s\"\n", ifname);
+		status = STATUS_ERR;
+	} 
+	
+	else if (!netif_running(odev)) 
+	{
+		printk(KERN_ERR "mpcdrv: device is down: \"%s\"\n", ifname);
+		status = STATUS_ERR;
+	} 
+	else 
+	{
+		
+		printk("mpcdrv:Get the Tsec device is name %s,alias %s\n\r",odev->name,odev->ifalias);
+		
+		return STATUS_OK;
+	}
+
+	dev_put(odev);
+	return status;
+
+}
+#endif
+
+
+
 
 
 

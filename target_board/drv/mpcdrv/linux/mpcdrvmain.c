@@ -119,15 +119,32 @@ GENERAL NOTES
 //#include "mpcdrveth_ipv4.h"
 
 
+#define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  // 10.0.0.2 
+#define BASE_IP_ADDRESS	            0x0A000001  // 10.0.0.1   
+#define RECEIVER_IP_ADDRESS			0x0A000064	// 10.0.0.100 
 
 
+#define P2020_IP_ADDRESS	0xACA8820A 			 // 172.168.130.10 
+#define P2020_IP1_ADDRESS	0xACA88214 			 // 172.168.130.20 
+
+
+///MAC Addres for comparsions
+
+ char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
+ char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
+ char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
+ char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
+ char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
+ char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
+
+ 
 /////////TEST LOOPBACK FUNCTION 
 /*This test  Recieve packet  write to PLIS and theb Read packet from PLIS
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
-#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
-#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
 //DIRECTION 1 Loopback Test
@@ -155,7 +172,6 @@ GENERAL NOTES
 //DIRECTION 9 Loopback Test
 
 
-
 ///////////////////////TDM DIRECTION TEST//////////////
   //#define TDM0_DIR_TEST  1
   //#define TDM1_DIR_TEST  1
@@ -178,21 +194,6 @@ static void loopback_read();
 
 
 
-
-
-
-
-#define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  /* 10.0.0.2 */
-#define BASE_IP_ADDRESS	            0x0A000001  /* 10.0.0.1   */
-#define RECEIVER_IP_ADDRESS			0x0A000064	/* 10.0.0.100 */
-
-
-#define P2020_IP_ADDRESS	0xACA8820A 			 /* 172.168.130.10 */
-#define P2020_IP1_ADDRESS	0xACA88214 			 /* 172.168.130.20 */
-
-
-
-
 const char * lbc_ready_toread     =    "data_read_ready_OK";
 const char * lbc_notready_to_read =    "data_read_ready_NOT";
 
@@ -200,19 +201,15 @@ const char * lbc_ready_towrite    =    "data_write_ready_OK";
 const char * lbc_notready_to_write =   "data_write_ready_NOT";
 
 
-char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
-char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
-char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
-char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
-char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
-char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
-
-
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
 extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_get_datapacket  (const u16 *in_buf ,const u16 in_size);
+extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size);
+
+
+
 
 
 #define DPRINT(fmt,args...) \
@@ -322,10 +319,7 @@ void loopback_write()
 UINT16 	loopbacklbcwrite_state=0;
 	
 	if(recieve_tsec_packet.state==1)
-	{
-		//Easy variant
-		// TDM0_direction_write (test_full_packet_mas ,1514); 
-		// get();	
+	{	
 		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
 		if (loopbacklbcwrite_state==0)
 		{
@@ -335,15 +329,12 @@ UINT16 	loopbacklbcwrite_state=0;
 			
 		if(loopbacklbcwrite_state==1)
 	    {
-		printk("-----------WRITEtimer2_routine----->%s------------------\n\r",lbc_ready_towrite); 
+		printk("-----------WRITELoopback_routine----->%s------------------\n\r",lbc_ready_towrite); 
 		
-		 //TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		    //TDM0_direction_write (softperfect_switch ,1514); 
-
-		
-		
-		   TDM0_direction_write (softperfect_switch_hex ,1514);
-		 //TDM0_direction_write (test_full_packet_mas ,1514);
+		   //TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		   //TDM0_direction_write (softperfect_switch ,1514); 
+		    // TDM0_direction_write (softperfect_switch_hex ,1514);
+		     TDM0_direction_write (test_full_packet_mas ,1514);
 		
 		get();	
 	    }
@@ -365,14 +356,10 @@ UINT16 loopbackout_buf[760];//1518 bait;
 UINT16 loopbackout_size=0;
 
 
-  
+  //clear buffer
   memset(&loopbackout_buf, 0x0000, sizeof(loopbackout_buf));  
   
-  
-  //TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
-
-
-
+ 
 	 loopbacklbcread_state=TDM0_direction_READ_READY();
 	 if(loopbacklbcread_state==0)
 	 {
@@ -382,8 +369,8 @@ UINT16 loopbackout_size=0;
 	    
 	 if(loopbacklbcread_state==1)
 	 {
-		printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
-		TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
+	 printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
+	  TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
 	 }
 
 	
@@ -443,7 +430,7 @@ struct iphdr *ip;
     	if(ostatok_of_size_packet==1)
     	{
     	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС
+    	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
     
     	
@@ -454,7 +441,10 @@ struct iphdr *ip;
    
   	 
     	 //Функция складирования пакета в буфер FIFO
-    	 result_comparsion=strcmp(p2020_default_mac_addr,buf_mac_dst);
+    	 //result_comparsion=strcmp(p2020_default_mac_addr,buf_mac_dst);
+    	   result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	   
+    	   
     	 if(result_comparsion==0)
     	 {
     	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
@@ -464,7 +454,8 @@ struct iphdr *ip;
     		   
     	 	 //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
     	     recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-    		 put();
+    	     p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    	     put();
     		    		 
     		 
 		  	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
@@ -488,6 +479,38 @@ struct iphdr *ip;
     	   //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
     	 }
    
+    	
+    	 /*Пакет предназначенный для отправки в служебный канал и обратно моему КУ-S*/
+   
+    	 result_comparsion=strcmp(service_channel_packet_DAmacaddr,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 {
+    		
+    		//функция подмены MAC адреса назначения на DA моего КОС и отправки назад к КОС
+    		 p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    		 
+    		 //функция отправки в служебный канал
+    		 
+    		 
+    	 }
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
+    	 
     	 
     	 
     	 
@@ -879,10 +902,10 @@ int mpc_init_module(void)
          
          
          
-         //Init Structure 
+         //Initialization Functions Structure 
          recieve_tsec_packet.state=0;
          LocalBusCyc3_Init();   //__Initialization Local bus 
-	  //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+	     InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	  
 	
 	//DPRINT("init_module_tdm() called\n");
