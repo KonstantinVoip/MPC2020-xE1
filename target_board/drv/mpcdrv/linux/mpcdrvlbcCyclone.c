@@ -113,8 +113,10 @@ static u8 eth_preambula_mas[8]=
 {0x55,0x55,0x55,0x55,0x55,0x55,0x55,0x5d};
 */
 
+/*
 static UINT16 eth_preambula_mas[4]=
 {0x5555,0x5555,0x5555,0x555d};
+
 
 /*****************************************************************************/
 /*	PRIVATE FUNCTION DEFINITIONS					     */

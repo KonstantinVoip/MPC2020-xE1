@@ -205,7 +205,9 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
 extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_get_datapacket  (const u16 *in_buf ,const u16 in_size);
+
+
+extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size);
 
 
@@ -243,10 +245,6 @@ static struct hrtimer hr_timer;           //high resolution timer
 UINT16  tdm_transmit_state,tdm_recieve_state ;
 static struct task_struct *tdm_transmit_task=NULL;
 static struct task_struct *tdm_recieve_task=NULL;
-
-
-
-
 
 
 /*****************************************************************************/
@@ -381,10 +379,6 @@ UINT16 loopbackout_size=0;
 
 
 
-
-
-
-
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
@@ -416,9 +410,9 @@ struct ethhdr *eth;
 /* Указатель на структуру заголовка протокола ip в пакете */
 struct iphdr *ip;
 
+    
 
-
-   //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
+    //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
     //Если пришёл пакет типа 0x800 (IPv4)    
     if (skb->protocol ==htons(ETH_P_IP))
     {
@@ -433,28 +427,24 @@ struct iphdr *ip;
     	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
     
-    	
-    	
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
-   
-  	 
+    
     	 //Функция складирования пакета в буфер FIFO
     	 //result_comparsion=strcmp(p2020_default_mac_addr,buf_mac_dst);
     	   result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
-    	   
-    	   
-    	 if(result_comparsion==0)
-    	 {
+    	   if(result_comparsion==0)
+    	   {
     	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
     	     
-    	 	 
-    	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    		   
+    	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);   
     	 	 //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
     	     recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-    	     p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    	    	     
+    	     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+     		//Функция складирования в очередь FIFO
+     		 nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
     	     put();
     		    		 
     		 
@@ -472,56 +462,31 @@ struct iphdr *ip;
     		  
     		return NF_ACCEPT;
 
-    		 //Здесь должна быть функции кладения в буфер FIFO
+    	  //Здесь должна быть функции кладения в буфер FIFO
    		  //пока напрямую работаем	  
    		  //здесь будет собираю пакет для построение ГРАФА
    		  //Пакет предназначен моему МПС в DA мой mac адрес 
-    	   //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
+    	  //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
     	 }
    
     	
     	 /*Пакет предназначенный для отправки в служебный канал и обратно моему КУ-S*/
-   
     	 result_comparsion=strcmp(service_channel_packet_DAmacaddr,buf_mac_dst);
     	 if(result_comparsion==0)
-    	 {
-    		
+    	 {	
+    		//Функция складирования в очередь FIFO
+    		//nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
+    		 
     		//функция подмены MAC адреса назначения на DA моего КОС и отправки назад к КОС
-    		 p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-    		 
+    		// p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
     		 //функция отправки в служебный канал
-    		 
-    		 
+    		  
     	 }
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
     	 
     	 ////////////Дальше доделаю эту фишку
     	 /* Сохраняем указатель на структуру заголовка IP */
 	     /*ip = (struct iphdr *)skb_network_header(skb);
-	    
-	     
-	     
+	 
 	     if (curr_ipaddr== (uint)ip->daddr)
 	     {
 
@@ -541,11 +506,7 @@ struct iphdr *ip;
 	    	 //return   NF_DROP;
 	    	 return NF_ACCEPT;
 	     }*/
-     
-    
-    
-    
-    }
+     }
 return NF_ACCEPT; 	     
 
 //return NF_DROP;  //не пропускаем пакеты
@@ -874,11 +835,11 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 int mpc_init_module(void)
 {
- UINT16 nazad;
+
 	/*
 	** We use the miscfs to register our device.
 	*/
-      DPRINT("init_module_tdm() called\n"); 
+        DPRINT("init_module_tdm() called\n"); 
     
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
@@ -894,42 +855,34 @@ int mpc_init_module(void)
       /* Регистрируем */
          nf_register_hook(&bundle);
       
-      
-         
-         
-         //Инициализация структуры
-         //memset(&recieve_tsec_packet, 0, sizeof(recieve_tsec_packet)); // инициализируем область памяти структуры XX
-         
-         
          
          //Initialization Functions Structure 
          recieve_tsec_packet.state=0;
+        
+         
          LocalBusCyc3_Init();   //__Initialization Local bus 
 	     InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
-	  
+	     Init_FIFObuf();        //Initialization FIFI buffesrs
+	     
+	     
+	     
+	     
+	     
+	     //Timer1
+	     init_timer(&timer1);
+	     timer1.function = timer1_routine;
+	     timer1.data = 1;
+	     timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
-	//DPRINT("init_module_tdm() called\n");
-	//nazad=mpc_recieve_packet(33,28);
-	//printk("nazd= %d\n\r",nazad);
-	//TIMER INITIALIZATION
-	//mdelay(600);
-	
-	
-	//Timer1
-    init_timer(&timer1);
-	timer1.function = timer1_routine;
-	timer1.data = 1;
-	timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
-	
-    //Timer2
-	init_timer(&timer2);
-	timer2.function = timer2_routine;
-	timer2.data = 1;
-	timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	     //Timer2
+	     init_timer(&timer2);
+	     timer2.function = timer2_routine;
+	     timer2.data = 1;
+	     timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	
-	//add_timer(&timer2);  //Starting the timer2
-	//add_timer(&timer1);  //Starting the timer1
+	     //add_timer(&timer2);  //Starting the timer2
+	     //add_timer(&timer1);  //Starting the timer1
 	
     
 	

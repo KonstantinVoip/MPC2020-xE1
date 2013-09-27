@@ -101,7 +101,7 @@ GENERAL NOTES
 
 
 
-
+//KY-S Destination MAC addrress
 static UINT16 my_kus_mac_addr [6]={0x0025,0x0100,0x112D};
  
 
@@ -179,23 +179,14 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	 
 	 //podmena MAC adressa
 	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
-	 printk("memset_OK\n\r");
 	 
 	  //put to buffer 
 	 
      transmit_tsec_packet.data  = in_buf;
 	 transmit_tsec_packet.length= in_size;
 	
-	 
-	 
-	 
-	 
-	 
-	 
 	 //Send Packet to ethernet eTSEC2
 	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
-	 
-	 
 	 
 	//printk("OK\n\r");
 	
