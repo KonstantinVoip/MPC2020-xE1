@@ -109,6 +109,7 @@ struct net_device *tsec0_dev,*tsec1_dev,*tsec2_dev;
 
 static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
 static struct net_device *tsec_get_device_by_name(const char *ifname);
+static void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev);
 
 
 /*
@@ -159,7 +160,61 @@ if(!tsec1_dev){printk("No Device Found %s\n\r",ifname1);}
 tsec2_dev=tsec_get_device_by_name(ifname2);
 if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
+
+//Set multicast for 2 device
+p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+
+
+
 }
+
+/**************************************************************************************************
+Syntax:      	    static void p2020_tsec_set_hardware_reg_configuration
+Parameters:     	
+Remarks:	        set p2020 etsec registers configurations for hardware	
+Return Value:	    
+***************************************************************************************************/
+void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
+{
+	struct dev_mc_list *mc_ptr;
+	struct gfar_private *priv = netdev_priv(dev);
+	struct gfar __iomem *regs = priv->gfargrp[0].regs;
+	u32 tempval;
+	
+	printk("++Enable Multicast Frame for eth2\n\r++");
+	//Set multicast frames incoming packet
+	gfar_write(&regs->igaddr0, 0xffffffff);
+	gfar_write(&regs->igaddr1, 0xffffffff);
+	gfar_write(&regs->igaddr2, 0xffffffff);
+	gfar_write(&regs->igaddr3, 0xffffffff);
+	gfar_write(&regs->igaddr4, 0xffffffff);
+	gfar_write(&regs->igaddr5, 0xffffffff);
+	gfar_write(&regs->igaddr6, 0xffffffff);
+	gfar_write(&regs->igaddr7, 0xffffffff);
+	gfar_write(&regs->gaddr0, 0xffffffff);
+	gfar_write(&regs->gaddr1, 0xffffffff);
+	gfar_write(&regs->gaddr2, 0xffffffff);
+	gfar_write(&regs->gaddr3, 0xffffffff);
+	gfar_write(&regs->gaddr4, 0xffffffff);
+	gfar_write(&regs->gaddr5, 0xffffffff);
+	gfar_write(&regs->gaddr6, 0xffffffff);
+	gfar_write(&regs->gaddr7, 0xffffffff);
+		
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -143,8 +143,9 @@ void LocalBusCyc3_Init()
 	map = kzalloc(sizeof(*map), GFP_KERNEL);
 	if (!map) 
 	{
-		printk(KERN_WARNING "Failed to allocate memory for MAP_INFO_Structure\n");	   
-	return NULL;}
+    printk("ERROR_Failed to allocate memory for MAP_INFO_Structure\n");	   
+	return NULL;
+	}
 	
 	map->name="Cyclone3";//dev_name(&dev->dev);
 	map->phys=0xef000000;//res.start;
@@ -157,7 +158,7 @@ void LocalBusCyc3_Init()
 	//
 	if (!map->virt)
 	{
-	printk(KERN_INFO "Failed to ioremap() flash region\n");
+	printk("ERROR_Failed to ioremap() flash region\n");
 	return STATUS_ERR;
 	}
 	

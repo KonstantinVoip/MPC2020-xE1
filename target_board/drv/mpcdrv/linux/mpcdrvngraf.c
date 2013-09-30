@@ -45,12 +45,16 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-struct ngarf_element
+struct ngarf_setevoi_element
 {
-	
-	
-	
-	
+/////point begining
+//IP address
+//num landing
+//port number
+/////point end
+//IP address
+//num landing
+//port number	
 };
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */

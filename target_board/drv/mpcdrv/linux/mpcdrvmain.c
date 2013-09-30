@@ -129,13 +129,21 @@ GENERAL NOTES
 
 
 ///MAC Addres for comparsions
+///ReaL MAC Address
+//MAC Address for KOS
+
+char kys_information_packet_da_mac         [18]=  {"01:ff:ff:ff:ff:00"};
+char kys_mymps_packet_da_mac               [18]=  {"01:ff:ff:ff:ff:11"};
+char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
+ 
+
 
  char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
  char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
  char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
  char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
  char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
- char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
+ //char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
 
  
 /////////TEST LOOPBACK FUNCTION 
@@ -184,11 +192,34 @@ GENERAL NOTES
   //#define TDM8_DIR_TEST  1
   //#define TDM9_DIR_TEST  1
 ///////////////////////////////////////////////////////////
-
-
+/////////DEFINE P2020 HARDWARE REGISTERS  Implementayions ////
+//#define PORPLLSR	0x50D4
+//#define LBCR        0x50D0  
+//#define PMJCR		0x50D4
+//#define PMJCR		0x50D0   //
+//#define PMJCR     0xE00A0  //PVR—Processor version register 0x80211040
+ #define PMJCR     0xE0070  //DEVICE Disable Registers  
+ 
+ 
+ 
+ 
+static __be32 __iomem *pmjcr;
+static __be32 __iomem *data;
+ 
+static phys_addr_t  k_base = 0xffe00000;
+static phys_addr_t  immrbase = -1;
+ 
+ 
 /*****************************************************************************/
 /***********************	PRIVATE STATIC FUNCTION DEFENITION****************/
 /*****************************************************************************/
+
+static void Hardware_p2020_set_configuartion();
+
+static phys_addr_t l_get_immrbase(void);  //Get Register offset address of p2020
+
+
+
 static void loopback_write();
 static void loopback_read();
 
@@ -205,17 +236,10 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
 extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-
-
 extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size);
 
 
-
-
-
-#define DPRINT(fmt,args...) \
-	           printk(KERN_INFO "%s,%i:" fmt "\n",__FUNCTION__,__LINE__,##args);
 
 #define MAC_ADDR_LEN 6
 #define PROMISC_MODE_ON  1   //флаг включения неразборчивый режим
@@ -259,6 +283,112 @@ static struct ethdata_packet
 
 
 static struct ethdata_packet  recieve_tsec_packet;
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    void Hardware_p2020_set_configuartion()
+Parameters:     	
+Remarks:			Set hardware configuration for p2020 processor
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+void Hardware_p2020_set_configuartion()
+{
+ 
+/************Readme Registers Value**************
+ * Default value for p2020MPC procssor GUTS_DEVDISR = 0x2608 0001
+ * |31    28      24      20      16      12      8        4       0 
+ * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
+ * 
+ *0        3       7       11      15     19       23     27        31
+ * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
+ 	              1 1   1               1 1*/
+		
+ UINT32 in_val_disable_alltsecs=0x27A03001;	
+ 	
+	
+	
+ //UINT32 in_val_disable_alltsecs=0x260800E1;
+ UINT32 currnet_val_disable=0;
+ 
+ int reg_offset;	
+	
+	
+ pmjcr = ioremap(0xffe00000+ PMJCR, 4);	
+ printk("set_kernel:value to set=0x%x\n\r",pmjcr);
+ //value to set in registers
+ out_be32(pmjcr, in_val_disable_alltsecs);
+ 
+ 
+ /*
+ currnet_val_disable = in_be32(pmjcr);
+ printk("get_kernel:,val=0x%x \n\r",currnet_val_disable);	
+ */
+ 
+ 
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    phys_addr_t l_get_immrbase(void)
+Parameters:     	
+Remarks:			get data from input tsec packet 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+phys_addr_t l_get_immrbase(void)
+{
+	struct device_node *soc;
+	
+	if (immrbase != -1)
+			return immrbase;
+	
+	
+	soc = of_find_node_by_type(NULL, "soc");
+	if (soc) {
+		printk ("SUCCESS: SOC device support !\n");	
+		int size;
+		u32 naddr;
+		const u32 *prop = of_get_property(soc, "#address-cells", &size);
+		
+		if (prop && size == 4)
+			naddr = *prop;
+		else
+			naddr = 2;
+		
+		prop = of_get_property(soc, "ranges", &size);
+		if (prop)
+			immrbase = of_translate_address(soc, prop + naddr);
+
+		of_node_put(soc);
+		
+	}
+	else
+	{
+    printk ("Error: SOC device not support !\n");
+		
+	}
+	printk("!!!!!!!IMMRBASE=0x%x",immrbase);
+	return immrbase;
+}
+
+
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_packet_data()
 Parameters:     	
@@ -460,27 +590,62 @@ struct iphdr *ip;
     		  loopback_read();
 			  #endif
     		  
-    		return NF_ACCEPT;
-
-    	  //Здесь должна быть функции кладения в буфер FIFO
-   		  //пока напрямую работаем	  
-   		  //здесь будет собираю пакет для построение ГРАФА
-   		  //Пакет предназначен моему МПС в DA мой mac адрес 
-    	  //ngraf_get_datapacket (skb->data ,(uint)skb->len);  	  
+    		  
+    		  
+    	   //Функция складирования в очередь FIFO
+    	   //nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
+    		    
+    		  
+    		return NF_ACCEPT; 	  
     	 }
    
     	
+    	 /*Информационный пакет при старте присылает КУ-S с совим IP и MAC адресом*/  
+    	 result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 { 
+    		 printk("+INPUT_INFORMATION_PACKET+\n\r");
+    		 
+    	  //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
+    	  //2.отправляю назад пакет потдтверждения для КУ-S
+    	  //SA:01-ff-ff-ff-ff-00
+    	  //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил
+    	   
+    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	 }
+    	 /*Пакет предназначенный только моему МПС структура графа который я строю*/
+         result_comparsion=strcmp(kys_mymps_packet_da_mac,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 { 
+           //1. Функция построения графа и поиска оптимального пути.
+    		 printk("+INPUT_PACKET_ONLY_MY_MPC+\n\r");
+    		  
+    		 
+    	    		 
+    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	 }
+    	   
+  
     	 /*Пакет предназначенный для отправки в служебный канал и обратно моему КУ-S*/
-    	 result_comparsion=strcmp(service_channel_packet_DAmacaddr,buf_mac_dst);
+    	 result_comparsion=strcmp(kys_service_channel_packet_da_mac,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {	
-    		//Функция складирования в очередь FIFO
-    		//nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
+    		
+    		 printk("+INPUT_PACKET_SERVICE_CHANNEL_and_NAZAD_KOS+\n\r");
     		 
-    		//функция подмены MAC адреса назначения на DA моего КОС и отправки назад к КОС
-    		// p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-    		 //функция отправки в служебный канал
-    		  
+    		 
+    		 //1.отправляем пакет обратно моему КУ-S производим подмену MAC адреса
+    		 //входной пакет SA :00-25-01-00-11-2D
+    		 //              DA :01-ff-ff-ff-ff-22
+    		 
+    		//выходной пакет:SA :01-ff-ff-ff-ff-22
+    		//               DA :00-25-01-00-11-2D
+    		//p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    		//////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
+    		//2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
+    	    //  канал нам отправить этот пакет.  1 <-> 10  
+    	    //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
+    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	 
     	 ////////////Дальше доделаю эту фишку
@@ -839,7 +1004,7 @@ int mpc_init_module(void)
 	/*
 	** We use the miscfs to register our device.
 	*/
-        DPRINT("init_module_tdm() called\n"); 
+        printk("init_module_tdm() called\n"); 
     
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
@@ -860,8 +1025,12 @@ int mpc_init_module(void)
          recieve_tsec_packet.state=0;
         
          
+         //Future MAC Address Filtering enable and Disable
+         //Future Temperature controlling and other options p2020 chips.
+         Hardware_p2020_set_configuartion();         
          LocalBusCyc3_Init();   //__Initialization Local bus 
 	     InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+	     
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
 	     
 	     
@@ -908,7 +1077,8 @@ void mpc_cleanup_module(void)
 	 /* Регистрируем */
 	nf_unregister_hook(&bundle);
 
-	DPRINT("exit_module() called\n");
+	printk("exit_module() called\n");
+	//DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }

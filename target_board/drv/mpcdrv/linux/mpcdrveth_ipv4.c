@@ -674,11 +674,8 @@ err:
 
 /**************************************************************************************************
 Syntax:      	  static struct net_device *pktgen_dev_get_by_name(const char *ifname)
-
 Remarks:		  Важная функция позволяет нам получить структуру struct net_device по имени устройства,"eth0","eth1","eth2"
-
 Return Value:	  Returns 1 on success and negative value on failure.
-
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
@@ -782,7 +779,6 @@ static int pktgen_add_device(struct pktgen_thread *t, const char *ifname)
 	}
     */
 	printk("+++++++++pktgen_add_device++++++++\n");	
-	
 	pkt_dev = kzalloc(sizeof(struct pktgen_dev), GFP_KERNEL);
 	if (!pkt_dev)
 	{
@@ -801,7 +797,6 @@ static int pktgen_add_device(struct pktgen_thread *t, const char *ifname)
 	//Kosta add
 	//printk("pkt_dev->cur_pkt_size=%x,pkt_dev->pkt_overhead=%x\n\r",pkt_dev->cur_pkt_size,pkt_dev->pkt_overhead);
 	pkt_dev->cur_pkt_size =0x200;
-	
 	pkt_dev->dst_mac[5]=0xe9;
 	pkt_dev->dst_mac[4]=0x8b;
 	pkt_dev->dst_mac[3]=0x75;
@@ -881,7 +876,8 @@ static void spin(struct pktgen_dev *pkt_dev, ktime_t spin_until)
 	hrtimer_set_expires(&t.timer, spin_until);
 
 	remaining = ktime_to_us(hrtimer_expires_remaining(&t.timer));
-	if (remaining <= 0) {
+	if (remaining <= 0)
+	{
 		pkt_dev->next_tx = ktime_add_ns(spin_until, pkt_dev->delay);
 		return;
 	}
@@ -1029,10 +1025,8 @@ static void mpls_push(__be32 *mpls, struct pktgen_dev *pkt_dev)
 
 /**************************************************************************************************
 Syntax:      	 static void mod_cur_headers(struct pktgen_dev *pkt_dev)
-
 Remarks:		 Increment/randomize headers according to flags and current values
-                 for IP src/dest, UDP src/dst port, MAC-Addr src/dst
-				 
+                 for IP src/dest, UDP src/dst port, MAC-Addr src/dst			 
 Return Value:	  Returns 1 on success and negative value on failure.
 
  				Value		 									Description
@@ -1246,12 +1240,9 @@ static void mod_cur_headers(struct pktgen_dev *pkt_dev)
 
 /**************************************************************************************************
 Syntax:      	 static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_dev *pkt_dev)
-
 Remarks:		 Fill ipv4 Packets
-
-Return Value:	  Returns 1 on success and negative value on failure.
-
- 				Value		 									Description
+Return Value:	 Returns 1 on success and negative value on failure.
+ 				 Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
 				=-1												Failure
@@ -1316,16 +1307,12 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_de
 		if (pkt_dev->svlan_id != 0xffff) 
 		{
 			svlan_tci = (__be16 *)skb_put(skb, sizeof(__be16));
-			*svlan_tci = build_tci(pkt_dev->svlan_id,
-					       pkt_dev->svlan_cfi,
-					       pkt_dev->svlan_p);
+			*svlan_tci = build_tci(pkt_dev->svlan_id,pkt_dev->svlan_cfi,pkt_dev->svlan_p);
 			svlan_encapsulated_proto = (__be16 *)skb_put(skb, sizeof(__be16));
 			*svlan_encapsulated_proto = htons(ETH_P_8021Q);
 		}
 		vlan_tci = (__be16 *)skb_put(skb, sizeof(__be16));
-		*vlan_tci = build_tci(pkt_dev->vlan_id,
-				      pkt_dev->vlan_cfi,
-				      pkt_dev->vlan_p);
+		*vlan_tci = build_tci(pkt_dev->vlan_id,pkt_dev->vlan_cfi,pkt_dev->vlan_p);
 		vlan_encapsulated_proto = (__be16 *)skb_put(skb, sizeof(__be16));
 		*vlan_encapsulated_proto = htons(ETH_P_IP);
 	}
@@ -1356,7 +1343,6 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_de
 	udph->dest = htons(pkt_dev->cur_udp_dst);
 	udph->len = htons(datalen + 8);	// DATA + udphdr 
 	udph->check = 0;	// No checksum 
-
 	iph->ihl = 5;
 	iph->version = 4;
 	iph->ttl = 128;
@@ -1428,13 +1414,10 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_de
 
 			skb_shinfo(skb)->frags[i - 1].size -= rem;
 
-			skb_shinfo(skb)->frags[i] =
-			    skb_shinfo(skb)->frags[i - 1];
+			skb_shinfo(skb)->frags[i] =skb_shinfo(skb)->frags[i - 1];
 			get_page(skb_shinfo(skb)->frags[i].page);
-			skb_shinfo(skb)->frags[i].page =
-			    skb_shinfo(skb)->frags[i - 1].page;
-			skb_shinfo(skb)->frags[i].page_offset +=
-			    skb_shinfo(skb)->frags[i - 1].size;
+			skb_shinfo(skb)->frags[i].page =skb_shinfo(skb)->frags[i - 1].page;
+			skb_shinfo(skb)->frags[i].page_offset +=skb_shinfo(skb)->frags[i - 1].size;
 			skb_shinfo(skb)->frags[i].size = rem;
 			i++;
 			skb_shinfo(skb)->nr_frags = i;
@@ -1444,7 +1427,6 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,struct pktgen_de
 
 	// Stamp the time, and sequence number,
 	// convert them to network byte order
- 
 	if (pgh) 
 	{
 		struct timeval timestamp;
