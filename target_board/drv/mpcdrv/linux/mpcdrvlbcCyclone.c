@@ -56,7 +56,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-
+extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 
 //PLIS DEBUG DEFENITION
 
@@ -66,7 +66,7 @@ GENERAL NOTES
 
 
 ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
-  //#define TDM0_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
  //#define TDM3_DIR_TEST_ETHERNET_SEND  1
@@ -219,11 +219,59 @@ UINT16 count_visim=0;
 UINT16 dannie800=0;
 UINT16 status =0; 
 
-mdelay(100);  //2 secumd
+mdelay(1000);
+dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
+  	  if(dannie1000==0xabc1)
+  	  {
+	  status =1;
+		 
+  	  } 
+
+  	  if(dannie1000==0x1)
+  	  {
+	  status =1;
+  	  }
+
+  	mdelay(200);
+    dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
+	if(dannie800==0x1)
+	{
+		status =1;
+	}
+	if(dannie800==0xabc1)
+	{
+		status =1;
+	}
+	
+	if(dannie800==0)
+		{
+			status =0;
+		}
+	
+	
+	
+	printk("dannie1000=0x%x->>>>>",dannie1000);
+	printk("dannie800=0x%x->>>>>>",dannie800);
+	printk("Status =%d\n\r",status);
+	
+return status;
+
+
+
+
+
+
+
+
+
+
+//old wariant very big Zaderski
+#if 0
+//mdelay(1000);  //2 secumd
 
  	 while(!dannie1000)
  	 {	 
- 		 if(count_visim==1000)
+ 		 if(count_visim==100)
  		 {
  		 status=0;
  		 printk("visim 1000 iteration read_ready break\n\r");
@@ -237,6 +285,7 @@ mdelay(100);  //2 secumd
 		 
  		 }
  		//printk("read_ready1000=0x%x->>",dannie1000);  
+ 	    //mdelay(1000);
  	count_visim++; 
     }
  	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
@@ -250,7 +299,13 @@ mdelay(100);  //2 secumd
  	}
  	printk("dannie800=0x%x\n\r",dannie800);
  	return status;
-	
+
+#endif  	
+ 	
+ 	
+ 	
+ 	
+ 	
 }
 
 /**************************************************************************************************
@@ -1096,12 +1151,18 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM0_dierction_read ()
+//void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 {
   UINT16 dannie1200=0; 
   UINT16 i=0;		  
   static UINT16 tdm0_read_iteration=0;
   UINT16 packet_size_hex=0;
+  UINT16  out_buf[760];//1518 bait;
+  UINT16  out_size=0;
+  
+  
+  memset(&out_buf, 0x0000, sizeof(out_buf));  
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
   packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
@@ -1118,6 +1179,12 @@ void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
   }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
 
 
+  
+  
+  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
+  nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
+  
+  
   
   printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
   printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);

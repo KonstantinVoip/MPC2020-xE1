@@ -35,7 +35,12 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	COMMON CONFIGURATION						     */
 /*****************************************************************************/
-
+/*
+ * mdelay(unsigned long millisecond)
+ * udelay(unsigned long microsecond)
+ * ndelay(unsigned long nanosecond);
+ * 
+ */
 
 
 /*****************************************************************************/
@@ -151,7 +156,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
-//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 //#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
@@ -181,7 +186,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
 
 
 ///////////////////////TDM DIRECTION TEST//////////////
-  //#define TDM0_DIR_TEST  1
+    #define TDM0_DIR_TEST  1
   //#define TDM1_DIR_TEST  1
   //#define TDM2_DIR_TEST  1
   //#define TDM3_DIR_TEST  1
@@ -236,7 +241,7 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
 extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+//extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size);
 
 
@@ -308,13 +313,9 @@ void Hardware_p2020_set_configuartion()
  * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
  	              1 1   1               1 1*/
 		
- UINT32 in_val_disable_alltsecs=0x27A03001;	
- 	
-	
-	
- //UINT32 in_val_disable_alltsecs=0x260800E1;
+UINT32 in_val_disable_alltsecs=0x27A03001;	
+//UINT32 in_val_disable_alltsecs=0x260800E1;
  UINT32 currnet_val_disable=0;
- 
  int reg_offset;	
 	
 	
@@ -329,63 +330,7 @@ void Hardware_p2020_set_configuartion()
  printk("get_kernel:,val=0x%x \n\r",currnet_val_disable);	
  */
  
- 
 
-}
-
-
-
-
-
-
-
-
-
-
-
-
-/**************************************************************************************************
-Syntax:      	    phys_addr_t l_get_immrbase(void)
-Parameters:     	
-Remarks:			get data from input tsec packet 
-
-Return Value:	    0  =>  Success  ,-EINVAL => Failure
-
-***************************************************************************************************/
-phys_addr_t l_get_immrbase(void)
-{
-	struct device_node *soc;
-	
-	if (immrbase != -1)
-			return immrbase;
-	
-	
-	soc = of_find_node_by_type(NULL, "soc");
-	if (soc) {
-		printk ("SUCCESS: SOC device support !\n");	
-		int size;
-		u32 naddr;
-		const u32 *prop = of_get_property(soc, "#address-cells", &size);
-		
-		if (prop && size == 4)
-			naddr = *prop;
-		else
-			naddr = 2;
-		
-		prop = of_get_property(soc, "ranges", &size);
-		if (prop)
-			immrbase = of_translate_address(soc, prop + naddr);
-
-		of_node_put(soc);
-		
-	}
-	else
-	{
-    printk ("Error: SOC device not support !\n");
-		
-	}
-	printk("!!!!!!!IMMRBASE=0x%x",immrbase);
-	return immrbase;
 }
 
 
@@ -459,10 +404,10 @@ UINT16 	loopbacklbcwrite_state=0;
 	    {
 		printk("-----------WRITELoopback_routine----->%s------------------\n\r",lbc_ready_towrite); 
 		
-		   //TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
 		   //TDM0_direction_write (softperfect_switch ,1514); 
 		    // TDM0_direction_write (softperfect_switch_hex ,1514);
-		     TDM0_direction_write (test_full_packet_mas ,1514);
+		     //TDM0_direction_write (test_full_packet_mas ,1514);
 		
 		get();	
 	    }
@@ -574,7 +519,7 @@ struct iphdr *ip;
     	    	     
     	     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
      		//Функция складирования в очередь FIFO
-     		 nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
+     		 //nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
     	     put();
     		    		 
     		 
@@ -589,13 +534,9 @@ struct iphdr *ip;
     		  //Test Function READ function
     		  loopback_read();
 			  #endif
-    		  
-    		  
-    		  
-    	   //Функция складирования в очередь FIFO
-    	   //nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
     		    
-    		  
+    	   //Функция складирования в очередь FIFO
+    	   //nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);   		  
     		return NF_ACCEPT; 	  
     	 }
    
@@ -707,13 +648,18 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 void timer1_routine(unsigned long data)
 {
  UINT16  lbcread_state=0;
- UINT16  out_buf[1518];//1518 bait;
- UINT16  out_size=0;
+ //UINT16  out_buf[1518];//1518 bait;
+// UINT16  out_size=0;
 
  
- #ifdef TDM0_DIR_TEST
- lbcread_state=TDM0_direction_READ_READY();
- #endif
+ 	 #ifdef TDM0_DIR_TEST
+ 	 lbcread_state=TDM0_direction_READ_READY();
+ 	 if(lbcread_state==1)
+ 	 {
+ 		 //TDM0_dierction_read  (out_buf,&out_size);
+ 		 TDM0_dierction_read();
+ 	 }
+ 	 #endif
 
 
  #ifdef TDM1_DIR_TEST
@@ -755,8 +701,7 @@ void timer1_routine(unsigned long data)
 
  
 
-
-  
+/*
 	if(lbcread_state==0)
 	{
 	printk("------------READtimer1_routine----->%s---------------\n\r",lbc_notready_to_read );		
@@ -770,6 +715,7 @@ void timer1_routine(unsigned long data)
     #ifdef TDM0_DIR_TEST
 	TDM0_dierction_read  (out_buf,&out_size);
     #endif
+*/	
 	
 	#ifdef TDM1_DIR_TEST
 	TDM1_dierction_read  (out_buf,&out_size);
@@ -806,10 +752,10 @@ void timer1_routine(unsigned long data)
 	#ifdef TDM9_DIR_TEST
 	TDM9_dierction_read  (out_buf,&out_size);
 	#endif		
-	}
+	//}
 
     //printk(KERN_ALERT"+timer1_routine+\n\r"); 
-    mod_timer(&timer1, jiffies + msecs_to_jiffies(2000)); // restarting timer
+    mod_timer(&timer1, jiffies + msecs_to_jiffies(5000)); // restarting timer
     //ktime_now();
       
 }
@@ -1047,11 +993,11 @@ int mpc_init_module(void)
 	     init_timer(&timer2);
 	     timer2.function = timer2_routine;
 	     timer2.data = 1;
-	     timer2.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	     timer2.expires = jiffies + msecs_to_jiffies(5000);//2000 ms 
 	
 	
 	     //add_timer(&timer2);  //Starting the timer2
-	     //add_timer(&timer1);  //Starting the timer1
+	     add_timer(&timer1);  //Starting the timer1
 	
     
 	

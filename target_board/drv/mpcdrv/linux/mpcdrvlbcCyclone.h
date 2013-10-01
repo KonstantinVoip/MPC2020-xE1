@@ -176,7 +176,10 @@ void LocalBusCyc3_Init();
 /*****************************************************************************/
 
 /* Read Data from Direction */
-void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+//void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
+
+
+void TDM0_dierction_read  ();
 void TDM1_dierction_read  (u16 *out_buf,u16 out_size_byte);
 void TDM2_dierction_read  (u16 *out_buf,u16 out_size_byte);
 void TDM3_dierction_read  (u16 *out_buf,u16 out_size_byte);

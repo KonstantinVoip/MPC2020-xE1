@@ -169,14 +169,11 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 	unsigned char  *buffer;
 	unsigned int    size;
 	int cur;
-	
 	if((obj_num < 1) || (obj_size < 1)) 
 	{
 		printk("nrbuf_init: invalid obj_num %d or obj_size %d\n",obj_num, obj_size);
 		return(NULL);
 	}
-	
-	
 	size = obj_num * obj_size;
 	printk("size =%d byte\n\r",size);
 	
@@ -185,16 +182,13 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 	{
 		return(NULL);
 	}
-	
 	printk("buffer kmalloc _OK\n\r");
-	
 	ret = kmalloc(sizeof(struct mpcfifo), GFP_MASK);
 	if (!ret)
 	{	
 		return(NULL);
 	}
 	printk("mpc info kmalloc _OK\n\r");
-	
 	ret->in =  0;
 	ret->out=  0;
 	ret->num = 0;
@@ -203,16 +197,11 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 	ret->rbufd_size = obj_num * obj_size;
 	ret->buffer=buffer;
 	ret->lock=lock;
-	
 	for(cur = 0; cur < ret->rbufd_size; cur++)
 	{
 		ret->buffer[cur] = 0;
 	}
-	
-	
-	
 	return (ret);
-
 }
 
 
@@ -232,10 +221,15 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 {
 	int i;
 	unsigned long flags;
-	
-	
-	spin_lock_irqsave(rbd_p->lock, flags);
 
+	spin_lock_irqsave(rbd_p->lock, flags);
+	
+	if(rbd_p->num==10)
+	{
+		
+		printk("FIFO_FULL_REJECT_PACKET\n\r");
+		return 0;
+	}
 	
 	if(!rbd_p)
 	{
@@ -243,12 +237,6 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 	}
 	
 	printk("current_interation  =%d\n\r",rbd_p->num );
-	
-	if(rbd_p->num >=rbd_p->obj_num)
-	{
-		printk("FIFO BUFFER is FULL STOP TOKEN\n\r");
-	    return 0;
-	}
 	
 	if(rbd_p->num == rbd_p->obj_num)
 	{
@@ -285,6 +273,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 }
 /**************************************************************************************************
 Syntax:      	    static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj		 
+Remark              
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -468,33 +457,34 @@ static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode)
 
 /*****************************************************************************
 Syntax:      	    nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
-Remarks:			get data packet and set to fifo
+Remarks:			get data on FIFO
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
 {
-	u16 out_buf[757];
-	u16  packet_size_hex=756;
-	u16 status;
-	
-	printk("+++SET TO FIFO BUFFER DIRECTION0++++\n\r");
-	
-	//FILL struct FIFO 
-	fifo_tdm0_dir_read ->obj_size=in_size;
-	//Set to the FIFO buffer
-	status=mpcfifo_put(fifo_tdm0_dir_read, in_buf);
-    
-	//mpcfifo_print(fifo_tdm0_dir_read, 0);
-	
-	
-	mpcfifo_print(fifo_tdm0_dir_read, 0);
-	
+	 u16 out_buf[757];
+	 u16  packet_size_hex=756;
+	//u16 status;
 	 mpcfifo_get(fifo_tdm0_dir_read, out_buf);
+     mpcfifo_print(fifo_tdm0_dir_read, 0);
+ 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+ 	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	
+	
+	
+	//printk("+++SET TO FIFO BUFFER DIRECTION0++++\n\r");
+	
+
+	
+	
+	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
+	
+	 //mpcfifo_get(fifo_tdm0_dir_read, out_buf);
 	//mpcfifo_print(fifo_tdm0_dir_read, 0);
 
 	
-	printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	//printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	//printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 	
 	
 	
@@ -586,6 +576,113 @@ void nbuf_get_datapacket_dir9 (const u16 *in_buf ,const u16 in_size)
 
 
 
+////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////SET DATA PACKET TO FIFO BUFFER//////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_siz
+Remarks:			set data to fifo buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
+{
+u16 status;
+	
+	//FILL struct FIFO 
+	 fifo_tdm0_dir_read ->obj_size=in_size;
+	//Set to the FIFO buffer
+	 status=mpcfifo_put(fifo_tdm0_dir_read, in_buf);  
+	 mpcfifo_print(fifo_tdm0_dir_read, 0);
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:             void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_get_datapacket_dir9 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size))
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
+/*****************************************************************************
+Syntax:      	    void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size
+Remarks:			get data packet and set to fifo
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size)
+{
+	
+}
 
 
 
