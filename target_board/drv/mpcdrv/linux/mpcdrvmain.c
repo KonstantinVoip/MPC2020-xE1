@@ -156,7 +156,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
-#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+  #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 //#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
@@ -186,7 +186,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
 
 
 ///////////////////////TDM DIRECTION TEST//////////////
-    #define TDM0_DIR_TEST  1
+  //#define TDM0_DIR_TEST  1
   //#define TDM1_DIR_TEST  1
   //#define TDM2_DIR_TEST  1
   //#define TDM3_DIR_TEST  1
@@ -268,14 +268,19 @@ struct ifparam *ifp;
 struct timer_list timer1,timer2;          //default timer   
 static struct hrtimer hr_timer;           //high resolution timer 
 
+///////////////////TASK _STRUCTURE///////////////
+struct task_struct *r_t1;
+static int tdm_recieve_thread(void *data);
+static int tdm_recieve_thread_one(void *data);
+static int N=2;
+
+
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
-UINT16  tdm_transmit_state,tdm_recieve_state ;
-static struct task_struct *tdm_transmit_task=NULL;
-static struct task_struct *tdm_recieve_task=NULL;
+static inline ktime_t ktime_now(void);
 
-
+module_param( N, int, 0 );
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
@@ -285,54 +290,7 @@ static struct ethdata_packet
 	u16 length;
     u16 state;
 };
-
-
 static struct ethdata_packet  recieve_tsec_packet;
-
-
-
-
-
-/**************************************************************************************************
-Syntax:      	    void Hardware_p2020_set_configuartion()
-Parameters:     	
-Remarks:			Set hardware configuration for p2020 processor
-
-Return Value:	    0  =>  Success  ,-EINVAL => Failure
-
-***************************************************************************************************/
-void Hardware_p2020_set_configuartion()
-{
- 
-/************Readme Registers Value**************
- * Default value for p2020MPC procssor GUTS_DEVDISR = 0x2608 0001
- * |31    28      24      20      16      12      8        4       0 
- * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
- * 
- *0        3       7       11      15     19       23     27        31
- * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
- 	              1 1   1               1 1*/
-		
-UINT32 in_val_disable_alltsecs=0x27A03001;	
-//UINT32 in_val_disable_alltsecs=0x260800E1;
- UINT32 currnet_val_disable=0;
- int reg_offset;	
-	
-	
- pmjcr = ioremap(0xffe00000+ PMJCR, 4);	
- printk("set_kernel:value to set=0x%x\n\r",pmjcr);
- //value to set in registers
- out_be32(pmjcr, in_val_disable_alltsecs);
- 
- 
- /*
- currnet_val_disable = in_be32(pmjcr);
- printk("get_kernel:,val=0x%x \n\r",currnet_val_disable);	
- */
- 
-
-}
-
 
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_packet_data()
@@ -379,6 +337,64 @@ static inline get()
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
+///////////////////////THREAD TEST FUNCTIONS FOR MPC P2020///////////////
+static char *sj( void ) 
+{ // метка времени
+	static char s[ 40 ];
+	sprintf( s, "%08ld :", jiffies );
+	return s;
+}
+
+static char *st( int lvl ) 
+{ // метка потока
+	static char s[ 40 ];
+	sprintf( s, "%skthread [%05d:%d]",ktime_now() /*sj()*/, current->pid, lvl );
+	return s;
+}
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    void Hardware_p2020_set_configuartion()
+Parameters:     	
+Remarks:			Set hardware configuration for p2020 processor
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+void Hardware_p2020_set_configuartion()
+{
+ 
+/************Readme Registers Value**************
+ * Default value for p2020MPC procssor GUTS_DEVDISR = 0x2608 0001
+ * |31    28      24      20      16      12      8        4       0 
+ * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
+ * 
+ *0        3       7       11      15     19       23     27        31
+ * |0 0 1 0|0 1 1 0|0 0 0 0|1 0 0 0|0 0 0 0|0 0 0 0|0 0 0 0|0 0 0 1|
+ 	              1 1   1               1 1*/
+		
+UINT32 in_val_disable_alltsecs=0x27A03001;	
+//UINT32 in_val_disable_alltsecs=0x260800E1;
+UINT32 currnet_val_disable=0;
+int reg_offset;	
+	
+	
+ pmjcr = ioremap(0xffe00000+ PMJCR, 4);	
+ printk("set_kernel:value to set=0x%x\n\r",pmjcr);
+ //value to set in registers
+ out_be32(pmjcr, in_val_disable_alltsecs);
+ 
+ 
+ /*
+ currnet_val_disable = in_be32(pmjcr);
+ printk("get_kernel:,val=0x%x \n\r",currnet_val_disable);	
+ */
+ 
+
+}
+
 
 
 /**************************************************************************************************/
@@ -495,13 +511,14 @@ struct iphdr *ip;
       	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
         //например 341 или что-то похожеею    	
     	
+    	/*
     	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     	if(ostatok_of_size_packet==1)
     	{
     	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
     	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
-    
+        */
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
@@ -552,7 +569,7 @@ struct iphdr *ip;
     	  //SA:01-ff-ff-ff-ff-00
     	  //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил
     	   
-    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    		   return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	 /*Пакет предназначенный только моему МПС структура графа который я строю*/
          result_comparsion=strcmp(kys_mymps_packet_da_mac,buf_mac_dst);
@@ -563,7 +580,7 @@ struct iphdr *ip;
     		  
     		 
     	    		 
-    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    		  return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	   
   
@@ -586,7 +603,7 @@ struct iphdr *ip;
     		//2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
     	    //  канал нам отправить этот пакет.  1 <-> 10  
     	    //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
-    		 return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    		 return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	 
     	 ////////////Дальше доделаю эту фишку
@@ -612,7 +629,8 @@ struct iphdr *ip;
 	    	 //return   NF_DROP;
 	    	 return NF_ACCEPT;
 	     }*/
-     }
+    	 return NF_ACCEPT; 
+    }
 return NF_ACCEPT; 	     
 
 //return NF_DROP;  //не пропускаем пакеты
@@ -632,7 +650,7 @@ static inline ktime_t ktime_now(void)
 {
 	struct timespec ts;
 	ktime_get_ts(&ts);
-	printk("%lld.%.9ld\n\r", (long long)ts.tv_sec, ts.tv_nsec);
+	printk("%lld.%.9ld->>>", (long long)ts.tv_sec, ts.tv_nsec);
 	return timespec_to_ktime(ts);
 }
 
@@ -892,47 +910,53 @@ Remarks:
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static int tdm_transmit(void *data)
+static int tdm_recieve_thread_one(void *data)
 {
-u16  out_buf[759];//1518 bait;
-u16  out_size;
-u8  *out_num_of_tdm_ch=0;
-    while(1)
-	{							
-    	  //Tdm_Direction0_write (test_full_packet_mas ,IN_PACKET_SIZE_DIRCTION0,IN_NUM_OF_TDMCH_DIRECTION0);
-    	  mdelay(800);msleep(1);
-		  //Tdm_Direction0_read  (out_buf,&out_size,&out_num_of_tdm_ch);
-		  
-		  printk("out_size=%d\n\r",out_size);
-		  printk("0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3]);
-		if (kthread_should_stop()) return 0;
-	}
+UINT16 lbcread_state=0;
+printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 
-return 0;
+			while(!kthread_should_stop()) 
+			{	
+	 	 	 //printk("Thread Work\n\r");
+			     //msleep( 100 );	
+				  schedule();
+				
+				//#ifdef TDM0_DIR_TEST
+			  	 lbcread_state=TDM0_direction_READ_READY();
+			     if(lbcread_state==1)
+			     {
+		     //TDM0_dierction_read  (out_buf,&out_size);
+		         TDM0_dierction_read();
+			     }
+	 	 	 //#endif
+			 
+				// выполняемая работа потоковой функции
+			 // msleep( 100 );
+			}
+		printk( "%s find signal!\n", st( N ) );
+		printk( "%s is completed\n", st( N ) );
+	return 0;	
 }
 
 
 /**************************************************************************************************
-Syntax:      	    static int tdm_recieve(void *data)
+Syntax:      	    static int tdm_recieve_thread(void *data)
 Parameters:     	void *ptr
 Remarks:			 
 
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static int tdm_recieve(void *data)
+static int tdm_recieve_thread(void *data)
 {
-	
-	
-	while(1)
-	{
-		//DPRINT("tdm_thread_recieve");
-		//mdelay(500);msleep(1);
-		//if (kthread_should_stop()) return 0;
-	}
-	
-	return 0;
+printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
+	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "my_thread_%d", N );
+	msleep(20000);
+	kthread_stop(r_t1);
+	printk( "%smain process [%d] is completed\n",ktime_now(), current->pid );
+return -1;
 }
+
 
 
 
@@ -969,35 +993,34 @@ int mpc_init_module(void)
          
          //Initialization Functions Structure 
          recieve_tsec_packet.state=0;
-        
+         
          
          //Future MAC Address Filtering enable and Disable
          //Future Temperature controlling and other options p2020 chips.
          Hardware_p2020_set_configuartion();         
          LocalBusCyc3_Init();   //__Initialization Local bus 
 	     InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
-	     
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
 	     
 	     
-	     
-	     
+	     tdm_recieve_thread(NULL);
+	  
 	     
 	     //Timer1
-	     init_timer(&timer1);
-	     timer1.function = timer1_routine;
-	     timer1.data = 1;
-	     timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	    // init_timer(&timer1);
+	    // timer1.function = timer1_routine;
+	    // timer1.data = 1;
+	    // timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	     //Timer2
-	     init_timer(&timer2);
-	     timer2.function = timer2_routine;
-	     timer2.data = 1;
-	     timer2.expires = jiffies + msecs_to_jiffies(5000);//2000 ms 
+	    // init_timer(&timer2);
+	    // timer2.function = timer2_routine;
+	    // timer2.data = 1;
+	    // timer2.expires = jiffies + msecs_to_jiffies(5000);//2000 ms 
 	
 	
 	     //add_timer(&timer2);  //Starting the timer2
-	     add_timer(&timer1);  //Starting the timer1
+	     //add_timer(&timer1);  //Starting the timer1
 	
     
 	
@@ -1018,8 +1041,8 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	del_timer_sync(&timer1);             /* Deleting the timer */
-	del_timer_sync(&timer2);             /* Deleting the timer */
+	//del_timer_sync(&timer1);             /* Deleting the timer */
+	//del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
 	nf_unregister_hook(&bundle);
 

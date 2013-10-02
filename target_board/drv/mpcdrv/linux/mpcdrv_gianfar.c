@@ -162,7 +162,7 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
 //Set multicast for 2 device
-p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+///p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 
 
@@ -178,7 +178,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 {
 	struct dev_mc_list *mc_ptr;
 	struct gfar_private *priv = netdev_priv(dev);
-	struct gfar __iomem *regs = priv->gfargrp[0].regs;
+	struct gfar  *regs = priv->gfargrp[0].regs;
 	u32 tempval;
 	
 	printk("++Enable Multicast Frame for eth2\n\r++");

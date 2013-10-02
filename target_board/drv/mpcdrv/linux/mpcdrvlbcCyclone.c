@@ -66,7 +66,7 @@ extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 
 
 ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
- //#define TDM0_DIR_TEST_ETHERNET_SEND  1
+   #define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
  //#define TDM3_DIR_TEST_ETHERNET_SEND  1
@@ -219,37 +219,30 @@ UINT16 count_visim=0;
 UINT16 dannie800=0;
 UINT16 status =0; 
 
-mdelay(1000);
-dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
-  	  if(dannie1000==0xabc1)
-  	  {
-	  status =1;
-		 
-  	  } 
 
-  	  if(dannie1000==0x1)
-  	  {
-	  status =1;
-  	  }
-
+	dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
+	if((dannie1000==0xabc1) || (dannie1000==0x1))
+    {
+	  status =1; 
+  	} 
+	else
+	{
+	  status=0;	
+	  //printk("Status1000 =%d\n\r",dannie1000);
+	  return (status);	
+	}
+	 
+	//msleep(100);
   	mdelay(200);
     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
-	if(dannie800==0x1)
+	if((dannie800==0x1)||(dannie800==0xabc1))
 	{
 		status =1;
 	}
-	if(dannie800==0xabc1)
+	else
 	{
-		status =1;
+		status =0;
 	}
-	
-	if(dannie800==0)
-		{
-			status =0;
-		}
-	
-	
-	
 	printk("dannie1000=0x%x->>>>>",dannie1000);
 	printk("dannie800=0x%x->>>>>>",dannie800);
 	printk("Status =%d\n\r",status);
@@ -844,7 +837,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
      
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
-	
+	    mdelay(1);
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
