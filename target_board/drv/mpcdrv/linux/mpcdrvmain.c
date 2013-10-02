@@ -123,6 +123,10 @@ GENERAL NOTES
 //#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
 //#include "mpcdrveth_ipv4.h"
 
+#define P2020_MPCRDB_KIT      1
+
+
+
 
 #define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  // 10.0.0.2 
 #define BASE_IP_ADDRESS	            0x0A000001  // 10.0.0.1   
@@ -142,7 +146,7 @@ char kys_mymps_packet_da_mac               [18]=  {"01:ff:ff:ff:ff:11"};
 char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
  
 
-
+ char p2020_rdbkit_mac_addr [18]=			{"00:04:9f:ef:01:01"};
  char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
  char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
  char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
@@ -156,7 +160,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
-  #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+// #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 //#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
@@ -240,8 +244,10 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
+//extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size);
 
 
@@ -510,7 +516,7 @@ struct iphdr *ip;
     	
       	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
         //например 341 или что-то похожеею    	
-    	
+    	printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
     	/*
     	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     	if(ostatok_of_size_packet==1)
@@ -524,20 +530,22 @@ struct iphdr *ip;
     	 print_mac(buf_mac_dst,eth->h_dest);
     
     	 //Функция складирования пакета в буфер FIFO
-    	 //result_comparsion=strcmp(p2020_default_mac_addr,buf_mac_dst);
-    	   result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 result_comparsion=strcmp(p2020_rdbkit_mac_addr,buf_mac_dst);
+    	  // result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
     	   if(result_comparsion==0)
     	   {
     	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-    	     
-    	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);   
+    	 	 nbuf_set_datapacket_dir0  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    	 	 
+    	 	 
+    	 	// memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);   
     	 	 //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
-    	     recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+    	    // recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
     	    	     
     	     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
      		//Функция складирования в очередь FIFO
      		 //nbuf_get_datapacket_dir0 (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len); 
-    	     put();
+    	     //put();
     		    		 
     		 
 		  	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
@@ -666,9 +674,9 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 void timer1_routine(unsigned long data)
 {
  UINT16  lbcread_state=0;
- //UINT16  out_buf[1518];//1518 bait;
+ UINT16  out_buf[1518];//1518 bait;
 // UINT16  out_size=0;
-
+nbuf_get_datapacket_dir0 (out_buf ,lbcread_state);
  
  	 #ifdef TDM0_DIR_TEST
  	 lbcread_state=TDM0_direction_READ_READY();
@@ -919,15 +927,16 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			{	
 	 	 	 //printk("Thread Work\n\r");
 			     //msleep( 100 );	
-				  schedule();
+			  schedule();
 				
 				//#ifdef TDM0_DIR_TEST
-			  	 lbcread_state=TDM0_direction_READ_READY();
+			/*
+				 lbcread_state=TDM0_direction_READ_READY();
 			     if(lbcread_state==1)
 			     {
-		     //TDM0_dierction_read  (out_buf,&out_size);
 		         TDM0_dierction_read();
 			     }
+	 	 	*/
 	 	 	 //#endif
 			 
 				// выполняемая работа потоковой функции
@@ -951,8 +960,8 @@ static int tdm_recieve_thread(void *data)
 {
 printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
 	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "my_thread_%d", N );
-	msleep(20000);
-	kthread_stop(r_t1);
+	//msleep(20000);
+	//kthread_stop(r_t1);
 	printk( "%smain process [%d] is completed\n",ktime_now(), current->pid );
 return -1;
 }
@@ -992,14 +1001,17 @@ int mpc_init_module(void)
       
          
          //Initialization Functions Structure 
-         recieve_tsec_packet.state=0;
+         //recieve_tsec_packet.state=0;
          
          
          //Future MAC Address Filtering enable and Disable
          //Future Temperature controlling and other options p2020 chips.
          Hardware_p2020_set_configuartion();         
-         LocalBusCyc3_Init();   //__Initialization Local bus 
-	     InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+         
+         
+         //LocalBusCyc3_Init();   //__Initialization Local bus 
+	     
+         InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
 	     
 	     
@@ -1007,10 +1019,10 @@ int mpc_init_module(void)
 	  
 	     
 	     //Timer1
-	    // init_timer(&timer1);
-	    // timer1.function = timer1_routine;
-	    // timer1.data = 1;
-	    // timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	     init_timer(&timer1);
+	     timer1.function = timer1_routine;
+	     timer1.data = 1;
+	     timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	     //Timer2
 	    // init_timer(&timer2);
@@ -1041,11 +1053,12 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	//del_timer_sync(&timer1);             /* Deleting the timer */
+	del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	 /* Регистрируем */
 	nf_unregister_hook(&bundle);
-
+	msleep(10);
+    kthread_stop(r_t1);
 	printk("exit_module() called\n");
 	//DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
