@@ -132,10 +132,21 @@ GENERAL NOTES
 #define BASE_IP_ADDRESS	            0x0A000001  // 10.0.0.1   
 #define RECEIVER_IP_ADDRESS			0x0A000064	// 10.0.0.100 
 
-
+/*
 #define P2020_IP_ADDRESS	0xACA8820A 			 // 172.168.130.10 
 #define P2020_IP1_ADDRESS	0xACA88214 			 // 172.168.130.20 
+*/
 
+
+
+
+#define P2020_IP_ADDRESS	0xC0A86F01 			 // 192.168.111.1
+#define P2020_IP1_ADDRESS	0xC0A86F01			 // 192.168.111.2
+
+/*
+#define TEST_KYS_IPADDR_DA1  0xCOA86F01             //192.168.111.1              
+#define TEST_KYS_IPADDR_DA2  0xCOA86F02             //192.168.111.2
+*/
 
 ///MAC Addres for comparsions
 ///ReaL MAC Address
@@ -160,7 +171,7 @@ char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:ff:22"};
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
-// #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+ #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 //#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
@@ -413,13 +424,12 @@ void loopback_write()
 {
 UINT16 	loopbacklbcwrite_state=0;
 	
-	if(recieve_tsec_packet.state==1)
-	{	
+	//if(recieve_tsec_packet.state==1)
+	//{	
 		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
 		if (loopbacklbcwrite_state==0)
 		{
 		printk("-----------WRITELoopback_routine----->%s---------------\n\r",lbc_notready_to_write);   
-		get();
 		}
 			
 		if(loopbacklbcwrite_state==1)
@@ -431,10 +441,10 @@ UINT16 	loopbacklbcwrite_state=0;
 		    // TDM0_direction_write (softperfect_switch_hex ,1514);
 		     //TDM0_direction_write (test_full_packet_mas ,1514);
 		
-		get();	
+		//get();	
 	    }
 
-	}
+	//}
 	
 }
 #endif
@@ -497,7 +507,11 @@ u16 result_comparsion=0;
 unsigned char buf[1514];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
-__be32	curr_ipaddr = P2020_IP_ADDRESS ;
+//__be32	curr_ipaddr = P2020_IP_ADDRESS ;
+__be32  test_kys1_ipaddr = P2020_IP_ADDRESS;      //192.168.111.1              
+__be32  test_kys2_ipaddr = P2020_IP1_ADDRESS ;      //192.168.111.2   
+
+
 UINT16 ostatok_of_size_packet=0;
 
 
@@ -513,10 +527,12 @@ struct iphdr *ip;
     //Если пришёл пакет типа 0x800 (IPv4)    
     if (skb->protocol ==htons(ETH_P_IP))
     {
-    	
+    	//printk("+Hook_Func+|SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+    	//printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");
       	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
         //например 341 или что-то похожеею    	
-    	printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+    	//printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
+    	
     	/*
     	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     	if(ostatok_of_size_packet==1)
@@ -525,22 +541,30 @@ struct iphdr *ip;
     	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
         */
+        
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
     
-    	 //Функция складирования пакета в буфер FIFO
-    	 result_comparsion=strcmp(p2020_rdbkit_mac_addr,buf_mac_dst);
-    	  // result_comparsion=strcmp(p2020_mac_addr,buf_mac_dst);
+    	 
+
+    	 
+    	 
+	 
+    	  //Функция складирования пакета в буфер FIFO
+    	 //result_comparsion=strcmp(p2020_rdbkit_mac_addr,buf_mac_dst); 
+//#if 0	 
+    	   result_comparsion=strcmp(information_packet_DAmacaddr,buf_mac_dst);
     	   if(result_comparsion==0)
     	   {
     	 	 printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-    	 	 nbuf_set_datapacket_dir0  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     	 	 
+    	 	 //nbuf_set_datapacket_dir0  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    	 	   
     	 	 
-    	 	// memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);   
-    	 	 //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
-    	    // recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+    	 	   memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);   
+    	 	   //memcpy(recieve_tsec_packet.data ,softperfect_switch,(uint)skb->mac_len+(uint)skb->len); 
+    	       recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
     	    	     
     	     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
      		//Функция складирования в очередь FIFO
@@ -577,7 +601,7 @@ struct iphdr *ip;
     	  //SA:01-ff-ff-ff-ff-00
     	  //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил
     	   
-    		   return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	  return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	 /*Пакет предназначенный только моему МПС структура графа который я строю*/
          result_comparsion=strcmp(kys_mymps_packet_da_mac,buf_mac_dst);
@@ -588,7 +612,7 @@ struct iphdr *ip;
     		  
     		 
     	    		 
-    		  return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	  return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	 }
     	   
   
@@ -616,27 +640,38 @@ struct iphdr *ip;
     	 
     	 ////////////Дальше доделаю эту фишку
     	 /* Сохраняем указатель на структуру заголовка IP */
-	     /*ip = (struct iphdr *)skb_network_header(skb);
-	 
-	     if (curr_ipaddr== (uint)ip->daddr)
-	     {
+        	 	ip = (struct iphdr *)skb_network_header(skb);
+        	 	 
+        	 	     if (((uint)ip->daddr==test_kys1_ipaddr)||((uint)ip->daddr==test_kys2_ipaddr))
+        	 	     {
 
-	    	 if(recieve_tsec_packet.state==0)	 
-	    	   {	 
-		    	 printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
-	    		 //Фильтрация 3 го уровня по ip адресу нашего НМС.
-		    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
-	    		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-	    	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-	    	 	 
-	    	 	 //put();
-	    	        
-	    	   }
-	    	 
-	    	 //return   NF_DROP;
-	    	 return NF_ACCEPT;
-	     }*/
+        	 		    	 printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
+        	 	    		 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+        	 		    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+        	 		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
+        	 	    		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+        	 	    	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+        	 	    	        
+        	 	    	  
+    						#ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+        	 	    	 	//Test Function only recieve packet
+        	 	    	 	 loopback_write();
+    		  	  	  	  	#endif 
+    		  
+    		
+    		  
+            				#ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+        	 	    	 	//Test Function READ function
+        	 	    	 	loopback_read();
+    		  	  	  	  	  #endif
+        	 	    	 	 
+        	 	    	 return   NF_DROP;
+        	 	    	 //return NF_ACCEPT;
+        	 	     }
+        	 
+  	 
+    //#endif 	 
+    	 
     	 return NF_ACCEPT; 
     }
 return NF_ACCEPT; 	     
@@ -676,7 +711,7 @@ void timer1_routine(unsigned long data)
  UINT16  lbcread_state=0;
  UINT16  out_buf[1518];//1518 bait;
 // UINT16  out_size=0;
-nbuf_get_datapacket_dir0 (out_buf ,lbcread_state);
+    //nbuf_get_datapacket_dir0 (out_buf ,lbcread_state);
  
  	 #ifdef TDM0_DIR_TEST
  	 lbcread_state=TDM0_direction_READ_READY();
@@ -925,18 +960,18 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 
 			while(!kthread_should_stop()) 
 			{	
-	 	 	 //printk("Thread Work\n\r");
-			     //msleep( 100 );	
-			  schedule();
+				//выполняемая работа потоковой функции
+				// msleep( 100 );  
 				
-				//#ifdef TDM0_DIR_TEST
-			/*
+				
+				
+			     schedule();
+			  //#ifdef TDM0_DIR_TEST
 				 lbcread_state=TDM0_direction_READ_READY();
 			     if(lbcread_state==1)
 			     {
 		         TDM0_dierction_read();
 			     }
-	 	 	*/
 	 	 	 //#endif
 			 
 				// выполняемая работа потоковой функции
@@ -1007,22 +1042,17 @@ int mpc_init_module(void)
          //Future MAC Address Filtering enable and Disable
          //Future Temperature controlling and other options p2020 chips.
          Hardware_p2020_set_configuartion();         
-         
-         
-         //LocalBusCyc3_Init();   //__Initialization Local bus 
-	     
+         LocalBusCyc3_Init();   //__Initialization Local bus 
          InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
-	     
-	     
 	     tdm_recieve_thread(NULL);
 	  
 	     
 	     //Timer1
-	     init_timer(&timer1);
-	     timer1.function = timer1_routine;
-	     timer1.data = 1;
-	     timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	       //init_timer(&timer1);
+	       //timer1.function = timer1_routine;
+	       //timer1.data = 1;
+	       //timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
 	
 	     //Timer2
 	    // init_timer(&timer2);
@@ -1055,12 +1085,11 @@ void mpc_cleanup_module(void)
 {	
 	del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
-	 /* Регистрируем */
+	/* Регистрируем */
 	nf_unregister_hook(&bundle);
 	msleep(10);
     kthread_stop(r_t1);
 	printk("exit_module() called\n");
-	//DPRINT("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }

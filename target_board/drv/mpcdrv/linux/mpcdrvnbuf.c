@@ -463,15 +463,19 @@ Return Value:	    Returns 1 on success and negative value on failure.
 void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
 {
 	 u16 out_buf[757];
-	 u16  packet_size_hex=756;
-	//u16 status;
+	 u16  packet_size_hex=0;
+	 
+	 
+	 //u16 status;
 	 mpcfifo_get(fifo_tdm0_dir_read, out_buf);
-     mpcfifo_print(fifo_tdm0_dir_read, 0);
- 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	 printk("+nbuf_get_datapacket_dir0=%d+\n\r",fifo_tdm0_dir_read->obj_size);
+	 packet_size_hex=fifo_tdm0_dir_read->obj_size;
+	 
+	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
+ 
+	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
  	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-	
-	
-	
+	 
 	//printk("+++SET TO FIFO BUFFER DIRECTION0++++\n\r");
 	
 
@@ -599,7 +603,7 @@ u16 status;
 	 fifo_tdm0_dir_read ->obj_size=in_size;
 	//Set to the FIFO buffer
 	 status=mpcfifo_put(fifo_tdm0_dir_read, in_buf);  
-	 mpcfifo_print(fifo_tdm0_dir_read, 0);
+	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
 	
 }
 /*****************************************************************************

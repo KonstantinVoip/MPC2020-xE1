@@ -249,15 +249,6 @@ UINT16 status =0;
 	
 return status;
 
-
-
-
-
-
-
-
-
-
 //old wariant very big Zaderski
 #if 0
 //mdelay(1000);  //2 secumd
@@ -1182,7 +1173,8 @@ void TDM0_dierction_read ()
   printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
   printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
     
-    
+   
+  
 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
   p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 #endif  
