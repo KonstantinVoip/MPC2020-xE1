@@ -46,7 +46,7 @@
 //#include <linux/delay.h>  // mdelay ,msleep,
 //#include <linux/timer.h>  // timer 
 //#include <linux/ktime.h>  // hardware timer (ktime)
-
+#include "/mnt/SHARE/MPC2020-xE1/target_board/app/mpcapp/INC/mpcUniDef.h"
 
 //#include <linux/types.h>    //Data types for linux
 

@@ -138,8 +138,6 @@ GENERAL NOTES
 */
 
 
-
-
 #define P2020_IP_ADDRESS	0xC0A86F01 			 // 192.168.111.1
 #define P2020_IP1_ADDRESS	0xC0A86F01			 // 192.168.111.2
 
@@ -436,7 +434,7 @@ UINT16 	loopbacklbcwrite_state=0;
 	    {
 		printk("-----------WRITELoopback_routine----->%s------------------\n\r",lbc_ready_towrite); 
 		
-		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
 		   //TDM0_direction_write (softperfect_switch ,1514); 
 		    // TDM0_direction_write (softperfect_switch_hex ,1514);
 		     //TDM0_direction_write (test_full_packet_mas ,1514);
@@ -516,41 +514,39 @@ UINT16 ostatok_of_size_packet=0;
 
 
 
+
+
 /* Указатель на структуру заголовка протокола eth в пакете */
 struct ethhdr *eth;
 /* Указатель на структуру заголовка протокола ip в пакете */
 struct iphdr *ip;
 
-    
+printk("+Hook_Func+\n\r");
 
     //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
     //Если пришёл пакет типа 0x800 (IPv4)    
     if (skb->protocol ==htons(ETH_P_IP))
     {
-    	//printk("+Hook_Func+|SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+    	printk("+Hook_Func+|SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
     	//printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");
       	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
         //например 341 или что-то похожеею    	
     	//printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
     	
-    	/*
+    	
     	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     	if(ostatok_of_size_packet==1)
     	{
     	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	  return   NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	  return   NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
-        */
+        
         
     	 //Пока делаю программную фильтрацию 2 го уровня временно.
     	 eth=(struct ethhdr *)skb_mac_header(skb);
     	 print_mac(buf_mac_dst,eth->h_dest);
     
-    	 
-
-    	 
-    	 
-	 
+   
     	  //Функция складирования пакета в буфер FIFO
     	 //result_comparsion=strcmp(p2020_rdbkit_mac_addr,buf_mac_dst); 
 //#if 0	 
@@ -616,70 +612,63 @@ struct iphdr *ip;
     	 }
     	   
   
-    	 /*Пакет предназначенный для отправки в служебный канал и обратно моему КУ-S*/
-    	 result_comparsion=strcmp(kys_service_channel_packet_da_mac,buf_mac_dst);
-    	 if(result_comparsion==0)
-    	 {	
-    		
-    		 printk("+INPUT_PACKET_SERVICE_CHANNEL_and_NAZAD_KOS+\n\r");
-    		 
-    		 
-    		 //1.отправляем пакет обратно моему КУ-S производим подмену MAC адреса
-    		 //входной пакет SA :00-25-01-00-11-2D
-    		 //              DA :01-ff-ff-ff-ff-22
-    		 
-    		//выходной пакет:SA :01-ff-ff-ff-ff-22
-    		//               DA :00-25-01-00-11-2D
-    		//p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-    		//////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
-    		//2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
-    	    //  канал нам отправить этот пакет.  1 <-> 10  
-    	    //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
-    		 return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
-    	 }
+    	 	 	 /*Пакет предназначенный для отправки в служебный канал и обратно моему КУ-S*/
+    	 	 	 result_comparsion=strcmp(kys_service_channel_packet_da_mac,buf_mac_dst);
+    	 	 	 if(result_comparsion==0)
+    	 	 	 {	
+    		     printk("+INPUT_PACKET_SERVICE_CHANNEL_and_NAZAD_KOS+\n\r");
+    		     //1.отправляем пакет обратно моему КУ-S производим подмену MAC адреса
+    		     //входной пакет SA :00-25-01-00-11-2D
+    		     //              DA :01-ff-ff-ff-ff-22
+    		     //выходной пакет:SA :01-ff-ff-ff-ff-22
+    		     //               DA :00-25-01-00-11-2D
+    		     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+    		     //////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
+    		     //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
+    		     //  канал нам отправить этот пакет.  1 <-> 10  
+    		     //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
+    		     return NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	 	 	 }
     	 
-    	 ////////////Дальше доделаю эту фишку
-    	 /* Сохраняем указатель на структуру заголовка IP */
-        	 	ip = (struct iphdr *)skb_network_header(skb);
+    	         ////////////Дальше доделаю эту фишку
+    	         /* Сохраняем указатель на структуру заголовка IP */
+        	 	 ip = (struct iphdr *)skb_network_header(skb);
         	 	 
-        	 	     if (((uint)ip->daddr==test_kys1_ipaddr)||((uint)ip->daddr==test_kys2_ipaddr))
-        	 	     {
+        	 	 if (((uint)ip->daddr==test_kys1_ipaddr)||((uint)ip->daddr==test_kys2_ipaddr))
+        	 	 {
 
-        	 		    	 printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
-        	 	    		 //Фильтрация 3 го уровня по ip адресу нашего НМС.
-        	 		    	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-        	 		    	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
-        	 	    		 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-        	 	    	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+        	     printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
+        	 	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+        	 	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+        	 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
+        	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+        	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
         	 	    	        
         	 	    	  
-    						#ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-        	 	    	 	//Test Function only recieve packet
-        	 	    	 	 loopback_write();
-    		  	  	  	  	#endif 
+				 #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+        	 	 //Test Function only recieve packet
+        	 	 loopback_write();
+    		  	 #endif 
     		  
-    		
-    		  
-            				#ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
-        	 	    	 	//Test Function READ function
-        	 	    	 	loopback_read();
-    		  	  	  	  	  #endif
+            	 #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+        	 	 //Test Function READ function
+        	 	 loopback_read();
+    		  	 #endif
         	 	    	 	 
-        	 	    	 return   NF_DROP;
-        	 	    	 //return NF_ACCEPT;
-        	 	     }
+        	 	 return   NF_DROP;
+        	 	 //return NF_ACCEPT;
+        	 	 }
         	 
   	 
     //#endif 	 
     	 
     	 return NF_ACCEPT; 
     }
-return NF_ACCEPT; 	     
 
+    
+    
+  return NF_ACCEPT; 	     
 //return NF_DROP;  //не пропускаем пакеты
-
-
-
 }
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)
