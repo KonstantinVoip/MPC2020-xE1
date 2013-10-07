@@ -103,7 +103,8 @@ GENERAL NOTES
 
 //KY-S Destination MAC addrress
 static UINT16 my_kus_mac_addr [6]={0x0025,0x0100,0x112D};
- 
+static UINT16 my_kys_mac1_addr[6]={0x0025,0x0100,0x1f05};
+
 
 struct net_device *tsec0_dev,*tsec1_dev,*tsec2_dev;
 
@@ -162,7 +163,7 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
 //Set multicast for 2 device
-p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 
 
 
@@ -185,13 +186,16 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	
 	printk("++Enable Promis mode for eth2\n\r++");
 	
-	/* Set RCTRL to PROM */
+	// Set RCTRL to PROM 
+	
+	/*
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
+	*/
 	
 	
-/*	
+	
 	printk("++Enable Multicast Frame for eth2\n\r++");
 	//Set multicast frames incoming packet
 	gfar_write(&regs->igaddr0, 0xffffffff);
@@ -210,8 +214,8 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	gfar_write(&regs->gaddr5, 0xffffffff);
 	gfar_write(&regs->gaddr6, 0xffffffff);
 	gfar_write(&regs->gaddr7, 0xffffffff);
-*/	
-		
+	
+	
 }
 
 
@@ -242,7 +246,7 @@ Return Value:
 void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size)
 {
 	 printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
-	 memcpy(in_buf, my_kus_mac_addr, 6);
+	 memcpy(in_buf, my_kys_mac1_addr, 6);
 	 
 	 //podmena MAC adressa
 	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
@@ -382,7 +386,7 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
     u16 len;
 	u16 ret;
 	
-	
+
 	len =  get_tdmdir_packet_length();      
 	data = get_tdmdir_packet_data();      
 	//Char Buffer only
