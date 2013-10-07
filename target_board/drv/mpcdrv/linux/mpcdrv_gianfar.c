@@ -102,8 +102,8 @@ GENERAL NOTES
 
 
 //KY-S Destination MAC addrress
-static UINT16 my_kus_mac_addr [6]={0x0025,0x0100,0x112D};
-static UINT16 my_kys_mac1_addr[6]={0x0025,0x0100,0x1f05};
+//static UINT16 my_kus_mac_addr [6]={0x0025,0x0100,0x112D};
+static UINT16 my_kys_mac1_addr[12]={0x0025,0x0100,0x1f05,0x01ff,0xffff,0xff00};
 
 
 struct net_device *tsec0_dev,*tsec1_dev,*tsec2_dev;
@@ -219,23 +219,6 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	    p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size
 Parameters:     	
@@ -246,18 +229,23 @@ Return Value:
 void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size)
 {
 	 printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
-	 memcpy(in_buf, my_kys_mac1_addr, 6);
+	 //memcpy(in_buf, my_kys_mac1_addr, 6);
+	 memcpy(in_buf, my_kys_mac1_addr, 12);
 	 
 	 //podmena MAC adressa
 	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
+	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[4],in_buf[5],in_buf[6],in_buf[7]);
+	 
 	 
 	  //put to buffer 
+	 
+	 
 	 
      transmit_tsec_packet.data  = in_buf;
 	 transmit_tsec_packet.length= in_size;
 	
 	 //Send Packet to ethernet eTSEC2
-	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec0_dev);
 	 
 	//printk("OK\n\r");
 	

@@ -534,7 +534,7 @@ unsigned char  buf_mac_dst[6];
 //__be32	curr_ipaddr = P2020_IP_ADDRESS ;
 __be32  test_kys1_ipaddr = P2020_IP_ADDRESS;      //192.168.111.1              
 __be32  test_kys2_ipaddr = P2020_IP1_ADDRESS ;      //192.168.111.2   
-__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+//__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
 
 UINT16 ostatok_of_size_packet=0;
 
