@@ -110,7 +110,7 @@ struct net_device * get_virt_tsec3();
 struct net_device * get_virt_tsec4();
 */
 
-void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size);
+void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size,const u16 *mac_header);
 void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
 //Recieve and transmit packet on ethernet
 
