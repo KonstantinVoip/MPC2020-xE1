@@ -586,9 +586,10 @@ UINT16 TDM0_direction_WRITE_READY(void)
 
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
- mdelay(5);
+ mdelay(20);
  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 
- if(dannie30==1)
+ //printk("register 30 dannie= %d ready\n\r",dannie30);
+ if(dannie30==0)
  {
 	return 1; 
  }
@@ -1162,6 +1163,9 @@ void TDM0_dierction_read ()
   UINT16  out_size=0;
   UINT16  out_mac[12];
   
+  UINT16  mac1[6];
+  UINT16  mac2[6];
+  
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
@@ -1172,7 +1176,7 @@ void TDM0_dierction_read ()
   //16 bit  or 2 bait Local bus iteration
   do
   {
-	//mdelay(5);   
+	mdelay(1);   
     out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
     i++;
                  
@@ -1182,17 +1186,24 @@ void TDM0_dierction_read ()
   
   
   //SET to FIFO buffer recieve TDM0 direction FIFO buffer
-  nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
+  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
   
   
   printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
   printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
     
+   memcpy(mac1,out_buf,6);
+   memcpy(mac2,&out_buf[3],6);
+  
+   
+    printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
+    printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
    
   
-  p2020_revert_mac_header(out_buf[3],out_buf[0],&out_mac);
-  p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
+  
+    p2020_revert_mac_header(mac2,mac1,&out_mac);
+    p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
   
 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
  // p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet

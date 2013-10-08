@@ -664,7 +664,7 @@ struct iphdr *ip;
     	  
     	  
     	  
-    	  printk("+zdes+\n\r");
+    	  //printk("+zdes+\n\r");
     	  
     	  //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
     	  
