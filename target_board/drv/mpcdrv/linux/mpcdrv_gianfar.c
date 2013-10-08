@@ -184,7 +184,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	u32 tempval;
 	
 	
-	printk("++Enable Promis mode for eth2\n\r++");
+	//printk("++Enable Promis mode for eth2\n\r++");
 	
 	// Set RCTRL to PROM 
 	
@@ -257,7 +257,7 @@ Return Value:
 ***************************************************************************************************/
 void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_header)
 {
-	 printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
+	 //printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
 	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",mac_header[0],mac_header[1],mac_header[2],mac_header[3]);
 	 
 	 //memcpy(in_buf, my_kys_mac1_addr, 6);
@@ -267,8 +267,8 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
      //memcpy(in_buf, mac_header, 36); 
 	 
 	 //podmena MAC adressa
-	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
-	 printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",in_buf[4],in_buf[5],in_buf[6],in_buf[7]);
+	 printk("revert_MAC_DA_|0x%04x|0x%04x|0x%04x\n\r",in_buf[0],in_buf[1],in_buf[2]);
+	 printk("revert_MAC_SA_|0x%04x|0x%04x|0x%04x\n\r",in_buf[3],in_buf[4],in_buf[5]);
 	 
 	 
 	  //put to buffer 

@@ -234,7 +234,7 @@ UINT16 status =0;
 	}
 	 
 	// msleep(100);
-  	mdelay(200);
+  	mdelay(400);
     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
 	if((dannie800==0x1)||(dannie800==0xabc1))
 	{
@@ -590,14 +590,9 @@ UINT16 TDM0_direction_WRITE_READY(void)
  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 
  //printk("register 30 dannie= %d ready\n\r",dannie30);
  if(dannie30==0)
- {
-	return 1; 
- }
+ {return 1; }
  else
- {
-
-	 return 0;
- }
+ {return 0;}
  
  //old varioant 
  /*
@@ -608,7 +603,7 @@ UINT16 TDM0_direction_WRITE_READY(void)
  }
  */
  //printk("WRITE_READY_OK=%d\n\r",dannie30);
- return 1; //WRITE READY SUCCESS
+ //return 1; //WRITE READY SUCCESS
  // #ifdef TDM_DIRECTION0_WRITE_DEBUG	
  /*printk("WRITE_READY=%d\n\r",dannie30);
  //#endif
@@ -1159,6 +1154,7 @@ void TDM0_dierction_read ()
   UINT16 i=0;		  
   static UINT16 tdm0_read_iteration=0;
   UINT16 packet_size_hex=0;
+  UINT16 ostatok_of_size_packet=0;
   UINT16  out_buf[760];//1518 bait;
   UINT16  out_size=0;
   UINT16  out_mac[12];
@@ -1172,42 +1168,41 @@ void TDM0_dierction_read ()
   packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
   printk("+Tdm_Dir0_read->>!ITERATION=%d!|1200in_byte=%d|1200in_hex=%d+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex); 
   
-  
-  //16 bit  or 2 bait Local bus iteration
-  do
+  //Проверка что получили целый размер иначе хлам
+  ostatok_of_size_packet =(dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+  if(ostatok_of_size_packet==1)
   {
-	mdelay(1);   
-    out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
-    i++;
-                 
-  }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	  printk("+Tdm_Dir0_read->>????bad_in_packet_size=%d?????\n\r",dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+          
+  }
+  else
+  {	  
+	  //16 bit  or 2 bait Local bus iteration
+	  do
+	  {
+	  mdelay(5);   
+      out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
+      i++;           
+      }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
 
-
+	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
+	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
+	  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	  memcpy(mac1,out_buf,6);
+	  memcpy(mac2,&out_buf[3],6);
   
-  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
-  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
-  
-  
-  
-  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-    
-   memcpy(mac1,out_buf,6);
-   memcpy(mac2,&out_buf[3],6);
-  
+	  //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
+	  //printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
    
-    printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
-    printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
-   
+	  p2020_revert_mac_header(mac2,mac1,&out_mac);
+	  p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
   
-  
-    p2020_revert_mac_header(mac2,mac1,&out_mac);
-    p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
-  
-#ifdef TDM0_DIR_TEST_ETHERNET_SEND
- // p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
-#endif  
+	 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
+     //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+	 #endif  
+  }
  
   tdm0_read_iteration++; 
 }
