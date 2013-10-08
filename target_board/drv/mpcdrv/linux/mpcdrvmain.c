@@ -167,8 +167,6 @@ char kys_information_packet_da_mac         [18]=  {"01:ff:ff:ff:ff:00"};
 char kys_mymps_packet_da_mac               [18]=  {"01:ff:ff:ff:ff:11"};
 
 
-
-
 /* с этим DA MAC адресом будут служебные данные от КУ-S ,замена 
    ppp который работает в данный момент на скорости 2400 бит/c у нас будет
    64 К/бит (1 тайм-слот)
@@ -284,7 +282,7 @@ extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
-
+extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
 #define MAC_ADDR_LEN 6
@@ -459,7 +457,10 @@ UINT16 	loopbacklbcwrite_state=0;
 	
 	//if(recieve_tsec_packet.state==1)
 	//{	
-		loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
+		
+        //printk("+zdes1+\n\r");
+        
+        loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
 		if (loopbacklbcwrite_state==0)
 		{
 		printk("-----------WRITELoopback_routine----->%s---------------\n\r",lbc_notready_to_write);   
@@ -600,9 +601,12 @@ struct iphdr *ip;
     		  printk("+KYS_Inform_PACKET|SA_MAC =|0x%04x|0x%04x|0x%04x\n\r",my_kys_mac_addr[0],my_kys_mac_addr[1],my_kys_mac_addr[2]);
     	      printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",my_kys_ip_addr);
     	 	
+    	      
+    	       p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);
+    	      
     	      //Подмена MAC заголовков для отправки обратно КY-S;
-    		  memcpy(mac_header_for_kys,eth->h_source,6);
-        	  memcpy(mac_header_for_kys+3,mac_addr1,6);     
+    		  //memcpy(mac_header_for_kys,eth->h_source,6);
+        	  //memcpy(mac_header_for_kys+3,mac_addr1,6);     
               	 	  	    
  		     //TDM0_direction_write (softperfect_switch ,1514); 
  		     //TDM0_direction_write (softperfect_switch_hex ,1514);
@@ -648,27 +652,33 @@ struct iphdr *ip;
     		     //               DA :00-25-01-00-11-2D
     		     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
     		     //////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
-    		    
-    	  
-    	  
     	         //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
     		     //  канал нам отправить этот пакет.  1 <-> 10  
     		     //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
     	
-		 	 
+    	     
+    	  //Фильтрация 3 го уровня по ip адресу нашего НМС.
+    	  memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    	  recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	 
     	  
-    	  /*
-    	     #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-       	 	 //Test Function only recieve packet
-       	 	 loopback_write();
-   		  	 #endif 
+    	  
+    	  
+    	  
+    	  printk("+zdes+\n\r");
+    	  
+    	  //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
+    	  
+    	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+       	  //Test Function only recieve packet
+       	  loopback_write();
+   		  #endif 
    		  
-           	 #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
-       	 	 //Test Function READ function
-       	 	 loopback_read();
-   		  	 #endif
+          #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+       	 //Test Function READ function
+       	  loopback_read();
+   		  #endif
     	  
-    	  */
+    	  
     	  
     	  return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
     	}
@@ -998,14 +1008,28 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 				// msleep( 100 );  
 				
 				
-				
+				 
 			     schedule();
 			  //#ifdef TDM0_DIR_TEST
 				 lbcread_state=TDM0_direction_READ_READY();
-			     if(lbcread_state==1)
+				 if(lbcread_state==0)
+				 {
+				 //printk("------------READLoopback_routine----->%s---------------\n\r",lbc_notready_to_read );		
+				 }
+				 
+				 if(lbcread_state==1)
+				 {
+				 printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
+				 TDM0_dierction_read();
+				 } 
+				 
+				 
+				 
+				 /*
+				 if(lbcread_state==1)
 			     {
 		         TDM0_dierction_read();
-			     }
+			     }*/
 	 	 	 //#endif
 			 
 				// выполняемая работа потоковой функции

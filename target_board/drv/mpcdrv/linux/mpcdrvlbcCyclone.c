@@ -105,6 +105,7 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
 extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
+extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
@@ -228,11 +229,11 @@ UINT16 status =0;
 	else
 	{
 	  status=0;	
-	  //printk("Status1000 =%d\n\r",dannie1000);
+	  //printk("Status1000 =0x%x\n\r",dannie1000);
 	  return (status);	
 	}
 	 
-	//msleep(100);
+	// msleep(100);
   	mdelay(200);
     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
 	if((dannie800==0x1)||(dannie800==0xabc1))
@@ -585,11 +586,26 @@ UINT16 TDM0_direction_WRITE_READY(void)
 
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
- while(dannie30)
+ mdelay(5);
+ dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 
+ if(dannie30==1)
  {
+	return 1; 
+ }
+ else
+ {
+
+	 return 0;
+ }
+ 
+ //old varioant 
+ /*
+ while(dannie30)
+ {	 
   dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 	 
   //printk("register 30 dannie= %d ready\n\r",dannie30);
  }
+ */
  //printk("WRITE_READY_OK=%d\n\r",dannie30);
  return 1; //WRITE READY SUCCESS
  // #ifdef TDM_DIRECTION0_WRITE_DEBUG	
@@ -1144,7 +1160,7 @@ void TDM0_dierction_read ()
   UINT16 packet_size_hex=0;
   UINT16  out_buf[760];//1518 bait;
   UINT16  out_size=0;
-  
+  UINT16  out_mac[12];
   
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
@@ -1175,8 +1191,11 @@ void TDM0_dierction_read ()
     
    
   
+  p2020_revert_mac_header(out_buf[3],out_buf[0],&out_mac);
+  p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
+  
 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
-  p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+ // p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 #endif  
  
   tdm0_read_iteration++; 

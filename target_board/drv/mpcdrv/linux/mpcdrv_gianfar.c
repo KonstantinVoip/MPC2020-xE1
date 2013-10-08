@@ -218,6 +218,35 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	
 }
 
+/**************************************************************************************************
+Syntax:      	    void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
+Parameters:     	
+Remarks:			Set DA address my_kos only Input Packet
+Return Value:	    
+
+***************************************************************************************************/
+void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
+{
+	// printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
+	 printk("+++Revert_MAC+++\n\r");
+	  //Подмена MAC заголовков для отправки обратно КY-S;
+	  memcpy(out_mac,dst,6);
+	  memcpy(out_mac+3,src,6);    
+      
+	
+	 // printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
+	  
+	  
+}
+
+
+
+
+
+
+
+
+
 
 /**************************************************************************************************
 Syntax:      	    p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size
@@ -229,9 +258,11 @@ Return Value:
 void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_header)
 {
 	 printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
+	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",mac_header[0],mac_header[1],mac_header[2],mac_header[3]);
+	 
 	 //memcpy(in_buf, my_kys_mac1_addr, 6);
 	   memcpy(in_buf, mac_header, 12);
-	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",mac_header[0],mac_header[1],mac_header[2],mac_header[3]);
+	 
 	 
      //memcpy(in_buf, mac_header, 36); 
 	 
