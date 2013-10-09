@@ -277,8 +277,9 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
+//extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+extern void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
@@ -544,7 +545,7 @@ unsigned char  buf_mac_dst[6];
 //__be32	curr_ipaddr = P2020_IP_ADDRESS ;
 //__be32  test_kys1_ipaddr = P2020_IP_ADDRESS;      //192.168.111.1              
 //__be32  test_kys2_ipaddr = P2020_IP1_ADDRESS ;      //192.168.111.2   
-//__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
 
 
 UINT16 ostatok_of_size_packet=0;
@@ -631,14 +632,24 @@ struct iphdr *ip;
     		 printk("+INPUT_PACKET_MY_MPC_STROI_GRAF+\n\r");		 
     		 //ip = (struct iphdr *)skb_network_header(skb);
     		        	 	
-    		 //проверяю что пакет с таким IP моего КУ-S(МПС). 
-    		 if ((uint)ip->daddr==my_kys_ip_addr)
-    		 {
-    		 //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
-    	     //  канал нам отправить этот пакет.  1 <-> 10  
-    		   ngraf_get_datapacket (skb->data ,(uint)skb->len);
-  		 
+    		 //проверяю что пакет с таким IP моего КУ-S(МПС). если да то строю граф
+    		 if ((uint)ip->daddr==my_kys_ipaddr)
+    		 {     
+    			//этот ip DA address определяеться как вершина графа
+    			//от котрого будут строиться пути и рассчитываться стоимость
+    			//маршрута к другим сетевым элементам.
+    			 
+    			 ngraf_packet_for_my_mps(skb->data ,(uint)skb->len);
     		 }
+    
+    		 //отправляю на анализ куда скоммутировать пакет с дейкстрой какому МПС по ip заголовку ip Destaddr
+    		 else
+    		 {
+
+    			 
+    		 }
+    		 
+    		 
     		 
     	  return NF_DROP;	//cбрасывю не пускаю дальше пакет так как он нену жен больше
   
@@ -667,6 +678,12 @@ struct iphdr *ip;
     	  //Фильтрация 3 го уровня по ip адресу нашего НМС.
     	  memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
     	  recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	 
+    	  
+    	  
+    	  
+    	  
+    	  
+    	  
     	  //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
     	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
        	  //Test Function only recieve packet

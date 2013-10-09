@@ -58,8 +58,10 @@
 /*****************************************************************************/
 /*!!!!!!!!!!!!!!!!!!!!!EXTERN FUNCTIONS AND DATA TYPES						 */
 /******************************************************************************/
-void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
- 
+//void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
+void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
+  
+
   
 /*****************************************************************************/
 /*	PUBLIC DATA TYPES						     */
