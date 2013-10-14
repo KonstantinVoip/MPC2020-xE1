@@ -191,6 +191,20 @@ char kys_deicstra_mps_packet_da_mac               [18]=  {"01:ff:ff:ff:ff:11"};
  //char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
 
  
+ 
+ //
+#define IPv4_HEADER_LENGTH         20    //20 bait
+#define UDP_HEADER_LENGTH          8     //8 bait
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 /////////TEST LOOPBACK FUNCTION 
 /*This test  Recieve packet  write to PLIS and theb Read packet from PLIS
  * no TIMER  for channel 0 and 1*/
@@ -286,6 +300,14 @@ extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
+
+UINT32 get_ipaddr_my_kys(); 
+
+
+
+
+
+
 #define MAC_ADDR_LEN 6
 #define PROMISC_MODE_ON  1   //флаг включения неразборчивый режим
 #define PROMISC_MODE_OFF 0  //флаг выключения неразборчивого режима
@@ -340,6 +362,22 @@ static struct ethdata_packet
     u16 state;
 };
 static struct ethdata_packet  recieve_tsec_packet;
+
+
+
+
+UINT32 get_ipaddr_my_kys()
+{
+	
+	return MY_KYS_IPADDR;
+	
+}
+
+
+
+
+
+
 
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_packet_data()
@@ -554,7 +592,8 @@ UINT16 ostatok_of_size_packet=0;
 struct ethhdr *eth;
 /* Указатель на структуру заголовка протокола ip в пакете */
 struct iphdr *ip;
-
+/*Указатель на UDP заголовок*/
+struct udphdr *udph;
 //printk("+Hook_Func+\n\r");
 
     //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
@@ -635,11 +674,22 @@ struct iphdr *ip;
     		 //проверяю что пакет с таким IP моего КУ-S(МПС). если да то строю граф
     		 if ((uint)ip->daddr==my_kys_ipaddr)
     		 {     
-    			//этот ip DA address определяеться как вершина графа
-    			//от котрого будут строиться пути и рассчитываться стоимость
-    			//маршрута к другим сетевым элементам.
+    			
+    			 /*Если пакет со структурой сети фрагментирован то здесь должна быть функция
+    			  * предварительной сборки пакета а единой целое в один граф*/
+    			 //section_unti_fragmentation_packet();
     			 
-    			 ngraf_packet_for_my_mps(skb->data ,(uint)skb->len);
+    			 
+    			 //этот ip DA address определяеться как вершина графа
+    			//от котрого будут строиться пути и рассчитываться стоимость
+    			//маршрута к другим сетевым элементам.    			 	 
+    			 ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
+    			 // ngraf_packet_for_my_mps(skb->data  ,(uint)skb->len);
+    			 //ngraf_packet_for_my_mps(skb->transport_header  ,(uint)skb->len-20);
+    		 
+    		 
+    		 
+    		 
     		 }
     
     		 //отправляю на анализ куда скоммутировать пакет с дейкстрой какому МПС по ip заголовку ip Destaddr
@@ -663,26 +713,40 @@ struct iphdr *ip;
     	if(result_comparsion==0)
     	{	
     	  printk("+INPUT_SERIVCE_CH_MAC=%s+\n\r",buf_mac_dst);
-    	//1.отправляем пакет обратно моему КУ-S производим подмену MAC адреса
-        //входной пакет SA :00-25-01-00-11-2D
-    	//              DA :01-ff-ff-ff-22-xx
-    		     //выходной пакет:SA :01-ff-ff-ff-ff-22
-    		     //               DA :00-25-01-00-11-2D
-    		     //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-    		     //////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
-    	         //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный 
-    		     //  канал нам отправить этот пакет.  1 <-> 10  
-    		     //  ngraf_get_datapacket (skb->data ,(uint)skb->len);
+        //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
+    	//              DA :01-ff-ff-ff-22-xx  
+        // в данном случае xx это номер ip подсети где находиться ставим в соответствие
+    	                    /*157*/                        /*157*/
+    	// DA :01-ff-ff-ff-22-9D     -> IP_DA = 192.168.130.157
+    	  
+    	  
+    	//выходной пакет:SA :01-ff-ff-ff-22-9D   (наша подсеть)   
+        //               DA :00-25-01-00-11-2D   (или MAC адрес нашего КY-S)
+        
+    	  
+    	/*Проверка и отброс пакета который пришёл сам себе на всякий случай
+    	 *сбрасываю его
+    	 */
+    	 
+    	// if(157 == 157)
+    	//  {
+    	//	return NF_DROP;  
+    	//  }
+    	  
+    	  
+    	  
+      //операция подмены MAC адреса на обратный моему KY-S	  
+      //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+        
+      //////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
+      //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный канал нам отправить этот пакет. 
+      //ngraf_get_datapacket (skb->data ,(uint)skb->len);
     	
     	     
-    	  //Фильтрация 3 го уровня по ip адресу нашего НМС.
+    	  //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
     	  memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
     	  recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	 
-    	  
-    	  
-    	  
-    	  
-    	  
+    	 
     	  
     	  //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
     	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER

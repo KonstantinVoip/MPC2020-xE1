@@ -63,6 +63,15 @@ UINT16 number_peak=6;                          ///Количество верш�
 UINT16 cost_matrica_puti[6][6];                //матрица стоимостей путей  //Здесь С
 UINT16 MAX;                                  //вместо бесконечностей
 
+
+////////////////////////////////////////////////
+#define DLINNA_SVYAZI   12   /*длинна цепочки приёмник источник в пакете на 12 байт
+                               в неё входит узел(наш мультиплексор и куда какому мультплексору)                     
+                              */
+                             
+                              
+
+
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
@@ -95,6 +104,9 @@ static void algoritm_djeicstra();
 /*****************************************************************************/
 /*	PRIVATE FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
+extern UINT32 get_ipaddr_my_kys(); 
+
+
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_my_mps(skb->data ,(uint)skb->len)
 Parameters:     	void data
@@ -105,20 +117,53 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
-	u16 hex_element_size;	
-	u16 ngaf_ip_array[757];
-
+	u16 hex_element_size=0;	
+	u16 size_packet=0;
+    u16 mas[in_size/2];
+    __be32  my_kys_ipaddr;
+    
+    
+    //for deijctra
+    UINT16 number_of_par_sviaznosti_in_packet=0;
+    
+    my_kys_ipaddr=get_ipaddr_my_kys();
+	
 	hex_element_size=in_size/2;
-	memcpy(ngaf_ip_array,in_buf,hex_element_size);
-	printk("+ngraf_get_datapacket\in_size_mas_byte= %d+\n\r",in_size);
-	printk("+ngraf_get_datapacket\in_size_mas_element= %d+\n\r",in_size/2);
-	printk("+ngraf_get_data_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",ngaf_ip_array[0],ngaf_ip_array[1],ngaf_ip_array[2],ngaf_ip_array[3]);
-    printk("+ngraf_get_data_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",ngaf_ip_array[hex_element_size-4],ngaf_ip_array[hex_element_size-3],ngaf_ip_array[hex_element_size-2],ngaf_ip_array[hex_element_size-1]);	
+	size_packet=sizeof(mas);
+    
+	printk("sizeof= %d\n\r ",size_packet) ;
+	memset(&mas,0x0000,size_packet);	
+	memcpy(mas,in_buf,sizeof(mas));
 
-    algoritm_djeicstra();
-    
-    
-    
+	
+//#if 0	
+	printk("+ngraf_get_datapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,in_size/2);
+	printk("+ngraf_get_data_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[0],mas[1],mas[2],mas[3]);
+	printk("+ngraf_get_data_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[hex_element_size-4],mas[hex_element_size-3],mas[hex_element_size-2],mas[hex_element_size-1]);	
+//#endif
+	
+	
+	
+		
+#if 0	
+	printk("+ngraf_get_indatapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,hex_element_size);
+	printk("+ngraf_get_indata_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
+	printk("+ngraf_get_indata_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);	
+#endif 
+	
+   
+    //before MEMCPY  наш буфер потом производим парсинг пакета на маршруты.к точке назначения.
+	//выделяем для нашего ip(мультика) валидные соединения с его соседом
+	printk("IP_ADDR_TOP_of_graf=0x%x\n\r",my_kys_ipaddr);
+	//подсчитываем количество связей (пар) в пакете 
+	number_of_par_sviaznosti_in_packet=in_size/DLINNA_SVYAZI;
+	//ищем вхождения ip адреса наешго KY-S мультиплексора(мультика)
+	
+	
+	
+	
+	
+    //algoritm_djeicstra(); 
 }
 
 /**************************************************************************************************
@@ -136,9 +181,6 @@ void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size)
 	
 }
 */
-
-
-
 
 /**************************************************************************************************
 Syntax:      	    static void set_max_element_cost_matrica()    
@@ -168,9 +210,6 @@ static void set_max_element_cost_matrica()
    max=MAX=36; //max*max;
    printk("max= %d\n\r",MAX);
 }
-
-
-
 /**************************************************************************************************
 Syntax:      	    static bool in_arr(UINT16 j ,UINT16 *arr);
 Parameters:     	проверка на наличие числа j в массиве arr
