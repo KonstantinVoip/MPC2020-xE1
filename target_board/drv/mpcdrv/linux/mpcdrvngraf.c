@@ -107,6 +107,37 @@ static void algoritm_djeicstra();
 extern UINT32 get_ipaddr_my_kys(); 
 
 
+
+
+/**************************************************************************************************
+Syntax:      	    void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u16 priznak_kommutacii)
+Parameters:     	void data
+Remarks:			timer functions 
+
+Return Value:	    1  =>  Success  ,-1 => Failure
+
+***************************************************************************************************/
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii)
+{
+	
+	printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_my_mps(skb->data ,(uint)skb->len)
 Parameters:     	void data

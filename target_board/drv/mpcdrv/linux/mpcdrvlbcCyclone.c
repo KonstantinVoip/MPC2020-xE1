@@ -104,6 +104,8 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
+
 extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 /*****************************************************************************/
@@ -1190,6 +1192,13 @@ void TDM0_dierction_read ()
   
 	  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
 	  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	  
+	  
+	  
+	  
+	  //Подмена MAC только для пакетов предназначенных для отправки обратно моему KY-S
+	  
+	  
 	  memcpy(mac1,out_buf,6);
 	  memcpy(mac2,&out_buf[3],6);
   

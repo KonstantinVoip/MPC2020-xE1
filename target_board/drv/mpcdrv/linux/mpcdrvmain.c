@@ -291,9 +291,14 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-//extern void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
-//extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+
+/*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
 extern void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
+/*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
+
+
+
 extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
@@ -368,9 +373,7 @@ static struct ethdata_packet  recieve_tsec_packet;
 
 UINT32 get_ipaddr_my_kys()
 {
-	
-	return MY_KYS_IPADDR;
-	
+	return MY_KYS_IPADDR;	
 }
 
 
@@ -424,6 +427,11 @@ static inline get()
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
+
+
+
+
+
 ///////////////////////THREAD TEST FUNCTIONS FOR MPC P2020///////////////
 static char *sj( void ) 
 { // метка времени
@@ -572,11 +580,12 @@ unsigned int Hook_Func(uint hooknum,
                   struct sk_buff *skb,
                   const struct net_device *in,
                   const struct net_device *out,
-                  int (*okfn)(struct sk_buff *)  )
+                  int (*okfn)(struct sk_buff *))
 {
 static u16 count=0;   
 u16 i=0;
-u16 result_comparsion=0; 
+u16 result_comparsion=0;
+UINT8 kys_last_mac[12];
 unsigned char buf[1514];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
@@ -594,23 +603,22 @@ struct ethhdr *eth;
 struct iphdr *ip;
 /*Указатель на UDP заголовок*/
 struct udphdr *udph;
+
+
 //printk("+Hook_Func+\n\r");
 
-    //Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
-    //Если пришёл пакет типа 0x800 (IPv4)    
+    /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
+     *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/ 
     if (skb->protocol ==htons(ETH_P_IP))
     {
-    	//printk("+Hook_Func+|SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	//printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");
-      	//Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
-        //например 341 или что-то похожеею    	
-    	//printk("+Hook_Func+|in_DA_MAC =%s\n\r",buf_mac_dst);
-    	
+ 
+      	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+         *например 341 или что-то подобное 111*/    		
     	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     	if(ostatok_of_size_packet==1)
     	{
     	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	  return   NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+    	  return   NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой длинны пакета
     	}
         
         
@@ -620,14 +628,11 @@ struct udphdr *udph;
     	 //Фильтрация 3 го уровня по IP
     	 ip = (struct iphdr *)skb_network_header(skb);
     	 
-    	 
-    	 
-    	 //Проверка продолжаю работать если есть информационный пакет от КУ-S
-    	  /*Принял от КУ-S Информационный пакет который сожержит
-    	  IP и MAC моего КУ-S не начинаю работат пока нет информационного пакетаю*/
-    	  result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
-    	  if(result_comparsion==0)
-    	  {
+    	 /*Принял от КУ-S Информационный пакет который сожержит
+    	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
+    	 result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
+    	 if(result_comparsion==0)
+    	 {
     	   //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
     	   //2.отправляю назад пакет потдтверждения для КУ-S
     	   //SA:01-ff-ff-ff-ff-00
@@ -635,42 +640,28 @@ struct udphdr *udph;
     		//Копируем данные из информационного пакета в MAC и IP адрес    	  
     	 	  //Берём IP адрес нашего КУ-S и MAC
     	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
-    	 	  memcpy(my_kys_mac_addr,eth->h_source,6);
-    	 
-    		  
+    	 	  memcpy(my_kys_mac_addr,eth->h_source,6);	  
     		  printk("+KYS_Inform_PACKET|SA_MAC =|0x%04x|0x%04x|0x%04x\n\r",my_kys_mac_addr[0],my_kys_mac_addr[1],my_kys_mac_addr[2]);
     	      printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",my_kys_ip_addr);
     	 	
-    	      
-    	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);
-    	      
-    	      //Подмена MAC заголовков для отправки обратно КY-S;
-    		  //memcpy(mac_header_for_kys,eth->h_source,6);
-        	  //memcpy(mac_header_for_kys+3,mac_addr1,6);     
-              	 	  	    
+    	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
  		     //TDM0_direction_write (softperfect_switch ,1514); 
  		     //TDM0_direction_write (softperfect_switch_hex ,1514);
  		     //TDM0_direction_write (test_full_packet_mas ,1514);
     	 	p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);
-    	 	information_packet_ok = 1;
     	 	return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой    	  
-    	
     	 }
+    	 
     	 /*Пакет от Гришы со структурой графа расположен алогоритм дейкстры
     	  *строю граф для моего МПС на основании котрого будет дальнейшая маршрутизация 
-    	  анализирую ip заголовок если совпадает с адресом моего КУ-S то строю граф
-    	  кратчайших расстояний пакет заканчиваеться на  
-    	  */
-    	 
-    	  
-    	  
+    	  *анализирую ip заголовок если совпадает с адресом моего КУ-S то строю граф
+    	  *кратчайших расстояний пакет заканчиваеться на*/
     	 result_comparsion=strcmp(kys_deicstra_mps_packet_da_mac,buf_mac_dst);
     	 if(result_comparsion==0)
     	 { 
     		 //1. Функция построения графа и поиска оптимального пути.
     		 printk("+INPUT_PACKET_MY_MPC_STROI_GRAF+\n\r");		 
     		 //ip = (struct iphdr *)skb_network_header(skb);
-    		        	 	
     		 //проверяю что пакет с таким IP моего КУ-S(МПС). если да то строю граф
     		 if ((uint)ip->daddr==my_kys_ipaddr)
     		 {     
@@ -678,95 +669,78 @@ struct udphdr *udph;
     			 /*Если пакет со структурой сети фрагментирован то здесь должна быть функция
     			  * предварительной сборки пакета а единой целое в один граф*/
     			 //section_unti_fragmentation_packet();
-    			 
-    			 
-    			 //этот ip DA address определяеться как вершина графа
-    			//от котрого будут строиться пути и рассчитываться стоимость
-    			//маршрута к другим сетевым элементам.    			 	 
-    			 ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
-    			 // ngraf_packet_for_my_mps(skb->data  ,(uint)skb->len);
-    			 //ngraf_packet_for_my_mps(skb->transport_header  ,(uint)skb->len-20);
-    		 
-    		 
-    		 
-    		 
+    			 /*этот ip DA address определяеться как вершина графа
+    			  *от котрого будут строиться пути и рассчитываться стоимость
+    			  *маршрута к другим сетевым элементам.*/    			 	 
+    			  ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
+    			  //ngraf_packet_for_my_mps(skb->data  ,(uint)skb->len);
+    			  //ngraf_packet_for_my_mps(skb->transport_header  ,(uint)skb->len-20);
     		 }
-    
-    		 //отправляю на анализ куда скоммутировать пакет с дейкстрой какому МПС по ip заголовку ip Destaddr
     		 else
     		 {
-
-    			 
+             //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
+    	     ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,(uint)ip->daddr);
+    		
     		 }
-    		 
-    		 
-    		 
     	  return NF_DROP;	//cбрасывю не пускаю дальше пакет так как он нену жен больше
-  
     	 }
     	  
-    	/*Пакет предназначенный для отправки в служебный канал
-    	 *пакет с данными от Севы фишка в следующем
-    	 *я его принимаю и анализирую последнюю часть мас
-    	 * */
+    	/*Пакет предназначенный для отправки в служебный канал пакет с данными от Севы фишка в следующем
+    	 *я его принимаю и анализирую последнюю часть мас*/
     	result_comparsion=strcmp(kys_service_channel_packet_da_mac,strncpy (socr_stroka,buf_mac_dst,14)); 
     	if(result_comparsion==0)
     	{	
-    	  printk("+INPUT_SERIVCE_CH_MAC=%s+\n\r",buf_mac_dst);
-        //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
-    	//              DA :01-ff-ff-ff-22-xx  
-        // в данном случае xx это номер ip подсети где находиться ставим в соответствие
-    	                    /*157*/                        /*157*/
-    	// DA :01-ff-ff-ff-22-9D     -> IP_DA = 192.168.130.157
-    	  
-    	  
+    	 printk("+INPUT_SERIVCE_CH_MAC=%s+\n\r",buf_mac_dst);
+        
+    	 //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
+    	 //              DA :01-ff-ff-ff-22-xx  
+         //в данном случае xx это номер ip подсети где находиться ставим в соответствие
+    	                    /*157*/                       /*157*/
+    	// DA :01-ff-ff-ff-22-9D     -> IP_DA = 192.168.130.157 
     	//выходной пакет:SA :01-ff-ff-ff-22-9D   (наша подсеть)   
         //               DA :00-25-01-00-11-2D   (или MAC адрес нашего КY-S)
-        
-    	  
-    	/*Проверка и отброс пакета который пришёл сам себе на всякий случай
-    	 *сбрасываю его
-    	 */
+    	/*Проверка и отброс пакета который пришёл сам себе на всякий случай сбрасываю его*/
+    	// if(157 == 157){return NF_DROP;}
+    	 memcpy(kys_last_mac,eth->h_dest,12);	
     	 
-    	// if(157 == 157)
-    	//  {
-    	//	return NF_DROP;  
-    	//  }
-    	  
-    	  
-    	  
-      //операция подмены MAC адреса на обратный моему KY-S	  
-      //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-        
-      //////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////// 
-      //2.Отправляем пакет на анализ в граф по ip заголовку чтобы решить в какой служебный канал нам отправить этот пакет. 
-      //ngraf_get_datapacket (skb->data ,(uint)skb->len);
-    	
-    	     
-    	  //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
-    	  memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    	  recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	 
+  
+    	 //last_mac_value=eth->h_dest;                 //buf_mac_dst[6];
+    	 //printk("last_mac_value=0x%x\n\r",kys_last_mac[5]);
+         //добавляем подсеть типа коммутация по ip  
     	 
+    	 
+    	 //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
+	      ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
     	  
-    	  //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
-    	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-       	  //Test Function only recieve packet
-       	  loopback_write();
-   		  #endif 
+    	 
+    	 
+    	 
+    	 
+    	 
+	  	  #if 0  //16.10.13	     
+    	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
+    	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
+    	 //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
+      	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+    	 //Test Function only recieve packet
+    	 loopback_write();
+   	  	  #endif 
    		  
-          #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
-       	 //Test Function READ function
-       	  loopback_read();
-   		  #endif
-    	  return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
-    	}
+      	  #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
+    	 //Test Function READ function
+    	 loopback_read();
+   	  	  #endif
+      
+	  	  #endif //16.10.13     
+      
+      return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+      }
     	 
     	         ////////////Дальше доделаю эту фишку
     	         /* Сохраняем указатель на структуру заголовка IP */
-        	 	
     	 	 	 /*
-    	 	 	 ip = (struct iphdr *)skb_network_header(skb);
-        	 	 
+    	 	 	 ip = (struct iphdr *)skb_network_header(skb); 	 
         	 	 if (((uint)ip->daddr==test_kys1_ipaddr)||((uint)ip->daddr==test_kys2_ipaddr))
         	 	 {
 
@@ -795,13 +769,13 @@ struct udphdr *udph;
   	 
     //#endif 	 
     	
-    //return	NF_DROP;	 
-    return NF_ACCEPT; 
+     //return	NF_DROP;	 
+       return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
     }
 
     
     
- // return NF_ACCEPT; 	     
+//return NF_ACCEPT; 	     
 return NF_DROP;  //не пропускаем пакеты
 }
 /**************************************************************************************************
