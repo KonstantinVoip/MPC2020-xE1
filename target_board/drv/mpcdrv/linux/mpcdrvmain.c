@@ -377,11 +377,6 @@ UINT32 get_ipaddr_my_kys()
 }
 
 
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_packet_data()
 Parameters:     	
@@ -427,8 +422,6 @@ static inline get()
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
-
-
 
 
 
@@ -565,8 +558,6 @@ UINT16 loopbackout_size=0;
 }
 #endif
 
-
-
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
@@ -605,11 +596,94 @@ struct iphdr *ip;
 struct udphdr *udph;
 
 
+#if 0
+
+
+unsigned char *virt_dev;
+
+
 //printk("+Hook_Func+\n\r");
+virt_dev=skb->dev->name;
+
+eth=(struct ethhdr *)skb_mac_header(skb);
+print_mac(buf_mac_dst,eth->h_dest); 
+//Фильтрация 3 го уровня по IP
+ip = (struct iphdr *)skb_network_header(skb);
+
+
+	if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
+	{
+    /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
+     *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/    
+     printk("--------------recieve_IP_PACKET_DEVICE=%s---------\n\r",virt_dev);   
+	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+	 //выода MAC flhtcjd
+     printk("+macDA_addr=%s+\n\r",buf_mac_dst);
+     printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
+
+	 //if ping request for this ip send ping reply
+	 //no transmit //dalee
+
+    }
+
+
+	if (virt_dev && !strcasecmp(virt_dev ,"eth1"))   
+    {
 
     /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
-     *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/ 
-    if (skb->protocol ==htons(ETH_P_IP))
+     *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/    
+     printk("----------------recieve_IP_PACKET_DEVICE=%s---------------\n\r",virt_dev);   
+	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+	 //выода MAC flhtcjd
+     printk("+macDA_addr=%s+\n\r",buf_mac_dst);
+     printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
+
+	 //if ping reguest(for this ip) send ping reply 
+	 
+    }
+
+
+	if (virt_dev && !strcasecmp(virt_dev ,"eth2"))   
+   {
+    
+	/*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
+     *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/    
+     printk("---------------recieve_IP_PACKET_DEVICE=%s----------------------\n\r",virt_dev);   
+	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+	 //выода MAC flhtcjd
+     printk("+macDA_addr=%s+\n\r",buf_mac_dst);
+     printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
+
+     //if ping request for this ip send ping reply  
+	 
+   }
+#endif
+
+
+
+
+
+   
+	eth=(struct ethhdr *)skb_mac_header(skb);
+	print_mac(buf_mac_dst,eth->h_dest); 
+	//Фильтрация 3 го уровня по IP
+	ip = (struct iphdr *)skb_network_header(skb);
+   
+   
+   
+   
+   
+   
+   
+   
+
+   //comment on ispitania.
+//#if 0
+
+   if (skb->protocol ==htons(ETH_P_IP))
     {
  
       	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
@@ -621,12 +695,46 @@ struct udphdr *udph;
     	  return   NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой длинны пакета
     	}
         
-        
-    	 //Пока делаю программную фильтрацию 2 го уровня временно.
-    	 eth=(struct ethhdr *)skb_mac_header(skb);
-    	 print_mac(buf_mac_dst,eth->h_dest); 
-    	 //Фильтрация 3 го уровня по IP
-    	 ip = (struct iphdr *)skb_network_header(skb);
+    	     	 
+    	    if ((uint)ip->daddr==0xC0A8829D)
+    	       {
+
+    	        	     //printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
+    	        	 	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
+    	        	 	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
+    	        	 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
+    	        	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    	        	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
+    	        	 	    	         	        	 	    	  
+    					 #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+    	        	 	 //Test Function only recieve packet
+    	        	 	 loopback_write();
+    	    		  	 #endif 
+    	    		  
+                         // return NF_DROP;
+    	        	 	 
+    	       }
+    	 
+    	    
+    	 
+    	 
+    	 /*
+    	 printk("AFTER|_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+    	 //  #if 0  //16.10.13	     
+    	    	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
+    	    	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    	    	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
+    	    	 //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
+    	      	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
+    	    	 //Test Function only recieve packet
+    	    	 loopback_write();
+    	   	  	  #endif 
+    	   		  */
+    	 
+    	 
+    	 
+    	 
+    	 
     	 
     	 /*Принял от КУ-S Информационный пакет который сожержит
     	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
@@ -710,14 +818,11 @@ struct udphdr *udph;
     	 
     	 
     	 //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
-	      ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
+	     // ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
     	  
+    	
     	 
-    	 
-    	 
-    	 
-    	 
-	  	  #if 0  //16.10.13	     
+	  	//  #if 0  //16.10.13	     
     	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
     	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
     	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
@@ -732,7 +837,7 @@ struct udphdr *udph;
     	 loopback_read();
    	  	  #endif
       
-	  	  #endif //16.10.13     
+	  	 // #endif //16.10.13     
       
       return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
       }
@@ -772,11 +877,11 @@ struct udphdr *udph;
      //return	NF_DROP;	 
        return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
     }
-
+//#endif
     
     
-//return NF_ACCEPT; 	     
-return NF_DROP;  //не пропускаем пакеты
+    return NF_ACCEPT; 	     
+   //  return NF_DROP;  //не пропускаем пакеты
 }
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)

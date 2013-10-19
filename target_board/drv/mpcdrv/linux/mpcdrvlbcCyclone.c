@@ -53,11 +53,13 @@ GENERAL NOTES
 
 #include "mpcdrvlbcCyclone.h"
 #include "mpcdrv_gianfar.h"
+//#include "mpcdrvngraf.h"
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
 extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
-
+/*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
 //PLIS DEBUG DEFENITION
 
 #define PLIS_DEBUG_1400  1
@@ -1560,6 +1562,11 @@ void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	    
 	  printk("+Tdm_Dir8_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
 	  printk("+Tdm_Dir8_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	  
+	  
+	  
+	  
+	  //ngraf_packet_for_matrica_kommutacii(out_buf ,packet_size_hex,u32 priznak_kommutacii);
 	  
 	  
 	#ifdef TDM8_DIR_TEST_ETHERNET_SEND

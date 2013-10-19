@@ -164,7 +164,7 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 //Set multicast for 2 device
 p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
-
+p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 
 }
@@ -279,7 +279,7 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	 transmit_tsec_packet.length= in_size;
 	
 	 //Send Packet to ethernet eTSEC2
-	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec0_dev);
+	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
 	 
 	//printk("OK\n\r");
 	
