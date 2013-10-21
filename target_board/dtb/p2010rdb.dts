@@ -20,7 +20,7 @@
 		ethernet0 = &enet0;
 		ethernet1 = &enet1;
 		ethernet2 = &enet2;
-		ethernet3 = &enet3;
+		/*ethernet3 = &enet3;*/
 		serial0 = &serial0;
 		serial1 = &serial1;
 	};
@@ -305,7 +305,7 @@
 			local-mac-address = [ 00 00 00 00 00 00 ];
 			interrupts = <29 2 30 2 34 2>;
 			interrupt-parent = <&mpic>;
-                        phy-handle = <&phy1>;
+            phy-handle = <&phy1>;
 			phy-connection-type = "rmii";
 
 			mdio@520 {
@@ -370,7 +370,7 @@
 		};
 
         /*Virtual Ethernet  <<->>Local BUS and CYC3 PLIS*/
-
+        /*
         enet3: ethernet@22000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -384,7 +384,7 @@
 			interrupt-parent = <&mpic>;
 			fixed-link = <1 1 100 0 0>;
 			phy-connection-type = "rmii";
-		};
+		};*/
         
 		mpic: pic@40000 {
 			interrupt-controller;

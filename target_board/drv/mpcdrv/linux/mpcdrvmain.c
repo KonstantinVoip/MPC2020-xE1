@@ -596,9 +596,7 @@ struct iphdr *ip;
 struct udphdr *udph;
 
 
-#if 0
-
-
+//#if 0   //parse on etherbet device structute
 unsigned char *virt_dev;
 
 
@@ -660,18 +658,13 @@ ip = (struct iphdr *)skb_network_header(skb);
      //if ping request for this ip send ping reply  
 	 
    }
-#endif
+//#endif
 
 
 
 
 
-   
-	eth=(struct ethhdr *)skb_mac_header(skb);
-	print_mac(buf_mac_dst,eth->h_dest); 
-	//Фильтрация 3 го уровня по IP
-	ip = (struct iphdr *)skb_network_header(skb);
-   
+
    
    
    
@@ -681,9 +674,14 @@ ip = (struct iphdr *)skb_network_header(skb);
    
 
    //comment on ispitania.
-//#if 0
-
-   if (skb->protocol ==htons(ETH_P_IP))
+#if 0
+	   
+	eth=(struct ethhdr *)skb_mac_header(skb);
+	print_mac(buf_mac_dst,eth->h_dest); 
+	//Фильтрация 3 го уровня по IP
+	ip = (struct iphdr *)skb_network_header(skb);
+   
+    if (skb->protocol ==htons(ETH_P_IP))
     {
  
       	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
@@ -877,7 +875,7 @@ ip = (struct iphdr *)skb_network_header(skb);
      //return	NF_DROP;	 
        return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
     }
-//#endif
+#endif
     
     
     return NF_ACCEPT; 	     
