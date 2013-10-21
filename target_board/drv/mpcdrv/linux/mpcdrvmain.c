@@ -6,7 +6,7 @@
 *
 * Description : P2020 mpc linux driver kernel module init 
 *
-* Author      : Konstantin Shiluaev
+* Author      : Konstantin Shiluaev..
 *
 ******************************************************************************
 ******************************************************************************
