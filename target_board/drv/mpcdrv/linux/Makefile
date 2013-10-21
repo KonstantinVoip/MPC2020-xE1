@@ -5,12 +5,9 @@ TARGET = mpcdrv
 
  
 
-  # obj-m  += mpcgianfar.o
-  
- 
+  #obj-m  += mpcgianfar.o
   obj-m  += mpcdrv.o
   mpcdrv-objs := mpcdrvmain.o mpcdrvlbcCyclone.o mpcdrv_gianfar.o mpcdrvnbuf.o mpcdrvngraf.o
-  #mpcdrv-objs := mpcdrvlbcCyclone.o mpcdrv_gianfar.o mpcdrvmain.o
   #Next step  add driver Cyclone3 PLIS <->P2020 driver exchange(взамен) mpcdrvlbcnor.o
 
   #mpcdrv-objs := pktgen.o
