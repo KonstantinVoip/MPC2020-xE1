@@ -580,10 +580,22 @@ UINT8 kys_last_mac[12];
 unsigned char buf[1514];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
+
+unsigned char  eth0_mac_dst[6];
+unsigned char  eth1_mac_dst[6];
+unsigned char  eth2_mac_dst[6];
+
 //__be32	curr_ipaddr = P2020_IP_ADDRESS ;
-//__be32  test_kys1_ipaddr = P2020_IP_ADDRESS;      //192.168.111.1              
+//__be32  test_kys1_ipaddr = P2020_IP_ADDRESS;        //192.168.111.1              
 //__be32  test_kys2_ipaddr = P2020_IP1_ADDRESS ;      //192.168.111.2   
 __be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+
+//TEST_MAC_Adddress
+unsigned char *eth0_mac= "c0ffc570";        //eth0
+unsigned char *eth1_mac= "c0ffc834";        //eth1
+unsigned char *eth2_mac= "c0ffc97c";        //eht2
+
+
 
 
 UINT16 ostatok_of_size_packet=0;
@@ -609,6 +621,22 @@ print_mac(buf_mac_dst,eth->h_dest);
 ip = (struct iphdr *)skb_network_header(skb);
 
 
+
+	print_mac(eth0_mac_dst,eth0_mac); 
+	print_mac(eth1_mac_dst,eth1_mac); 
+	print_mac(eth2_mac_dst,eth2_mac); 
+
+           
+
+	 printk("+macETH0_addr=%s+\n\r",eth0_mac_dst);
+	 printk("+macETH1_addr=%s+\n\r",eth1_mac_dst);
+	 printk("+macETH2_addr=%s+\n\r",eth2_mac_dst);
+	
+	
+	
+	
+	
+
 	if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
 	{
     /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
@@ -619,16 +647,13 @@ ip = (struct iphdr *)skb_network_header(skb);
      printk("+macDA_addr=%s+\n\r",buf_mac_dst);
      printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
-
 	 //if ping request for this ip send ping reply
 	 //no transmit //dalee
-
     }
 
 
 	if (virt_dev && !strcasecmp(virt_dev ,"eth1"))   
     {
-
     /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
      *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/    
      printk("----------------recieve_IP_PACKET_DEVICE=%s---------------\n\r",virt_dev);   
@@ -637,15 +662,12 @@ ip = (struct iphdr *)skb_network_header(skb);
      printk("+macDA_addr=%s+\n\r",buf_mac_dst);
      printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
-
 	 //if ping reguest(for this ip) send ping reply 
-	 
     }
 
 
-	if (virt_dev && !strcasecmp(virt_dev ,"eth2"))   
+   if (virt_dev && !strcasecmp(virt_dev ,"eth2"))   
    {
-    
 	/*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
      *Если пришёл пакет типа 0x800 (IPv4)  остальные отбрасываем*/    
      printk("---------------recieve_IP_PACKET_DEVICE=%s----------------------\n\r",virt_dev);   
@@ -654,25 +676,11 @@ ip = (struct iphdr *)skb_network_header(skb);
      printk("+macDA_addr=%s+\n\r",buf_mac_dst);
      printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
-
      //if ping request for this ip send ping reply  
-	 
    }
 //#endif
 
-
-
-
-
-
    
-   
-   
-   
-   
-   
-   
-
    //comment on ispitania.
 #if 0
 	   
