@@ -107,6 +107,18 @@ static void algoritm_djeicstra();
 extern UINT32 get_ipaddr_my_kys(); 
 
 
+/*Extern ethernet functions*/
+extern void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size,const u16 *mac_header);
+extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
+extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
+
+
+
+/*Extern fifo buffer function*/
+extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+
+
 
 
 /**************************************************************************************************
@@ -119,8 +131,45 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii)
 {
+   UINT16  out_mac[12];
+   UINT16  mac1[6];
+   UINT16  mac2[6];
+	
+	
 	
 	printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
+    //Здесь должен быть алгоритм коммутации куда направить пакет
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//Здесь кладём пакет в FIFO на отправку в нужное направление .TDM
+	nbuf_set_datapacket_dir0  (in_buf ,in_size);
+    
+	
+	//Или если пакет для нашего KY-S пихаем его в ethernet фугкции подмены MAC адреса
+	//обратно выпл1вываем
+	
+	
+	//Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
+    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet
+	  
+	/*********************/
+	//Подмена MAC только для пакетов предназначенных для отправки обратно моему KY-S  //переношу это в матрицу коммутации
+	  //memcpy(mac1,out_buf,6);
+	  //memcpy(mac2,&out_buf[3],6);
+	  //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
+	  //printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
+	 //p2020_revert_mac_header(mac2,mac1,&out_mac);
+	 //p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
+   /**********************/
+
+	
 	
 }
 

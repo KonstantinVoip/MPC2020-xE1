@@ -574,29 +574,18 @@ unsigned int Hook_Func(uint hooknum,
                   int (*okfn)(struct sk_buff *))
 {
 static u16 count=0;   
-u16 i=0;
+//u16 i=0;
 u16 result_comparsion=0;
 UINT8 kys_last_mac[12];
 unsigned char buf[1514];
 unsigned char  buf_mac_src[6];
 unsigned char  buf_mac_dst[6];
 
-unsigned char  eth0_mac_dst[6];
-unsigned char  eth1_mac_dst[6];
-unsigned char  eth2_mac_dst[6];
 
 //__be32	curr_ipaddr = P2020_IP_ADDRESS ;
 //__be32  test_kys1_ipaddr = P2020_IP_ADDRESS;        //192.168.111.1              
 //__be32  test_kys2_ipaddr = P2020_IP1_ADDRESS ;      //192.168.111.2   
 __be32  my_kys_ipaddr    = MY_KYS_IPADDR;
-
-//TEST_MAC_Adddress
-unsigned char *eth0_mac= "c0ffc570";        //eth0
-unsigned char *eth1_mac= "c0ffc834";        //eth1
-unsigned char *eth2_mac= "c0ffc97c";        //eht2
-
-
-
 
 UINT16 ostatok_of_size_packet=0;
 
@@ -608,13 +597,7 @@ struct iphdr *ip;
 struct udphdr *udph;
 
 
-//#if 0   //parse on etherbet device structute
-unsigned char *virt_dev;
-
-
-//printk("+Hook_Func+\n\r");
-virt_dev=skb->dev->name;
-
+//Фильтрация 2 го уровня по MAC
 eth=(struct ethhdr *)skb_mac_header(skb);
 print_mac(buf_mac_dst,eth->h_dest); 
 //Фильтрация 3 го уровня по IP
@@ -622,20 +605,19 @@ ip = (struct iphdr *)skb_network_header(skb);
 
 
 
-	print_mac(eth0_mac_dst,eth0_mac); 
-	print_mac(eth1_mac_dst,eth1_mac); 
-	print_mac(eth2_mac_dst,eth2_mac); 
 
-           
 
-	 printk("+macETH0_addr=%s+\n\r",eth0_mac_dst);
-	 printk("+macETH1_addr=%s+\n\r",eth1_mac_dst);
-	 printk("+macETH2_addr=%s+\n\r",eth2_mac_dst);
-	
-	
-	
-	
-	
+#if 0   //parse  Input packet dependebcie on ethernet device structure 
+//TEST_MAC_Adddress
+unsigned char  eth0_mac_dst[6];
+unsigned char  eth1_mac_dst[6];
+unsigned char  eth2_mac_dst[6];
+
+unsigned char *eth0_mac= "c0ffc570";        //eth0
+unsigned char *eth1_mac= "c0ffc834";        //eth1
+unsigned char *eth2_mac= "c0ffc97c";        //eht2
+unsigned char *virt_dev;
+virt_dev=skb->dev->name;
 
 	if (virt_dev && !strcasecmp(virt_dev ,"eth0"))   
 	{
@@ -651,7 +633,6 @@ ip = (struct iphdr *)skb_network_header(skb);
 	 //no transmit //dalee
     }
 
-
 	if (virt_dev && !strcasecmp(virt_dev ,"eth1"))   
     {
     /*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
@@ -665,7 +646,6 @@ ip = (struct iphdr *)skb_network_header(skb);
 	 //if ping reguest(for this ip) send ping reply 
     }
 
-
    if (virt_dev && !strcasecmp(virt_dev ,"eth2"))   
    {
 	/*Филтрацию 2 го уровня по MAC адресам постараюсь сделть потом аппаратно.!
@@ -678,75 +658,36 @@ ip = (struct iphdr *)skb_network_header(skb);
 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len);  
      //if ping request for this ip send ping reply  
    }
-//#endif
-
+#endif
+	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+      *например 341 или что-то подобное 111*/    		
+   	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
+   	if(ostatok_of_size_packet==1)
+   	{
+   	  //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+   	  return   NF_ACCEPT;	//cбрасывю не пускаю в local bus
+   	}
    
-   //comment on ispitania.
-#if 0
-	   
-	eth=(struct ethhdr *)skb_mac_header(skb);
-	print_mac(buf_mac_dst,eth->h_dest); 
-	//Фильтрация 3 го уровня по IP
-	ip = (struct iphdr *)skb_network_header(skb);
-   
+//Main basic code on p2020.
+//#if 0
+	//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
     if (skb->protocol ==htons(ETH_P_IP))
     {
- 
-      	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
-         *например 341 или что-то подобное 111*/    		
-    	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
-    	if(ostatok_of_size_packet==1)
-    	{
-    	  printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	  return   NF_ACCEPT;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой длинны пакета
-    	}
-        
-    	     	 
-    	    if ((uint)ip->daddr==0xC0A8829D)
-    	       {
 
-    	        	     //printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
-    	        	 	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
-    	        	 	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-    	        	 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
-    	        	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    	        	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-    	        	 	    	         	        	 	    	  
-    					 #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-    	        	 	 //Test Function only recieve packet
-    	        	 	 loopback_write();
-    	    		  	 #endif 
-    	    		  
-                         // return NF_DROP;
-    	        	 	 
-    	       }
-    	 
-    	    
-    	 
-    	 
-    	 /*
-    	 printk("AFTER|_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-    	 //  #if 0  //16.10.13	     
-    	    	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
-    	    	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    	    	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
-    	    	 //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
-    	      	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-    	    	 //Test Function only recieve packet
-    	    	 loopback_write();
-    	   	  	  #endif 
-    	   		  */
-    	 
-    	 
-    	 
-    	 
-    	 
-    	 
     	 /*Принял от КУ-S Информационный пакет который сожержит
     	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
     	 result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
     	 if(result_comparsion==0)
     	 {
+     	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
+       	 	  memcpy(my_kys_mac_addr,eth->h_source,6);	  
+       		 	 
+       	      //get packet from FIFO buffer
+       	      nbuf_get_datapacket_dir0 (skb->mac_header ,my_kys_ip_addr);
+    		 
+    	
+		  #if 0	  //comment for FIFO buffer Testing 
+    		 
     	   //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
     	   //2.отправляю назад пакет потдтверждения для КУ-S
     	   //SA:01-ff-ff-ff-ff-00
@@ -762,8 +703,12 @@ ip = (struct iphdr *)skb_network_header(skb);
  		     //TDM0_direction_write (softperfect_switch ,1514); 
  		     //TDM0_direction_write (softperfect_switch_hex ,1514);
  		     //TDM0_direction_write (test_full_packet_mas ,1514);
-    	 	p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);
-    	 	return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой    	  
+    	 	 p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);
+    	 
+			#endif	 
+    	 	 
+    	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
+    	 
     	 }
     	 
     	 /*Пакет от Гришы со структурой графа расположен алогоритм дейкстры
@@ -804,7 +749,7 @@ ip = (struct iphdr *)skb_network_header(skb);
     	result_comparsion=strcmp(kys_service_channel_packet_da_mac,strncpy (socr_stroka,buf_mac_dst,14)); 
     	if(result_comparsion==0)
     	{	
-    	 printk("+INPUT_SERIVCE_CH_MAC=%s+\n\r",buf_mac_dst);
+    	 printk("+INPUT_SERIVCE_CHANNEL_MAC=%s+\n\r",buf_mac_dst);
         
     	 //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
     	 //              DA :01-ff-ff-ff-22-xx  
@@ -825,9 +770,6 @@ ip = (struct iphdr *)skb_network_header(skb);
     	 
     	 //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
 	     // ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
-    	  
-    	
-    	 
 	  	//  #if 0  //16.10.13	     
     	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
     	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
@@ -845,49 +787,17 @@ ip = (struct iphdr *)skb_network_header(skb);
       
 	  	 // #endif //16.10.13     
       
-      return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС c нечётной суммой
+          return NF_DROP;
       }
-    	 
-    	         ////////////Дальше доделаю эту фишку
-    	         /* Сохраняем указатель на структуру заголовка IP */
-    	 	 	 /*
-    	 	 	 ip = (struct iphdr *)skb_network_header(skb); 	 
-        	 	 if (((uint)ip->daddr==test_kys1_ipaddr)||((uint)ip->daddr==test_kys2_ipaddr))
-        	 	 {
-
-        	     printk("---------------------------recieve_IP_PACKET-----------------------------------------\n\r");   
-        	 	 //Фильтрация 3 го уровня по ip адресу нашего НМС.
-        	 	 printk("ipSA_addr=0x%x|ipDA_addr=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr);
-        	 	 printk("LEN =0x%x|LEN=%d\n\r",(uint)skb->mac_len+(uint)skb->len,(uint)skb->mac_len+(uint)skb->len); 
-        	 	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-        	 	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;
-        	 	    	        
-        	 	    	  
-				 #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
-        	 	 //Test Function only recieve packet
-        	 	 loopback_write();
-    		  	 #endif 
-    		  
-            	 #ifdef	TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
-        	 	 //Test Function READ function
-        	 	 loopback_read();
-    		  	 #endif
-        	 	    	 	 
-        	 	 return   NF_DROP;
-        	 	 //return NF_ACCEPT;
-        	 	 }*/
-        	 
-  	 
-    //#endif 	 
-    	
-     //return	NF_DROP;	 
-       return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
+          	 
+    //return	NF_DROP;	 
+    return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
     }
-#endif
+//#endif
     
     
-    return NF_ACCEPT; 	     
-   //  return NF_DROP;  //не пропускаем пакеты
+return NF_ACCEPT; //end functions 	     
+//return NF_DROP;  //не пропускаем пакеты
 }
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)

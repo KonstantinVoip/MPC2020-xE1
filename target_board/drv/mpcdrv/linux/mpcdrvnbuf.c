@@ -49,10 +49,6 @@ GENERAL NOTES
 
 
 
-
-
-
-
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -62,8 +58,9 @@ GENERAL NOTES
 
 
 ///FIFO QUEUE
-//10 Recieve TDM DIRECTION READ FIFO strtucrure
-struct mpcfifo *fifo_tdm0_dir_read,fifo_tdm1_dir_read,fifo_tdm2_dir_read,fifo_tdm3_dir_read;
+//10 Transmit to TDM DIRECTION FIFO strtucrure.
+struct mpcfifo *fifo_put_to_tdm0_dir,*fifo_put_to_tdm1_dir,*fifo_put_to_tdm2_dir,*fifo_put_to_tdm3_dir;
+
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -98,7 +95,7 @@ static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode);
   /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
-
+extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
 
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
@@ -120,36 +117,63 @@ Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void Init_FIFObuf()
 {
-	 spinlock_t my_lock_fifo_0;
-	 memset(&fifo_tdm0_dir_read, 0x0000, sizeof(fifo_tdm0_dir_read)); 
+	 spinlock_t my_lock_fifo_0,my_lock_fifo_1,my_lock_fifo_2,my_lock_fifo_3;
+	 memset(&fifo_put_to_tdm0_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
 	
-	 //INIT FIFO DEIRECTION0 READ
-	 fifo_tdm0_dir_read=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_0);
-     if(!fifo_tdm0_dir_read) 
-     {
-    	printk("No FIFO _0 ENABLE\n\r");
-  
-     }	
-	//INIT FIFO DEIRECTION1 READ
-	//fifo_tdm1_dir_read=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
-	//INIT FIFO DEIRECTION2 READ
-	//fifo_tdm2_dir_read= mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_2);
-	//INIT FIFO DEIRECTION3 READ
-	//fifo_tdm3_dir_read=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_3);
-	//INIT FIFO DEIRECTION4 READ
+	 /*
+	 memset(&fifo_put_to_tdm1_dir, 0x0000, sizeof(fifo_put_to_tdm1_dir)); 
+	 memset(&fifo_put_to_tdm2_dir, 0x0000, sizeof(fifo_put_to_tdm2_dir)); 
+	 memset(&fifo_put_to_tdm3_dir, 0x0000, sizeof(fifo_put_to_tdm3_dir)); 
+	 */
+	 //Add to 10 directions only futures
+	 /*
+	 memset(&fifo_put_to_tdm4_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
+	 memset(&fifo_put_to_tdm5_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
+	 memset(&fifo_put_to_tdm6_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
+	 memset(&fifo_put_to_tdm7_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
+	 memset(&fifo_put_to_tdm8_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
+	 */
+	 
+	 
+	 
+	 
+	 //INIT FIFO DEIRECTION0 PUT to direction 0
+	 fifo_put_to_tdm0_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_0);
+     if(!fifo_put_to_tdm0_dir) {printk("???Transmit FIFO DIRECTION_0 Initialization Failed???\n\r");}	
+     printk("FIFO_0_TRANSMIT_INIT_OK\n\r");
+ 
+/*
+     //INIT FIFO DEIRECTION1 PUT to direction 1
+	 fifo_put_to_tdm1_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
+     if(!fifo_put_to_tdm1_dir) {printk("???Transmit FIFO DIRECTION_1 Initialization Failed??? \n\r");}	
+     printk("FIFO_1_TRANSMIT_INIT_OK\n\r");
+     
+     //INIT FIFO DEIRECTION2 PUT to direction 2
+	 fifo_put_to_tdm2_dir= mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_2);
+     if(!fifo_put_to_tdm2_dir) {printk("???Transmit FIFO DIRECTION_2 Initialization Failed??? \n\r");}
+     printk("FIFO_2_TRANSMIT_INIT_OK\n\r");  
+
+     //INIT FIFO DEIRECTION3 PUT to direction 3
+	 fifo_put_to_tdm3_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_3);
+     if(!fifo_put_to_tdm3_dir) {printk("???Transmit FIFO DIRECTION_3 Initialization Failed??? \n\r");}   
+     printk("FIFO_3_TRANSMIT_INIT_OK\n\r"); 
+*/    
+     
+     //Only Future 10 directions
+     /*
+     //INIT FIFO DEIRECTION4 PUT to direction 4
+	  fifo_put_to_tdm3_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
+     //INIT FIFO DEIRECTION5 PUT to direction 5
+	 //mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
+     //INIT FIFO DEIRECTION6 PUT to direction 6
 	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	//INIT FIFO DEIRECTION5 READ
+     //INIT FIFO DEIRECTION7 PUT to direction 7
 	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	//INIT FIFO DEIRECTION6 READ
+     //INIT FIFO DEIRECTION8 PUT to direction 8
 	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	//INIT FIFO DEIRECTION7 READ
+     //INIT FIFO DEIRECTION9 PUT to direction 9
 	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	//INIT FIFO DEIRECTION8 READ
-	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	//INIT FIFO DEIRECTION9 READ
-	//mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock);
-	
-	printk("++++++++INITIALIZE FIFO_OK+++++++++++++\n\r");
+	*/
 	
 	
 }
@@ -227,7 +251,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 	if(rbd_p->num==10)
 	{
 		
-		printk("FIFO_FULL_REJECT_PACKET\n\r");
+		printk("+++mpcfifo_put_full_fifo++\n\r");
 		return 0;
 	}
 	
@@ -236,7 +260,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 	  return 0;
 	}
 	
-	printk("current_interation  =%d\n\r",rbd_p->num );
+	printk("++mpcfifo_put_iteration=%d++\n\r",rbd_p->num );
 	
 	if(rbd_p->num == rbd_p->obj_num)
 	{
@@ -262,8 +286,8 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
 	smp_wmb();
 	
 	rbd_p->num++;	
-	printk("++++mpcfifo_put_SUCCESS++++\n\r");
 	
+	printk("++++mpcfifo_put_SUCCESS++++\n\r");
 	spin_unlock_irqrestore(rbd_p->lock, flags);
 	
 	
@@ -315,7 +339,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	rbd_p->num--;
 	
     smp_mb();
-    printk("++++mpcfifo_get_SUCCESS+++\n\r");	
+    printk("++mpcfifo_get_sucess++\n\r");	
    
    spin_unlock_irqrestore(rbd_p->lock, flags);
    
@@ -457,7 +481,7 @@ static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode)
 
 /*****************************************************************************
 Syntax:      	    nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
-Remarks:			get data on FIFO
+Remarks:			get data from FIFO buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
@@ -467,19 +491,20 @@ void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
 	 
 	 
 	 //u16 status;
-	 mpcfifo_get(fifo_tdm0_dir_read, out_buf);
-	 printk("+nbuf_get_datapacket_dir0=%d+\n\r",fifo_tdm0_dir_read->obj_size);
-	 packet_size_hex=fifo_tdm0_dir_read->obj_size;
+	 mpcfifo_get(fifo_put_to_tdm0_dir, out_buf);
+	 printk("+nbuf_get_datapacket_dir0_sizein_byte=%d+\n\r",fifo_put_to_tdm0_dir->obj_size);
+	 packet_size_hex=(fifo_put_to_tdm0_dir->obj_size)/2;
 	 
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
  
 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
- 	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+ 	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
 	 
 	//printk("+++SET TO FIFO BUFFER DIRECTION0++++\n\r");
 	
-
-	
+     
+ 	 //отправляю в ethernet
+ 	  p2020_get_recieve_virttsec_packet_buf(out_buf,fifo_put_to_tdm0_dir->obj_size);//send to eternet
 	
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
 	
@@ -587,9 +612,6 @@ void nbuf_get_datapacket_dir9 (const u16 *in_buf ,const u16 in_size)
 
 
 
-
-
-
 /*****************************************************************************
 Syntax:      	    void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_siz
 Remarks:			set data to fifo buffer
@@ -600,9 +622,9 @@ void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
 u16 status;
 	
 	//FILL struct FIFO 
-	 fifo_tdm0_dir_read ->obj_size=in_size;
+     fifo_put_to_tdm0_dir ->obj_size=in_size;
 	//Set to the FIFO buffer
-	 status=mpcfifo_put(fifo_tdm0_dir_read, in_buf);  
+	 status=mpcfifo_put(fifo_put_to_tdm0_dir, in_buf);  
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
 	
 }

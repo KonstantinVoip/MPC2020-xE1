@@ -49,26 +49,21 @@ GENERAL NOTES
 #include <linux/of_platform.h>
 /*External Header*/
 #include <linux/delay.h>  // mdelay ,msleep,
-
+//#include <linux/if_ether.h>
 
 #include "mpcdrvlbcCyclone.h"
-#include "mpcdrv_gianfar.h"
+//#include "mpcdrv_gianfar.h"
 //#include "mpcdrvngraf.h"
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
-/*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
-//PLIS DEBUG DEFENITION
-
 #define PLIS_DEBUG_1400  1
 
 
 
 
 ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
-   #define TDM0_DIR_TEST_ETHERNET_SEND  1
+ //#define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
  //#define TDM3_DIR_TEST_ETHERNET_SEND  1
@@ -106,10 +101,18 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
 /*****************************************************************************/
+
+
+
+
+
+//extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+/*функция для передачи пакета в матрицу коммутации для определния куда его направитъ*/
 extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
 
-extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
-extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
+
+//extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
+//extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
@@ -290,10 +293,6 @@ return status;
  	return status;
 
 #endif  	
- 	
- 	
- 	
- 	
  	
 }
 
@@ -840,11 +839,13 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     u16 dannie1400 =0; 
 	#endif	   
     
+    
+    
     hex_element_size=in_size/2;
      
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
-	    mdelay(1);
+	    //mdelay(1);
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
@@ -852,6 +853,8 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
 	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
+	
+	
 	
 	
 #ifdef PLIS_DEBUG_1400
@@ -1160,23 +1163,25 @@ void TDM0_dierction_read ()
   UINT16 packet_size_hex=0;
   UINT16 ostatok_of_size_packet=0;
   UINT16  out_buf[760];//1518 bait;
-  UINT16  out_size=0;
-  UINT16  out_mac[12];
   
-  UINT16  mac1[6];
-  UINT16  mac2[6];
+  //IP DA address read on direction 0
+  __be32  dir0_ip_da_addr    = 0;
+  //MAC DA address read on direction 0
+  UINT8   dir0_mac_da_addr   = 0;
+  //Priznak Sevi Packet 22-ff _predposlednii bait.
+  UINT8   dir0_mac_priznak_kys = 0; 
   
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
   packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>!ITERATION=%d!|1200in_byte=%d|1200in_hex=%d+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex); 
+  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
   ostatok_of_size_packet =(dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
   if(ostatok_of_size_packet==1)
   {
-	  printk("+Tdm_Dir0_read->>????bad_in_packet_size=%d?????\n\r",dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  printk("???Tdm_Dir0_read->>????bad_in_packet_size=%d?????\n\r",dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
           
   }
   else
@@ -1196,20 +1201,32 @@ void TDM0_dierction_read ()
 	  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 	  
 	  
+	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
+	  //Пока сделано очень шрубо потом доработаю.
+	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
 	  
+	  //IP DA address read on direction 0
+	 dir0_ip_da_addr    = out_buf[16];
+	  //MAC DA address read on direction 0
+	 dir0_mac_da_addr   = out_buf[2];
+	 //определяю признак KY-S по mac адресам 
+	 dir0_mac_priznak_kys = out_buf[2]>>8;
+	 
+	 printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
+	 printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
+	 
+	 if(dir0_mac_priznak_kys==0x22)
+	 {
+		 //packet kommutacii po mac address
+		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,dir0_mac_da_addr); 
+	 }
+	 else
+	 {
+		 //packet kommutacii pi ip grisha graf
+		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,dir0_ip_da_addr);
+	 }
 	  
-	  //Подмена MAC только для пакетов предназначенных для отправки обратно моему KY-S
-	  
-	  
-	  memcpy(mac1,out_buf,6);
-	  memcpy(mac2,&out_buf[3],6);
-  
-	  //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
-	  //printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
-   
-	  p2020_revert_mac_header(mac2,mac1,&out_mac);
-	  p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
-  
+	 
 	 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
      //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 	 #endif  
