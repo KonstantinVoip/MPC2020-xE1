@@ -57,7 +57,14 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
-#define PLIS_DEBUG_1400  1
+//#define PLIS_DEBUG_1400  1
+
+
+/**********************DEBUG READ PLIS OPERATION***********************/
+
+//#define  TDM0_DIR_0_READ_DEBUG   1
+//#define  TDM0_DIR_0_WRITE_DEBUG  1
+
 
 
 
@@ -849,9 +856,16 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
-    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    
+#ifdef  TDM0_DIR_0_WRITE_DEBUG	
+	
+	printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+	
+#endif 	
+	
+	
 	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
 	
 	
@@ -1197,9 +1211,10 @@ void TDM0_dierction_read ()
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
-	  printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-	  
+#ifdef  TDM0_DIR_0_READ_DEBUG	  
+	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+#endif	  
 	  
 	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
 	  //Пока сделано очень шрубо потом доработаю.
@@ -1212,8 +1227,8 @@ void TDM0_dierction_read ()
 	 //определяю признак KY-S по mac адресам 
 	 dir0_mac_priznak_kys = out_buf[2]>>8;
 	 
-	 printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
-	 printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
+	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
+	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
 	 
 	 if(dir0_mac_priznak_kys==0x22)
 	 {

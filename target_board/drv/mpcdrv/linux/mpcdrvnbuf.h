@@ -95,17 +95,34 @@ void Init_FIFObuf();
 /*****************************************************************************/
 /*	PUBLIC DATA TYPES						     */
 /*****************************************************************************/
+
+/*
 struct mpcfifo {
 
-	unsigned int  in;	    // (put) data is added at offset (in % size) 
-	unsigned int  out;	    // (get) data is extracted from off. (out % size)
-	unsigned int  num;        // actual number of stored infos
-	unsigned int  obj_num;     //maximum number of objects to store
-    unsigned int  obj_size;	   // the size of the allocated buffer
-    unsigned int  rbufd_size;  //obj_num * obj_size = size of information buffer
-    unsigned char *buffer;	   //the buffer holding the data 
-	spinlock_t    *lock;	    // protects concurrent modifications 
+	unsigned int  in;	    	//(put) data is added at offset (in % size) 
+	unsigned int  out;	     	//(get) data is extracted from off. (out % size)
+	unsigned int  num;       	//actual number of stored infos
+	unsigned int  obj_num;   	//maximum number of objects to store
+    unsigned int  obj_size[10];	 	//the size of the allocated buffer
+    unsigned int  obj_put_curr_size; //size of current packet put to FIFO
+    unsigned int  obj_get_curr_size; //size of current packet get from FIFO
+    unsigned int  rbufd_size;   //obj_num * obj_size = size of information buffer
+    unsigned char *buffer;	    //the buffer holding the data 
+	spinlock_t    *lock;	    //protects concurrent modifications 
 };
+*/
+
+struct mpcfifo {
+	unsigned int  head;
+	unsigned int  tail;
+    u16           N;
+	u16           *q;
+	u16           *buffer;	    //the buffer holding the data 
+	u16           cur_put_packet_size;  
+    u16           cur_get_packet_size;
+};
+
+
 
 
 

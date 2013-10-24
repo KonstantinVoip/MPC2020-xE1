@@ -681,7 +681,7 @@ virt_dev=skb->dev->name;
     	 {
      	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
        	 	  memcpy(my_kys_mac_addr,eth->h_source,6);	  
-       		 	 
+       		  	 
        	      //get packet from FIFO buffer
        	      nbuf_get_datapacket_dir0 (skb->mac_header ,my_kys_ip_addr);
     		 

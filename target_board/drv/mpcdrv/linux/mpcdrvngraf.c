@@ -137,7 +137,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	
 	
 	
-	printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
+	//printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
     //Здесь должен быть алгоритм коммутации куда направить пакет
 	
 	
