@@ -72,7 +72,8 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 /*****************************************************************************/
 //FIFO Function 
 static unsigned int mpcfifo_term(struct mpcfifo *rbd_p);
-static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj);
+//static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj);
+static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf);
 static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj);
 static unsigned int mpcfifo_flush(struct mpcfifo *rbd_p);
 static unsigned int mpcfifo_num(struct mpcfifo *rbd_p);
@@ -142,6 +143,7 @@ void Init_FIFObuf()
      if(!fifo_put_to_tdm0_dir) {printk("???Transmit FIFO DIRECTION_0 Initialization Failed???\n\r");}	
      printk("FIFO_0_TRANSMIT_INIT_OK\n\r");
  
+     
 /*
      //INIT FIFO DEIRECTION1 PUT to direction 1
 	 fifo_put_to_tdm1_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
@@ -177,8 +179,30 @@ void Init_FIFObuf()
 	
 	
 }
+
 /*****************************************************************************
-Syntax:      	    void Init_FIFObuf()
+Syntax:      	    void Clear_FIFObuf()
+Remarks:			This Function Clear FIFO buffer for fifo_put_to_tdm0_dir 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				Value		 									Description
+				--------------------------------------------------------------
+				= 1												Success
+				=-1												Failure
+*******************************************************************************/
+void Clear_FIFObuf()
+{
+	
+	kfree(fifo_put_to_tdm0_dir);
+	printk("+free_fifo_put_to_tdm0_dir_OK+\n\r");
+	
+}
+
+
+
+
+
+/*****************************************************************************
+Syntax:      	    struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t gfp_mask, spinlock_t *loc
 Remarks:			This Function Init FIFO buffers 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -189,104 +213,25 @@ Return Value:	    Returns 1 on success and negative value on failure.
 struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t gfp_mask, spinlock_t *lock)
 {
 	struct mpcfifo *ret;
-	int i;
-	unsigned int    size; //size for packet data massive;
-	//u16 N;
-	
-	size = obj_num * obj_size;   //razmer data massive
-    
-	
+
     /////////////////Initialize structure mpcfifo buffer	
 	ret = kmalloc(sizeof(struct mpcfifo), GFP_MASK);
 	if (!ret)
 	{	
 		return(NULL);
 	}
+
+	printk("+mpcfifo_init_alocate_memory_for_structure+\n\r");
 	
-	printk("mpc info kmalloc _OK\n\r");
-	
-	ret->N=obj_num+1;	
-	//начало очереди
-	ret->head=ret->N;
-	//конец очереди
 	ret->tail=0;
-	//запоняем массив 10 элементов
+	ret->N=obj_num+1;
+	ret->head=ret->N;
 	
-	ret->cur_put_packet_size=0;   //текущий размер пакета который кладём в очередь
-	ret->cur_get_packet_size=0;   //размер пакета который я должен получит назад.
+	ret->cur_put_packet_size=0;
+	ret->cur_get_packet_size=0;
 
-	//////////////////////массив q храняться размеры пакета.//////////////
-	ret->q = kmalloc(ret->N, GFP_MASK);
-	if (!ret->q)
-	{return(NULL);}
-	for(i = 0; i < ret->N; i++)
-	{ret->q[i] = 0;}
-	
-	///////////////////массив для самого пакета///////////////////////////
-	ret->buffer = kmalloc(size, GFP_MASK);
-	if (!ret->buffer)
-	{return(NULL);}
-	for(i = 0; i < size; i++)
-	{ret->buffer[i] = 0;}
-	
-	//printk("!!!!!!!!!!!Data buffer Initialization_OK!!!!!\n\r");
-	
-	
-	printk("Init_FIFO|ret->N=%d|ret->head=%d|ret->tail=%d\n\r",ret->N,ret->head,ret->tail);
-	printk("++++mpcfifo_init_OK++++\n\r");
 	return (ret);
 	
-	
-#if 0	
-	
-	struct mpcfifo *ret;
-	unsigned char  *buffer;
-	unsigned int    size;
-	int cur;
-	if((obj_num < 1) || (obj_size < 1)) 
-	{
-		printk("nrbuf_init: invalid obj_num %d or obj_size %d\n",obj_num, obj_size);
-		return(NULL);
-	}
-	size = obj_num * obj_size;
-	printk("+mpcfifo_init_size =%d byte+\n\r",size);
-	
-	buffer = kmalloc(size, GFP_MASK);
-	if (!buffer)
-	{
-		return(NULL);
-	}
-	//printk("buffer kmalloc _OK\n\r");
-	ret = kmalloc(sizeof(struct mpcfifo), GFP_MASK);
-	if (!ret)
-	{	
-		return(NULL);
-	}
-	//printk("mpc info kmalloc _OK\n\r");
-	ret->in =  0;
-	ret->out=  0;
-	ret->num = 0;
-	ret->obj_num = obj_num;
-	ret->obj_put_curr_size=0;
-	ret->obj_get_curr_size=0;
-	for(cur = 0; cur < 10; cur++)
-		{
-		ret->obj_size[cur] = 0;
-		}
-	//ret->obj_size = obj_size;	
-	ret->rbufd_size = obj_num * obj_size;
-	ret->buffer=buffer;
-	ret->lock=lock;
-	for(cur = 0; cur < ret->rbufd_size; cur++)
-	{
-		ret->buffer[cur] = 0;
-	}
-	
-	
-	printk("++++mpcfifo_init_OK++++\n\r");
-	return (ret);
-#endif
-
 }
 
 
@@ -302,88 +247,27 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)
+static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 {
-    u16 i;	
-	
-	printk("++mpcfifo_put++\n\r");	
-	//q у нас массив где храниться размер пакетаю
-	//rbd_p->q[rbd_p->tail]=(u16 )obj ;	
-	//запоняем размер пакет массив q
-	rbd_p->q[rbd_p->tail]=rbd_p->cur_put_packet_size;
-	//заполняем сам пакет.
-	rbd_p->tail++;
-	//Заполняем буфер пакетом
-	for(i = 0; i < rbd_p->cur_put_packet_size; i++)
-	{
-		rbd_p->buffer[rbd_p->tail] = (u16)obj + i;
-		rbd_p->tail++;
-	
-	}
-	
-	//увиличиваем значение счётчика конца хвоста FIFO
-	//rbd_p->tail++;
-	//Cчётчики
-	rbd_p->tail=rbd_p->tail % rbd_p->N;
-	
-	printk("mpcfifo_put|ret->N=%d|ret->tail=%d|packet_size=%d\n\r",rbd_p->N,rbd_p->tail,rbd_p->cur_put_packet_size);	
-	
-	
-#if 0	
-	int i;
-	unsigned long flags;
-
-	spin_lock_irqsave(rbd_p->lock, flags);
-	
-	
-	printk("+++++++++mpcfifo_put|in_rbd_p->num=%d++++++\n\r",rbd_p->num);
+	u16 i;
+	DATA_lbc  ps;
 	
 	//Нет указателя на FIFO выходим из очереди
 	if(!rbd_p){return 0;}
 	
+	//Естественно нужна защита от одновременного доступа к даннымю потом сделаю! пока так.
 	
-	//Переполнение буфера слишком много элементов >10
-	if(rbd_p->num==10)
-	{printk("+++mpcfifo_put_full_fifo++\n\r");return 0;}
+	ps.size=rbd_p->cur_put_packet_size;
 	
-
-	//Заполняем массив размеров для пишем туда размер текущего пакета.
-	rbd_p->obj_size[rbd_p->num]=rbd_p->obj_put_curr_size;
-	
-	printk("+++++++++mpcfifo_put|cur_size=%d+++++++\n\r",rbd_p->obj_put_curr_size);
-	
-	
-	if(rbd_p->num == rbd_p->obj_num)
+	for(i=0;i<ps.size;i++)
 	{
-	printk("[RB OV]\n");
-	return 0;
+		ps.data[i]=(u16)buf[i];
 	}
-    
-    //Блокировка доступа MULTI_PROCESSOR
-	smp_mb();
 	
-	//Заполняем буфер пакетом
-	for(i = 0; i < rbd_p->obj_put_curr_size; i++)
-	{
-		rbd_p->buffer[rbd_p->in + i] = *(((unsigned char *)obj) + i);
-    }
+	rbd_p->q[rbd_p->tail++]=ps;
+	rbd_p->tail=rbd_p->tail %rbd_p->N;
 	
-	rbd_p->in += rbd_p->obj_put_curr_size;
-	
-	if(rbd_p->in == rbd_p->rbufd_size)
-	{	
-			rbd_p->in = 0;
-	}
-	smp_wmb();
-	//Увиличиваме счётчик на еденицу.
-	rbd_p->num++;	
-	
-	printk("+++++++++mpcfifo_put|out_rbd_p->num=%d++++++\n\r",rbd_p->num);
-	
-	//printk("++mpcfifo_put_success++\n\r");
-	spin_unlock_irqrestore(rbd_p->lock, flags);
-	
-#endif	
+	printk("++mpcfifo_put_OK!++\n\r");
 	
 	return 1;
 	
@@ -403,100 +287,33 @@ Return Value:	    Returns 1 on success and negative value on failure.
 static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 {
 	u16 i;
-	u16 out[757];
-     
-	//Счётчики элеметов FIFO
-	rbd_p->head=rbd_p->head % rbd_p->N;
-	
-	
-	
-	
-	
-	//копируем данные о состоянии пакета.
-	rbd_p->cur_get_packet_size=rbd_p->q[rbd_p->head];
-	rbd_p->head++;
-	
-	
-	/*
-	
-	//Заполняем буфер пакетом
-	for(i = 0; i < rbd_p->cur_get_packet_size; i++)
-	{	
-		//*(((unsigned char *)obj) + i) = rbd_p->buffer[i];
-		out[i] = rbd_p->buffer[i];  
-		
-		rbd_p->head++;
-	}
-	*/
-	
-	
-	
-	//увиличиваем значение конца хвоста
-	
-	
-	
-	
-	//Копируем данные назад размер пакета
-	//obj =rbd_p->q[rbd_p->head++];
-	
-
-	printk("mpcfifo_get|out_packet_size=%d\n\r",rbd_p->cur_get_packet_size);
-	
-#if 0	
-	
-	int i;
-
+	DATA_lbc local;
 	unsigned long flags;
-	spin_lock_irqsave(rbd_p->lock, flags);
 	
-	printk("+++++++++mpcfifo_get|in_rbd_p->num=%d++++++\n\r",rbd_p->num);
 	
+	//проверяем условие что нормальный указатель в памяти не хлам
 	if(!rbd_p)
 	{return 0;}
 	
-	smp_rmb();
+	//проверка что буфер не пуст иначе кладём
 	
-	if(rbd_p->num == 0){return 0;}
-
-	//rbd_p->obj_get_curr_size=rbd_p->obj_size[rbd_p->num]
+	rbd_p->head =rbd_p->head %rbd_p->N;
 	
-	//schetchik_get_fifo=rbd_p->num
+	local.size = rbd_p->q[rbd_p->head].size;
 	
-	//Add current size of the objects
-    //rbd_p->obj_get_curr_size=rbd_p->obj_size[rbd_p->num];
-
+	rbd_p->cur_get_packet_size=rbd_p->q[rbd_p->head].size;
 	
-#if 0
-	
-	for(i = 0; i < rbd_p->obj_get_curr_size; i++)
-	{	
-		*(((unsigned char *)obj) + i) = rbd_p->buffer[rbd_p->out + i];
-
-	}	
-		
-	rbd_p->out += rbd_p->obj_get_curr_size;
-
-	if(rbd_p->out == rbd_p->rbufd_size)
-	{	
-		rbd_p->out = 0;
+	for(i=0;i<local.size;i++)
+	{
+		*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
 	}
-
-#endif	
 	
-	
-	rbd_p->num--;
-	//printk("+++++++++mpcfifo_get|out_rbd_p->num=%d++++++\n\r",rbd_p->num);
-	//Add current size of the objects
-	//rbd_p->obj_get_curr_size=rbd_p->obj_size[rbd_p->num];
-	
-	//printk("++mpcfifo_get_iteration|get_curr_size=%d++\n\r",rbd_p->obj_get_curr_size);
-	
-    smp_mb();    
-   // printk("++mpcfifo_get_sucess++\n\r");	
-   spin_unlock_irqrestore(rbd_p->lock, flags);
- 
-#endif  
-   
+	rbd_p->head++;
+	 
+   /*	
+   printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[0], local.data[1], local.data[2], local.data[3], local.data[4], local.data[5]);
+   printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[rbd_p->cur_get_packet_size-6], local.data[rbd_p->cur_get_packet_size-5], local.data[rbd_p->cur_get_packet_size-4], local.data[rbd_p->cur_get_packet_size-3], local.data[rbd_p->cur_get_packet_size-2], local.data[rbd_p->cur_get_packet_size-1]);
+   */	
    return 1;
 }
 
@@ -649,45 +466,19 @@ void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
 	 u16  packet_size_in_byte;
 	 u16  static get_iteration=0;
 	 
-	 
-	 
-	 
-	 printk("???>>>>>>>>>>>>nbuf_get_datapacket_dir0 Iteration=%d<<<<<<<<<<<<<<<<???\n\r",get_iteration);
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration);
 	 //u16 status;
 	 mpcfifo_get(fifo_put_to_tdm0_dir, out_buf);
-	 //packet_size_in_byte=fifo_put_to_tdm0_dir->obj_get_curr_size;
-	 p2020_get_recieve_virttsec_packet_buf(out_buf,(fifo_put_to_tdm0_dir->cur_get_packet_size)*2);
-	 
+	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
+	 //отправляю в ethernet
+ 	 p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_in_byte);//send to eternet	 
 	 get_iteration++;
-	 //printk("packet_size_in_byte=%d",packet_size_in_byte);
-	 
-	 
-	 //printk("+nbuf_get_datapacket_dir0_sizein_byte=%d+\n\r",fifo_put_to_tdm0_dir->obj_size);
-	 //packet_size_hex=(fifo_put_to_tdm0_dir->obj_size)/2;
-	 
-	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
- 
-	 
-	 
+
 	 /* 
 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
  	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
 	 */
-	 
-	//printk("+++SET TO FIFO BUFFER DIRECTION0++++\n\r");
 	
-     
- 	 //отправляю в ethernet
- 	  //p2020_get_recieve_virttsec_packet_buf(out_buf,fifo_put_to_tdm0_dir->obj_size);//send to eternet
-	
-	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
-	
-	 //mpcfifo_get(fifo_tdm0_dir_read, out_buf);
-	//mpcfifo_print(fifo_tdm0_dir_read, 0);
-
-	
-	//printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	//printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 	
 	
 	
@@ -796,17 +587,12 @@ void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
 u16 status=0;
 u16 static set_iteration=0;  
 
-printk("???>>>>>>>>>>>>nbuf_set_datapacket_dir0=%d<<<<<<<<<<<<<<<<???\n\r",set_iteration);
-	//FILL struct FIFO 
-     //fifo_put_to_tdm0_dir ->obj_size=in_size;
-	 
-     //fill_packet_size_current
-     fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
-
-
-     //fifo_put_to_tdm0_dir ->obj_put_curr_size=in_size;
+     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir0=%d<<<<<<<<<<<<<<<<\n\r",set_iteration);	 
+     //set packet size to fifo buffer
+       fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
+ 
      //Set to the FIFO buffer
-	 status=mpcfifo_put(fifo_put_to_tdm0_dir, in_buf);  
+	  status=mpcfifo_put(fifo_put_to_tdm0_dir, in_buf);  
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
 	 set_iteration++;
 	 

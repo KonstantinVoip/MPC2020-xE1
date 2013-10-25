@@ -1221,7 +1221,8 @@ void mpc_cleanup_module(void)
 	nf_unregister_hook(&bundle);
 	msleep(10);
     kthread_stop(r_t1);
-	printk("exit_module() called\n");
+    Clear_FIFObuf();
+    printk("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 
 }

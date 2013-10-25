@@ -90,7 +90,7 @@ void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
 /*	                 EXTERN FUNCTIONS AND DATA TYPES						     */
 /******************************************************************************/
 void Init_FIFObuf();
-
+void Clear_FIFObuf();
 
 /*****************************************************************************/
 /*	PUBLIC DATA TYPES						     */
@@ -112,13 +112,21 @@ struct mpcfifo {
 };
 */
 
+
+typedef struct description_packet
+{
+ u16 size;	
+ u16 data[757];
+ 
+}DATA_lbc;
+
+
 struct mpcfifo {
+	DATA_lbc      q[10];
 	unsigned int  head;
 	unsigned int  tail;
     u16           N;
-	u16           *q;
-	u16           *buffer;	    //the buffer holding the data 
-	u16           cur_put_packet_size;  
+    u16           cur_put_packet_size;
     u16           cur_get_packet_size;
 };
 

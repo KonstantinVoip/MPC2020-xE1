@@ -116,8 +116,15 @@ extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 /*Extern fifo buffer function*/
 extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
-
+extern void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
 
 
 
@@ -139,7 +146,16 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	
 	//printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
     //Здесь должен быть алгоритм коммутации куда направить пакет
-	
+   /*
+     int A[N][N] = {
+           {0, 1, 1, 1, INT16_MAX, INT16_MAX},  //1 элемент
+           {1, 0, 1, INT16_MAX, INT16_MAX, 1}, //2 элемент
+           {1, 1, 0, 1, INT16_MAX, 1},         //3 элемент
+           {1, INT16_MAX, 1, 0, 1, INT16_MAX},  //4 элемент
+           {INT16_MAX, INT16_MAX, INT16_MAX, 1, 0, 1}, //5 элемент
+           {INT16_MAX, 1, 1, INT16_MAX,1, 0}  //6 элемент
+       };
+   */
 	
 	
 	
