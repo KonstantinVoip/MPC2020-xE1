@@ -47,6 +47,7 @@ GENERAL NOTES
 /*****************************************************************************/
 struct ngarf_setevoi_element
 {
+bool   setevoi_elemet_commutacia_zapolnenena;
 UINT32 my_setevoi_element_ip;
 UINT16 matrica_commutacii_current_mpc_sosedi[16];
 UINT32 matrica_ipadrr_sosedi_cur_mpc[16];
@@ -54,6 +55,7 @@ UINT32 matrica_ipadrr_sosedi_cur_mpc[16];
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
+__be32  my_kys_ipaddr=0;                         //IP адрес моего КY-S
 UINT16 number_peak=6;                          ///Количество вершин графа (сетевых элементов)
 UINT16 cost_matrica_puti[6][6];                //матрица стоимостей путей  //Здесь С
 UINT16 MAX;                                  //вместо бесконечностей
@@ -80,7 +82,7 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 /*****************************************************************************/
 static void set_max_element_cost_matrica();
 static bool in_arr(UINT16 j ,UINT16 *arr);
-static void algoritm_djeicstra();
+static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
 
 
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip);
@@ -198,60 +200,85 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  out_mac[12];
    UINT16  mac1[6];
    UINT16  mac2[6];
+   
+   
 	
+   //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S
+   if(priznak_kommutacii==my_kys_ipaddr)
+   {
+	/*********************/
+	//Подмена MAC только для пакетов предназначенных для отправки обратно моему KY-S
+	  memcpy(mac1,in_buf,6);
+      memcpy(mac2,&in_buf[3],6);
+      //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
+	  //printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
+      p2020_revert_mac_header(mac2,mac1,&out_mac);
+	  p2020_get_recieve_packet_and_setDA_MAC(in_buf ,in_size,out_mac);
+	/**********************/     
+   }
+   
+   //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
+   //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
+   //Сосед на направлении 1
+   //Предположим пока так будем коммутировать 
+   
+//#if 0   
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[0])
+   {
+    //Здесь кладём пакет в FIFO на отправку в нужное направление .TDM накапливаем пакеты
+	  nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   }
+   
+   
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[1])
+   {	   
+   //Сосед на направлении 2
+	  nbuf_set_datapacket_dir1  (in_buf ,in_size);
+   }
 	
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[2])
+   {
+	   //Сосед на направлении 3
+	  nbuf_set_datapacket_dir2  (in_buf ,in_size);
+   }
+   
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[3])
+   {	   
+   //Сосед на направлении 4
+	  nbuf_set_datapacket_dir3  (in_buf ,in_size);
+   }
+  
+   
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[4])
+   {	   
+   //Сосед на направлении 5
+	  nbuf_set_datapacket_dir4  (in_buf ,in_size);
+   }
+	  
+   
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[5])
+   {	   
+   //Сосед на направлении 6
+	  nbuf_set_datapacket_dir5  (in_buf ,in_size);
+   }   
 	
-	//printk("MATRICA_KOMMUTACII=0x%x\n\r",priznak_kommutacii);
-    //Здесь должен быть алгоритм коммутации куда направить пакет
-   /*
-     int A[N][N] = {
-           {0, 1, 1, 1, INT16_MAX, INT16_MAX},  //1 элемент
-           {1, 0, 1, INT16_MAX, INT16_MAX, 1}, //2 элемент
-           {1, 1, 0, 1, INT16_MAX, 1},         //3 элемент
-           {1, INT16_MAX, 1, 0, 1, INT16_MAX},  //4 элемент
-           {INT16_MAX, INT16_MAX, INT16_MAX, 1, 0, 1}, //5 элемент
-           {INT16_MAX, 1, 1, INT16_MAX,1, 0}  //6 элемент
-       };
-   */
-	
-
-   //по признаку коммутации	
-	//Здесь кладём пакет в FIFO на отправку в нужное направление .TDM
-	nbuf_set_datapacket_dir0  (in_buf ,in_size);
-    
-	
-	//Или если пакет для нашего KY-S пихаем его в ethernet фугкции подмены MAC адреса
-	//обратно выпл1вываем
-	
-	
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[6])
+   {	   
+   //Сосед на направлении 7
+	  nbuf_set_datapacket_dir6  (in_buf ,in_size);
+   }
+	  
+   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[7])
+   {	   
+	  //Сосед на направлении 8
+	  nbuf_set_datapacket_dir7  (in_buf ,in_size);
+   }
+//#endif  
+ 	
 	//Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
     //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet
-	  
-	/*********************/
-	//Подмена MAC только для пакетов предназначенных для отправки обратно моему KY-S  //переношу это в матрицу коммутации
-	  //memcpy(mac1,out_buf,6);
-	  //memcpy(mac2,&out_buf[3],6);
-	  //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);  
-	  //printk("podmena_mac_dst_|0x%04x|0x%04x|0x%04x\n\r",mac2[0],mac2[1],mac2[2]);
-	 //p2020_revert_mac_header(mac2,mac1,&out_mac);
-	 //p2020_get_recieve_packet_and_setDA_MAC(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,out_mac);
-   /**********************/
-
-	
-	
+	  	
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -272,7 +299,7 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     
     u16 razmer_array_element =400;
     
-    __be32  my_kys_ipaddr;
+    //__be32  my_kys_ipaddr;
     __be32  l_ipaddr=0;
     __be32  sosed_ipaddr=0;
     __be32  last_ip_addr=0;
@@ -312,7 +339,7 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     
      ///////////////////////Берём адрес моего сетевого элемент исходящая вершина графа////////////////
      //my_kys_ipaddr=get_ipaddr_my_kys();
-     my_kys_ipaddr=0xc0a86f01;  //пока делаю подставу.
+     //my_kys_ipaddr=0xc0a86f01;  //пока делаю подставу.
     
 
     size_my_mas=sizeof(mas_1);
@@ -384,9 +411,6 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		 			last_ip_addr=l_ipaddr;
 		 		}
 		 		
-		 		
-		 		
-		 		
 		 		//Ситуация заполнения узла
 		 		if(last_ip_addr==l_ipaddr)
 		 		{	  
@@ -436,13 +460,11 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	 }
 	 */
 	 
-	// 
-	 
-	 
+	 // 
 	 proba1=setevoi_element[0].my_setevoi_element_ip;	
 	 printk("Cornevoi_setevoi_elemnt_ip=%x\n\r",proba1);
 	 
-	 for(j=0;j<8;j++)
+	 for(j=0;j<max_kolichestvo_par_v_odnom_setevom_elemente;j++)
 	 {
 	 		 
 		     proba3=setevoi_element[0].matrica_commutacii_current_mpc_sosedi[j];
@@ -452,8 +474,6 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		     printk("ip_sosed=0x%x\n\r" ,proba2);
 		     
 	 }
-	 
-	 
 	 //printk("!!!!!!!!!OK_MATRICA_IS_FULL\n\r!!!!!!!!!!!");
 	 /*
 	 for(i=0;i<max_kolichestvo_setvich_elementov_onpacket;i++)
@@ -463,11 +483,13 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	 
 	 
 	 
-	 //stroi graf seti ot moego elementa 
+   //Пока в качестве заглушки используем Алгоритм для поиска пакета с удалённым IP_мультиплексора который не
+   //входит в число соседей моего корневого.
+   //+нужно изъять паралельные связи которые не ведут нас к удалённому мултиплексору(пока оставлю это)
 	 
-	  
 	 
 	 
+   Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 // 
 #if 0	
 	printk("+ngraf_get_datapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,in_size/2);
@@ -503,118 +525,18 @@ void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size)
 }
 */
 
+
+
+
 /**************************************************************************************************
-Syntax:      	    static void set_max_element_cost_matrica()    
-Parameters:     	void
-Remarks:			вычисляем максимальный элемент матрицы 
-Return Value:	    1  =>  Success  ,-1 => Failure
-***************************************************************************************************/
-static void set_max_element_cost_matrica()
-{
- int max=0;
- int i,j;
- 
- 	for (i=0; i<number_peak; i++) 
- 	{
- 		for (j=0; j<number_peak; j++)
- 		{
- 			//if (cost_matrica_puti[i][j]!=NULL && cost_matrica_puti[i][j]!=50)
- 			//{
- 				//max=36;//max+cost_matrica_puti[i][j];
- 				//printk("max= %d\n\r",max);
- 			//
- 				//}
-  
- 		}
- 	}
- 		
-   max=MAX=36; //max*max;
-   printk("max= %d\n\r",MAX);
-}
-/**************************************************************************************************
-Syntax:      	    static bool in_arr(UINT16 j ,UINT16 *arr);
-Parameters:     	проверка на наличие числа j в массиве arr
+Syntax:      	    static void Algoritm_puti_udalennogo_ip_and_chisla_hop()
+Parameters:     	Алгоритм полсчета числа прыжков и маршрута к удалённому Мультиплексорую.
 Remarks:			timer functions 
 Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
-static bool in_arr(UINT16 j ,UINT16 *arr)
+static void Algoritm_puti_udalennogo_ip_and_chisla_hop()
 {
-	int i;
-	bool ret;
-	ret=false;
-	for (i=0; i<number_peak-1; i++) if (arr[i]==j) ret=true;
-	return ret;
-	
-}
 
-
-
-/**************************************************************************************************
-Syntax:      	    static void algoritm_djeicstra()
-Parameters:     	сам алгоритм
-Remarks:			timer functions 
-Return Value:	    1  =>  Success  ,-1 => Failure
-***************************************************************************************************/
-static void algoritm_djeicstra()
-{
-  int i,j,k;                   //для циклов for
-  int a;                       //вершина источник графа //a=1,a=2,a=3,a=4,a=5,a=6 откуда считаем пути	
-  int w,min;
-  int S[number_peak-1];        //массив S содержит вершины помеченные как посещённые  
-  int D[number_peak];          //массив D содрежит кратчайшие расстояние к вершинам из вершины источника
-  int P[number_peak];          //массив последних промежуточных вершин на маршруте
-  
- 
-  a=4;    //из вершины 1 один к остальным вершинам.
-  a = a-1;	
-  set_max_element_cost_matrica();	
-
-  for(k=0;k<number_peak-1;k++)
-  {
-   S[k] = -1;
-  }
-  S[0]=a;
-  /////
-  for (i=0; i<number_peak; i++)
-  {                       
-  		if (cost_matrica_puti[a][i]==NULL) D[i]=MAX;
-  			else D[i]=cost_matrica_puti[a][i];
-  		
-  }
-  //////
-  for (i=1; i<number_peak-1; i++)
-  {
-	 min=MAX;
-	 for (k=0; k<number_peak; k++)
-	 {
-		if (D[k]<min && !in_arr(k,S) && k!=a)
-		{
-			w=k;
-			min=D[k];
-		}
-	 }
-	 if (min==MAX) break;
-	 S[i]=w;
-	 for (j=0; j<number_peak; j++) 
-	 {
-		if (!in_arr(j,S) && cost_matrica_puti[w][j]!=NULL && (D[w]+cost_matrica_puti[w][j])<=D[j])
-			{
-				P[j]=w;
-				D[j]=D[w]+cost_matrica_puti[w][j];
-			}
-			
-		
-	 }
-  }
- 
-  
-  for(i=0;i<5;i++)
-  {
-  //printk("S= %d",S[i]);
-   printk("D= %d\n\r",D[i]);
-	//  printk("D= %d\n\r",P[i]);
-  //printk("cost_matrica_puti= %x\n\r",cost_matrica_puti[i]);
-  }
   
   
 }

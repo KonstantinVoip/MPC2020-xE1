@@ -230,7 +230,6 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM0_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
-UINT16 count_visim=0;
 UINT16 dannie800=0;
 UINT16 status =0; 
 
@@ -258,51 +257,12 @@ UINT16 status =0;
 	{
 		status =0;
 	}
-	printk("dannie1000=0x%x->>>>>",dannie1000);
-	printk("dannie800=0x%x->>>>>>",dannie800);
-	printk("Status =%d\n\r",status);
+	printk("dannie1000_dir0=0x%x->>>>>",dannie1000);
+	printk("dannie800_dir0=0x%x->>>>>>",dannie800);
+	printk("Status_dir0 =%d\n\r",status);
 	
 return status;
-
-//old wariant very big Zaderski
-#if 0
-//mdelay(1000);  //2 secumd
-
- 	 while(!dannie1000)
- 	 {	 
- 		 if(count_visim==100)
- 		 {
- 		 status=0;
- 		 printk("visim 1000 iteration read_ready break\n\r");
- 		 break; //return 0;
- 		 }
- 		 
- 		 dannie1000=plis_read16 (DIR0_PLIS_READOK_ADDR1000);
- 		 if(dannie1000==0xabc0)
- 		 {
-		 dannie1000=0; 
-		 
- 		 }
- 		//printk("read_ready1000=0x%x->>",dannie1000);  
- 	    //mdelay(1000);
- 	count_visim++; 
-    }
- 	dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
- 	if(dannie800==0x1)
- 	{
- 		status =1;
- 	}
- 	if(dannie800==0xabc1)
- 	{
- 		status =1;
- 	}
- 	printk("dannie800=0x%x\n\r",dannie800);
- 	return status;
-
-#endif  	
- 	
 }
-
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM1_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
@@ -314,23 +274,43 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM1_direction_READ_READY(void)
 {
 UINT16 dannie1002=0;
-UINT16 tdmdir1_count_visim=0;
+UINT16 status =0; 
 UINT16 dannie802=0;
 
-	 	 while(!dannie1002)
-	 	 {	 
-	 		 if(tdmdir1_count_visim==20)return 0;
-		 
-	 		dannie1002=plis_read16 (DIR1_PLIS_READOK_ADDR1002);
-	 		 if(dannie1002==0xabc0)
-	 		 {
-	 			dannie1002=0; 
-			 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
-	 		 }
-	 		tdmdir1_count_visim++; 
-	    }
-	 	dannie802=plis_read16 (DIR1_PLIS_READ_BUG_ADDR802);
-	 	return 1;
+	dannie1002=plis_read16 (DIR1_PLIS_READOK_ADDR1002);
+	if((dannie1002==0xabc1) || (dannie1002==0x1))
+	{
+		status =1; 
+	} 
+	else
+	{
+	   status=0;	
+	   //printk("Status1000 =0x%x\n\r",dannie1000);
+	   return (status);	
+	}
+	mdelay(400);
+	dannie802=plis_read16 (DIR1_PLIS_READ_BUG_ADDR802);
+	if((dannie802==0x1)||(dannie802==0xabc1))
+	{
+	status =1;	
+	}
+	else
+	{
+	status =0;
+	}
+	printk("dannie1002_dir1=0x%x->>>>>",dannie1002);
+	printk("dannie802_dir1=0x%x->>>>>>",dannie802);
+	printk("Status_dir1 =%d\n\r",status);
+
+return status;
+
+
+
+
+
+
+
+
 		
 }
 /**************************************************************************************************
@@ -343,25 +323,38 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM2_direction_READ_READY(void)
 {
-	UINT16 dannie1004=0;
-	UINT16 tdmdir2_count_visim=0;
-	UINT16 dannie804=0;
+ UINT16 dannie1004=0;
+ UINT16 status =0;
+ UINT16 dannie804=0;
 
-		 	 while(!dannie1004)
-		 	 {	 
-		 		 if(tdmdir2_count_visim==20)return 0;
-			 
-		 		dannie1004=plis_read16 (DIR2_PLIS_READOK_ADDR1004);
-		 		 if(dannie1004==0xabc0)
-		 		 {
-		 			dannie1004=0; 
-				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
-		 		 }
-		 		tdmdir2_count_visim++; 
-		    }
-		 	dannie804=plis_read16 (DIR2_PLIS_READ_BUG_ADDR804);
-		 	return 1;
+	dannie1004=plis_read16 (DIR2_PLIS_READOK_ADDR1004);
+	if((dannie1004==0xabc1) || (dannie1004==0x1))
+	{
+		status =1; 
+	} 
+	else
+	{
+	   status=0;	
+	   //printk("Status1000 =0x%x\n\r",dannie1000);
+	   return (status);	
+	}
+	mdelay(400);
+	dannie804=plis_read16 (DIR2_PLIS_READ_BUG_ADDR804);
+	if((dannie804==0x1)||(dannie804==0xabc1))
+	{
+	status =1;	
+	}
+	else
+	{
+	status =0;
+	}
+	printk("dannie1004_dir1=0x%x->>>>>",dannie1004);
+	printk("dannie804_dir1=0x%x->>>>>>",dannie804);
+	printk("Status_dir2 =%d\n\r",status);
 
+return status;
+	
+	
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM3_direction_READ_READY(void)			 
@@ -374,23 +367,35 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM3_direction_READ_READY(void)
 {
 	UINT16 dannie1006=0;
-	UINT16 tdmdir3_count_visim=0;
+	UINT16 status =0;
 	UINT16 dannie806=0;
 
-		 	 while(!dannie1006)
-		 	 {	 
-		 		 if(tdmdir3_count_visim==20)return 0;
-			 
-		 		dannie1006=plis_read16 (DIR3_PLIS_READOK_ADDR1006);
-		 		 if(dannie1006==0xabc0)
-		 		 {
-		 			dannie1006=0; 
-				 //printk("VISIM_READ_READY=0x%x\n\r",dannie1000);
-		 		 }
-		 		tdmdir3_count_visim++; 
-		    }
-		 	dannie806=plis_read16 (DIR3_PLIS_READ_BUG_ADDR806);
-		 	return 1;
+	dannie1006=plis_read16 (DIR3_PLIS_READOK_ADDR1006);
+	if((dannie1006==0xabc1) || (dannie1006==0x1))
+	{
+		status =1; 
+	} 
+	else
+	{
+	   status=0;	
+	   //printk("Status1000 =0x%x\n\r",dannie1000);
+	   return (status);	
+	}
+	mdelay(400);
+	dannie806=plis_read16 (DIR3_PLIS_READ_BUG_ADDR806);
+	if((dannie806==0x1)||(dannie806==0xabc1))
+	{
+	status =1;	
+	}
+	else
+	{
+	status =0;
+	}
+	printk("dannie1006_dir1=0x%x->>>>>",dannie1006);
+	printk("dannie806_dir1=0x%x->>>>>>",dannie806);
+	printk("Status_dir3 =%d\n\r",status);
+
+return status;
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM4_direction_READ_READY(void)			 
@@ -634,15 +639,16 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM1_direction_WRITE_READY(void)
 {
-UINT16  dannie32=1; 
-     //Next step Set delay to write succes operations !!!!!!!!!!!
-	 while(dannie32)
-	 {
-	  dannie32=plis_read16 (DIR1_PLIS_WRITEOK_ADDR32); 
-	 }
-	 //printk("WRITE_READY_OK=%d\n\r",dannie30);
-return 1; //WRITE READY SUCCESS
-
+    UINT16  dannie32=1; 
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	mdelay(20);
+	dannie32=plis_read16 (DIR1_PLIS_WRITEOK_ADDR32); 
+	//printk("register 30 dannie= %d ready\n\r",dannie30);
+	if(dannie32==0)
+	{return 1; }
+	else
+	{return 0;}
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM2_direction_WRITE_READY(void)			 
@@ -654,15 +660,16 @@ Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
 UINT16 TDM2_direction_WRITE_READY(void)
 {
-
 	UINT16  dannie34=1; 
-	     //Next step Set delay to write succes operations !!!!!!!!!!!
-		 while(dannie34)
-		 {
-		  dannie34=plis_read16 (DIR2_PLIS_WRITEOK_ADDR34); 
-		 }
-		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
-	return 1;	
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	mdelay(20);
+	dannie34=plis_read16 (DIR2_PLIS_WRITEOK_ADDR34); 
+	//printk("register 30 dannie= %d ready\n\r",dannie30);
+	if(dannie34==0)
+	{return 1; }
+	else
+	{return 0;}
 	
 }
 /**************************************************************************************************
@@ -676,13 +683,16 @@ Return Value:	    Returns 1 on success and negative value on failure.
 UINT16 TDM3_direction_WRITE_READY(void)
 {
 	UINT16  dannie36=1; 
-	     //Next step Set delay to write succes operations !!!!!!!!!!!
-		 while(dannie36)
-		 {
-		  dannie36=plis_read16 (DIR3_PLIS_WRITEOK_ADDR36); 
-		 }
-		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
-	return 1;	
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	mdelay(20);
+	dannie36=plis_read16 (DIR3_PLIS_WRITEOK_ADDR36); 
+	//printk("register 30 dannie= %d ready\n\r",dannie30);
+	if(dannie36==0)
+	{return 1; }
+	else
+	{return 0;}
+	
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM4_direction_WRITE_READY(void)			 
@@ -1203,7 +1213,7 @@ void TDM0_dierction_read ()
 	  //16 bit  or 2 bait Local bus iteration
 	  do
 	  {
-	  mdelay(5);   
+	  //mdelay(5);   
       out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
       i++;           
       }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
@@ -1252,7 +1262,7 @@ void TDM0_dierction_read ()
 
 
 /**************************************************************************************************
-Syntax:      	   void TDM1_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM1_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1260,47 +1270,92 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM1_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM1_dierction_read ()
 {
 
 	  UINT16 dannie1202=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm1_read_iteration=0;
 	  UINT16 packet_size_hex=0;
+	  UINT16 ostatok_of_size_packet=0;
+	  UINT16  out_buf1[760];//1518 bait;
 	  
-	  //out_size_byte=256;//512 bait;
-	   
+	  //IP DA address read on direction 1
+	  __be32  dir1_ip_da_addr    = 0;
+	  //MAC DA address read on direction 1
+	  UINT8   dir1_mac_da_addr   = 0;
+	  //Priznak Sevi Packet 22-ff _predposlednii bait.
+	  UINT8   dir1_mac_priznak_kys = 0; 
+	  
+	  memset(&out_buf1, 0x0000, sizeof(out_buf1));
+	  
 	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202 );
 	  packet_size_hex=dannie1202/2; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir1_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);   
-	  
+	  printk("+Tdm_Dir1_read->>ITERATION=%d|1202in_byte=%d|1202in_hex=%d|size=%d|+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	    
+	    //Проверка что получили целый размер иначе хлам
+	    ostatok_of_size_packet =(dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+	    if(ostatok_of_size_packet==1)
+	    {
+	  	  printk("???Tdm_Dir1_read->>????bad_in_packet_size=%d?????\n\r",dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	            
+	    }
+	    else
+	    {	  
+	  	  //16 bit  or 2 bait Local bus iteration
+	  	  do
+	  	  {
+	  	  //mdelay(5);   
+	        out_buf1[i]= plis_read16 (DIR1_PLIS_READ_ADDR402);
+	        i++;           
+	        }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
 
-	  do
-	   {
-		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
-		 out_buf[i]=plis_read16 (DIR1_PLIS_READ_ADDR402);  
-		 i++;
-	   }while(i<packet_size_hex+1+PATCHlbc_ONE_ITERATION_READ);
-	//#endif
-	   	  
-	  
-	  printk("+Tdm_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-	  
-	  
-	  
-	#ifdef TDM1_DIR_TEST_ETHERNET_SEND
-	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
-	#endif  
-	  
-	  
+	  	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
+	  	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	    
+	  #ifdef  TDM0_DIR_1_READ_DEBUG	  
+	  	    printk("+Tdm_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf1[0],out_buf1[1],out_buf1[2],out_buf1[3],out_buf1[4],out_buf1[5]);
+	  	    printk("+Tdm_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf1[packet_size_hex-5],out_buf1[packet_size_hex-4],out_buf1[packet_size_hex-3],out_buf1[packet_size_hex-2],out_buf1[packet_size_hex-1],out_buf1[packet_size_hex]);
+	  #endif	  
+	  	  
+	  	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
+	  	  //Пока сделано очень шрубо потом доработаю.
+	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
+	  	  
+	  	  //IP DA address read on direction 0
+	  	 dir1_ip_da_addr    = out_buf1[16];
+	  	  //MAC DA address read on direction 0
+	  	 dir1_mac_da_addr   = out_buf1[2];
+	  	 //определяю признак KY-S по mac адресам 
+	  	 dir1_mac_priznak_kys = out_buf1[2]>>8;
+	  	 
+	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
+	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
+	  	 
+	  	 if(dir1_mac_priznak_kys==0x22)
+	  	 {
+	  		 //packet kommutacii po mac address
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE,dir1_mac_da_addr); 
+	  	 }
+	  	 else
+	  	 {
+	  		 //packet kommutacii pi ip grisha graf
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE,dir1_ip_da_addr);
+	  	 }
+	  	  
+	  	 
+	  	 #ifdef TDM1_DIR_TEST_ETHERNET_SEND
+	       //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+	  	 #endif  
+	  }
+	
 	  tdm1_read_iteration++; 
 	
 }
 
 
 /**************************************************************************************************
-Syntax:      	   void TDM2_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM2_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1308,44 +1363,92 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM2_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM2_dierction_read ()
 {
 	  UINT16 dannie1204=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm2_read_iteration=0;
 	  UINT16 packet_size_hex=0;
-	  //out_size_byte=256;//512 bait;
-	   
-	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204);
+	  UINT16 ostatok_of_size_packet=0;
+	  UINT16  out_buf2[760];//1518 bait;
+	 	  
+	  //IP DA address read on direction 1
+	  __be32  dir2_ip_da_addr    = 0;
+	  //MAC DA address read on direction 1
+	  UINT8   dir2_mac_da_addr   = 0;
+	  //Priznak Sevi Packet 22-ff _predposlednii bait.
+	  UINT8   dir2_mac_priznak_kys = 0; 
+	 	  
+	  memset(&out_buf2, 0x0000, sizeof(out_buf2));
+	 	  
+	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204 );
 	  packet_size_hex=dannie1204/2; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir2_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex);   
-	  
+	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	 	    
+	 	    //Проверка что получили целый размер иначе хлам
+	 	    ostatok_of_size_packet =(dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+	 	    if(ostatok_of_size_packet==1)
+	 	    {
+	 	  	  printk("???Tdm_Dir2_read->>????bad_in_packet_size=%d?????\n\r",dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	 	            
+	 	    }
+	 	    else
+	 	    {	  
+	 	  	  //16 bit  or 2 bait Local bus iteration
+	 	  	  do
+	 	  	  {
+	 	  	  //mdelay(5);   
+	 	        out_buf2[i]= plis_read16 (DIR2_PLIS_READ_ADDR404);
+	 	        i++;           
+	 	        }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
 
-	  do
-	   {
-		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
-		 out_buf[i]=plis_read16 (DIR2_PLIS_READ_ADDR404);  
-		 i++;
-	   }while(i<packet_size_hex+1+PATCHlbc_ONE_ITERATION_READ);
-	//#endif
-	  
-	  
-	  printk("+Tdm_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-     
-	#ifdef TDM2_DIR_TEST_ETHERNET_SEND
-	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
-	#endif  
+	 	  	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
+	 	  	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	 	    
+	 	  #ifdef  TDM0_DIR_2_READ_DEBUG	  
+	 	  	    printk("+Tdm_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf2[0],out_buf2[1],out_buf2[2],out_buf2[3],out_buf2[4],out_buf2[5]);
+	 	  	    printk("+Tdm_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf2[packet_size_hex-5],out_buf2[packet_size_hex-4],out_buf2[packet_size_hex-3],out_buf2[packet_size_hex-2],out_buf2[packet_size_hex-1],out_buf2[packet_size_hex]);
+	 	  #endif	  
+	 	  	  
+	 	  	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
+	 	  	  //Пока сделано очень шрубо потом доработаю.
+	 	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
+	 	  	  
+	 	  	  //IP DA address read on direction 0
+	 	  	 dir2_ip_da_addr    = out_buf2[16];
+	 	  	  //MAC DA address read on direction 0
+	 	  	 dir2_mac_da_addr   = out_buf2[2];
+	 	  	 //определяю признак KY-S по mac адресам 
+	 	  	 dir2_mac_priznak_kys = out_buf2[2]>>8;
+	 	  	 
+	 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
+	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
+	 	  	 
+	 	  	 if(dir2_mac_priznak_kys==0x22)
+	 	  	 {
+	 	  		 //packet kommutacii po mac address
+	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE,dir2_mac_da_addr); 
+	 	  	 }
+	 	  	 else
+	 	  	 {
+	 	  		 //packet kommutacii pi ip grisha graf
+	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE,dir2_ip_da_addr);
+	 	  	 }
+	 	  	  
+	 	  	 
+	 	  	 #ifdef TDM2_DIR_TEST_ETHERNET_SEND
+	 	       //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+	 	  	 #endif  
+	 	  }
 	  
 	  tdm2_read_iteration++; 
-	
-	
+
 }
 	
 	
 	
 /**************************************************************************************************
-Syntax:      	   void TDM3_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM3_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1353,35 +1456,83 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM3_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM3_dierction_read  ()
 {
 	  UINT16 dannie1206=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm3_read_iteration=0;
 	  UINT16 packet_size_hex=0;
-	  
-	  //out_size_byte=256;//512 bait;
-	   
-	  dannie1206 = plis_read16 (DIR3_PLIS_PACKSIZE_ADDR1206);
+	  UINT16 ostatok_of_size_packet=0;
+	  UINT16  out_buf3[760];//1518 bait;
+	  	 	  
+	  //IP DA address read on direction 1
+	  __be32  dir3_ip_da_addr    = 0;
+	  //MAC DA address read on direction 1
+	  UINT8   dir3_mac_da_addr   = 0;
+	  //Priznak Sevi Packet 22-ff _predposlednii bait.
+	  UINT8   dir3_mac_priznak_kys = 0; 
+	  	 	  
+	  memset(&out_buf3 ,0x0000, sizeof(out_buf3));
+	  	 	  
+	  dannie1206 = plis_read16 (DIR3_PLIS_PACKSIZE_ADDR1206 );
 	  packet_size_hex=dannie1206/2; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir3_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex);   
-	  
+	  printk("+Tdm_Dir3_read->>ITERATION=%d|1206in_byte=%d|1206in_hex=%d|size=%d|+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  	 	    
+	  //Проверка что получили целый размер иначе хлам
+	  	 	    ostatok_of_size_packet =(dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+	  	 	    if(ostatok_of_size_packet==1)
+	  	 	    {
+	  	 	  	  printk("???Tdm_Dir3_read->>????bad_in_packet_size=%d?????\n\r",dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  	 	            
+	  	 	    }
+	  	 	    else
+	  	 	    {	  
+	  	 	  	  //16 bit  or 2 bait Local bus iteration
+	  	 	  	  do
+	  	 	  	  {
+	  	 	  	  //mdelay(5);   
+	  	 	        out_buf3[i]= plis_read16 (DIR3_PLIS_READ_ADDR406);
+	  	 	        i++;           
+	  	 	        }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
 
-	  do
-	   {
-		 //out_buf[i]= __raw_readw(map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));
-		 out_buf[i]=plis_read16 (DIR3_PLIS_READ_ADDR406);  
-		 i++;
-	   }while(i<packet_size_hex+1+PATCHlbc_ONE_ITERATION_READ);
-	//#endif
-	    
-	  
-	  printk("+Tdm_Dir3_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	  printk("+Tdm_Dir3_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-	 
-	#ifdef TDM3_DIR_TEST_ETHERNET_SEND
-	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
-	#endif  
+	  	 	  	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
+	  	 	  	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	  	 	    
+	  	 	  #ifdef  TDM0_DIR_2_READ_DEBUG	  
+	  	 	  	    printk("+Tdm_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf2[0],out_buf2[1],out_buf2[2],out_buf2[3],out_buf2[4],out_buf2[5]);
+	  	 	  	    printk("+Tdm_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf2[packet_size_hex-5],out_buf2[packet_size_hex-4],out_buf2[packet_size_hex-3],out_buf2[packet_size_hex-2],out_buf2[packet_size_hex-1],out_buf2[packet_size_hex]);
+	  	 	  #endif	  
+	  	 	  	  
+	  	 	  	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
+	  	 	  	  //Пока сделано очень шрубо потом доработаю.
+	  	 	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
+	  	 	  	  
+	  	 	  	  //IP DA address read on direction 0
+	  	 	  	 dir3_ip_da_addr    = out_buf3[16];
+	  	 	  	  //MAC DA address read on direction 0
+	  	 	  	 dir3_mac_da_addr   = out_buf3[2];
+	  	 	  	 //определяю признак KY-S по mac адресам 
+	  	 	  	 dir3_mac_priznak_kys = out_buf3[2]>>8;
+	  	 	  	 
+	  	 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
+	  	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
+	  	 	  	 
+	  	 	  	 if(dir3_mac_priznak_kys==0x22)
+	  	 	  	 {
+	  	 	  		 //packet kommutacii po mac address
+	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_mac_da_addr); 
+	  	 	  	 }
+	  	 	  	 else
+	  	 	  	 {
+	  	 	  		 //packet kommutacii pi ip grisha graf
+	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_ip_da_addr);
+	  	 	  	 }
+	  	 	  	  
+	  	 	  	 
+	  	 	  	 #ifdef TDM3_DIR_TEST_ETHERNET_SEND
+	  	 	       //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+	  	 	  	 #endif  
+	  	 	  }
 	  
 tdm3_read_iteration++; 
 		
@@ -1390,7 +1541,7 @@ tdm3_read_iteration++;
 		
 
 /**************************************************************************************************
-Syntax:      	   void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM4_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1398,7 +1549,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM4_dierction_read  ()
 {
 	  UINT16 dannie1208=0; 
 	  UINT16 i=0;		  
@@ -1406,7 +1557,8 @@ void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  UINT16 packet_size=0;
 	  UINT16 packet_size_hex=0;
 	  //out_size_byte=256;//512 bait;
-	   
+
+#if 0	  
 	  dannie1208 = plis_read16 (DIR4_PLIS_PACKSIZE_ADDR1208);
 	  packet_size_hex=dannie1208/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir4_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm4_read_iteration,dannie1208,packet_size_hex);   
@@ -1426,7 +1578,9 @@ void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	#ifdef TDM4_DIR_TEST_ETHERNET_SEND
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif  
-	    
+
+#endif	  
+	  
 	  tdm4_read_iteration++; 
 				
 }
@@ -1435,7 +1589,7 @@ void TDM4_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 			
 			
 /**************************************************************************************************
-Syntax:      	   void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM5_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1443,7 +1597,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM5_dierction_read  ()
 {
 	  UINT16 dannie1210=0; 
 	  UINT16 i=0;		  
@@ -1451,7 +1605,8 @@ void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  UINT16 packet_size=0;
 	  UINT16 packet_size_hex=0;
 	  //out_size_byte=256;//512 bait;
-	   
+	
+#if 0	  
 	  dannie1210 = plis_read16 (DIR5_PLIS_PACKSIZE_ADDR1210);
 	  packet_size_hex=dannie1210/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir5_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm5_read_iteration,dannie1210,packet_size_hex);   
@@ -1471,6 +1626,8 @@ void TDM5_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	#ifdef TDM5_DIR_TEST_ETHERNET_SEND
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif  
+
+#endif
 	  
 	  tdm5_read_iteration++; 
 					
@@ -1485,14 +1642,15 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM6_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM6_dierction_read  ()
 {
 	  UINT16 dannie1212=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm6_read_iteration=0;
 	  UINT16 packet_size_hex=0;
 	  //out_size_byte=256;//512 bait;
-	   
+
+#if 0	  
 	  dannie1212 = plis_read16 (DIR6_PLIS_PACKSIZE_ADDR1212);
 	  packet_size_hex=dannie1212/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir6_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_read_iteration,dannie1212,packet_size_hex);   
@@ -1513,14 +1671,14 @@ void TDM6_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif    
 	  
-	  
+#endif	  
 	  tdm6_read_iteration++; 				
 }
 					
 					
 					
 /***************************************************************************************************
-Syntax:      	   void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM7_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1528,7 +1686,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM7_dierction_read  ()
 {
 	  UINT16 dannie1214=0; 
 	  UINT16 i=0;		  
@@ -1536,7 +1694,7 @@ void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  UINT16 packet_size_hex=0;
 	  
 	  //out_size_byte=256;//512 bait;
-	   
+#if 0	   
 	  dannie1214 = plis_read16 (DIR7_PLIS_PACKSIZE_ADDR1214);
 	  packet_size_hex=dannie1214/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir7_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm7_read_iteration,dannie1214,packet_size_hex);   
@@ -1555,13 +1713,15 @@ void TDM7_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	#ifdef TDM7_DIR_TEST_ETHERNET_SEND
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif    
+
+#endif	  
 	  
 tdm7_read_iteration++; 			
 }						
 						
 						
 /**************************************************************************************************
-Syntax:      	   void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM8_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1569,7 +1729,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM8_dierction_read  ()
 {
 	
 	  UINT16 dannie1216=0; 
@@ -1578,7 +1738,7 @@ void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  UINT16 packet_size_hex=0;
 	  
 	  //out_size_byte=256;//512 bait;
-	   
+#if 0	   
 	  dannie1216 = plis_read16 (DIR8_PLIS_PACKSIZE_ADDR1216);
 	  packet_size_hex=dannie1216/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir8_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm8_read_iteration,dannie1216,packet_size_hex);   
@@ -1604,7 +1764,9 @@ void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	#ifdef TDM8_DIR_TEST_ETHERNET_SEND
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif   
-	 
+
+#endif 	  
+	  
 	  tdm8_read_iteration++; 
 	
 }
@@ -1613,7 +1775,7 @@ void TDM8_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	
 	
 /**************************************************************************************************
-Syntax:      	   void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+Syntax:      	   void TDM9_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1621,7 +1783,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
+void TDM9_dierction_read  ()
 {
 
 	  UINT16 dannie1218=0; 
@@ -1630,7 +1792,8 @@ void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  UINT16 packet_size_hex=0;
 	  
 	  //out_size_byte=256;//512 bait;
-	   
+
+#if 0	  
 	  dannie1218 = plis_read16 (DIR9_PLIS_PACKSIZE_ADDR1218);
 	  packet_size_hex=dannie1218/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir9_read->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm9_read_iteration,dannie1218,packet_size_hex);   
@@ -1651,7 +1814,7 @@ void TDM9_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 	  p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_hex);//send to eternet
 	#endif  
 	
-
+#endif
 	  tdm9_read_iteration++; 
 	  
 }

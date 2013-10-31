@@ -180,15 +180,15 @@ void LocalBusCyc3_Init();
 
 
 void TDM0_dierction_read  ();
-void TDM1_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM2_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM3_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM4_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM5_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM6_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM7_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM8_dierction_read  (u16 *out_buf,u16 out_size_byte);
-void TDM9_dierction_read  (u16 *out_buf,u16 out_size_byte);
+void TDM1_dierction_read  ();
+void TDM2_dierction_read  ();
+void TDM3_dierction_read  ();
+void TDM4_dierction_read  ();
+void TDM5_dierction_read  ();
+void TDM6_dierction_read  ();
+void TDM7_dierction_read  ();
+void TDM8_dierction_read  ();
+void TDM9_dierction_read  ();
 
 
 /* Write Data to direction */

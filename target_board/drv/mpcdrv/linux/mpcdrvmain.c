@@ -210,7 +210,7 @@ char kys_deicstra_mps_packet_da_mac               [18]=  {"01:ff:ff:ff:ff:11"};
  * no TIMER  for channel 0 and 1*/
 
 //DIRECTION 0 Loopback Test
- #define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
+//#define  TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER  1
 //#define  TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME    1
 //DIRECTION 0 Loopback Test
 
@@ -300,7 +300,7 @@ extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_
 
 
 extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
+//extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
@@ -336,9 +336,13 @@ struct timer_list timer1,timer2;          //default timer
 static struct hrtimer hr_timer;           //high resolution timer 
 
 ///////////////////TASK _STRUCTURE///////////////
-struct task_struct *r_t1;
-static int tdm_recieve_thread(void *data);
-static int tdm_recieve_thread_one(void *data);
+struct task_struct *r_t1,*r_t2;
+//static int tdm_recieve_thread(void *data);
+
+//static int tdm_recieve_thread_one(void *data);
+
+
+
 static int N=2;
 
 
@@ -360,6 +364,9 @@ module_param( N, int, 0 );
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
+
+
+/*
 static struct ethdata_packet
 { 
 	u16 data[759] ;
@@ -367,6 +374,7 @@ static struct ethdata_packet
     u16 state;
 };
 static struct ethdata_packet  recieve_tsec_packet;
+*/
 
 
 
@@ -385,11 +393,12 @@ Remarks:			get data from input tsec packet
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
+/*
 static inline u16* get_tsec_packet_data()
 {
 	return recieve_tsec_packet.data;
 }
-
+*/
 /**************************************************************************************************
 Syntax:      	    static inline get_tsec_packet_length()
 Parameters:     	
@@ -398,31 +407,34 @@ Remarks:			get length from input packet
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
+/*
 static inline u16 get_tsec_packet_length()
 {
 	return recieve_tsec_packet.length;
 }
-
+*/
 /**************************************************************************************************/
 /*                                static inline put()                                            */
 /**************************************************************************************************/
+/*
 static inline put()
 {
 	
 	//printk("???put_input_packet_to_lbc=1???\n\r");
 	recieve_tsec_packet.state=1;//TRUE;
 }
-
+*/
 /**************************************************************************************************/
 /*                                static inline get()                                            */
 /**************************************************************************************************/
+/*
 static inline get()
 {
 	//printk("???get_lbc_transmit_complete=0????????\n\r");
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
-
+*/
 
 
 ///////////////////////THREAD TEST FUNCTIONS FOR MPC P2020///////////////
@@ -659,21 +671,27 @@ virt_dev=skb->dev->name;
      //if ping request for this ip send ping reply  
    }
 #endif
-	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
-      *например 341 или что-то подобное 111*/    		
-   	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
-   	if(ostatok_of_size_packet==1)
-   	{
-   	  //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
-   	  return   NF_ACCEPT;	//cбрасывю не пускаю в local bus
-   	}
-   
+
+  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   	
+   	
 //Main basic code on p2020.
 //#if 0
 	//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
     if (skb->protocol ==htons(ETH_P_IP))
     {
 
+    	/*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+          *например 341 или что-то подобное 111*/    		
+       	ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
+       	if(ostatok_of_size_packet==1)
+       	{
+       	  //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
+       	  return   NF_ACCEPT;	//cбрасывю не пускаю в local bus
+       	}
+    	
+    	
+    	
     	 /*Принял от КУ-S Информационный пакет который сожержит
     	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
     	 result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
@@ -681,18 +699,12 @@ virt_dev=skb->dev->name;
     	 {
      	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
        	 	  memcpy(my_kys_mac_addr,eth->h_source,6);	  
-       		  	 
-       	      //get packet from FIFO buffer
-       	      nbuf_get_datapacket_dir0 (skb->mac_header ,my_kys_ip_addr);
-    		 
-    	
-		  #if 0	  //comment for FIFO buffer Testing 
-    		 
-    	   //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
-    	   //2.отправляю назад пакет потдтверждения для КУ-S
-    	   //SA:01-ff-ff-ff-ff-00
-    	   //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
-    		//Копируем данные из информационного пакета в MAC и IP адрес    	  
+		      //#if 0	  //comment for FIFO buffer Testing 
+    	      //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
+    	      //2.отправляю назад пакет потдтверждения для КУ-S
+    	      //SA:01-ff-ff-ff-ff-00
+    	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
+    		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
     	 	  //Берём IP адрес нашего КУ-S и MAC
     	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
     	 	  memcpy(my_kys_mac_addr,eth->h_source,6);	  
@@ -700,12 +712,9 @@ virt_dev=skb->dev->name;
     	      printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",my_kys_ip_addr);
     	 	
     	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
- 		     //TDM0_direction_write (softperfect_switch ,1514); 
- 		     //TDM0_direction_write (softperfect_switch_hex ,1514);
- 		     //TDM0_direction_write (test_full_packet_mas ,1514);
-    	 	 p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);
+    	 	  p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);
     	 
-			#endif	 
+			//#endif	 
     	 	 
     	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
     	 
@@ -720,8 +729,6 @@ virt_dev=skb->dev->name;
     	 { 
     		 //1. Функция построения графа и поиска оптимального пути.
     		 printk("+INPUT_PACKET_MY_MPC_STROI_GRAF+\n\r");		 
-    		 //ip = (struct iphdr *)skb_network_header(skb);
-    		 //проверяю что пакет с таким IP моего КУ-S(МПС). если да то строю граф
     		 if ((uint)ip->daddr==my_kys_ipaddr)
     		 {     
     			
@@ -745,7 +752,8 @@ virt_dev=skb->dev->name;
     	 }
     	  
     	/*Пакет предназначенный для отправки в служебный канал пакет с данными от Севы фишка в следующем
-    	 *я его принимаю и анализирую последнюю часть мас*/
+    	 *я его принимаю и анализирую последнюю часть мас пока работаю в одной подсеити потом может 
+    	 *больше если недостаточно одной сети*/
     	result_comparsion=strcmp(kys_service_channel_packet_da_mac,strncpy (socr_stroka,buf_mac_dst,14)); 
     	if(result_comparsion==0)
     	{	
@@ -760,20 +768,20 @@ virt_dev=skb->dev->name;
         //               DA :00-25-01-00-11-2D   (или MAC адрес нашего КY-S)
     	/*Проверка и отброс пакета который пришёл сам себе на всякий случай сбрасываю его*/
     	// if(157 == 157){return NF_DROP;}
-    	 memcpy(kys_last_mac,eth->h_dest,12);	
+    	   memcpy(kys_last_mac,eth->h_dest,12);	
     	 
   
     	 //last_mac_value=eth->h_dest;                 //buf_mac_dst[6];
-    	 //printk("last_mac_value=0x%x\n\r",kys_last_mac[5]);
+    	   printk("last_mac_value=0x%x\n\r",kys_last_mac[5]);
          //добавляем подсеть типа коммутация по ip  
     	 
     	 
     	 //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
-	     // ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
+	      ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
 	  	//  #if 0  //16.10.13	     
     	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
-    	 memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-    	 recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
+    	 //memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+    	 //recieve_tsec_packet.length =  (uint)skb->mac_len+(uint)skb->len;	   
     	 //Здесь должен быть анализ и маршрутизация пакета в нужный DIRECTION
       	  #ifdef	TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
     	 //Test Function only recieve packet
@@ -787,16 +795,19 @@ virt_dev=skb->dev->name;
       
 	  	 // #endif //16.10.13     
       
-          return NF_DROP;
+      return NF_DROP;
       }
-          	 
-    //return	NF_DROP;	 
-    return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
+      else //ARP ZAPROS 
+      {
+      return	NF_ACCEPT;  
+    	  
+      }
+    	
+     //return	NF_DROP;	 
+    //return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
     }
 //#endif
-    
-    
-return NF_ACCEPT; //end functions 	     
+//return NF_ACCEPT; //end functions 	     
 //return NF_DROP;  //не пропускаем пакеты
 }
 /**************************************************************************************************
@@ -826,117 +837,11 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer1_routine(unsigned long data)
 {
- UINT16  lbcread_state=0;
- UINT16  out_buf[1518];//1518 bait;
-// UINT16  out_size=0;
-    //nbuf_get_datapacket_dir0 (out_buf ,lbcread_state);
- 
- 	 #ifdef TDM0_DIR_TEST
- 	 lbcread_state=TDM0_direction_READ_READY();
- 	 if(lbcread_state==1)
- 	 {
- 		 //TDM0_dierction_read  (out_buf,&out_size);
- 		 TDM0_dierction_read();
- 	 }
- 	 #endif
-
-
- #ifdef TDM1_DIR_TEST
- lbcread_state=TDM1_direction_READ_READY();
- #endif
-
- #ifdef TDM2_DIR_TEST
- lbcread_state=TDM2_direction_READ_READY();
- #endif
-
- #ifdef TDM3_DIR_TEST
- lbcread_state=TDM3_direction_READ_READY();
- #endif
-
- #ifdef TDM4_DIR_TEST
- lbcread_state=TDM4_direction_READ_READY();
- #endif
-
- #ifdef TDM5_DIR_TEST
- lbcread_state=TDM5_direction_READ_READY();
- #endif
-		
- #ifdef TDM6_DIR_TEST
- lbcread_state=TDM6_direction_READ_READY();
- #endif		
-		
- #ifdef TDM7_DIR_TEST
- lbcread_state=TDM7_direction_READ_READY();
- #endif			
-		
- #ifdef TDM8_DIR_TEST
- lbcread_state=TDM8_direction_READ_READY();
- #endif			
-		
- #ifdef TDM9_DIR_TEST
- lbcread_state=TDM9_direction_READ_READY();
- #endif			
-		
-
- 
-
-/*
-	if(lbcread_state==0)
-	{
-	printk("------------READtimer1_routine----->%s---------------\n\r",lbc_notready_to_read );		
-	}
-    
-    
-	if(lbcread_state==1)
-	{
-	printk("------------READtimer1_routine------>%s---------------\n\r",lbc_ready_toread );		
-	
-    #ifdef TDM0_DIR_TEST
-	TDM0_dierction_read  (out_buf,&out_size);
-    #endif
-*/	
-	
-	#ifdef TDM1_DIR_TEST
-	TDM1_dierction_read  (out_buf,&out_size);
-	#endif
-
-	#ifdef TDM2_DIR_TEST
-	TDM2_dierction_read  (out_buf,&out_size);
-	#endif
-
-	#ifdef TDM3_DIR_TEST
-	TDM3_dierction_read  (out_buf,&out_size);
-	#endif
-
-	#ifdef TDM4_DIR_TEST
-	TDM4_dierction_read  (out_buf,&out_size);
-	#endif
-
-	#ifdef TDM5_DIR_TEST
-	TDM5_dierction_read  (out_buf,&out_size);
-	#endif
-		
-	#ifdef TDM6_DIR_TEST
-	TDM6_dierction_read  (out_buf,&out_size);
-	#endif		
-		
-	#ifdef TDM7_DIR_TEST
-	TDM7_dierction_read  (out_buf,&out_size);
-	#endif			
-		
-	#ifdef TDM8_DIR_TEST
-	TDM8_dierction_read  (out_buf,&out_size);
-	#endif			
-		
-	#ifdef TDM9_DIR_TEST
-	TDM9_dierction_read  (out_buf,&out_size);
-	#endif		
-	//}
-
-    //printk(KERN_ALERT"+timer1_routine+\n\r"); 
-    mod_timer(&timer1, jiffies + msecs_to_jiffies(5000)); // restarting timer
-    //ktime_now();
-      
+ //UINT16  lbcread_state=0;
+ //UINT16  out_buf[1518];//1518 bait;
+ //printk(KERN_ALERT"+timer1_routine+\n\r"); 
+ mod_timer(&timer1, jiffies + msecs_to_jiffies(5000)); // restarting timer
+ //ktime_now();     
 }
 
 /**************************************************************************************************
@@ -947,167 +852,85 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 void timer2_routine(unsigned long data)
 {
-UINT16 lbcwrite_state=0;
-
     //printk("++timer2_routin++\n\r");
     //mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-	//if success packet to transmit ->>ready
-	if(recieve_tsec_packet.state==1)
-	  {
-	
-	  	  #ifdef TDM0_DIR_TEST
-		  lbcwrite_state=TDM0_direction_WRITE_READY();
- 	  	  #endif	
-		
-	  	  #ifdef TDM1_DIR_TEST
-		  lbcwrite_state=TDM1_direction_WRITE_READY();
-		  #endif	 
-	
-	  	  #ifdef TDM2_DIR_TEST
-	      lbcwrite_state=TDM2_direction_WRITE_READY();
- 	      #endif
-		
-          #ifdef TDM3_DIR_TEST
-	      lbcwrite_state=TDM3_direction_WRITE_READY();
-		  #endif
-	  
-          #ifdef TDM4_DIR_TEST
-	      lbcwrite_state=TDM4_direction_WRITE_READY();
- 	      #endif
-	  
-          #ifdef TDM5_DIR_TEST
-	      lbcwrite_state=TDM5_direction_WRITE_READY();
- 	      #endif
-	  
-          #ifdef TDM6_DIR_TEST
-	      lbcwrite_state=TDM6_direction_WRITE_READY();
- 	      #endif
-	  
-          #ifdef TDM7_DIR_TEST
-	      lbcwrite_state=TDM7_direction_WRITE_READY();
- 	      #endif
-	  
-          #ifdef TDM8_DIR_TEST
-	      lbcwrite_state=TDM8_direction_WRITE_READY();
-	      #endif
-	  
-          #ifdef TDM9_DIR_TEST
-	      lbcwrite_state=TDM9_direction_WRITE_READY();
-	      #endif
-	  
-
-	   if (lbcwrite_state==0)
-	   {
-		   printk("-----------WRITEtimer2_routine----->%s---------------\n\r",lbc_notready_to_write);   
-		   get();
-	   }
-	   
-	  
-	   if(lbcwrite_state==1)
-	   {	       
-		  printk("-----------WRITEtimer2_routine----->%s------------------\n\r",lbc_ready_towrite); 
-		   
-          #ifdef TDM0_DIR_TEST
-		   TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		  // TDM0_direction_write (test_full_packet_mas ,1514); 
-		  
-		  #endif
-		   
-  	  	  #ifdef TDM1_DIR_TEST
-		   TDM1_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		  #endif	 
-
-  	  	  #ifdef TDM2_DIR_TEST
-		   TDM2_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
- 	 	  #endif
-
-		  #ifdef TDM3_DIR_TEST
-		   TDM3_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		  #endif
-
-		  #ifdef TDM4_DIR_TEST
-		   TDM4_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
- 	 	  #endif
-
-		  #ifdef TDM5_DIR_TEST
-		   TDM5_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
- 	 	  #endif
-
-		  #ifdef TDM6_DIR_TEST
-		   TDM6_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
- 	 	  #endif
-
-		  #ifdef TDM7_DIR_TEST
-		   TDM7_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
- 	 	  #endif
-
-		  #ifdef TDM8_DIR_TEST
-		   TDM8_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		  #endif
-
-		  #ifdef TDM9_DIR_TEST
-		   TDM9_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		  #endif
-		  
-	   get();
-	   }
-	 
-	  // mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-	   //ktime_now();
-	   //get ethernet packet and transmit to cyclone3 local bus //transmit success;
-	  //set transmission success;
-	  
-	}
-mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-
-
+	// mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
+	//ktime_now();
+	//get ethernet packet and transmit to cyclone3 local bus //transmit success;
+	//set transmission success;
+    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
 }
 
 /**************************************************************************************************
-Syntax:      	    static int tdm_transmit_task(void *ptr)
+Syntax:      	    static int tdm_recieve_thread_two(void *data)
 Parameters:     	void *ptr
 Remarks:			 
+Return Value:	    1  =>  Success  ,-1 => Failure
 
+***************************************************************************************************/
+static int tdm_recieve_thread_two(void *data)
+{
+	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );	
+	
+	while(!kthread_should_stop()) 
+		{
+	    
+		schedule();
+		}
+	printk( "%s find signal!\n", st( N ) );
+	printk( "%s is completed\n", st( N ) );
+return 0;	
+}
+
+
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_recieve_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			 
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
 static int tdm_recieve_thread_one(void *data)
 {
-UINT16 lbcread_state=0;
 printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 
 			while(!kthread_should_stop()) 
 			{	
 				//выполняемая работа потоковой функции
-				// msleep( 100 );  
-				
-				
+				// msleep( 100 );  	 
+			    schedule();
+				//cpu_relax();
+			     /*
+			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 
+				 //else{};
 				 
-			     schedule();
-			  //#ifdef TDM0_DIR_TEST
-				 lbcread_state=TDM0_direction_READ_READY();
-				 if(lbcread_state==0)
-				 {
-				 //printk("------------READLoopback_routine----->%s---------------\n\r",lbc_notready_to_read );		
-				 }
+					 
+				 if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
+				 //else{};
+				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
+				 //else{};
 				 
-				 if(lbcread_state==1)
-				 {
-				 printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
-				 TDM0_dierction_read();
-				 } 
-				 
-				 
+				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();}
+				 //else{};
+                 */				 
 				 
 				 /*
-				 if(lbcread_state==1)
-			     {
-		         TDM0_dierction_read();
-			     }*/
-	 	 	 //#endif
-			 
-				// выполняемая работа потоковой функции
-			 // msleep( 100 );
+				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
+				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
+				 if(TDM6_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );TDM6_dierction_read();}
+				 if(TDM7_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR7------>%s---------------\n\r",lbc_ready_toread );TDM7_dierction_read();}
+			     if(TDM8_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR8------>%s---------------\n\r",lbc_ready_toread );TDM8_dierction_read();}
+				 if(TDM9_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR9------>%s---------------\n\r",lbc_ready_toread );TDM9_dierction_read();}
+			     
+			     */
+			
 			}
 		printk( "%s find signal!\n", st( N ) );
 		printk( "%s is completed\n", st( N ) );
@@ -1126,7 +949,10 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 static int tdm_recieve_thread(void *data)
 {
 printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
-	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "my_thread_%d", N );
+	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "my_tdm_recieve_%d", N );
+	
+	r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "my_tdm_transmit_%d",N );
+	
 	//msleep(20000);
 	//kthread_stop(r_t1);
 	printk( "%smain process [%d] is completed\n",ktime_now(), current->pid );
@@ -1215,12 +1041,13 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	del_timer_sync(&timer1);             /* Deleting the timer */
+	//del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
 	nf_unregister_hook(&bundle);
 	msleep(10);
     kthread_stop(r_t1);
+    kthread_stop(r_t2);
     Clear_FIFObuf();
     printk("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func

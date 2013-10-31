@@ -46,7 +46,7 @@ GENERAL NOTES
 /*	DEBUG MPC FIFO                          							     */
 /****************************************************************************/
 #define DEBUG_MPC_FIFO_BUFFER    1
-
+//#define DEBUG_GET_FIFO_SEND_TO_ETHERNET 1
 
 
 /*****************************************************************************/
@@ -120,12 +120,10 @@ void Init_FIFObuf()
 {
 	 spinlock_t my_lock_fifo_0,my_lock_fifo_1,my_lock_fifo_2,my_lock_fifo_3;
 	 memset(&fifo_put_to_tdm0_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
-	
-	 /*
 	 memset(&fifo_put_to_tdm1_dir, 0x0000, sizeof(fifo_put_to_tdm1_dir)); 
 	 memset(&fifo_put_to_tdm2_dir, 0x0000, sizeof(fifo_put_to_tdm2_dir)); 
 	 memset(&fifo_put_to_tdm3_dir, 0x0000, sizeof(fifo_put_to_tdm3_dir)); 
-	 */
+	 
 	 //Add to 10 directions only futures
 	 /*
 	 memset(&fifo_put_to_tdm4_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
@@ -135,31 +133,26 @@ void Init_FIFObuf()
 	 memset(&fifo_put_to_tdm8_dir, 0x0000, sizeof(fifo_put_to_tdm0_dir)); 
 	 */
 	 
-	 
-	 
-	 
 	 //INIT FIFO DEIRECTION0 PUT to direction 0
 	 fifo_put_to_tdm0_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_0);
      if(!fifo_put_to_tdm0_dir) {printk("???Transmit FIFO DIRECTION_0 Initialization Failed???\n\r");}	
-     printk("FIFO_0_TRANSMIT_INIT_OK\n\r");
+     printk("+FIFO_0_TRANSMIT_INIT_OK+\n\r");
  
-     
-/*
      //INIT FIFO DEIRECTION1 PUT to direction 1
 	 fifo_put_to_tdm1_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
      if(!fifo_put_to_tdm1_dir) {printk("???Transmit FIFO DIRECTION_1 Initialization Failed??? \n\r");}	
-     printk("FIFO_1_TRANSMIT_INIT_OK\n\r");
+     printk("+FIFO_1_TRANSMIT_INIT_OK+\n\r");
      
      //INIT FIFO DEIRECTION2 PUT to direction 2
 	 fifo_put_to_tdm2_dir= mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_2);
      if(!fifo_put_to_tdm2_dir) {printk("???Transmit FIFO DIRECTION_2 Initialization Failed??? \n\r");}
-     printk("FIFO_2_TRANSMIT_INIT_OK\n\r");  
+     printk("+FIFO_2_TRANSMIT_INIT_OK+\n\r");  
 
      //INIT FIFO DEIRECTION3 PUT to direction 3
 	 fifo_put_to_tdm3_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_3);
      if(!fifo_put_to_tdm3_dir) {printk("???Transmit FIFO DIRECTION_3 Initialization Failed??? \n\r");}   
-     printk("FIFO_3_TRANSMIT_INIT_OK\n\r"); 
-*/    
+     printk("+FIFO_3_TRANSMIT_INIT_OK+\n\r"); 
+    
      
      //Only Future 10 directions
      /*
@@ -193,7 +186,10 @@ void Clear_FIFObuf()
 {
 	
 	kfree(fifo_put_to_tdm0_dir);
-	printk("+free_fifo_put_to_tdm0_dir_OK+\n\r");
+	kfree(fifo_put_to_tdm1_dir);
+	kfree(fifo_put_to_tdm2_dir);
+	kfree(fifo_put_to_tdm3_dir);
+	printk("+free_fifo_buffer_OK+\n\r");
 	
 }
 
@@ -220,8 +216,6 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 	{	
 		return(NULL);
 	}
-
-	printk("+mpcfifo_init_alocate_memory_for_structure+\n\r");
 	
 	ret->tail=0;
 	ret->N=obj_num+1;
@@ -230,6 +224,8 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 	ret->cur_put_packet_size=0;
 	ret->cur_get_packet_size=0;
 
+	printk("+mpcfifo_init_alocate_memory_for_structure+\n\r");
+	
 	return (ret);
 	
 }
@@ -295,7 +291,9 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	if(!rbd_p)
 	{return 0;}
 	
-	//проверка что буфер не пуст иначе кладём
+	//проверка что буфер не пуст есть что взять
+	//return 0 buffer =0 пуст нет данных.
+	
 	
 	rbd_p->head =rbd_p->head %rbd_p->N;
 	
@@ -461,28 +459,32 @@ Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size)
 {
-	 u16 out_buf[757];
+	 u16 out_buf_dir0[757];
 	 u16  packet_size_hex=0;
 	 u16  packet_size_in_byte;
-	 u16  static get_iteration=0;
+	 u16  static get_iteration_dir0=0;
+	 u16  status=0;
 	 
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration);
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 //u16 status;
-	 mpcfifo_get(fifo_put_to_tdm0_dir, out_buf);
+	 status=mpcfifo_get(fifo_put_to_tdm0_dir, out_buf_dir0);
+	 
+	 
+	 
 	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
 	 //отправляю в ethernet
- 	 p2020_get_recieve_virttsec_packet_buf(out_buf,packet_size_in_byte);//send to eternet	 
-	 get_iteration++;
+ 	 
+#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir0,packet_size_in_byte);//send to eternet	 
+#endif	 
+ 	 
+ 	 
+ 	 get_iteration_dir0++;
 
 	 /* 
 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
  	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
 	 */
-	
-	
-	
-	
-	
 	
 }
 /*****************************************************************************
@@ -492,7 +494,28 @@ Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir1 (const u16 *in_buf ,const u16 in_size)
 {
-		
+
+	 u16 out_buf_dir1[757];
+	 u16  packet_size_hex=0;
+	 u16  packet_size_in_byte;
+	 u16  static get_iteration_dir1=0;
+	 
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
+	 //u16 status;
+	 mpcfifo_get(fifo_put_to_tdm1_dir, out_buf_dir1);
+	 packet_size_in_byte=(fifo_put_to_tdm1_dir->cur_get_packet_size)*2;
+	 //отправляю в ethernet
+	 
+#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+	   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+#endif	 
+	 
+	 get_iteration_dir1++;
+
+	 /* 
+	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
+	 */
 }
 /*****************************************************************************
 Syntax:      	    void nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in_size)
@@ -501,6 +524,28 @@ Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in_size)
 {
+	 u16 out_buf_dir2[757];
+	 u16  packet_size_hex=0;
+	 u16  packet_size_in_byte;
+	 u16  static get_iteration_dir2=0;
+	 
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir2 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir2);
+	 //u16 status;
+	 mpcfifo_get(fifo_put_to_tdm2_dir, out_buf_dir2);
+	 packet_size_in_byte=(fifo_put_to_tdm2_dir->cur_get_packet_size)*2;
+	 //отправляю в ethernet
+	 
+	 
+#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET  
+	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir2,packet_size_in_byte);//send to eternet	 
+#endif	 
+	 
+	 get_iteration_dir2++;
+
+	 /* 
+	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
+	 */
 		
 }
 /*****************************************************************************
@@ -510,7 +555,28 @@ Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_get_datapacket_dir3 (const u16 *in_buf ,const u16 in_size)
 {
-		
+	 u16 out_buf_dir3[757];
+	 u16  packet_size_hex=0;
+	 u16  packet_size_in_byte;
+	 u16  static get_iteration_dir3=0;
+	 
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir3 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir3);
+	 //u16 status;
+	 mpcfifo_get(fifo_put_to_tdm3_dir, out_buf_dir3);
+	 packet_size_in_byte=(fifo_put_to_tdm3_dir->cur_get_packet_size)*2;
+	 //отправляю в ethernet
+	 
+#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET
+	   p2020_get_recieve_virttsec_packet_buf(out_buf_dir3,packet_size_in_byte);//send to eternet	 
+#endif
+	 
+	 get_iteration_dir3++;
+
+	 /* 
+	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-6],out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1]);
+	 */
+	
 }
 
 /*****************************************************************************
@@ -585,45 +651,76 @@ Return Value:	    Returns 1 on success and negative value on failure.
 void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
 {
 u16 status=0;
-u16 static set_iteration=0;  
+u16 static set_iteration_dir0=0;  
 
-     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir0=%d<<<<<<<<<<<<<<<<\n\r",set_iteration);	 
+     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir0=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
      //set packet size to fifo buffer
        fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
  
      //Set to the FIFO buffer
 	  status=mpcfifo_put(fifo_put_to_tdm0_dir, in_buf);  
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);
-	 set_iteration++;
-	 
-	 
+	 set_iteration_dir0++;
+
 }
 /*****************************************************************************
 Syntax:      	    void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
-Remarks:			get data packet and set to fifo
+Remarks:			get data packet and set to fifo direction1
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
 {
-	
+	u16 status=0;
+	u16 static set_iteration_dir1=0;  
+
+	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir1=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir1);	 
+	     //set packet size to fifo buffer
+	       fifo_put_to_tdm1_dir->cur_put_packet_size=in_size/2;
+	 
+	     //Set to the FIFO buffer
+		  status=mpcfifo_put(fifo_put_to_tdm1_dir, in_buf);  
+		 //mpcfifo_print(fifo_tdm0_dir_read, 0);
+		 set_iteration_dir1++;
+  
 }
 /*****************************************************************************
 Syntax:      	    void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
-Remarks:			get data packet and set to fifo
+Remarks:			get data packet and set to fifo direction2
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
 {
+	u16 status=0;
+	u16 static set_iteration_dir2=0;  
+
+	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir2=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir2);	 
+	     //set packet size to fifo buffer
+	       fifo_put_to_tdm2_dir->cur_put_packet_size=in_size/2;
+	 
+	     //Set to the FIFO buffer
+		  status=mpcfifo_put(fifo_put_to_tdm2_dir, in_buf);  
+		 //mpcfifo_print(fifo_tdm0_dir_read, 0);
+		 set_iteration_dir2++;
 	
 }
 /*****************************************************************************
 Syntax:      	    void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size
-Remarks:			get data packet and set to fifo
+Remarks:			get data packet and set to fifo direction3
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size)
 {
-	
+	u16 status=0;
+	u16 static set_iteration_dir3=0;  
+
+	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir3=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir3);	 
+	     //set packet size to fifo buffer
+	     fifo_put_to_tdm3_dir->cur_put_packet_size=in_size/2;
+	 
+	     //Set to the FIFO buffer
+		  status=mpcfifo_put(fifo_put_to_tdm3_dir, in_buf);  
+		 //mpcfifo_print(fifo_tdm0_dir_read, 0);
+		 set_iteration_dir3++;
 }
 /*****************************************************************************
 Syntax:             void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16 in_size)
