@@ -871,24 +871,61 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 static int tdm_recieve_thread_two(void *data)
 {
 	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );	
-	
+	u16 status=0;
+	u16 *in_buf=0;
+	u16 in_size =0;
 	while(!kthread_should_stop()) 
 		{
 	    
 		schedule();
+	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
+			if(TDM0_direction_WRITE_READY()==1)
+			{			
+		        
+				//Есть пакет в буфере FIFO на отправку по направлению 0
+				if(nbuf_get_datapacket_dir0 (&in_buf ,in_size)==1)
+		        {
+		        	 printk("-----------WRITELoopback_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
+		        	//TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
+		        }
+				
+			}			
+	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
+			if(TDM1_direction_WRITE_READY()==1)
+			{
+		    
+				if(nbuf_get_datapacket_dir1 (&in_buf ,in_size)==1)
+				{
+					
+					printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					//TDM1_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());	
+				}		
+			
+			}
+    /*///////////////////////////////Шина Local bus готова к записи по направадению 2//////////////////////////*/
+			if(TDM2_direction_WRITE_READY()==1)
+			{
+				if(nbuf_get_datapacket_dir2 (&in_buf ,in_size)==1)
+				{
+				    printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
+					//TDM2_direction_write (get_tsec_packet_data() ,get_tsec_packet_length());
+				}			
+			}
+    /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
+		    if(TDM3_direction_WRITE_READY()==1)
+		    {
+		    	if(nbuf_get_datapacket_dir2 (&in_buf ,in_size)==1)
+		    	{
+		    	   printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
+		    	  //TDM3_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
+		    	}
+		    }
+			
 		}
 	printk( "%s find signal!\n", st( N ) );
 	printk( "%s is completed\n", st( N ) );
 return 0;	
 }
-
-
-
-
-
-
-
-
 
 /**************************************************************************************************
 Syntax:      	    static int tdm_recieve_thread_one(void *data)
@@ -905,22 +942,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			{	
 				//выполняемая работа потоковой функции
 				// msleep( 100 );  	 
-			    schedule();
+			       schedule();
 				//cpu_relax();
-			     /*
-			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 
-				 //else{};
-				 
-					 
+			     
+			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 				 if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
-				 //else{};
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
-				 //else{};
-				 
-				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();}
-				 //else{};
-                 */				 
-				 
+				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
@@ -949,9 +977,9 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 static int tdm_recieve_thread(void *data)
 {
 printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
-	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "my_tdm_recieve_%d", N );
+	r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
 	
-	r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "my_tdm_transmit_%d",N );
+	r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
 	
 	//msleep(20000);
 	//kthread_stop(r_t1);
