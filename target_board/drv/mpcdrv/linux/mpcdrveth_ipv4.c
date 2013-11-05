@@ -83,8 +83,6 @@ GENERAL NOTES
 
 
 // Add kosta Include for DMA and routing table 
-
-
 //#include <net/route.h>
 //#include <linux/dma-mapping.h>
 

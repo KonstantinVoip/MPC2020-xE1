@@ -146,7 +146,7 @@ GENERAL NOTES
 #define TEST_KYS_IPADDR_DA2  0xCOA86F02             //192.168.111.2
 */
 
-#define MY_KYS_IPADDR        0xC0A8829D             //192.168.130.157
+#define MY_KYS_IPADDR        0xC0A8827C             //192.168.130.124
 
 
 
@@ -369,7 +369,7 @@ module_param( N, int, 0 );
 /*****************************************************************************/
 
 
-/*
+
 static struct ethdata_packet
 { 
 	u16 data[759] ;
@@ -377,7 +377,7 @@ static struct ethdata_packet
     u16 state;
 };
 static struct ethdata_packet  recieve_tsec_packet;
-*/
+
 
 
 
@@ -396,12 +396,18 @@ Remarks:			get data from input tsec packet
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
-/*
+
 static inline u16* get_tsec_packet_data()
 {
 	return recieve_tsec_packet.data;
 }
-*/
+
+
+static inline u16 get_tsec_state()
+{
+	return recieve_tsec_packet.state;
+}
+
 /**************************************************************************************************
 Syntax:      	    static inline get_tsec_packet_length()
 Parameters:     	
@@ -410,34 +416,33 @@ Remarks:			get length from input packet
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
-/*
+
 static inline u16 get_tsec_packet_length()
 {
 	return recieve_tsec_packet.length;
 }
-*/
+
 /**************************************************************************************************/
 /*                                static inline put()                                            */
 /**************************************************************************************************/
-/*
+
 static inline put()
 {
 	
 	//printk("???put_input_packet_to_lbc=1???\n\r");
 	recieve_tsec_packet.state=1;//TRUE;
 }
-*/
+
 /**************************************************************************************************/
 /*                                static inline get()                                            */
 /**************************************************************************************************/
-/*
 static inline get()
 {
 	//printk("???get_lbc_transmit_complete=0????????\n\r");
 	recieve_tsec_packet.state=0;//FALSE;
 	
 }
-*/
+
 
 
 ///////////////////////THREAD TEST FUNCTIONS FOR MPC P2020///////////////
@@ -731,7 +736,7 @@ virt_dev=skb->dev->name;
     	 if(result_comparsion==0)
     	 { 
     		 //1. Функция построения графа и поиска оптимального пути.
-    		 
+    		 printk("+INPUT_PACKET_MY_MPC_STROI_GRAF-\n\r");
     		 if ((uint)ip->daddr==my_kys_ipaddr)
     		 {     
     			 //printk("+INPUT_PACKET_MY_MPC_STROI_GRAF-\n\r");
@@ -744,19 +749,25 @@ virt_dev=skb->dev->name;
     			 
     			// spin_lock_irqsave(grisha_packet,flags);
     			 
-    			 ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
-    			
+    			 //ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
+    			// return NF_DROP;
     			 //spin_unlock_irqrestore(grisha_packet,flags);
     			 //ngraf_packet_for_my_mps(skb->data  ,(uint)skb->len);
     			  //ngraf_packet_for_my_mps(skb->transport_header  ,(uint)skb->len-20);
+    	    	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
+    	    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
+    	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
+    	    	 put();
+    		 
+    		 
     		 }
     		 else
     		 {
              //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
     	     ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,(uint)ip->daddr);
-    		
+    	     //return NF_DROP;
     		 }
-    	  return NF_DROP;	//cбрасывю не пускаю дальше пакет так как он нену жен больше
+    	  //return NF_DROP;	//cбрасывю не пускаю дальше пакет так как он нену жен больше
     	 }
     	  
     	/*Пакет предназначенный для отправки в служебный канал пакет с данными от Севы фишка в следующем
@@ -900,8 +911,9 @@ static int tdm_recieve_thread_two(void *data)
 	    
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-			if(TDM0_direction_WRITE_READY()==1)
-			{			
+//#if 0
+		//if(TDM0_direction_WRITE_READY()==1)
+			//{			
 		        
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 				if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
@@ -910,14 +922,14 @@ static int tdm_recieve_thread_two(void *data)
 		        	   printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	   printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	   printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		        	   TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
+		        	  // TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 		        }
 				
-			}			
+			//}			
 	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
-#if 0	
-			if(TDM1_direction_WRITE_READY()==1)
-			{
+	
+			//if(TDM1_direction_WRITE_READY()==1)
+			//{
 		       
 				
 				if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
@@ -927,35 +939,35 @@ static int tdm_recieve_thread_two(void *data)
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-					TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
+					//TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
 				}		
 			
-			}
+			//}
     /*///////////////////////////////Шина Local bus готова к записи по направадению 2//////////////////////////*/
-			if(TDM2_direction_WRITE_READY()==1)
-			{
+			//if(TDM2_direction_WRITE_READY()==1)
+			//{
 				if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
 				{
 				    //printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
 				     //printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size);
 		        	 //printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIFO_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-				    TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
+				    //TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
 				}			
-			}
+			//}
     /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
-		    if(TDM3_direction_WRITE_READY()==1)
-		    {
+		    //if(TDM3_direction_WRITE_READY()==1)
+		    //{
 		    	if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
 		    	{
 		    	   //printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
 		    	     //printk("+FIF3_DIRO_insize_byte=%d\n\r+",in_size); 
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-		    	   TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
+		    	   //TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
 		    	}
-		    }
-#endif	
+		   // }
+//#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -979,11 +991,22 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 				//выполняемая работа потоковой функции
 				// msleep( 100 );  	 
 			       schedule();
-				//cpu_relax();
-			     
+			       
+			       
+			   
+			       
+			       
+			       if (get_tsec_state()==1)
+			       {	   
+			       ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
+			       get();
+			       }
+			       
+			       //cpu_relax();
+#if 0			     
 			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 				
-#if 0
+
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
@@ -1067,7 +1090,7 @@ int mpc_init_module(void)
          //Future MAC Address Filtering enable and Disable
          //Future Temperature controlling and other options p2020 chips.
          Hardware_p2020_set_configuartion();         
-         LocalBusCyc3_Init();   //__Initialization Local bus 
+        // LocalBusCyc3_Init();   //__Initialization Local bus 
          InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
 	     tdm_recieve_thread(NULL);

@@ -390,11 +390,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  max_kolichestvo_setvich_elementov_onpacket=(number_of_par_sviaznosti_in_packet/max_kolichestvo_par_v_odnom_setevom_elemente);
 	
 	  
-      /*
+      
 	  printk("max_kolichestvo_setvich_elementov_onpacket= %d\n\r",max_kolichestvo_setvich_elementov_onpacket);
 	  printk("number_of_par_sviaznosti_in_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
 	  printk("max_kolichestvo_par_v_odnom_setevom_elemente= %d\n\r",max_kolichestvo_par_v_odnom_setevom_elemente); 
-	  */
+	  
 	  
 	  ///////////////////////////////////////////////////////////////////////////////////// 
 	  
