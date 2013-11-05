@@ -52,7 +52,7 @@ GENERAL NOTES
 //#include <linux/if_ether.h>
 
 #include "mpcdrvlbcCyclone.h"
-//#include "mpcdrv_gianfar.h"
+#include "mpcdrv_gianfar.h"
 //#include "mpcdrvngraf.h"
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
@@ -62,15 +62,27 @@ GENERAL NOTES
 
 /**********************DEBUG READ PLIS OPERATION***********************/
 
-//#define  TDM0_DIR_0_READ_DEBUG   1
-//#define  TDM0_DIR_0_WRITE_DEBUG  1
+#define  TDM_DIR_0_READ_DEBUG   1
+#define  TDM_DIR_0_WRITE_DEBUG  1
+
+
+//#define  TDM_DIR_1_READ_DEBUG   1
+//#define  TDM_DIR_2_READ_DEBUG   1
+//#define  TDM_DIR_3_READ_DEBUG   1
+//#define  TDM_DIR_4_READ_DEBUG   1
+ 
+//#define  TDM_DIR_1_WRITE_DEBUG  1 
+//#define  TDM_DIR_2_WRITE_DEBUG  1
+//#define  TDM_DIR_3_WRITE_DEBUG  1
+//#define  TDM_DIR_4_WRITE_DEBUG  1
+//#define  TDM_DIR_5_WRITE_DEBUG  1
 
 
 
 
 
 ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
- //#define TDM0_DIR_TEST_ETHERNET_SEND  1
+  #define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
  //#define TDM3_DIR_TEST_ETHERNET_SEND  1
@@ -257,10 +269,10 @@ UINT16 status =0;
 	{
 		status =0;
 	}
-	printk("dannie1000_dir0=0x%x->>>>>",dannie1000);
+/*	printk("dannie1000_dir0=0x%x->>>>>",dannie1000);
 	printk("dannie800_dir0=0x%x->>>>>>",dannie800);
 	printk("Status_dir0 =%d\n\r",status);
-	
+*/	
 return status;
 }
 /**************************************************************************************************
@@ -777,8 +789,7 @@ UINT16 TDM7_direction_WRITE_READY(void)
 		 }
 		 //printk("WRITE_READY_OK=%d\n\r",dannie30);
 	return 1;					
-												
-						
+																	
 }					
 						
 						
@@ -859,25 +870,29 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     
     
     hex_element_size=in_size/2;
-     
+	printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    
+	#ifdef  TDM_DIR_0_WRITE_DEBUG	
+	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+   #endif
+    
+	
+	
+	
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
 	    //mdelay(1);
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
-    
-#ifdef  TDM0_DIR_0_WRITE_DEBUG	
+
 	
-	printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-	
-#endif 	
+ 	
 	
 	
 	plis_write16(DIR0_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
-	
+	//printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
 	
 	
 	
@@ -909,10 +924,14 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
     u16 hex_element_size=0;
     
     hex_element_size=in_size/2;
-    printk("+Tdm_Dir1_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir1_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     
+    printk("+Tdm_Dir1_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
+	
+#ifdef  TDM_DIR_1_WRITE_DEBUG	    
+    printk("+Tdm_Dir1_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+#endif    
+	
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
 		plis_write16(DIR1_PLIS_WRITE_ADDR202 ,in_buf[i]);
@@ -941,10 +960,14 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
     u16 hex_element_size=0;
     
     hex_element_size=in_size/2;
-    printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     
+    printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+#ifdef  TDM_DIR_2_WRITE_DEBUG	   
+    printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+#endif    
+	
+	
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
 		plis_write16(DIR2_PLIS_WRITE_ADDR204  ,in_buf[i]);
@@ -973,9 +996,13 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
     
     hex_element_size=in_size/2;
     printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+	
     
+#ifdef  TDM_DIR_3_WRITE_DEBUG	   
+    printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+#endif    
+	
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
 		plis_write16(DIR3_PLIS_WRITE_ADDR206  ,in_buf[i]);
@@ -1221,7 +1248,7 @@ void TDM0_dierction_read ()
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
-#ifdef  TDM0_DIR_0_READ_DEBUG	  
+#ifdef  TDM_DIR_0_READ_DEBUG	  
 	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
 	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 #endif	  
@@ -1253,7 +1280,7 @@ void TDM0_dierction_read ()
 	  
 	 
 	 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
-     //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+     p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 	 #endif  
   }
  

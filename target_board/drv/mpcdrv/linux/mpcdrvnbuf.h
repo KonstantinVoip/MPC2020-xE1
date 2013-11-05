@@ -56,16 +56,16 @@
  */
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
-bool nbuf_get_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir1  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir2  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir3  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir4  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir5  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir6  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir7  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir8  (const u16 *in_buf ,const u16 in_size);
-bool nbuf_get_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
+bool nbuf_get_datapacket_dir0  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir1  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir2  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir3  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir4  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir5  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir6  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir7  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir8  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir9  ( u16 *in_buf , u16 *in_size);
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
@@ -130,6 +130,7 @@ struct mpcfifo {
     u16           cur_get_packet_size;
     u16           fifo_pusto;
     u16           fifo_zapolneno;
+    spinlock_t    *lock;
 };
 
 

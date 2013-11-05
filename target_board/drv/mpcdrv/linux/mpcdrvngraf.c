@@ -74,7 +74,8 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
                                в неё входит узел(наш мультиплексор и куда какому мультплексору)                     
                               */
                              
-                              
+spinlock_t lock_packet;
+unsigned long lock_flags;                         
 
 
 /*****************************************************************************/
@@ -203,7 +204,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
    
 	
+   printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
+   
    //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S
+#if 0  
    if(priznak_kommutacii==my_kys_ipaddr)
    {
 	/*********************/
@@ -216,13 +220,17 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	  p2020_get_recieve_packet_and_setDA_MAC(in_buf ,in_size,out_mac);
 	/**********************/     
    }
+#endif   
    
    //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
    //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
    //Сосед на направлении 1
    //Предположим пока так будем коммутировать 
    
-//#if 0   
+    nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   
+   
+#if 0   
    if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[0])
    {
     //Здесь кладём пакет в FIFO на отправку в нужное направление .TDM накапливаем пакеты
@@ -273,7 +281,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	  //Сосед на направлении 8
 	  nbuf_set_datapacket_dir7  (in_buf ,in_size);
    }
-//#endif  
+#endif  
  	
 	//Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
     //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet
@@ -290,7 +298,7 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
+bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
 	u16 hex_input_data_size       = 0;	
 	u16 byte_input_data_size      = 0;
@@ -353,9 +361,15 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
    
     //printk("input_data_size->byte_=%d,hex_=%d,32_=%d\n\r",byte_input_data_size,hex_input_data_size,four_byte_input_data_size);
 	
+    // spin_lock_irqsave(lock_packet,lock_flags);
+ 
+   
 	memset(&mas_1,0x0000,size_my_mas);	
 	memcpy(mas_1,in_buf,byte_input_data_size);
-    	
+	
+	
+  
+	
 	//printk("+ngraf_get_data_rfirst|0x%08x|0x%08x|0x%08x|0x%08x+\n\r",mas_1[0],mas_1[1],mas_1[2],mas_1[3]);
 	//printk("+ngraf_get_data_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[hex_element_size-4],mas[hex_element_size-3],mas[hex_element_size-2],mas[hex_element_size-1]);	
     //first 4 bait my kys_ip_address
@@ -374,9 +388,14 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	  number_of_par_sviaznosti_in_packet=in_size/DLINNA_SVYAZI;
 	  max_kolichestvo_setvich_elementov_onpacket=(number_of_par_sviaznosti_in_packet/max_kolichestvo_par_v_odnom_setevom_elemente);
+	
+	  
+      /*
 	  printk("max_kolichestvo_setvich_elementov_onpacket= %d\n\r",max_kolichestvo_setvich_elementov_onpacket);
 	  printk("number_of_par_sviaznosti_in_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
 	  printk("max_kolichestvo_par_v_odnom_setevom_elemente= %d\n\r",max_kolichestvo_par_v_odnom_setevom_elemente); 
+	  */
+	  
 	  ///////////////////////////////////////////////////////////////////////////////////// 
 	  
 	  /*
@@ -384,8 +403,8 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  printk("MY_MPS_SOSED>>first_polovinka=0x%x|last_polovinka_=0x%x\n\r",first_polovinka_sosed,last_polovinka_sosed);
 	  printk("perv_element_dejcstra= 0x%x>>my_posad_mesto=%d>>>my_mk8_vihod=%d\n\r",l_ipaddr,my_posad_mesto,my_mk8_vihod);
 	  */
-   
-	  	  
+		    
+  	  
      //общее количество пар связносит 120 каждая равно 12 байт
 	 for(i=0;i<max_kolichestvo_setvich_elementov_onpacket;i++)
 	 {
@@ -449,7 +468,9 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		 
 				 
 	 } //OK заполнили распарсили пакет с графом на кускию
-	 
+	 return 0;
+	 		 
+	 	#if 0		 
 	
 	 //Ищу свой сетевой элемент если с моим ip и от него проверяю коммутацию.исходящею от меня 
 	 /*
@@ -489,7 +510,7 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	 
 	 
 	 
-   Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
+  //Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 // 
 #if 0	
 	printk("+ngraf_get_datapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,in_size/2);
@@ -506,7 +527,7 @@ void ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	
 	
-  
+#endif
 }
 
 /**************************************************************************************************
