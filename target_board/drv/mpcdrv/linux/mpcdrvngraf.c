@@ -468,9 +468,9 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		 
 				 
 	 } //OK заполнили распарсили пакет с графом на кускию
-	 return 0;
+	
 	 		 
-	 	#if 0		 
+	  
 	
 	 //Ищу свой сетевой элемент если с моим ip и от него проверяю коммутацию.исходящею от меня 
 	 /*
@@ -525,9 +525,8 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	printk("+ngraf_get_indata_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);	
 #endif 
 	
+	return 0;
 	
-	
-#endif
 }
 
 /**************************************************************************************************
