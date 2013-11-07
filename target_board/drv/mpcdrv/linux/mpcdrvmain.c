@@ -123,42 +123,35 @@ GENERAL NOTES
 //#include "mpcdrvngraf.h"       //Create p2020 graf functions for dynamic protocol
 //#include "mpcdrveth_ipv4.h"
 
-#define P2020_MPCRDB_KIT      1
+
+/******************************IP and UDP DEFINE****************************/
+ //
+#define IPv4_HEADER_LENGTH         20    //20 bait
+#define UDP_HEADER_LENGTH          8     //8 bait
+ 
 
 
 
 
-#define DEFAULT_GATEWAY_IP_ADDRESS	0x0A000002  // 10.0.0.2 
-#define BASE_IP_ADDRESS	            0x0A000001  // 10.0.0.1   
-#define RECEIVER_IP_ADDRESS			0x0A000064	// 10.0.0.100 
-
-/*
-#define P2020_IP_ADDRESS	0xACA8820A 			 // 172.168.130.10 
-#define P2020_IP1_ADDRESS	0xACA88214 			 // 172.168.130.20 
-*/
 
 
-#define P2020_IP_ADDRESS	0xC0A86F01 			 // 192.168.111.1
-#define P2020_IP1_ADDRESS	0xC0A86F01			 // 192.168.111.2
 
-/*
-#define TEST_KYS_IPADDR_DA1  0xCOA86F01             //192.168.111.1              
-#define TEST_KYS_IPADDR_DA2  0xCOA86F02             //192.168.111.2
-*/
+//#define P2020_MPCRDB_KIT      1
 
-//#define MY_KYS_IPADDR        0xC0A8827C             //192.168.130.124
-  #define MY_KYS_IPADDR        0xC0A8829D             //192.168.130.157
+
+///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
+#define MY_KYS_IPADDR        0xC0A8829D             //192.168.130.157
   
 
+static __be32  my_kys_ip_addr    =0;
+UINT16 mac_addr1 [6]=   {0x01FF,0xFFFF,0xFF00};
+UINT16 mac_header_for_kys[12];
+UINT8  my_kys_mac_addr[6];
 
-///MAC Addres for comparsions
-///ReaL MAC Address
-//MAC Address for KOS
 
 
 /*Первый стартовый информационный пакет от КУ-S содержит информация о IP и моего КУ-S
- *обратно отвечаю пакетом с поменённым MAC_oм 
- * */
+ *обратно отвечаю пакетом с поменённым MAC_oм */
 char    kys_information_packet_da_mac         [18]=  {"01:ff:ff:ff:ff:00"};
 UINT16  kys_information_packet_mac_last_word = 0xff00;
 
@@ -174,41 +167,11 @@ UINT16  kys_deicstra_packet_mac_last_word=0xff11;
    + здесь будет ледать информация о алгоритме декстры предназначенная другим МПС
    (сетевым элементам)
 */
-/*анализирую только первый пять 5 байт MAC адреса */
 //char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:22:00"};
   char   kys_service_channel_packet_da_mac     [16]=  {"01:ff:ff:ff:22"}; 
   UINT8  kys_service_channel_packet_pre_last_byte =0x22; 
 
-
-
-
-
- char p2020_rdbkit_mac_addr [18]=			{"00:04:9f:ef:01:01"};
- char kos_mac_addr   [18]=					{"00:25:01:00:11:2D"};
- char p2020_mac_addr [18]=					{"00:ff:ff:ff:11:0a"};
- char p2020_default_mac_addr [18]=			{"00:04:9f:ef:01:03"};
- char information_packet_DAmacaddr [18] =	{"00:ff:ff:ff:11:0a"};
- char mymps_ot_nms_packet_DAmacaddr [18]=	{"01:ff:ff:ff:11:0a"};
- //char service_channel_packet_DAmacaddr[18]=	{"01:ff:ff:ff:22:0a"};
-
- 
- 
- //
-#define IPv4_HEADER_LENGTH         20    //20 bait
-#define UDP_HEADER_LENGTH          8     //8 bait
- 
- 
- 
- /*
- spinlock_t grisha_packet;
- unsigned long flags;
- */
- 
- 
- 
- 
- 
- 
+  
 /////////TEST LOOPBACK FUNCTION 
 /*This test  Recieve packet  write to PLIS and theb Read packet from PLIS
  * no TIMER  for channel 0 and 1*/
@@ -303,28 +266,24 @@ extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_
 
 
 
-extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
+//extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
 
-UINT32 get_ipaddr_my_kys(); 
 
 
 
+void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address); 
 
 
 
-#define MAC_ADDR_LEN 6
-#define PROMISC_MODE_ON  1   //флаг включения неразборчивый режим
-#define PROMISC_MODE_OFF 0  //флаг выключения неразборчивого режима
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-#define IN_PACKET_SIZE_DIRCTION0    256   //256 element = 512 bait
-#define IN_NUM_OF_TDMCH_DIRECTION0   1    
+
 
 
 /*****************************************************************************/
@@ -341,35 +300,25 @@ static struct hrtimer hr_timer;           //high resolution timer
 
 ///////////////////TASK _STRUCTURE///////////////
 struct task_struct *r_t1,*r_t2;
-//static int tdm_recieve_thread(void *data);
-
-//static int tdm_recieve_thread_one(void *data);
-
-
-
 static int N=2;
 
 
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
-static __be32  my_kys_ip_addr    =0;
-static UINT16  my_kys_mac_addr[6] ;
-UINT16 mac_addr1 [6]=   {0x01FF,0xFFFF,0xFF00};
-UINT16 mac_header_for_kys[12];//={0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
-char  socr_stroka[16];
-
-
-static UINT16 information_packet_ok=0;
-
 
 static inline ktime_t ktime_now(void);
-module_param( N, int, 0 );
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
+struct KY_S
+{
+UINT32 ip_addres;
+UINT8  *mac_address;
+bool   state;
+}my_current_kos;
 
-
+//////////////////////////////////////////////////////////////////////////////////
 
 static struct ethdata_packet
 { 
@@ -380,11 +329,20 @@ static struct ethdata_packet
 };
 static struct ethdata_packet  recieve_mygraf_packet,recieve_matrica_commutacii_packet,recieve_tsec_packet;
 
+/**************************************************************************************************
+Syntax:      	    void get_ipaddr_my_kys(,,,)
+Parameters:     	
+Remarks:			get data from input tsec packet 
 
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
-UINT32 get_ipaddr_my_kys()
+***************************************************************************************************/
+
+void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 {
-	return MY_KYS_IPADDR;	
+	
+	
+	
 }
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_state()
@@ -707,10 +665,20 @@ input_mac_last_byte = input_mac_last_word;
     	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
     		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
     	 	  //Берём IP адрес нашего КУ-S и MAC
-    	 	  my_kys_ip_addr=(uint)ip->saddr;  	 	  
+    		  
+    		  
+    		  
+    		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
+    	 	  memcpy(my_kys_mac_addr,eth->h_source,6);
+    		 
+    	 	  /*заполняем структуру для нашего КY-S */
+    	 	  my_current_kos.ip_addres=(uint)ip->saddr;
+    	 	  my_current_kos.mac_address=my_kys_mac_addr;
+    	 	  my_current_kos.state=true;
     	 	  
-    	 	  //memcpy(my_kys_mac_addr,eth->h_source,6);
-    		  //printk("+KYS_Inform_PACKET|SA_MAC =|0x%04x|0x%04x|0x%04x\n\r",my_kys_mac_addr[0],my_kys_mac_addr[1],my_kys_mac_addr[2]);
+    	 	  
+    	 	  printk("\n\r");
+    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",my_kys_mac_addr[0],my_kys_mac_addr[1],my_kys_mac_addr[2],my_kys_mac_addr[3],my_kys_mac_addr[4],my_kys_mac_addr[5]);
     	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",my_kys_ip_addr);
     	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
     	 	  p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
@@ -918,9 +886,9 @@ static int tdm_recieve_thread_two(void *data)
 				if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
 		        	 //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
-		        	   printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		        	   printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		        	   printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		        	// printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		        	// printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		        	// printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
 		        	   TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 		        }
 				
@@ -1088,6 +1056,7 @@ int mpc_init_module(void)
          
          //Initialization Functions Structure 
          //recieve_tsec_packet.state=0;
+         memset(&my_current_kos,0x0000,sizeof(my_current_kos));
          memset(&recieve_matrica_commutacii_packet, 0x0000, sizeof(recieve_matrica_commutacii_packet));
          recieve_matrica_commutacii_packet.state=0;
          

@@ -41,7 +41,7 @@ GENERAL NOTES
 /*****************************************************************************/
 #include "mpcdrvngraf.h"
 /*External Header*/
-
+extern struct KY_S my_current_kos;
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
@@ -56,36 +56,21 @@ UINT32 matrica_ipadrr_sosedi_cur_mpc[16];
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
 __be32  my_kys_ipaddr=0;                         //IP адрес моего КY-S
-UINT16 number_peak=6;                          ///Количество вершин графа (сетевых элементов)
-UINT16 cost_matrica_puti[6][6];                //матрица стоимостей путей  //Здесь С
-UINT16 MAX;                                  //вместо бесконечностей
-
+                                                 //вместо бесконечностей
 
 //заполянем поле в матрице коммутации чтот свзяи по этому направлению нет
 UINT32 no_current_napr_mk8_svyaz= 0xffffffff;
 UINT32 est_current_napr_mk8_svyaz=0x00000001;
-
-//MATRIX for commutation mpc sosedi 10 napravlenii 10 sosedii
-//UINT32 matrica_commutacii_current_mpc_sosedi[10][10];
-//UINT32 matrica_ipadrr_sosedi_cur_mpc [10];
 
 ////////////////////////////////////////////////
 #define DLINNA_SVYAZI   12   /*длинна цепочки приёмник источник в пакете на 12 байт
                                в неё входит узел(наш мультиплексор и куда какому мультплексору)                     
                               */
                              
-spinlock_t lock_packet;
-unsigned long lock_flags;                         
-
-
 /*****************************************************************************/
-/*	PRIVATE FUNCTION PROTOTYPES					     */
+/*	PRIVATE FUNCTION PROTOTYPES					                             */
 /*****************************************************************************/
-static void set_max_element_cost_matrica();
-static bool in_arr(UINT16 j ,UINT16 *arr);
 static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
-
-
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip);
 
 
@@ -110,10 +95,12 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 /*****************************************************************************/
 
 
+
 /*****************************************************************************/
 /*	PRIVATE FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
-extern UINT32 get_ipaddr_my_kys(); 
+extern void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address); 
+
 
 
 /*Extern ethernet functions*/
@@ -203,10 +190,12 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  mac2[6];
    
    
-	
+   //get_ipaddr_my_kys(,,,);
+   //printk("State my_current MPC =0x%x\n\r",my_current_kos.ip_addres);
    printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
    
-   //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S
+   //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S или пакет с Гришиным графом для удалённого МПС
+   //(не шлюзового МПС)
 #if 0  
    if(priznak_kommutacii==my_kys_ipaddr)
    {
@@ -219,6 +208,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       p2020_revert_mac_header(mac2,mac1,&out_mac);
 	  p2020_get_recieve_packet_and_setDA_MAC(in_buf ,in_size,out_mac);
 	/**********************/     
+  
+	  //Пакет с графом для удалённого (не шлюзового МПС)
+	  //ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
+   
+   
    }
 #endif   
    
@@ -528,22 +522,6 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	return 0;
 	
 }
-
-/**************************************************************************************************
-Syntax:      	    ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size)
-Parameters:     	void data
-Remarks:			timer functions 
-
-Return Value:	    1  =>  Success  ,-1 => Failure
-
-***************************************************************************************************/
-/*
-void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size)
-{
-
-	
-}
-*/
 
 
 

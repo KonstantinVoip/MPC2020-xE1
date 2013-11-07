@@ -62,8 +62,8 @@ GENERAL NOTES
 
 /**********************DEBUG READ PLIS OPERATION***********************/
 
-#define  TDM_DIR_0_READ_DEBUG   1
-#define  TDM_DIR_0_WRITE_DEBUG  1
+//#define  TDM_DIR_0_READ_DEBUG   1
+//#define  TDM_DIR_0_WRITE_DEBUG  1
 
 
 //#define  TDM_DIR_1_READ_DEBUG   1

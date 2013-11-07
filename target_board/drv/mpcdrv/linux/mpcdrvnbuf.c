@@ -258,8 +258,15 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	
 	//Нет указателя на FIFO выходим из очереди
 	if(!rbd_p){return 0;}
-	
+	printk("rbd_p->tail=%d\n\r",rbd_p->tail);
 	//Естественно нужна защита от одновременного доступа к даннымю потом сделаю! пока так.
+	if(rbd_p->tail==(rbd_p->N))
+	{
+		printk("FIFO is FULL =%d\n\r",rbd_p->tail);
+		rbd_p->tail=rbd_p->tail %rbd_p->N; 
+		return 0;
+	}
+	
 	
 	ps.size=rbd_p->cur_put_packet_size;
 	
@@ -269,9 +276,13 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	}
 	
 	rbd_p->q[rbd_p->tail++]=ps;
-	rbd_p->tail=rbd_p->tail %rbd_p->N; //глубина очереди 10 элементов потом обнуляем хвост в 0 на начало.
 	
-	//printk("++mpcfifo_put_OK!++\n\r");
+	
+	//rbd_p->tail=rbd_p->N -rbd_p->head;
+	
+	 //rbd_p->tail=rbd_p->tail %rbd_p->N; //глубина очереди 10 элементов потом обнуляем хвост в 0 на начало.
+	
+	printk("++mpcfifo_put_OK!++\n\r");
 	
 	return 1;
 	
@@ -295,6 +306,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	unsigned long flags;
 	
 	
+	
 	//проверяем условие что нормальный указатель в памяти не хлам
 	if(!rbd_p)
 	{return 0;}
@@ -308,10 +320,10 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	
 	//Голова == хвосту 
 	if((rbd_p->tail)==(rbd_p->head))
-	{//printk("head == tail\n\r");
+	{printk("head == tail\n\r");
 	return 0;}
 	
-	
+	printk("rbd_p->head=%d\n\r",rbd_p->head);
 
 	rbd_p->head =rbd_p->head %rbd_p->N;
 	
@@ -324,7 +336,10 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 		*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
 	}
 	
+	printk("++mpc_fifo_get_ok++\n\r");
+	
 	rbd_p->head++;
+	
    /*	
    printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[0], local.data[1], local.data[2], local.data[3], local.data[4], local.data[5]);
    printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[rbd_p->cur_get_packet_size-6], local.data[rbd_p->cur_get_packet_size-5], local.data[rbd_p->cur_get_packet_size-4], local.data[rbd_p->cur_get_packet_size-3], local.data[rbd_p->cur_get_packet_size-2], local.data[rbd_p->cur_get_packet_size-1]);
