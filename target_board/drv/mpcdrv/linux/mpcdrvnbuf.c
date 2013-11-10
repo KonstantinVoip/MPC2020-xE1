@@ -35,7 +35,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	COMMON CONFIGURATION						     */
 /*****************************************************************************/
-
+#include <linux/delay.h>  
 /*****************************************************************************/
 /*	INCLUDES							     */
 /*****************************************************************************/
@@ -54,7 +54,7 @@ GENERAL NOTES
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
 #define FIFO_PACKET_SIZE_BYTE  1514          
-#define FIFO_PACKET_NUM        10 
+#define FIFO_PACKET_NUM        4 
 #define GFP_MASK               GFP_KERNEL
 
 
@@ -258,15 +258,17 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	
 	//Нет указателя на FIFO выходим из очереди
 	if(!rbd_p){return 0;}
-	printk("rbd_p->tail=%d\n\r",rbd_p->tail);
+	
 	//Естественно нужна защита от одновременного доступа к даннымю потом сделаю! пока так.
+	
+	/*
 	if(rbd_p->tail==(rbd_p->N))
 	{
 		printk("FIFO is FULL =%d\n\r",rbd_p->tail);
 		rbd_p->tail=rbd_p->tail %rbd_p->N; 
 		return 0;
 	}
-	
+	*/
 	
 	ps.size=rbd_p->cur_put_packet_size;
 	
@@ -280,7 +282,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	
 	//rbd_p->tail=rbd_p->N -rbd_p->head;
 	
-	 //rbd_p->tail=rbd_p->tail %rbd_p->N; //глубина очереди 10 элементов потом обнуляем хвост в 0 на начало.
+	rbd_p->tail=rbd_p->tail %rbd_p->N; //глубина очереди 10 элементов потом обнуляем хвост в 0 на начало.
 	
 	printk("++mpcfifo_put_OK!++\n\r");
 	
@@ -302,28 +304,42 @@ Return Value:	    Returns 1 on success and negative value on failure.
 static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 {
 	u16 i;
+	signed int schetchic1=0;
+	signed int schetchic=0;
 	DATA_lbc local;
 	unsigned long flags;
-	
+	signed int l_tail=0;
 	
 	
 	//проверяем условие что нормальный указатель в памяти не хлам
 	if(!rbd_p)
 	{return 0;}
 	
+	
+	l_tail=rbd_p->tail;
     //Буфер пуст взять нечего назад ноль видимо 
-	if(rbd_p->tail==0)
-	{//printk("??mpcfifo_get_no_packet_on_buffer??\n\r");
-	rbd_p-> fifo_pusto =1; //очередь пуста;
-	return 0;
+
+	
+	
+	
+	printk("l_tail=%d>>rbd_p->head=%d\n\r",l_tail,rbd_p->head);
+	
+	if (l_tail -rbd_p->head ==0)
+	{
+		mdelay(500);
+		return 0;
 	}
 	
-	//Голова == хвосту 
-	if((rbd_p->tail)==(rbd_p->head))
-	{printk("head == tail\n\r");
-	return 0;}
 	
-	printk("rbd_p->head=%d\n\r",rbd_p->head);
+	
+	//schetchic1=rbd_p->head;//-rbd_p->tail;
+	if(rbd_p->head-l_tail==4)
+	{
+		mdelay(500);
+		//printk(">>>>>>?????????<<<<<\n\r");
+		return 0;
+	}
+	
 
 	rbd_p->head =rbd_p->head %rbd_p->N;
 	
@@ -335,10 +351,11 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	{
 		*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
 	}
-	
-	printk("++mpc_fifo_get_ok++\n\r");
-	
 	rbd_p->head++;
+	
+	
+	mdelay(500);
+	printk("++mpc_fifo_get_ok++\n\r");
 	
    /*	
    printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[0], local.data[1], local.data[2], local.data[3], local.data[4], local.data[5]);
@@ -499,43 +516,39 @@ bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
 	 u16  status=0;
 	 
 	// printk(">>>>>>>>>>>>++++++++++++++++++++<<<<<<<<<<<<<<<<\n\r");
-	 spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
+	 //spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
 	 
-	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|Iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
+	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|Iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 status=mpcfifo_get(fifo_put_to_tdm0_dir, in_buf);
 	 //printk(">>>>>>>>>>>>+++++++status=%d++++++++++++<<<<<<<<<<<<<<<<\n\r",status);
+	 get_iteration_dir0++;
+	 return status;
+     
+	 
+	 /*	 
 	 if(status==0)
 	   {
-			 memset(&in_buf,0x0000,sizeof(in_buf));
-			 *in_size=0x0000;
-			 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
+			 //memset(&in_buf,0x0000,sizeof(in_buf));
+			 //*in_size=0x0000;
+			// spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 			 return 0;
 			 
 	   }
-	 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
+	 //spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 	 
 	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 
-	 /*
-	 status=mpcfifo_get(fifo_put_to_tdm0_dir, out_buf_dir0);
-	 if(status==0)
-	 {
-		 memset(&out_buf_dir0,0x0000,sizeof(out_buf_dir0));
-		 return 0; 
-	 }
-	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
-	 //отправляю в ethernet
-	 */
+*/
 	
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
 	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir0,packet_size_in_byte);//send to eternet	 
 #endif	 
  	 
  	 
- 	 get_iteration_dir0++;
-     return status;
+ 	 //get_iteration_dir0++;
+     //return status;
  	 
 	 /* 
 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);

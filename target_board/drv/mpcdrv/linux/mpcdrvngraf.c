@@ -294,6 +294,20 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
+	
+	printk (">>>>>>>>>.packet _for _my _mps>>>>>>>>>>>>>>\n\r");
+	
+	nbuf_set_datapacket_dir0  (in_buf ,in_size);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+#if 0	
 	u16 hex_input_data_size       = 0;	
 	u16 byte_input_data_size      = 0;
     u16 four_byte_input_data_size = 0;
@@ -518,6 +532,10 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	printk("+ngraf_get_indata_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
 	printk("+ngraf_get_indata_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);	
 #endif 
+
+	
+	
+#endif	
 	
 	return 0;
 	
