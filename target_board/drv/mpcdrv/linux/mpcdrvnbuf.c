@@ -260,16 +260,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	if(!rbd_p){return 0;}
 	
 	//Естественно нужна защита от одновременного доступа к даннымю потом сделаю! пока так.
-	
-	/*
-	if(rbd_p->tail==(rbd_p->N))
-	{
-		printk("FIFO is FULL =%d\n\r",rbd_p->tail);
-		rbd_p->tail=rbd_p->tail %rbd_p->N; 
-		return 0;
-	}
-	*/
-	
+		
 	ps.size=rbd_p->cur_put_packet_size;
 	
 	for(i=0;i<ps.size;i++)
@@ -322,11 +313,11 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	
 	
 	
-	printk("l_tail=%d>>rbd_p->head=%d\n\r",l_tail,rbd_p->head);
+	//printk("l_tail=%d>>rbd_p->head=%d\n\r",l_tail,rbd_p->head);
 	
 	if (l_tail -rbd_p->head ==0)
 	{
-		mdelay(500);
+		//mdelay(500);
 		return 0;
 	}
 	
@@ -335,7 +326,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	//schetchic1=rbd_p->head;//-rbd_p->tail;
 	if(rbd_p->head-l_tail==4)
 	{
-		mdelay(500);
+		//mdelay(500);
 		//printk(">>>>>>?????????<<<<<\n\r");
 		return 0;
 	}
@@ -354,7 +345,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	rbd_p->head++;
 	
 	
-	mdelay(500);
+	//mdelay(500);
 	printk("++mpc_fifo_get_ok++\n\r");
 	
    /*	
@@ -521,34 +512,31 @@ bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
 	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|Iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 status=mpcfifo_get(fifo_put_to_tdm0_dir, in_buf);
 	 //printk(">>>>>>>>>>>>+++++++status=%d++++++++++++<<<<<<<<<<<<<<<<\n\r",status);
-	 get_iteration_dir0++;
-	 return status;
-     
-	 
-	 /*	 
+    
+	  
 	 if(status==0)
 	   {
-			 //memset(&in_buf,0x0000,sizeof(in_buf));
-			 //*in_size=0x0000;
-			// spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
+			 memset(&in_buf,0x0000,sizeof(in_buf));
+			 *in_size=0x0000;
+			 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 			 return 0;
 			 
 	   }
-	 //spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
+	 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 	 
 	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 
-*/
+
 	
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
 	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir0,packet_size_in_byte);//send to eternet	 
 #endif	 
  	 
  	 
- 	 //get_iteration_dir0++;
-     //return status;
+ 	 get_iteration_dir0++;
+     return status;
  	 
 	 /* 
 	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);

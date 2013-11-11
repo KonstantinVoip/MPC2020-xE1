@@ -293,6 +293,10 @@ void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 ////NET FILTER STRUCTURE///////////////////////////////////////////////
 //// Структура для регистрации функции перехватчика входящих ip пакетов
 struct nf_hook_ops bundle;
+struct nf_hook_ops arp_bundle;
+
+
+
 struct ifparam *ifp;
 
 /////////////////////////Timer structures//////////////////////////////////////
@@ -561,6 +565,49 @@ UINT16 loopbackout_size=0;
 /*
  * kernel module identification
  */
+
+
+unsigned int Hook_Func_ARP(uint hooknum,
+                  struct sk_buff *skb,
+                  const struct net_device *in,
+                  const struct net_device *out,
+                  int (*okfn)(struct sk_buff *))
+{
+	
+   
+	if (skb->protocol ==htons(ETH_P_ARP))
+    {
+  	  
+  	  
+	  /*	
+	  printk("ARP_ZAPROS_OK\n\r");
+      printk("+ARP_size=%d|skb->hdr_len= %d|skb->data_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len,skb->tail,skb->len);
+      */
+      
+      
+      
+      
+	   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+       recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+       recieve_matrica_commutacii_packet.state=true;
+       recieve_matrica_commutacii_packet.priznak_kommutacii=0x806;
+       
+       return NF_ACCEPT;  //пропускаю дальше ARP
+  			  ////
+  	  
+    }
+	
+	
+}
+
+
+
+
+
+
+
+
+
 /*****************************************************************************/
 /*	KERNEL MODULE HANDLING						                             */
 /*****************************************************************************/
@@ -637,7 +684,9 @@ input_mac_last_byte = input_mac_last_word;
    /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
      *например 341 или что-то подобное 111*/    		
     //ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
-    
+    //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+
+
     if(((uint)skb->mac_len+(uint)skb->len)%2==1)
     {
     //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
@@ -645,8 +694,20 @@ input_mac_last_byte = input_mac_last_word;
     }
    
     
-
-
+    
+    
+#if 0    
+    if (skb->protocol ==htons(ETH_P_ARP))
+    {
+  	  
+  	  printk("ARP_ZAPROS_OK\n\r");
+     // printk("+Hook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+    	return	NF_ACCEPT;  //пропускаю дальше ARP
+  			  ////
+  	  
+    }
+#endif
+    
 //Main basic code on p2020.
 //#if 0
 	//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
@@ -785,10 +846,15 @@ input_mac_last_byte = input_mac_last_word;
 	  	 // #endif //16.10.13     
       
       }
-      else //ARP ZAPROS 
+	
+//#if 0	
+      else //end if (skb->protocol ==htons(ETH_P_IP)) 
       {
-      return	NF_ACCEPT;  //пропускаю дальше ARP  
+    	  //printk("else\n\r");
+    	  return	NF_ACCEPT;  //пропускаю дальше ARP  
+     
       }
+//#endif
     	
      //return	NF_DROP;	 
     //return NF_ACCEPT; //end if (skb->protocol ==htons(ETH_P_IP))
@@ -880,63 +946,63 @@ static int tdm_recieve_thread_two(void *data)
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
 //#if 0
-		//if(TDM0_direction_WRITE_READY()==1)
-		//	{			
+		if(TDM0_direction_WRITE_READY()==1)
+			{			
 		        
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 				if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
-		        	 //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
+		        	 printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
 		        	// printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	// printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	// printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		        	 // TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
+		        	  TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 		        }
 				
-			//}			
+			}			
 	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
 	
-			//if(TDM1_direction_WRITE_READY()==1)
-			//{
+			if(TDM1_direction_WRITE_READY()==1)
+			{
 		       
-#if 0				
+//#if 0				
 				if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 				{
 					
-					//printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-					//TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
+					TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
 				}		
 			
-			//}
+			}
     /*///////////////////////////////Шина Local bus готова к записи по направадению 2//////////////////////////*/
-			//if(TDM2_direction_WRITE_READY()==1)
-			//{
+			if(TDM2_direction_WRITE_READY()==1)
+			{
 				if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
 				{
-				    //printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
+				    printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
 				     //printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size);
 		        	 //printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIFO_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-				   // TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
+				    TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
 				}			
-			//}
+			}
     /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
-		   // if(TDM3_direction_WRITE_READY()==1)
-		   // {
+		    if(TDM3_direction_WRITE_READY()==1)
+		    {
 		    	if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
 		    	{
-		    	   //printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
+		    	   printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
 		    	     //printk("+FIF3_DIRO_insize_byte=%d\n\r+",in_size); 
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-		    	   //TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
+		    	   TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
 		    	}
-//}
+            }
 
-#endif	
+//#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -976,12 +1042,12 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
-#if 0			     
+//#if 0			     
 			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
-#endif
+//#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
@@ -1037,7 +1103,7 @@ int mpc_init_module(void)
 	/*
 	** We use the miscfs to register our device.
 	*/
-        printk("init_module_tdm() called\n"); 
+         printk("init_module_tdm() called\n"); 
     
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
@@ -1045,14 +1111,23 @@ int mpc_init_module(void)
       /* Устанавливаем указатель на модуль, создавший hook */
          bundle.owner = THIS_MODULE;
       /* Указываем семейство протоколов */
-         bundle.pf = PF_INET;
+         //bundle.pf = NFPROTO_ARP;//PF_INET;
+         bundle.pf = NFPROTO_IPV4;         
       /* Указываем, в каком месте будет срабатывать функция */
          bundle.hooknum = NF_INET_PRE_ROUTING;
       /* Выставляем самый высокий приоритет для функции */
          bundle.priority = NF_IP_PRI_FIRST;
       /* Регистрируем */
          nf_register_hook(&bundle);
-      
+       
+         ////////////////////////////ARP_HOOK/////////// 
+         arp_bundle.hook =   Hook_Func_ARP;
+         arp_bundle.owner=    THIS_MODULE;
+         arp_bundle.pf   =    NFPROTO_ARP;
+         arp_bundle.hooknum = NF_INET_PRE_ROUTING;
+         arp_bundle.priority =NF_IP_PRI_FIRST;
+         nf_register_hook(&arp_bundle);
+         ////////////////////////////////////////////////
          
          
          
@@ -1067,7 +1142,7 @@ int mpc_init_module(void)
          Hardware_p2020_set_configuartion();         
         
 #ifdef   P2020_MPCRDB_KIT   
-         //LocalBusCyc3_Init();   //__Initialization Local bus 
+         LocalBusCyc3_Init();   //__Initialization Local bus 
 #endif         
          InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFI buffesrs
@@ -1113,6 +1188,7 @@ void mpc_cleanup_module(void)
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
 	nf_unregister_hook(&bundle);
+	nf_unregister_hook(&arp_bundle);
 	msleep(10);
     kthread_stop(r_t1);
     kthread_stop(r_t2);

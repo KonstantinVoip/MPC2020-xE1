@@ -83,6 +83,7 @@ typedef enum{
      DIR0_PLIS_READ_BUG_ADDR800 			= 800, //plis patch read register
      DIR0_PLIS_READOK_ADDR1000  		    = 1000,//read ok start
      DIR0_PLIS_PACKSIZE_ADDR1200            = 1200,//plis read in  packet size 
+     DIR0_PLIS_PACKSIZE_ADDR1600            = 1600,//send plis packet size
      DIR0_PLIS_READ_ADDR400                 = 400, //0xC8   plis write data
      DIR0_PLIS_WRITE_ADDR200                = 200, //0x190   plis read data
      

@@ -193,6 +193,37 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //get_ipaddr_my_kys(,,,);
    //printk("State my_current MPC =0x%x\n\r",my_current_kos.ip_addres);
    printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
+   //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
+   //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
+   //Сосед на направлении 1
+   //Предположим пока так будем коммутировать 
+   
+   
+    
+     /*
+  	 printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+   	 printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]);
+  	 */
+     
+     
+   	 //ARP ZAPROS  //vo vse diri 
+   	 if(priznak_kommutacii==0x0806)
+   	 {
+   		
+   		printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+   		printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
+   		nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   	  	return ;
+     }
+   	 
+   	 
+    
+   	nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   	 
+   	 
+   //nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   
+   
    
    //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S или пакет с Гришиным графом для удалённого МПС
    //(не шлюзового МПС)
@@ -216,12 +247,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    }
 #endif   
    
-   //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
-   //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
-   //Сосед на направлении 1
-   //Предположим пока так будем коммутировать 
-   
-    nbuf_set_datapacket_dir0  (in_buf ,in_size);
+
    
    
 #if 0   
@@ -295,19 +321,12 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
 	
-	printk (">>>>>>>>>.packet _for _my _mps>>>>>>>>>>>>>>\n\r");
+	//printk (">>>>>>>>>.packet _for _my _mps>>>>>>>>>>>>>>\n\r");
+	//nbuf_set_datapacket_dir0  (in_buf ,in_size);
 	
-	nbuf_set_datapacket_dir0  (in_buf ,in_size);
+
 	
-	
-	
-	
-	
-	
-	
-	
-	
-#if 0	
+//#if 0	
 	u16 hex_input_data_size       = 0;	
 	u16 byte_input_data_size      = 0;
     u16 four_byte_input_data_size = 0;
@@ -535,7 +554,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 
 	
 	
-#endif	
+//#endif	
 	
 	return 0;
 	

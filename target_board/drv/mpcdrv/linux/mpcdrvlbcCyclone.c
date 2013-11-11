@@ -862,7 +862,8 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 	u16 i=0;
     static UINT16 tdm0_write_iteration=0;
     u16 hex_element_size=0;
-
+ 
+    
     #ifdef PLIS_DEBUG_1400 
     u16 dannie1400 =0; 
 	#endif	   
@@ -870,7 +871,10 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     
     
     hex_element_size=in_size/2;
-	printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    //Set size on PLIS in byte
+   
+    
+    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -878,9 +882,9 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
    #endif
     
 	
+	plis_write16(DIR0_PLIS_PACKSIZE_ADDR1600,in_size);
 	
-	
-	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
+	for(i=0;i<hex_element_size/*+PATCHlbc_ONE_ITERATION_WRITE*/;i++)
 	{
 	    //mdelay(1);
 		plis_write16( DIR0_PLIS_WRITE_ADDR200 ,in_buf[i]);
@@ -1221,6 +1225,8 @@ void TDM0_dierction_read ()
   UINT8   dir0_mac_da_addr   = 0;
   //Priznak Sevi Packet 22-ff _predposlednii bait.
   UINT8   dir0_mac_priznak_kys = 0; 
+  UINT16  dir0_priznak_arp_packet=0;
+  
   
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
@@ -1229,7 +1235,7 @@ void TDM0_dierction_read ()
   printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
-  ostatok_of_size_packet =(dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+  ostatok_of_size_packet =(dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
   if(ostatok_of_size_packet==1)
   {
 	  printk("???Tdm_Dir0_read->>????bad_in_packet_size=%d?????\n\r",dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
@@ -1243,7 +1249,7 @@ void TDM0_dierction_read ()
 	  //mdelay(5);   
       out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
       i++;           
-      }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
+      }while(i<packet_size_hex/*+PATCHlbc_ONE_ITERATION_READ*//*+PATCH_READ_PACKET_SIZE_ADD_ONE*/);
 
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
@@ -1264,23 +1270,43 @@ void TDM0_dierction_read ()
 	 //определяю признак KY-S по mac адресам 
 	 dir0_mac_priznak_kys = out_buf[2]>>8;
 	 
+	 //priznak ARP 0x806
+	 dir0_priznak_arp_packet =out_buf[6];
+	 
+	 
+	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
+	   printk("+dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
+	 
+	 
+	   
+	   
+	 if(dir0_priznak_arp_packet==0x0806)
+	   {
+	 		 //ARP packet for matrica
+	 		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+	   }
+	 
+	 
+	 
+	 
+	 
 	 
 	 if(dir0_mac_priznak_kys==0x22)
 	 {
 		 //packet kommutacii po mac address
-		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,dir0_mac_da_addr); 
+		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,dir0_mac_da_addr); 
 	 }
 	 else
 	 {
 		 //packet kommutacii pi ip grisha graf
-		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE,dir0_ip_da_addr);
+		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,dir0_ip_da_addr);
 	 }
 	  
 	 
 	 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
-     p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
+     p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/);//send to eternet
 	 #endif  
   }
  
