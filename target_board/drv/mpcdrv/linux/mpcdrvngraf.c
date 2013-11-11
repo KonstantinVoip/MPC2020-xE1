@@ -42,13 +42,24 @@ GENERAL NOTES
 #include "mpcdrvngraf.h"
 /*External Header*/
 
-extern void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address);
-
-
-extern struct KY_S my_current_kos;
+//extern void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address);
+//extern struct KY_S my_current_kos;
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
+///CURRENT _KYS
+static struct KY_S
+{
+UINT32 ip_addres;
+UINT8  *mac_address;
+bool   state;
+}my_current_kos;
+
+
+
+
+
+
 struct ngarf_setevoi_element
 {
 bool   setevoi_elemet_commutacia_zapolnenena;
@@ -123,6 +134,27 @@ extern void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
+
+
+void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
+{
+	
+	//printk("State =0x%x>>IP=0x%x,MAC =%0x%x\n\r",state,ip_addres,&mac_address[0]);
+	
+	my_current_kos.state=state;
+	my_current_kos.ip_addres=ip_addres;
+	my_current_kos.mac_address=mac_address;
+	
+}
+
+
+
+
+
+
+
+
+
 
 
 /**************************************************************************************************

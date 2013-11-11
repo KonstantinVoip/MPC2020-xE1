@@ -262,7 +262,7 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",mac_header[0],mac_header[1],mac_header[2],mac_header[3]);
 	 
 	 //memcpy(in_buf, my_kys_mac1_addr, 6);
-	   memcpy(in_buf, mac_header, 12);
+	  memcpy(in_buf, mac_header, 12);
 	 
 	 
      //memcpy(in_buf, mac_header, 36); 

@@ -265,21 +265,13 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 extern bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
 extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
-
-
+/*устанавливаем MAC моего KY-S */
+extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 
 //extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
-
-
-
-
-//extern 
-
-//void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address); 
-
 
 
 /*****************************************************************************/
@@ -321,16 +313,6 @@ UINT8  g_my_kys_mac_addr[6];
 static inline ktime_t ktime_now(void);
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
-/*****************************************************************************/
-/*
-struct KY_S
-{
-UINT32 ip_addres;
-UINT8  *mac_address;
-bool   state;
-}my_current_kos;
-*/
-
 //////////////////////////////////////////////////////////////////////////////////
 
 static struct ethdata_packet
@@ -342,21 +324,8 @@ static struct ethdata_packet
 };
 static struct ethdata_packet  recieve_mygraf_packet,recieve_matrica_commutacii_packet,recieve_tsec_packet;
 
-/**************************************************************************************************
-Syntax:      	    void get_ipaddr_my_kys(,,,)
-Parameters:     	
-Remarks:			get data from input tsec packet 
 
-Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
-***************************************************************************************************/
-void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address)
-{
-	*state       =g_my_kys_state;
-	*ip_addres   =g_my_kys_ip_addres;
-	*mac_address =g_my_kys_mac_addr;
-    
-}
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_state()
 Parameters:     	
@@ -723,26 +692,25 @@ input_mac_last_byte = input_mac_last_word;
     		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
     	 	  //Берём IP адрес нашего КУ-S и MAC
     		  
-    		  
-    		  
     		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
     	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
-    		 
-    	 	   	  
+    		   
     	 	  /*заполняем структуру для нашего КY-S */	 	  
-    	 	  
-    	 	  
+    	 	  	  
     	 	  g_my_kys_ip_addres=(uint)ip->saddr;
     		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
     		 
- 
-    	 	  
     	 	  printk("\n\r");
     	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
     	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
     	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
-    	 	  p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+    	 	  
+    	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+    	 	  
+    	 	  
     	 	  g_my_kys_state=true;	  
+    	 	  
+    	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,*g_my_kys_mac_addr);
     	 	  
     	 	  
     	 	  //set_information from my _kys to 
@@ -948,7 +916,7 @@ static int tdm_recieve_thread_two(void *data)
 	    
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-//#if 0
+#if 0
 		if(TDM0_direction_WRITE_READY()==1)
 			{			
 		        
@@ -1005,7 +973,7 @@ static int tdm_recieve_thread_two(void *data)
 		    	}
             }
 
-//#endif	
+#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -1045,12 +1013,12 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
-//#if 0			     
+#if 0			     
 			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
-//#endif
+#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
