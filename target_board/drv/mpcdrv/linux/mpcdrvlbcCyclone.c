@@ -259,7 +259,7 @@ UINT16 status =0;
 	}
 	 
 	// msleep(100);
-  	mdelay(400);
+  	mdelay(50);
     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
 	if((dannie800==0x1)||(dannie800==0xabc1))
 	{
@@ -613,7 +613,7 @@ UINT16 TDM0_direction_WRITE_READY(void)
 
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
- mdelay(20);
+ mdelay(10);
  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 
  //printk("register 30 dannie= %d ready\n\r",dannie30);
  if(dannie30==0)

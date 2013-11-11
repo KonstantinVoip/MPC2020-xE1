@@ -147,7 +147,8 @@ GENERAL NOTES
 static __be32  my_kys_ip_addr    =0;
 UINT16 mac_addr1 [6]=   {0x01FF,0xFFFF,0xFF00};
 UINT16 mac_header_for_kys[12];
-UINT8  my_kys_mac_addr[6];
+
+
 
 
 
@@ -275,9 +276,9 @@ extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
 
+//extern 
 
-
-void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address); 
+//void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address); 
 
 
 
@@ -307,6 +308,11 @@ static struct hrtimer hr_timer;           //high resolution timer
 struct task_struct *r_t1,*r_t2;
 static int N=2;
 
+////////////////////////FOR KY-S Global Variables/////////////
+UINT32 g_my_kys_ip_addres=0x00000000;
+bool   g_my_kys_state=0;
+UINT8  g_my_kys_mac_addr[6];
+
 
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
@@ -316,12 +322,14 @@ static inline ktime_t ktime_now(void);
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
+/*
 struct KY_S
 {
 UINT32 ip_addres;
 UINT8  *mac_address;
 bool   state;
 }my_current_kos;
+*/
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -342,12 +350,12 @@ Remarks:			get data from input tsec packet
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
-
-void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
+void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address)
 {
-	
-	
-	
+	*state       =g_my_kys_state;
+	*ip_addres   =g_my_kys_ip_addres;
+	*mac_address =g_my_kys_mac_addr;
+    
 }
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tsec_state()
@@ -586,11 +594,13 @@ unsigned int Hook_Func_ARP(uint hooknum,
       
       
       
-      
+      /*
 	   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
        recieve_matrica_commutacii_packet.state=true;
        recieve_matrica_commutacii_packet.priznak_kommutacii=0x806;
+      */ 
+       
        
        return NF_ACCEPT;  //пропускаю дальше ARP
   			  ////
@@ -692,22 +702,7 @@ input_mac_last_byte = input_mac_last_word;
     //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_SIZE_bYTE =%d|size=%d\n\r",ostatok_of_size_packet,(uint)skb->mac_len+(uint)skb->len);
     return   NF_ACCEPT;	//cбрасывю не пускаю в local bus
     }
-   
-    
-    
-    
-#if 0    
-    if (skb->protocol ==htons(ETH_P_ARP))
-    {
-  	  
-  	  printk("ARP_ZAPROS_OK\n\r");
-     // printk("+Hook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
-    	return	NF_ACCEPT;  //пропускаю дальше ARP
-  			  ////
-  	  
-    }
-#endif
-    
+        
 //Main basic code on p2020.
 //#if 0
 	//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
@@ -731,19 +726,27 @@ input_mac_last_byte = input_mac_last_word;
     		  
     		  
     		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
-    	 	  memcpy(my_kys_mac_addr,eth->h_source,6);
+    	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
     		 
-    	 	  /*заполняем структуру для нашего КY-S */
-    	 	  my_current_kos.ip_addres=(uint)ip->saddr;
-    	 	  my_current_kos.mac_address=my_kys_mac_addr;
-    	 	  my_current_kos.state=true;
+    	 	   	  
+    	 	  /*заполняем структуру для нашего КY-S */	 	  
     	 	  
+    	 	  
+    	 	  g_my_kys_ip_addres=(uint)ip->saddr;
+    		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
+    		 
+ 
     	 	  
     	 	  printk("\n\r");
-    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",my_kys_mac_addr[0],my_kys_mac_addr[1],my_kys_mac_addr[2],my_kys_mac_addr[3],my_kys_mac_addr[4],my_kys_mac_addr[5]);
-    	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",my_kys_ip_addr);
+    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
+    	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
     	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
     	 	  p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+    	 	  g_my_kys_state=true;	  
+    	 	  
+    	 	  
+    	 	  //set_information from my _kys to 
+    	 	  
     	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
     	 }
     	 
@@ -1120,7 +1123,7 @@ int mpc_init_module(void)
       /* Регистрируем */
          nf_register_hook(&bundle);
        
-         ////////////////////////////ARP_HOOK/////////// 
+         ////////////////////////////ARP_HOOK_FUNCTION/////////// 
          arp_bundle.hook =   Hook_Func_ARP;
          arp_bundle.owner=    THIS_MODULE;
          arp_bundle.pf   =    NFPROTO_ARP;
@@ -1131,9 +1134,15 @@ int mpc_init_module(void)
          
          
          
+         
+         
+         
+         
          //Initialization Functions Structure 
          //recieve_tsec_packet.state=0;
-         memset(&my_current_kos,0x0000,sizeof(my_current_kos));
+        // memset(&my_current_kos,0x0000,sizeof(my_current_kos));
+          
+         
          memset(&recieve_matrica_commutacii_packet, 0x0000, sizeof(recieve_matrica_commutacii_packet));
          recieve_matrica_commutacii_packet.state=0;
          

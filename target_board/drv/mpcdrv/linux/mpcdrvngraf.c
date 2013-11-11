@@ -41,6 +41,10 @@ GENERAL NOTES
 /*****************************************************************************/
 #include "mpcdrvngraf.h"
 /*External Header*/
+
+extern void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address);
+
+
 extern struct KY_S my_current_kos;
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
@@ -99,8 +103,6 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 /*****************************************************************************/
 /*	PRIVATE FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
-extern void get_ipaddr_my_kys(UINT8 state,UINT32 ip_addres,UINT8 *mac_address); 
-
 
 
 /*Extern ethernet functions*/
@@ -198,13 +200,6 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //Сосед на направлении 1
    //Предположим пока так будем коммутировать 
    
-   
-    
-     /*
-  	 printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-   	 printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]);
-  	 */
-     
      
    	 //ARP ZAPROS  //vo vse diri 
    	 if(priznak_kommutacii==0x0806)
@@ -212,18 +207,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		
    		printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
    		printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
-   		nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
    	  	return ;
      }
    	 
-   	 
     
-   	nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   	 
-   	 
-   //nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   
-   
    
    //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S или пакет с Гришиным графом для удалённого МПС
    //(не шлюзового МПС)
