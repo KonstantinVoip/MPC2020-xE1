@@ -551,7 +551,7 @@ unsigned int Hook_Func_ARP(uint hooknum,
                   int (*okfn)(struct sk_buff *))
 {
 	
-   
+	printk("+Hook_Func_ARP+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
 	if (skb->protocol ==htons(ETH_P_ARP))
     {
   	  
@@ -561,14 +561,12 @@ unsigned int Hook_Func_ARP(uint hooknum,
       printk("+ARP_size=%d|skb->hdr_len= %d|skb->data_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len,skb->tail,skb->len);
       */
       
-      
-      
-      /*
+
 	   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
        recieve_matrica_commutacii_packet.state=true;
        recieve_matrica_commutacii_packet.priznak_kommutacii=0x806;
-      */ 
+      
        
        
        return NF_ACCEPT;  //пропускаю дальше ARP
@@ -664,7 +662,7 @@ input_mac_last_byte = input_mac_last_word;
      *например 341 или что-то подобное 111*/    		
     //ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
     //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
-
+    
 
     if(((uint)skb->mac_len+(uint)skb->len)%2==1)
     {
@@ -821,7 +819,24 @@ input_mac_last_byte = input_mac_last_word;
 //#if 0	
       else //end if (skb->protocol ==htons(ETH_P_IP)) 
       {
-    	  //printk("else\n\r");
+    	  printk("else\n\r");
+	 	  
+    	  /*
+    	  g_my_kys_ip_addres=(uint)ip->daddr;
+		  memcpy(g_my_kys_mac_addr,eth->h_dest,6);
+		 
+	 	  printk("\n\r");
+	 	  printk("+KYS_ELSE|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
+	 	  printk("+KYS_ELSE|DA_IP  =0x%x|SA_IP=0x%x\n\r",g_my_kys_ip_addres,(uint)ip->saddr);
+    	  */
+  
+	  	 
+	
+	 	  
+	 	  
+	 	  
+    	  
+    	  //return	NF_DROP; 
     	  return	NF_ACCEPT;  //пропускаю дальше ARP  
      
       }
@@ -916,7 +931,7 @@ static int tdm_recieve_thread_two(void *data)
 	    
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-#if 0
+//#if 0
 		if(TDM0_direction_WRITE_READY()==1)
 			{			
 		        
@@ -973,7 +988,7 @@ static int tdm_recieve_thread_two(void *data)
 		    	}
             }
 
-#endif	
+//#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -1013,12 +1028,12 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
-#if 0			     
+//#if 0			     
 			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
-#endif
+//#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
@@ -1075,7 +1090,7 @@ int mpc_init_module(void)
 	** We use the miscfs to register our device.
 	*/
          printk("init_module_tdm() called\n"); 
-    
+#if 0 
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
          bundle.hook = Hook_Func;
@@ -1090,10 +1105,13 @@ int mpc_init_module(void)
          bundle.priority = NF_IP_PRI_FIRST;
       /* Регистрируем */
          nf_register_hook(&bundle);
-       
+#endif
+         
+         
          ////////////////////////////ARP_HOOK_FUNCTION/////////// 
-         arp_bundle.hook =   Hook_Func_ARP;
+         arp_bundle.hook =    Hook_Func_ARP;
          arp_bundle.owner=    THIS_MODULE;
+         //arp_bundle.pf =    NFPROTO_BRIDGE;
          arp_bundle.pf   =    NFPROTO_ARP;
          arp_bundle.hooknum = NF_INET_PRE_ROUTING;
          arp_bundle.priority =NF_IP_PRI_FIRST;
@@ -1122,7 +1140,7 @@ int mpc_init_module(void)
          LocalBusCyc3_Init();   //__Initialization Local bus 
 #endif         
          InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
-	     Init_FIFObuf();        //Initialization FIFI buffesrs
+	     Init_FIFObuf();        //Initialization FIFO buffesrs
 	     tdm_recieve_thread(NULL);
 	  
 	     
@@ -1164,7 +1182,7 @@ void mpc_cleanup_module(void)
 	//del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
-	nf_unregister_hook(&bundle);
+	//nf_unregister_hook(&bundle);
 	nf_unregister_hook(&arp_bundle);
 	msleep(10);
     kthread_stop(r_t1);

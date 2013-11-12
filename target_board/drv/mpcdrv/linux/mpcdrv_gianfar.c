@@ -182,21 +182,18 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar  *regs = priv->gfargrp[0].regs;
 	u32 tempval;
+	
+	
+	
 	// Set RCTRL to PROM 
-	
-
-	
-
-	
-	/*
 	printk("++Enable Promis mode for eth2\n\r++");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
-	*/
 	
 	
 	
+/*	
 	printk("++Enable Multicast Frame for eth2\n\r++");
 	//Set multicast frames incoming packet
 	gfar_write(&regs->igaddr0, 0xffffffff);
@@ -215,7 +212,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	gfar_write(&regs->gaddr5, 0xffffffff);
 	gfar_write(&regs->gaddr6, 0xffffffff);
 	gfar_write(&regs->gaddr7, 0xffffffff);
-	
+ */   
 	
 }
 

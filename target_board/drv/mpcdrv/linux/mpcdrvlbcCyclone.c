@@ -82,7 +82,7 @@ GENERAL NOTES
 
 
 ///////////////////////TDM DIRECTION TEST DEBUG FUNCTION//////////////
-  #define TDM0_DIR_TEST_ETHERNET_SEND  1
+ // #define TDM0_DIR_TEST_ETHERNET_SEND  1
  //#define TDM1_DIR_TEST_ETHERNET_SEND  1
  //#define TDM2_DIR_TEST_ETHERNET_SEND  1
  //#define TDM3_DIR_TEST_ETHERNET_SEND  1
@@ -1277,15 +1277,17 @@ void TDM0_dierction_read ()
 	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
-	   printk("+dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
+	   printk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
 	 
 	 
 	   
-	   
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
 	 if(dir0_priznak_arp_packet==0x0806)
 	   {
 	 		 //ARP packet for matrica
-	 		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+	 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+		    p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
+	   
 	   }
 	 
 	 

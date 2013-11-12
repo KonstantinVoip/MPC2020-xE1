@@ -239,7 +239,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		
    		printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
    		printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
-   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   		nbuf_set_datapacket_dir0  (in_buf ,in_size);
    	  	return ;
      }
    	 
