@@ -857,12 +857,17 @@ printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
 void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull)
 {
 
-	struct gfar_private *priv = netdev_priv(dev);
+	//struct gfar_private *priv = netdev_priv(dev);
 	unsigned char *skb_data;
 	unsigned int skb_len;
 	unsigned int eth_hdr_offset = 0;
 	unsigned char *eth_pkt;
-	u32 addr1, addr2, ports;
+
+	UINT32  input_mac_da_addr[1];
+	UINT16  input_mac_last_word;
+	UINT8   input_mac_prelast_byte;
+	UINT8   input_mac_last_byte;  //priznac commutacii po mac
+	
 		
 	struct ethhdr *eth;
 	struct iphdr *ip;
@@ -871,25 +876,100 @@ void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pu
 	skb_len = skb->len;
 
 	if (amount_pull)
+	{
 		eth_hdr_offset += amount_pull;
-	
+	}
 
 	if (eth_hdr_offset > skb_len)
+	{
 		return -1;
+	}
 	eth_pkt = skb_data + eth_hdr_offset;
-	
-	
 	eth = (struct ethhdr *)eth_pkt;
 	ip =  (struct iphdr *) (eth_pkt + ETH_HLEN);
 	
-	printk("_do _memcpy\n\r");
 	
-	memcpy(g_my_kys_mac_addr,eth->h_source,6);
+	
+	memcpy(input_mac_da_addr,eth->h_dest,6);
+	
+	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
+	//Last four byte mac _address input_mac_last_word
+	input_mac_last_word=input_mac_da_addr[1];
+	//Last byte mac address for priznac_commutacii;
+	//priznac commutacii po mac;
+	input_mac_prelast_byte=input_mac_last_word>>8;
+	//priznac chto iformation channel packet;
+	input_mac_last_byte = input_mac_last_word;
+	
+	
+	printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
+	printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
+    
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   	
+	   /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+	     *например 341 или что-то подобное 111*/    		
+	    //ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
+	    printk("+_SHook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+		//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+	    if (skb->protocol ==htons(ETH_P_IP))
+	    {	
+	    	 /*Принял от КУ-S Информационный пакет который сожержит
+	    	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
+	    	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
+	    	 if(input_mac_last_word==kys_information_packet_mac_last_word)
+	    	 {
+	     	 	  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
+	       	 	  //memcpy(my_kys_mac_addr,eth->h_source,6);	  
+			      //#if 0	  //comment for FIFO buffer Testing 
+	    	      //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
+	    	      //2.отправляю назад пакет потдтверждения для КУ-S
+	    	      //SA:01-ff-ff-ff-ff-00
+	    	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
+	    		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
+	    	 	  //Берём IP адрес нашего КУ-S и MAC
+	    		  
+	    		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
+	    	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
+	    		   
+	    	 	  /*заполняем структуру для нашего КY-S */	 	  
+	    	 	  	  
+	    	 	  g_my_kys_ip_addres=(uint)ip->saddr;
+	    		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
 	    		 
 	    	 	  printk("\n\r");
 	    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
-	
-
+	    	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
+	    	      p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
+	    	 	  
+	    	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+	    	 	  
+	    	 	  g_my_kys_state=true;	  
+	    	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,*g_my_kys_mac_addr);
+	    	 	  
+	    	 	  
+	    	 	  //set_information from my _kys to 
+	    	 	  
+	    	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
+	    	 }
+	    }
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
 	return 0; 
 	 	
 }
@@ -1005,7 +1085,7 @@ static int tdm_recieve_thread_two(void *data)
 	    
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-//#if 0
+#if 0
 		if(TDM0_direction_WRITE_READY()==1)
 			{			
 		        
@@ -1062,7 +1142,7 @@ static int tdm_recieve_thread_two(void *data)
 		    	}
             }
 
-//#endif	
+#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -1102,12 +1182,12 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
-//#if 0			     
+#if 0			     
 			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
-//#endif
+#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
@@ -1211,7 +1291,7 @@ int mpc_init_module(void)
          Hardware_p2020_set_configuartion();         
         
 #ifdef   P2020_MPCRDB_KIT   
-         LocalBusCyc3_Init();   //__Initialization Local bus 
+         //LocalBusCyc3_Init();   //__Initialization Local bus 
 #endif         
          //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFO buffesrs
