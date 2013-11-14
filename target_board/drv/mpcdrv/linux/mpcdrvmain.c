@@ -106,8 +106,8 @@ GENERAL NOTES
 #include <linux/in.h>
 #include <linux/if_packet.h>
 
-#include <linux/netfilter.h>
-#include <linux/netfilter_ipv4.h>
+//#include <linux/netfilter.h>
+//#include <linux/netfilter_ipv4.h>
 
 
 
@@ -277,16 +277,14 @@ extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-
-
-
+extern void *(*mpc_recieve_packet_hook_function)(struct sk_buff *skb,struct net_device *recieve_dev,int amount_pull);
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
 ////NET FILTER STRUCTURE///////////////////////////////////////////////
 //// Структура для регистрации функции перехватчика входящих ip пакетов
-struct nf_hook_ops bundle;
-struct nf_hook_ops arp_bundle;
+//struct nf_hook_ops bundle;
+//struct nf_hook_ops arp_bundle;
 
 
 
@@ -554,24 +552,18 @@ unsigned int Hook_Func_ARP(uint hooknum,
 	printk("+Hook_Func_ARP+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
 	if (skb->protocol ==htons(ETH_P_ARP))
     {
-  	  
-  	  
 	  /*	
 	  printk("ARP_ZAPROS_OK\n\r");
       printk("+ARP_size=%d|skb->hdr_len= %d|skb->data_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len,skb->tail,skb->len);
-      */
-      
-
+      */ 
+       /*
 	   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
        recieve_matrica_commutacii_packet.state=true;
        recieve_matrica_commutacii_packet.priznak_kommutacii=0x806;
-      
-       
-       
+       */
        return NF_ACCEPT;  //пропускаю дальше ARP
-  			  ////
-  	  
+  	   ////
     }
 	
 	
@@ -594,6 +586,12 @@ unsigned int Hook_Func(uint hooknum,
                   const struct net_device *out,
                   int (*okfn)(struct sk_buff *))
 {
+
+
+//void* mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull)
+//{
+
+
 //static u16 count=0;   
 //u16 i=0;
 //u16 result_comparsion=0;
@@ -645,7 +643,7 @@ input_mac_last_byte = input_mac_last_word;
 //input_mac_da_addr[1]=input_mac_da_addr[1]<<8;
 //input_mac_last_word =input_mac_da_addr[1];
 
-//printk("+DA_MAC=0x%08x|0x%08x|+\n\r",input_mac_da_addr[0],input_mac_da_addr[1]);
+printk("+DA_MAC=0x%08x|0x%08x|+\n\r",input_mac_da_addr[0],input_mac_da_addr[1]);
 //printk(">>>>last= 0x%08x|+\n\r",input_mac_da_addr[1]);
 
 //input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
@@ -654,14 +652,14 @@ input_mac_last_byte = input_mac_last_word;
 //input_mac_last_word=input_mac_da_addr[1];
 //printk(">>>last16 =0x%04x<<|\n\r",input_mac_last_word);
 
-//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
-//printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
+printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
+printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   	
    /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
      *например 341 или что-то подобное 111*/    		
     //ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
-    //printk("+Hook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+    printk("+_SHook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
     
 
     if(((uint)skb->mac_len+(uint)skb->len)%2==1)
@@ -705,9 +703,7 @@ input_mac_last_byte = input_mac_last_word;
     	 	  
     	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
     	 	  
-    	 	  
     	 	  g_my_kys_state=true;	  
-    	 	  
     	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,*g_my_kys_mac_addr);
     	 	  
     	 	  
@@ -735,7 +731,7 @@ input_mac_last_byte = input_mac_last_word;
     			  *от котрого будут строиться пути и рассчитываться стоимость
     			  *маршрута к другим сетевым элементам.*/    			 	 
     			 
-    			// spin_lock_irqsave(grisha_packet,flags);
+    			 //spin_lock_irqsave(grisha_packet,flags);
     			 
     			 //ngraf_packet_for_my_mps(skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH  ,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH));
     	    	 //копирую в промежуточный буфер буфер пока не сделал  (FIFO) перед отправкой в шину localbus.
@@ -849,6 +845,84 @@ input_mac_last_byte = input_mac_last_word;
 //return NF_ACCEPT; //end functions 	     
 //return NF_DROP;  //не пропускаем пакеты
 }
+
+
+/*
+ * Called via br_handle_frame_hook.
+ * Return NULL if skb is handled
+ * note: already called with rcu_read_lock (preempt_disabled)
+ */
+
+
+void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull)
+{
+
+	struct gfar_private *priv = netdev_priv(dev);
+	unsigned char *skb_data;
+	unsigned int skb_len;
+	unsigned int eth_hdr_offset = 0;
+	unsigned char *eth_pkt;
+	u32 addr1, addr2, ports;
+		
+	struct ethhdr *eth;
+	struct iphdr *ip;
+	
+	skb_data = skb->data;
+	skb_len = skb->len;
+
+	if (amount_pull)
+		eth_hdr_offset += amount_pull;
+	
+
+	if (eth_hdr_offset > skb_len)
+		return -1;
+	eth_pkt = skb_data + eth_hdr_offset;
+	
+	
+	eth = (struct ethhdr *)eth_pkt;
+	ip =  (struct iphdr *) (eth_pkt + ETH_HLEN);
+	
+	printk("_do _memcpy\n\r");
+	
+	memcpy(g_my_kys_mac_addr,eth->h_source,6);
+	    		 
+	    	 	  printk("\n\r");
+	    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
+	
+
+	return 0; 
+	 	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	    static inline ktime_t ktime_now(void)
 Parameters:     	void 
@@ -1105,7 +1179,7 @@ int mpc_init_module(void)
          bundle.priority = NF_IP_PRI_FIRST;
       /* Регистрируем */
          nf_register_hook(&bundle);
-#endif
+//#endif
          
          
          ////////////////////////////ARP_HOOK_FUNCTION/////////// 
@@ -1117,7 +1191,7 @@ int mpc_init_module(void)
          arp_bundle.priority =NF_IP_PRI_FIRST;
          nf_register_hook(&arp_bundle);
          ////////////////////////////////////////////////
-         
+#endif         
          
          
          
@@ -1139,10 +1213,14 @@ int mpc_init_module(void)
 #ifdef   P2020_MPCRDB_KIT   
          LocalBusCyc3_Init();   //__Initialization Local bus 
 #endif         
-         InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+         //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFO buffesrs
 	     tdm_recieve_thread(NULL);
 	  
+	     
+	     
+	     
+	     mpc_recieve_packet_hook_function = mpc_handle_frame;
 	     
 	     //Timer1
 	       //init_timer(&timer1);
@@ -1183,11 +1261,12 @@ void mpc_cleanup_module(void)
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
 	//nf_unregister_hook(&bundle);
-	nf_unregister_hook(&arp_bundle);
+	//nf_unregister_hook(&arp_bundle);
 	msleep(10);
     kthread_stop(r_t1);
     kthread_stop(r_t2);
     Clear_FIFObuf();
+    mpc_recieve_packet_hook_function=NULL;
     printk("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func
 	//kthread_stop(tdm_recieve_task); 

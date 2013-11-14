@@ -163,7 +163,7 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
 //Set multicast for 2 device
-p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
+//p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 
@@ -186,6 +186,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	
 	
 	// Set RCTRL to PROM 
+	
 	printk("++Enable Promis mode for eth2\n\r++");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
@@ -193,7 +194,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	
 	
 	
-/*	
+/*
 	printk("++Enable Multicast Frame for eth2\n\r++");
 	//Set multicast frames incoming packet
 	gfar_write(&regs->igaddr0, 0xffffffff);
@@ -212,7 +213,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	gfar_write(&regs->gaddr5, 0xffffffff);
 	gfar_write(&regs->gaddr6, 0xffffffff);
 	gfar_write(&regs->gaddr7, 0xffffffff);
- */   
+  */
 	
 }
 
