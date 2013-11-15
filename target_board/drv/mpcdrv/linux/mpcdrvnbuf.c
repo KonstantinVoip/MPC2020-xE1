@@ -275,7 +275,7 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	
 	rbd_p->tail=rbd_p->tail %rbd_p->N; //глубина очереди 10 элементов потом обнуляем хвост в 0 на начало.
 	
-	printk("++mpcfifo_put_OK!++\n\r");
+	//printk("++mpcfifo_put_OK!++\n\r");
 	
 	return 1;
 	
@@ -346,7 +346,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	
 	
 	//mdelay(500);
-	printk("++mpc_fifo_get_ok++\n\r");
+	//printk("++mpc_fifo_get_ok++\n\r");
 	
    /*	
    printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[0], local.data[1], local.data[2], local.data[3], local.data[4], local.data[5]);
@@ -524,7 +524,7 @@ bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
 	   }
 	 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 	 
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
+	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 
@@ -771,7 +771,7 @@ void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
 u16 status=0;
 u16 static set_iteration_dir0=0;  
 unsigned long flags;
-     printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
+    // printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
      //set packet size to fifo buffer
      
      spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);

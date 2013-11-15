@@ -106,6 +106,12 @@ GENERAL NOTES
 #include <linux/in.h>
 #include <linux/if_packet.h>
 
+#include <linux/icmp.h>
+
+
+//
+#include <linux/etherdevice.h>
+
 //#include <linux/netfilter.h>
 //#include <linux/netfilter_ipv4.h>
 
@@ -277,7 +283,7 @@ extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-extern void *(*mpc_recieve_packet_hook_function)(struct sk_buff *skb,struct net_device *recieve_dev,int amount_pull);
+extern void *(*mpc_recieve_packet_hook_function)(struct sk_buff *skb,struct net_device *recieve_dev,int amount_pull,int tsec_device_num);
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
@@ -620,6 +626,8 @@ struct iphdr *ip;
 /*Указатель на UDP заголовок*/
 struct udphdr *udph;
 
+/*указатель на icmp*/
+struct icmphdr *icmp;
 
 UINT32  input_mac_da_addr[1];
 UINT16  input_mac_last_word;
@@ -629,6 +637,9 @@ UINT8   input_mac_last_byte;  //priznac commutacii po mac
 eth=(struct ethhdr *)skb_mac_header(skb);
  //Фильтрация 3 го уровня по IP
 ip = (struct iphdr *)skb_network_header(skb);
+
+icmp =(struct icmphdr *)
+
 
 memcpy(input_mac_da_addr,eth->h_dest,6);
 input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
@@ -854,44 +865,47 @@ printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
  */
 
 
-void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull)
+void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull,int tsec_device_num)
 {
 
+   __be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+	/* Указатель на структуру заголовка протокола eth в пакете */
+	struct ethhdr *eth;
+	/* Указатель на структуру заголовка протокола ip в пакете */
+	struct iphdr *ip;
+	/*Указатель на UDP заголовок*/
+	struct udphdr *udph;
+	/*указатель на icmp сообщение*/
+	struct icmphdr *icmp;
+	
+	
+	
 	//struct gfar_private *priv = netdev_priv(dev);
-	unsigned char *skb_data;
-	unsigned int skb_len;
-	unsigned int eth_hdr_offset = 0;
-	unsigned char *eth_pkt;
-
 	UINT32  input_mac_da_addr[1];
 	UINT16  input_mac_last_word;
 	UINT8   input_mac_prelast_byte;
 	UINT8   input_mac_last_byte;  //priznac commutacii po mac
 	
-		
-	struct ethhdr *eth;
-	struct iphdr *ip;
-	
-	skb_data = skb->data;
-	skb_len = skb->len;
-
 	if (amount_pull)
-	{
-		eth_hdr_offset += amount_pull;
-	}
-
-	if (eth_hdr_offset > skb_len)
-	{
-		return -1;
-	}
-	eth_pkt = skb_data + eth_hdr_offset;
-	eth = (struct ethhdr *)eth_pkt;
-	ip =  (struct iphdr *) (eth_pkt + ETH_HLEN);
+	{skb_pull(skb, amount_pull);}
+	
+	/* Tell the skb what kind of packet this is */
+	skb->protocol = eth_type_trans(skb, dev);
+	skb_reset_network_header(skb);
+	skb_reset_transport_header(skb);
+	skb->mac_len = skb->network_header - skb->mac_header;
+	
+	
+	eth=(struct ethhdr *)skb_mac_header(skb);
+	 //Фильтрация 3 го уровня по IP
+	ip = (struct iphdr *)skb_network_header(skb);
+    //
+	icmp= (struct icmphdr*)skb_transport_header(skb);
+	
 	
 	
 	
 	memcpy(input_mac_da_addr,eth->h_dest,6);
-	
 	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
 	//Last four byte mac _address input_mac_last_word
 	input_mac_last_word=input_mac_da_addr[1];
@@ -900,20 +914,45 @@ void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pu
 	input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
 	input_mac_last_byte = input_mac_last_word;
-	
-	
-	printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
-	printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
+	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
+	//printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
     
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   	
 	   /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
 	     *например 341 или что-то подобное 111*/    		
 	    //ostatok_of_size_packet =((uint)skb->mac_len+(uint)skb->len)%2;
-	    printk("+_SHook_Func+|DROP_PACKET_INOCORRECT_size=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+	    //printk("+Input_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
 		//пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-	    if (skb->protocol ==htons(ETH_P_IP))
+	  
+	
+	  //2 уровень  
+	  if (skb->protocol ==htons(ETH_P_IP))
 	    {	
-	    	 /*Принял от КУ-S Информационный пакет который сожержит
+	    	
+	     //printk("protokol =%d\n\r",icmp->type);	
+		  //обработка ICMP пакета  3 уровень
+		  if(icmp->type==(69))
+		  {
+			  
+		  	  memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+		      recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+		      recieve_matrica_commutacii_packet.state=true;
+		      recieve_matrica_commutacii_packet.priznak_kommutacii=69;
+			  
+		  }
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  /*Принял от КУ-S Информационный пакет который сожержит
 	    	  *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	    	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
 	    	 if(input_mac_last_word==kys_information_packet_mac_last_word)
@@ -951,26 +990,27 @@ void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pu
 	    	 	  
 	    	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	    	 }
+	    }    
+	    
+	    //обработка ARP запроса 2 уровень
+	    if (skb->protocol ==htons(ETH_P_ARP))
+	    {
+	  	  
+	      /* 	
+	  	  printk("ARP_ZAPROS_OK\n\r");
+	      printk("+ARP_size=%d|skb->hdr_len= %d|skb->data_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len,skb->tail,skb->len);  
+	  	  */
+	      
+	      memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	      recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	      recieve_matrica_commutacii_packet.state=true;
+	      recieve_matrica_commutacii_packet.priznak_kommutacii=0x806;
 	    }
 	    
 	    
 	    
 	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	return 0; 
+	   return 0; 
 	 	
 }
 
@@ -1085,14 +1125,14 @@ static int tdm_recieve_thread_two(void *data)
 	    
 		schedule();
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-#if 0
+//#if 0
 		if(TDM0_direction_WRITE_READY()==1)
 			{			
 		        
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 				if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
-		        	 printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
+		        	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
 		        	// printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	// printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	// printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
@@ -1142,7 +1182,7 @@ static int tdm_recieve_thread_two(void *data)
 		    	}
             }
 
-#endif	
+//#endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -1182,12 +1222,12 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
-#if 0			     
-			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
+//#if 0			     
+			     if(TDM0_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );*/TDM0_dierction_read();} 			 
 			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
 				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
-#endif
+//#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
 				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
@@ -1291,9 +1331,9 @@ int mpc_init_module(void)
          Hardware_p2020_set_configuartion();         
         
 #ifdef   P2020_MPCRDB_KIT   
-         //LocalBusCyc3_Init();   //__Initialization Local bus 
+         LocalBusCyc3_Init();   //__Initialization Local bus 
 #endif         
-         //InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
+         InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFO buffesrs
 	     tdm_recieve_thread(NULL);
 	  

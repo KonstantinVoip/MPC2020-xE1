@@ -92,6 +92,7 @@ typedef enum{
      DIR1_PLIS_READ_BUG_ADDR802 		   = 802,
      DIR1_PLIS_READOK_ADDR1002  		   = 1002,
      DIR1_PLIS_PACKSIZE_ADDR1202           = 1202,//       plis read  packet size 
+     DIR1_PLIS_PACKSIZE_ADDR1602           = 1602,//send plis packet size
      DIR1_PLIS_READ_ADDR402                = 402, //0xC8   plis read data
      DIR1_PLIS_WRITE_ADDR202               = 202, //0x190   plis write data
      
@@ -101,6 +102,7 @@ typedef enum{
      DIR2_PLIS_READ_BUG_ADDR804 		   = 804,
      DIR2_PLIS_READOK_ADDR1004  		   = 1004,
      DIR2_PLIS_PACKSIZE_ADDR1204           = 1204,//       plis read  packet size 
+     DIR2_PLIS_PACKSIZE_ADDR1604           = 1604,
      DIR2_PLIS_READ_ADDR404                = 404, //0xC8   plis read data
      DIR2_PLIS_WRITE_ADDR204               = 204, //0x190   plis write data 
    
@@ -109,6 +111,7 @@ typedef enum{
      DIR3_PLIS_READ_BUG_ADDR806 		   = 806,
      DIR3_PLIS_READOK_ADDR1006  		   = 1006,
      DIR3_PLIS_PACKSIZE_ADDR1206           = 1206,//       plis read  packet size 
+     DIR3_PLIS_PACKSIZE_ADDR1606           = 1606,
      DIR3_PLIS_READ_ADDR406                = 406, //0xC8   plis read data
      DIR3_PLIS_WRITE_ADDR206               = 206, //0x190   plis write data
    
@@ -117,6 +120,7 @@ typedef enum{
      DIR4_PLIS_READ_BUG_ADDR808 		   = 808,
      DIR4_PLIS_READOK_ADDR1008  		   = 1008,
      DIR4_PLIS_PACKSIZE_ADDR1208           = 1208,//       plis read  packet size 
+     DIR4_PLIS_PACKSIZE_ADDR1608           = 1608,
      DIR4_PLIS_READ_ADDR408                = 408, //0xC8   plis read data
      DIR4_PLIS_WRITE_ADDR208               = 208, //0x190   plis write data
    
@@ -125,6 +129,7 @@ typedef enum{
      DIR5_PLIS_READ_BUG_ADDR810 		   = 810,
      DIR5_PLIS_READOK_ADDR1010  		   = 1010,
      DIR5_PLIS_PACKSIZE_ADDR1210           = 1210,//       plis read  packet size 
+     DIR5_PLIS_PACKSIZE_ADDR1610           = 1610,//send packet size in byte
      DIR5_PLIS_READ_ADDR410                = 410, //0xC8   plis read data
      DIR5_PLIS_WRITE_ADDR210               = 210, //0x190   plis write data
    
@@ -133,6 +138,7 @@ typedef enum{
      DIR6_PLIS_READ_BUG_ADDR812 		   = 812,
      DIR6_PLIS_READOK_ADDR1012  		   = 1012,
      DIR6_PLIS_PACKSIZE_ADDR1212           = 1212,//       plis read  packet size 
+     DIR6_PLIS_PACKSIZE_ADDR1612           = 1612,//send packet size in byte
      DIR6_PLIS_READ_ADDR412                = 412, //0xC8   plis read data
      DIR6_PLIS_WRITE_ADDR212               = 212, //0x190   plis write data
   
@@ -141,6 +147,7 @@ typedef enum{
      DIR7_PLIS_READ_BUG_ADDR814 		   = 814,
      DIR7_PLIS_READOK_ADDR1014  		   = 1014,
      DIR7_PLIS_PACKSIZE_ADDR1214           = 1214,//       plis read  packet size 
+     DIR7_PLIS_PACKSIZE_ADDR1614           = 1614,//send packet size in byte
      DIR7_PLIS_READ_ADDR414                = 414, //0xC8   plis read data
      DIR7_PLIS_WRITE_ADDR214               = 214, //0x190   plis write data
    
@@ -149,6 +156,7 @@ typedef enum{
      DIR8_PLIS_READ_BUG_ADDR816 		   = 816,
      DIR8_PLIS_READOK_ADDR1016  		   = 1016,
      DIR8_PLIS_PACKSIZE_ADDR1216           = 1216,//       plis read  packet size 
+     DIR8_PLIS_PACKSIZE_ADDR1616           = 1616,//send packet size in byte
      DIR8_PLIS_READ_ADDR416                = 416, //0xC8   plis read data
      DIR8_PLIS_WRITE_ADDR216               = 216, //0x190   plis write dataa
    

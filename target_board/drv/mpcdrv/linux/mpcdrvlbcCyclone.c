@@ -259,7 +259,7 @@ UINT16 status =0;
 	}
 	 
 	// msleep(100);
-  	mdelay(50);
+  	//mdelay(50);
     dannie800=plis_read16 (DIR0_PLIS_READ_BUG_ADDR800);
 	if((dannie800==0x1)||(dannie800==0xabc1))
 	{
@@ -300,7 +300,7 @@ UINT16 dannie802=0;
 	   //printk("Status1000 =0x%x\n\r",dannie1000);
 	   return (status);	
 	}
-	mdelay(400);
+	//mdelay(400);
 	dannie802=plis_read16 (DIR1_PLIS_READ_BUG_ADDR802);
 	if((dannie802==0x1)||(dannie802==0xabc1))
 	{
@@ -310,9 +310,9 @@ UINT16 dannie802=0;
 	{
 	status =0;
 	}
-	printk("dannie1002_dir1=0x%x->>>>>",dannie1002);
-	printk("dannie802_dir1=0x%x->>>>>>",dannie802);
-	printk("Status_dir1 =%d\n\r",status);
+	//printk("dannie1002_dir1=0x%x->>>>>",dannie1002);
+	//printk("dannie802_dir1=0x%x->>>>>>",dannie802);
+	//printk("Status_dir1 =%d\n\r",status);
 
 return status;
 
@@ -350,7 +350,7 @@ UINT16 TDM2_direction_READ_READY(void)
 	   //printk("Status1000 =0x%x\n\r",dannie1000);
 	   return (status);	
 	}
-	mdelay(400);
+	//mdelay(400);
 	dannie804=plis_read16 (DIR2_PLIS_READ_BUG_ADDR804);
 	if((dannie804==0x1)||(dannie804==0xabc1))
 	{
@@ -360,9 +360,9 @@ UINT16 TDM2_direction_READ_READY(void)
 	{
 	status =0;
 	}
-	printk("dannie1004_dir1=0x%x->>>>>",dannie1004);
-	printk("dannie804_dir1=0x%x->>>>>>",dannie804);
-	printk("Status_dir2 =%d\n\r",status);
+	//printk("dannie1004_dir1=0x%x->>>>>",dannie1004);
+	//printk("dannie804_dir1=0x%x->>>>>>",dannie804);
+	//printk("Status_dir2 =%d\n\r",status);
 
 return status;
 	
@@ -393,7 +393,7 @@ UINT16 TDM3_direction_READ_READY(void)
 	   //printk("Status1000 =0x%x\n\r",dannie1000);
 	   return (status);	
 	}
-	mdelay(400);
+	//mdelay(400);
 	dannie806=plis_read16 (DIR3_PLIS_READ_BUG_ADDR806);
 	if((dannie806==0x1)||(dannie806==0xabc1))
 	{
@@ -403,9 +403,9 @@ UINT16 TDM3_direction_READ_READY(void)
 	{
 	status =0;
 	}
-	printk("dannie1006_dir1=0x%x->>>>>",dannie1006);
-	printk("dannie806_dir1=0x%x->>>>>>",dannie806);
-	printk("Status_dir3 =%d\n\r",status);
+	//printk("dannie1006_dir1=0x%x->>>>>",dannie1006);
+	//printk("dannie806_dir1=0x%x->>>>>>",dannie806);
+	//printk("Status_dir3 =%d\n\r",status);
 
 return status;
 }
@@ -613,7 +613,7 @@ UINT16 TDM0_direction_WRITE_READY(void)
 
  //Next step Set delay to write succes operations !!!!!!!!!!!
  ////////////////////////////////////////////////////////////
- mdelay(10);
+ //mdelay(10);
  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 
  //printk("register 30 dannie= %d ready\n\r",dannie30);
  if(dannie30==0)
@@ -654,7 +654,7 @@ UINT16 TDM1_direction_WRITE_READY(void)
     UINT16  dannie32=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
 	////////////////////////////////////////////////////////////
-	mdelay(20);
+	//mdelay(20);
 	dannie32=plis_read16 (DIR1_PLIS_WRITEOK_ADDR32); 
 	//printk("register 30 dannie= %d ready\n\r",dannie30);
 	if(dannie32==0)
@@ -675,7 +675,7 @@ UINT16 TDM2_direction_WRITE_READY(void)
 	UINT16  dannie34=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
 	////////////////////////////////////////////////////////////
-	mdelay(20);
+	//mdelay(20);
 	dannie34=plis_read16 (DIR2_PLIS_WRITEOK_ADDR34); 
 	//printk("register 30 dannie= %d ready\n\r",dannie30);
 	if(dannie34==0)
@@ -697,7 +697,7 @@ UINT16 TDM3_direction_WRITE_READY(void)
 	UINT16  dannie36=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
 	////////////////////////////////////////////////////////////
-	mdelay(20);
+	//mdelay(20);
 	dannie36=plis_read16 (DIR3_PLIS_WRITEOK_ADDR36); 
 	//printk("register 30 dannie= %d ready\n\r",dannie30);
 	if(dannie36==0)
@@ -874,7 +874,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     //Set size on PLIS in byte
    
     
-    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    //printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -936,7 +936,10 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
 	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
 #endif    
 	
-	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
+	plis_write16(DIR1_PLIS_PACKSIZE_ADDR1602,in_size);
+	
+	
+	for(i=0;i<hex_element_size/*+PATCHlbc_ONE_ITERATION_WRITE*/;i++)
 	{
 		plis_write16(DIR1_PLIS_WRITE_ADDR202 ,in_buf[i]);
 	}
@@ -972,7 +975,9 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
 #endif    
 	
 	
-	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
+	plis_write16(DIR2_PLIS_PACKSIZE_ADDR1604,in_size);
+	
+	for(i=0;i<hex_element_size/*+PATCHlbc_ONE_ITERATION_WRITE*/;i++)
 	{
 		plis_write16(DIR2_PLIS_WRITE_ADDR204  ,in_buf[i]);
 	}
@@ -1006,6 +1011,9 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
     printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
 #endif    
+	
+	
+	plis_write16(DIR3_PLIS_PACKSIZE_ADDR1606,in_size);
 	
 	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
 	{
@@ -1232,7 +1240,7 @@ void TDM0_dierction_read ()
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
   packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
   ostatok_of_size_packet =(dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
@@ -1277,7 +1285,7 @@ void TDM0_dierction_read ()
 	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
-	   printk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
+	  // printk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
 	 
 	 
 	   
@@ -1289,6 +1297,11 @@ void TDM0_dierction_read ()
 		    p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   
 	   }
+	 else
+	 {
+		   p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);	 
+	 }
+	 
 	 
 	 
 	 
@@ -1342,14 +1355,17 @@ void TDM1_dierction_read ()
 	  //Priznak Sevi Packet 22-ff _predposlednii bait.
 	  UINT8   dir1_mac_priznak_kys = 0; 
 	  
+	  UINT16  dir1_priznak_arp_packet=0;
+	  
+	  
 	  memset(&out_buf1, 0x0000, sizeof(out_buf1));
 	  
-	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202 );
+	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202);
 	  packet_size_hex=dannie1202/2; //convert byte to element of massive in hex 
 	  printk("+Tdm_Dir1_read->>ITERATION=%d|1202in_byte=%d|1202in_hex=%d|size=%d|+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	    
 	    //Проверка что получили целый размер иначе хлам
-	    ostatok_of_size_packet =(dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+	    ostatok_of_size_packet =(dannie1202/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
 	    if(ostatok_of_size_packet==1)
 	    {
 	  	  printk("???Tdm_Dir1_read->>????bad_in_packet_size=%d?????\n\r",dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
@@ -1363,7 +1379,7 @@ void TDM1_dierction_read ()
 	  	  //mdelay(5);   
 	        out_buf1[i]= plis_read16 (DIR1_PLIS_READ_ADDR402);
 	        i++;           
-	        }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	        }while(i<packet_size_hex/*+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE*/);
 
 	  	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
@@ -1384,8 +1400,23 @@ void TDM1_dierction_read ()
 	  	 //определяю признак KY-S по mac адресам 
 	  	 dir1_mac_priznak_kys = out_buf1[2]>>8;
 	  	 
+	     dir1_priznak_arp_packet =out_buf1[6];
+	  	 
 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
+		 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+		 if(dir1_priznak_arp_packet==0x0806)
+		   {
+		 		 //ARP packet for matrica
+		 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+			    p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);//send to eternet tsec ARP broadcast
+		   
+		   }
+		 else
+		 {
+			   p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);	 
+		 }
+	  	
 	  	 
 	  	 if(dir1_mac_priznak_kys==0x22)
 	  	 {
@@ -1433,7 +1464,11 @@ void TDM2_dierction_read ()
 	  UINT8   dir2_mac_da_addr   = 0;
 	  //Priznak Sevi Packet 22-ff _predposlednii bait.
 	  UINT8   dir2_mac_priznak_kys = 0; 
-	 	  
+	 
+	  //
+	  UINT16  dir2_priznak_arp_packet=0;
+	  
+	  
 	  memset(&out_buf2, 0x0000, sizeof(out_buf2));
 	 	  
 	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204 );
@@ -1441,7 +1476,7 @@ void TDM2_dierction_read ()
 	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 	 	    //Проверка что получили целый размер иначе хлам
-	 	    ostatok_of_size_packet =(dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE)%2;
+	 	    ostatok_of_size_packet =(dannie1204/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
 	 	    if(ostatok_of_size_packet==1)
 	 	    {
 	 	  	  printk("???Tdm_Dir2_read->>????bad_in_packet_size=%d?????\n\r",dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
@@ -1455,7 +1490,7 @@ void TDM2_dierction_read ()
 	 	  	  //mdelay(5);   
 	 	        out_buf2[i]= plis_read16 (DIR2_PLIS_READ_ADDR404);
 	 	        i++;           
-	 	        }while(i<packet_size_hex+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE);
+	 	        }while(i<packet_size_hex/*+PATCHlbc_ONE_ITERATION_READ+PATCH_READ_PACKET_SIZE_ADD_ONE*/);
 
 	 	  	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	 	  	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
@@ -1475,9 +1510,26 @@ void TDM2_dierction_read ()
 	 	  	 dir2_mac_da_addr   = out_buf2[2];
 	 	  	 //определяю признак KY-S по mac адресам 
 	 	  	 dir2_mac_priznak_kys = out_buf2[2]>>8;
+	 	  	 ///Arp priznak
+	 	  	 dir2_priznak_arp_packet =out_buf2[6];
+	 	  	 
+	 	  	 if(dir2_priznak_arp_packet==0x0806)
+	 	  	   {
+	 	  	   //ARP packet for matrica
+	 	  	   //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+	 	  	   p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204);//send to eternet tsec ARP broadcast
+	 	  			   
+	 	  	   }
+	 	  	   else
+	 	  	   {
+	 	  	   p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204);	 
+	 	  	   }
 	 	  	 
 	 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
 	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
+	 	  	 
+	 	  	 
+	 	  	 
 	 	  	 
 	 	  	 if(dir2_mac_priznak_kys==0x22)
 	 	  	 {

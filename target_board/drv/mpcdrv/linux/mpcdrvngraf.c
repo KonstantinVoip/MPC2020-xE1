@@ -226,7 +226,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
    //get_ipaddr_my_kys(,,,);
    //printk("State my_current MPC =0x%x\n\r",my_current_kos.ip_addres);
-   printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
+   //printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
    //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
    //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
    //Сосед на направлении 1
@@ -237,11 +237,28 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	 if(priznak_kommutacii==0x0806)
    	 {
    		
-   		printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-   		printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
-   		nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   	  	return ;
+   		//printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+   		//printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
+   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   		//nbuf_set_datapacket_dir1  (in_buf ,in_size);  
+   		  nbuf_set_datapacket_dir2  (in_buf ,in_size);   
+   		 
+   		 return ;
      }
+   	 
+   	 //ICMP запрос Echo request
+   	 if(priznak_kommutacii==69)
+   	 {
+   		
+   		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+   		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
+   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   		//nbuf_set_datapacket_dir1  (in_buf ,in_size);
+   		 nbuf_set_datapacket_dir2  (in_buf ,in_size);
+   		  
+   		  return ;
+   	 }
+   	 
    	 
     
    
