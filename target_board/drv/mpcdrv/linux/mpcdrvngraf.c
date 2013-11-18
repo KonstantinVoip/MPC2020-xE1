@@ -139,8 +139,9 @@ extern void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
 void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 {
 	
-	//printk("State =0x%x>>IP=0x%x,MAC =%0x%x\n\r",state,ip_addres,&mac_address[0]);
+	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	
+	printk("State =0x%x>>IP=0x%x,MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",state,ip_addres,mac_address[0],mac_address[1],mac_address[2],mac_address[3],mac_address[4],mac_address[5]);
 	my_current_kos.state=state;
 	my_current_kos.ip_addres=ip_addres;
 	my_current_kos.mac_address=mac_address;
@@ -223,45 +224,84 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  mac1[6];
    UINT16  mac2[6];
    
-   
-   //get_ipaddr_my_kys(,,,);
-   //printk("State my_current MPC =0x%x\n\r",my_current_kos.ip_addres);
-   //printk("++priznak_kommutacii =%x\n\r",priznak_kommutacii);
-   //Режим по умолчанию если пришёл пакет но нет матрицы коммутации не создалась тоже нужно придумать.
-   //Матрица коммутации для пакетов соседей от моего сетевого элемента  МК8
-   //Сосед на направлении 1
-   //Предположим пока так будем коммутировать 
-   
-     
+    
    	 //ARP ZAPROS  //vo vse diri 
    	 if(priznak_kommutacii==0x0806)
    	 {
    		
    		//printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
    		//printk("+ARp_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
-   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   		//nbuf_set_datapacket_dir1  (in_buf ,in_size);  
-   		  nbuf_set_datapacket_dir2  (in_buf ,in_size);   
-   		 
-   		 return ;
-     }
-   	 
-   	 //ICMP запрос Echo request
-   	 if(priznak_kommutacii==69)
-   	 {
-   		
-   		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-   		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
-   		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   		//nbuf_set_datapacket_dir1  (in_buf ,in_size);
-   		 nbuf_set_datapacket_dir2  (in_buf ,in_size);
    		  
-   		  return ;
+   		  //Send ARP ZAPROS vo vse Napravlenia po logike veschei.
+   		  //4 napravlenia only 4 MPC
+   		  //nbuf_set_datapacket_dir0  (in_buf ,in_size);
+   		//  nbuf_set_datapacket_dir1  (in_buf ,in_size);  
+   	   	    nbuf_set_datapacket_dir2  (in_buf ,in_size);
+   		 // nbuf_set_datapacket_dir3  (in_buf ,in_size);
+   		 return ;
    	 }
+  
+	 
+	 if(priznak_kommutacii==0x11)
+ 	 {
+ 		
+ 		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+ 		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
+ 		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
+ 		//nbuf_set_datapacket_dir1  (in_buf ,in_size);
+ 		 nbuf_set_datapacket_dir2  (in_buf ,in_size);
+ 		  
+ 		  return ;
+ 	 }
    	 
    	 
-    
+   	 
+   	 
+ 	 if(priznak_kommutacii==69)
+ 	 {
+ 		
+ 		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+ 		//printk("+ICMP_type8_request|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[21-6],in_buf[21-5],in_buf[21-4],in_buf[21-3],in_buf[21-2],in_buf[21-1]); 
+ 		//nbuf_set_datapacket_dir0  (in_buf ,in_size);
+ 		//nbuf_set_datapacket_dir1  (in_buf ,in_size);
+ 		 nbuf_set_datapacket_dir2  (in_buf ,in_size);
+ 		  
+ 		  return ;
+ 	 }
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
    
+   	 
+   	 
+     //Главный цикл я получил свой IP и MAC адрес KY-S	 
+   	 /*if(my_current_kos.state==1)
+   	 {
+   		 
+   		 
+   		 
+   	 }*/
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
+   	 
    //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S или пакет с Гришиным графом для удалённого МПС
    //(не шлюзового МПС)
 #if 0  
@@ -340,7 +380,19 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    }
 #endif  
  	
-	//Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
+	
+ 	 //ICMP запрос Echo request
+ 	 
+ 
+ 	 
+   
+   
+   
+   
+   
+   
+   
+   //Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
     //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet
 	  	
 }

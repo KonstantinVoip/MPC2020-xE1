@@ -103,6 +103,9 @@
 
 //Start Ethernet Initialization
 void InitIp_Ethernet();
+//Stop  Ethernet Initialization
+void StopIp_Ethernet();
+
 /*struct net_device * get_tsec0();
 struct net_device * get_tsec1();
 struct net_device * get_tsec2();

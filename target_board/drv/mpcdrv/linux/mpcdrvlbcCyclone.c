@@ -968,7 +968,7 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
     
     hex_element_size=in_size/2;
     
-    printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+   // printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
 #ifdef  TDM_DIR_2_WRITE_DEBUG	   
     printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
@@ -1473,7 +1473,7 @@ void TDM2_dierction_read ()
 	 	  
 	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204 );
 	  packet_size_hex=dannie1204/2; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	//  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 	 	    //Проверка что получили целый размер иначе хлам
 	 	    ostatok_of_size_packet =(dannie1204/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
@@ -1530,7 +1530,7 @@ void TDM2_dierction_read ()
 	 	  	 
 	 	  	 
 	 	  	 
-	 	  	 
+	 /*	  	 
 	 	  	 if(dir2_mac_priznak_kys==0x22)
 	 	  	 {
 	 	  		 //packet kommutacii po mac address
@@ -1541,7 +1541,7 @@ void TDM2_dierction_read ()
 	 	  		 //packet kommutacii pi ip grisha graf
 	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE,dir2_ip_da_addr);
 	 	  	 }
-	 	  	  
+	 */	  	  
 	 	  	 
 	 	  	 #ifdef TDM2_DIR_TEST_ETHERNET_SEND
 	 	       //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet

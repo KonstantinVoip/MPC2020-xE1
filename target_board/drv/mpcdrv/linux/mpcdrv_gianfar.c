@@ -144,6 +144,9 @@ void InitIp_Ethernet()
 const char *ifname0="eth0";
 const char *ifname1="eth1";
 const char *ifname2="eth2";
+int  init_status_tsec2 =0;
+int  init_status_tsec1 =0;
+
 
 //tsec 0 ,tsec1 ,tsec2 ethernet controller
 printk("+++++++InitIp_Ethernet()_and_get_ethernet_device_structure+++++++\n\r");
@@ -162,9 +165,26 @@ tsec2_dev=tsec_get_device_by_name(ifname2);
 if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
-//Set multicast for 2 device
+//Set multicast configuration for  1 and 2 device
 //p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 //p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+
+
+//p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
+//p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+
+//Start GIANFAR DRIVER eth1.
+//int	(*ndo_init_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_init;
+//init_status_tsec1=(*ndo_init_tsec1)(tsec1_dev);
+//printk("+!Start_ETH1_status= %d!+\n\r",init_status_tsec1);
+//Start GIANFAR DRIVER eth2.
+/*
+int	(*ndo_init)(struct net_device *dev) = tsec2_dev->netdev_ops ->ndo_init;
+init_status_tsec2=(*ndo_init)(tsec2_dev);
+printk("+!Start_ETH2_status= %d!+\n\r",init_status_tsec2);
+*/
+//p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+
 
 
 }
@@ -183,11 +203,10 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	struct gfar  *regs = priv->gfargrp[0].regs;
 	u32 tempval;
 	
+
 	
-	
-	// Set RCTRL to PROM 
-	
-	printk("++Enable Promis mode for eth2\n\r++");
+	// Set RCTRL to PROMISC mode
+	printk("++Enable Promis mode for eth2++\n\r");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
@@ -384,10 +403,13 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 	struct sk_buff *skb=NULL;
 	__u8 *eth;
 	__be16 protocol = htons(ETH_P_IP);
-	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= dev->netdev_ops->ndo_start_xmit;
+	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= dev->netdev_ops->ndo_start_xmit;	
 	unsigned char *data;
     u16 len;
 	u16 ret;
+
+	
+//#if 0	
 	
 
 	len =  get_tdmdir_packet_length();      
@@ -450,9 +472,34 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 		// Increment the number of packets 
 		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
 	   
+//#endif
+
 }
 
 
+
+/**************************************************************************************************
+Syntax:      	    void StopIp_Ethernet()
+Parameters:     	
+Remarks:		    Stop ethernet tsec1,tsec2,tsec3 and virtual tsec function
+
+Return Value:	    
+***************************************************************************************************/
+void StopIp_Ethernet()
+{
+	int  stop_status_tsec2 =0;
+	int  stop_status_tsec1 =0;
+
+	//Stop GIANFAR DRIVER eth1.
+	//int	(*ndo_stop_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_stop;
+	//stop_status_tsec1=(*ndo_stop_tsec1)(tsec1_dev);
+	//printk("+!Stop_ETH1_status= %d!+\n\r",stop_status_tsec1);
+	//Stop GIANFAR DRIVER eth2.
+	int	(*ndo_stop_tsec2)(struct net_device *dev) = tsec2_dev->netdev_ops ->ndo_stop;
+	stop_status_tsec2=(*ndo_stop_tsec2)(tsec2_dev);
+	printk("+!Stop_ETH2_status= %d!+\n\r",stop_status_tsec2);
+	
+}
 
 
 

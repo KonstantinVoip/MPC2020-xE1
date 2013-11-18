@@ -574,7 +574,7 @@ bool nbuf_get_datapacket_dir1 (u16 *in_buf ,u16 *in_size)
 	 
 	 spin_unlock_irqrestore(fifo_put_to_tdm1_dir->lock,flags);
 	 
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
+	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
 	 packet_size_in_byte=(fifo_put_to_tdm1_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 	 //отправляю в ethernet
@@ -619,7 +619,7 @@ bool nbuf_get_datapacket_dir2 (u16 *in_buf , u16 *in_size)
 	   }
 	 	 
 	 
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir2 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir2);
+	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir2 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir2);
 	 packet_size_in_byte=(fifo_put_to_tdm2_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 	 
@@ -663,7 +663,7 @@ bool nbuf_get_datapacket_dir3 ( u16 *in_buf , u16 *in_size)
 	 }
 	 
 	 spin_unlock_irqrestore(fifo_put_to_tdm3_dir->lock,flags);
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir3 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir3);
+	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir3 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir3);
 	 packet_size_in_byte=(fifo_put_to_tdm3_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 	 
@@ -796,7 +796,7 @@ void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
 	u16 status=0;
 	u16 static set_iteration_dir1=0;  
 	unsigned long flags;
-	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir1);	 
+	    // printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir1);	 
 	     //set packet size to fifo buffer
 	     spin_lock_irqsave(fifo_put_to_tdm1_dir->lock,flags);
 	     
@@ -821,7 +821,7 @@ void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
 	u16 status=0;
 	u16 static set_iteration_dir2=0;  
 	unsigned long flags;
-	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir2|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir2);	 
+	     //printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir2|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir2);	 
 	     
 	     
 	     spin_lock_irqsave(fifo_put_to_tdm2_dir->lock,flags);
@@ -849,7 +849,7 @@ void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size)
 	u16 static set_iteration_dir3=0;  
 	unsigned long flags;
 	
-	     printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir3|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir3);	 
+	     //printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir3|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir3);	 
 	     //set packet size to fifo buffer
 	     spin_lock_irqsave(fifo_put_to_tdm3_dir->lock,flags);
 	     
