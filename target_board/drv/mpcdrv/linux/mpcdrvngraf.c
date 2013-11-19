@@ -118,7 +118,7 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 
 /*Extern ethernet functions*/
 extern void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size,const u16 *mac_header);
-extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
+extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
@@ -224,9 +224,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  mac1[6];
    UINT16  mac2[6];
    
-    
+     
    	 //ARP ZAPROS  //vo vse diri 
-   	 if(priznak_kommutacii==0x0806)
+     nbuf_set_datapacket_dir2  (in_buf ,in_size);
+     return;
+     /*
+   
+    if(priznak_kommutacii==0x0806)
    	 {
    		
    		//printk("+ARP_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -269,7 +273,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
  		  return ;
  	 }
    	 
-   	 
+ */  	 
    	 
    	 
    	 

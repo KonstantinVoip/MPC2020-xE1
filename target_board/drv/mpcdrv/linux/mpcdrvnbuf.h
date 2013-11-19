@@ -122,7 +122,7 @@ typedef struct description_packet
 
 
 struct mpcfifo {
-	DATA_lbc      q[4];
+	DATA_lbc      q[8];
 	unsigned int  head;
 	unsigned int  tail;
     u16           N;

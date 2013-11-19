@@ -367,7 +367,7 @@ static struct net_device *tsec_get_device_by_name(const char *ifname)
 /**********************************************************************/
 
 //#if 0
-void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
+void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id)
 {
 	//Real and Virtual Ethernet devices
 	//eth0,eth1,eth2,eth3,eth4,eth5,eth6.,eth7,eth8;
@@ -385,7 +385,17 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len)
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
 	//p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+	
+	if(tsec_id==1)
+	{
+	p2020_get_from_tdmdir_and_put_to_ethernet(tsec1_dev);
+	}
+	
+	if(tsec_id==2)
+	{	
 	p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+	}
+	
     
 }
 

@@ -54,7 +54,7 @@ GENERAL NOTES
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
 #define FIFO_PACKET_SIZE_BYTE  1514          
-#define FIFO_PACKET_NUM        4 
+#define FIFO_PACKET_NUM        8
 #define GFP_MASK               GFP_KERNEL
 
 
@@ -97,7 +97,7 @@ static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode);
   /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
-extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len);
+extern void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id);
 
 /*****************************************************************************/
 /*	EXTERNAL REFERENCES						     */
@@ -324,7 +324,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	
 	
 	//schetchic1=rbd_p->head;//-rbd_p->tail;
-	if(rbd_p->head-l_tail==4)
+	if(rbd_p->head-l_tail==FIFO_PACKET_NUM)
 	{
 		//mdelay(500);
 		//printk(">>>>>>?????????<<<<<\n\r");
@@ -623,6 +623,7 @@ bool nbuf_get_datapacket_dir2 (u16 *in_buf , u16 *in_size)
 	 packet_size_in_byte=(fifo_put_to_tdm2_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
 	 
+	  //mdelay(250);
 	 //отправляю в ethernet
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET  
 	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir2,packet_size_in_byte);//send to eternet	 
@@ -821,7 +822,9 @@ void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
 	u16 status=0;
 	u16 static set_iteration_dir2=0;  
 	unsigned long flags;
-	     //printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir2|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir2);	 
+	    
+	
+	    //printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir2|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir2);	 
 	     
 	     
 	     spin_lock_irqsave(fifo_put_to_tdm2_dir->lock,flags);
