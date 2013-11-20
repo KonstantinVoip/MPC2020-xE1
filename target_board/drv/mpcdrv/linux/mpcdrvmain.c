@@ -51,7 +51,7 @@ GENERAL NOTES
 #include <linux/autoconf.h>
 #endif
 
-
+#include <linux/sched.h> //все предусмотренные версией ядра примитивы синхронизации
 //Механизмы синхронизации 
 # if 0 
 #include <linux/sched.h> //все предусмотренные версией ядра примитивы синхронизации
@@ -112,8 +112,8 @@ GENERAL NOTES
 //
 #include <linux/etherdevice.h>
 
-//#include <linux/netfilter.h>
-//#include <linux/netfilter_ipv4.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter_ipv4.h>
 
 
 
@@ -289,8 +289,8 @@ extern void *(*mpc_recieve_packet_hook_function)(struct sk_buff *skb,struct net_
 /*****************************************************************************/
 ////NET FILTER STRUCTURE///////////////////////////////////////////////
 //// Структура для регистрации функции перехватчика входящих ip пакетов
-//struct nf_hook_ops bundle;
-//struct nf_hook_ops arp_bundle;
+struct nf_hook_ops bundle;
+struct nf_hook_ops arp_bundle;
 
 
 
@@ -539,6 +539,237 @@ UINT16 loopbackout_size=0;
 	 
 }
 #endif
+
+/**************************************************************************************************
+Syntax:      	    unsigned int Hook_Func_ARp
+Parameters:     	
+Remarks:			Process recieve frame 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+unsigned int Hook_Func_ARP(uint hooknum,
+                  struct sk_buff *skb,
+                  const struct net_device *in,
+                  const struct net_device *out,
+                  int (*okfn)(struct sk_buff *))
+
+{
+	if (skb->protocol == htons(ETH_P_ARP))
+	{
+		
+		//printk("ARP_OK\n\r");
+	    /*
+		memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+        recieve_matrica_commutacii_packet.state=true;
+        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
+		*/
+		return NF_DROP;
+	
+	
+	}
+	
+return NF_ACCEPT;	
+}
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    unsigned int Hook_Func
+Parameters:     	
+Remarks:			Process recieve frame 
+
+Return Value:	    0  =>  Success  ,-EINVAL => Failure
+
+***************************************************************************************************/
+unsigned int Hook_Func(uint hooknum,
+                  struct sk_buff *skb,
+                  const struct net_device *in,
+                  const struct net_device *out,
+                  int (*okfn)(struct sk_buff *))
+{
+	
+	__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+    /* Указатель на структуру заголовка протокола eth в пакете */
+	struct ethhdr *eth;
+    /* Указатель на структуру заголовка протокола ip в пакете */
+	struct iphdr *ip;
+	/*Указатель на UDP заголовок*/
+	struct udphdr *udph;
+		/*указатель на icmp сообщение*/
+	struct icmphdr *icmp;
+		
+	
+	UINT32  input_mac_da_addr[1];
+	UINT16  input_mac_last_word;
+	UINT8   input_mac_prelast_byte;
+	UINT8   input_mac_last_byte;  //priznac commutacii po mac
+	
+	
+	eth=(struct ethhdr *)skb_mac_header(skb);
+	 //Фильтрация 3 го уровня по IP
+	ip = (struct iphdr *)skb_network_header(skb);
+    //ICMP пакет
+	icmp= (struct icmphdr*)skb_transport_header(skb);
+	
+	
+	memcpy(input_mac_da_addr,eth->h_dest,6);
+	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
+	//Last four byte mac _address input_mac_last_word
+	input_mac_last_word=input_mac_da_addr[1];
+	//Last byte mac address for priznac_commutacii;
+	//priznac commutacii po mac;
+	input_mac_prelast_byte=input_mac_last_word>>8;
+	//priznac chto iformation channel packet;
+	input_mac_last_byte = input_mac_last_word;
+	
+	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
+	//printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
+	
+	   /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+	     *например 341 или что-то подобное 111*/    		
+        /* if(((uint)skb->mac_len+(uint)skb->len)%2==1)
+          { 
+	       printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
+		  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+           return NF_ACCEPT; 
+          }*/
+	
+	  
+	      /* 
+	      if(((uint)skb->mac_len+(uint)skb->len)<200)
+	      { 
+		  printk("drop\n\r");
+	      return NF_ACCEPT;
+	      //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+	      }
+          */
+
+	  //2 уровень пришёл Ethernet пакет 0x800
+	 if (skb->protocol ==htons(ETH_P_IP))
+	 {
+
+		 
+		  //printk("protokol =%d\n\r",icmp->type);	
+	    /*
+		  if(icmp->type==(69))
+	      {  
+	      memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+          recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+          recieve_matrica_commutacii_packet.state=true;
+          recieve_matrica_commutacii_packet.priznak_kommutacii=69;
+	      return NF_DROP;
+	      }
+	    */
+	 
+		     /*Принял от КУ-S Информационный пакет который сожержит
+	          *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
+	    	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
+	    	 if(input_mac_last_word==kys_information_packet_mac_last_word)
+	    	 {
+	     	 	  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
+	       	 	  //memcpy(my_kys_mac_addr,eth->h_source,6);	  
+			      //#if 0	  //comment for FIFO buffer Testing 
+	    	      //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
+	    	      //2.отправляю назад пакет потдтверждения для КУ-S
+	    	      //SA:01-ff-ff-ff-ff-00
+	    	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
+	    		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
+	    	 	  //Берём IP адрес нашего КУ-S и MAC
+	    		  
+	    		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
+	    	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
+	    		   
+	    	 	  /*заполняем структуру для нашего КY-S */	 	  
+	    	 	  	  
+	    	 	  g_my_kys_ip_addres=(UINT8)ip->saddr;
+	    		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
+	    		  
+	    	 	  printk("\n\r");
+	    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
+	    	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
+	    	      //Заворачиваю назад с подменой MAC адреса
+	    	 	  p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
+	    	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+	    	 	  
+	    	      //Сообщаю состояние что принял инофрмационный пакета передаю в матрицу коммутации эту информацию
+	    	      //чтобы дальше с ней работать.
+	    	 	  g_my_kys_state=true;	  
+	    	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,g_my_kys_mac_addr);
+	    	 	  	  
+	    	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
+	    	 }
+	    	 /*Пакет предназначенный для отправки в служебный канал пакет с данными от Севы фишка в следующем
+	    	  *я его принимаю и анализирую последнюю часть мас пока работаю в одной подсеити потом может 
+	    	  *больше если недостаточно одной сети*/	    	     	
+	    	 if(kys_service_channel_packet_pre_last_byte==input_mac_prelast_byte)
+	    	 {	
+	    	  //printk(">>INPUT_SERIVCE_CHANNEL_MAC<<\n\r");
+	    	  //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
+	    	  //              DA :01-ff-ff-ff-22-xx  
+	    	  //в данном случае xx это номер ip подсети где находиться ставим в соответствие
+	    	  /*157*/                       /*157*/
+	    	  // DA :01-ff-ff-ff-22-9D     -> IP_DA = 192.168.130.157 
+	    	  //выходной пакет:SA :01-ff-ff-ff-22-9D   (наша подсеть)   
+	    	  //               DA :00-25-01-00-11-2D   (или MAC адрес нашего КY-S)
+	    	  /*Проверка и отброс пакета который пришёл сам себе на всякий случай сбрасываю его*/
+	    	  //if(157 == 157){return NF_DROP;}
+	    	  //memcpy(kys_last_mac,eth->h_dest,12);	
+	    	 	    	     	 
+	    	 	    	   
+	    	  //last_mac_value=eth->h_dest;                 //buf_mac_dst[6];
+	    	  //printk("last_mac_value=0x%x\n\r",kys_last_mac[5]);
+	    	  //добавляем подсеть типа коммутация по ip      	     	 
+	    	  //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
+	    	  //ngraf_packet_for_matrica_kommutacii(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,kys_last_mac[5]); 
+	    	  	    	 	  	   
+	    	  memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	    	  recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	    	  recieve_matrica_commutacii_packet.priznak_kommutacii=input_mac_last_byte;
+	    	  recieve_matrica_commutacii_packet.state=true;
+	    	  return NF_DROP;
+	    	  } //kys_service_channel_packet_pre_last_byte==input_mac_prelast_byte
+	           
+	 }
+return NF_ACCEPT;	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	    void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull,int tsec_device_num)
 Parameters:     	
@@ -547,6 +778,10 @@ Remarks:			Process recieve frame
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 
 ***************************************************************************************************/
+
+#if 0
+
+
 void * mpc_handle_frame(struct sk_buff *skb,struct net_device *dev,int amount_pull,int tsec_device_num)
 {
 
@@ -829,7 +1064,7 @@ if (tsec_device_num==1)
 return 0;
 	    
 }
-
+#endif
 
 
 /**************************************************************************************************
@@ -966,7 +1201,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 */
 		        	 //mdelay(250); //250 миллисекунд задержки перед отправкой
 		        	 TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
-		        	 mdelay(250);
+		        	 //mdelay(250);
 				}	 		
 			}
     /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
@@ -982,7 +1217,7 @@ static int tdm_recieve_thread_two(void *data)
 		    	   
 		    	}
             }	    
-		    //mdelay(200);  
+		   mdelay(20);  
 //#endif	
 		    
 		}
@@ -1088,14 +1323,13 @@ int mpc_init_module(void)
 	** We use the miscfs to register our device.
 	*/
          printk("init_module_tdm() called\n"); 
-#if 0 
+//#if 0 
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
          bundle.hook = Hook_Func;
       /* Устанавливаем указатель на модуль, создавший hook */
          bundle.owner = THIS_MODULE;
       /* Указываем семейство протоколов */
-         //bundle.pf = NFPROTO_ARP;//PF_INET;
          bundle.pf = NFPROTO_IPV4;         
       /* Указываем, в каком месте будет срабатывать функция */
          bundle.hooknum = NF_INET_PRE_ROUTING;
@@ -1105,17 +1339,16 @@ int mpc_init_module(void)
          nf_register_hook(&bundle);
 //#endif
          
-         
+//#if 0         
          ////////////////////////////ARP_HOOK_FUNCTION/////////// 
          arp_bundle.hook =    Hook_Func_ARP;
          arp_bundle.owner=    THIS_MODULE;
-         //arp_bundle.pf =    NFPROTO_BRIDGE;
          arp_bundle.pf   =    NFPROTO_ARP;
          arp_bundle.hooknum = NF_INET_PRE_ROUTING;
          arp_bundle.priority =NF_IP_PRI_FIRST;
          nf_register_hook(&arp_bundle);
          ////////////////////////////////////////////////
-#endif         
+//#endif         
          
          
          
@@ -1133,7 +1366,7 @@ int mpc_init_module(void)
          //Future MAC Address Filtering enable and Disable
          //Future Temperature controlling and other options p2020 chips.
          Hardware_p2020_set_configuartion();         
-	     mpc_recieve_packet_hook_function = mpc_handle_frame;
+	    // mpc_recieve_packet_hook_function = mpc_handle_frame;
          LocalBusCyc3_Init();   //__Initialization Local bus        
          InitIp_Ethernet() ;    //__Initialization P2020Ethernet devices
 	     Init_FIFObuf();        //Initialization FIFO buffesrs
@@ -1182,13 +1415,13 @@ void mpc_cleanup_module(void)
 	//del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
-	//nf_unregister_hook(&bundle);
-	//nf_unregister_hook(&arp_bundle);
+	nf_unregister_hook(&bundle);
+	nf_unregister_hook(&arp_bundle);
 	msleep(10);
     kthread_stop(r_t1);
     kthread_stop(r_t2);
     Clear_FIFObuf();
-    mpc_recieve_packet_hook_function=NULL;
+  //  mpc_recieve_packet_hook_function=NULL;
       
     printk("exit_module() called\n");
 	//kthread_stop(tdm_transmit_task);      //Stop Thread func

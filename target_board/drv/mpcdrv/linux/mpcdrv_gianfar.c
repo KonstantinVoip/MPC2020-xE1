@@ -290,14 +290,11 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	 
 	 
 	  //put to buffer 
-	 
-	 
-	 
      transmit_tsec_packet.data  = in_buf;
 	 transmit_tsec_packet.length= in_size;
-	
+	 
 	 //Send Packet to ethernet eTSEC2
-	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
+	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec1_dev);
 	 
 	//printk("OK\n\r");
 	
