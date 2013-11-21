@@ -1285,10 +1285,8 @@ void TDM0_dierction_read ()
 	 
 	 
 	   
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута
-#if 0
-	 
-	 if(dir0_priznak_arp_packet==0x0806)
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
+	   if(dir0_priznak_arp_packet==0x0806)
 	   {
 	 		 //ARP packet for matrica
 	 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
@@ -1296,6 +1294,8 @@ void TDM0_dierction_read ()
 		  p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   }
+
+#if 0	 
 	   else
 	   {
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);	 
@@ -1417,14 +1417,27 @@ void TDM1_dierction_read ()
 		 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
 			    //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);//send to eternet tsec ARP broadcast		   
 			    p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
-		   
 		   }
+	  	 if(dir1_mac_priznak_kys==0x22)
+	  	  {
+	  		 //packet kommutacii po mac address
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_mac_da_addr); 
+	  	  }
+          
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+/*		 
 		   else
 		   {
 			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_ip_da_addr);
 			   //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);	 
 		   }
-	  	
+*/	  	
 	
 		 /*
 	  	 if(dir1_mac_priznak_kys==0x22)
@@ -1534,10 +1547,23 @@ void TDM2_dierction_read ()
 	 	  		 //send to eth2
 	 	  	     p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 	 	  	   }
+	 	  	 if(dir2_mac_priznak_kys==0x22)
+	 	  	   {
+	 	  		 //packet kommutacii po mac address
+	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_mac_da_addr); 
+	 	  	   }
+	
+	 	  	 
+	 	  	 
+	 	  	 
+/*
 	 	  	   else
 	 	  	   {
 	 	  		ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_ip_da_addr);
 	 	  	   }
+
+*/
+
 //#endif	 	  	   
 	 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
 	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);

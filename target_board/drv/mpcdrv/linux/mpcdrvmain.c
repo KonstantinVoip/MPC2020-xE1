@@ -558,14 +558,13 @@ unsigned int Hook_Func_ARP(uint hooknum,
 	if (skb->protocol == htons(ETH_P_ARP))
 	{
 		
-		//printk("ARP_OK\n\r");
-	    /*
+		printk("ARP_OK\n\r");
 		memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
         recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
         recieve_matrica_commutacii_packet.state=true;
         recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
-		*/
-		return NF_DROP;
+		
+		//return NF_DROP;
 	
 	
 	}
@@ -594,7 +593,7 @@ unsigned int Hook_Func(uint hooknum,
                   int (*okfn)(struct sk_buff *))
 {
 	
-	__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
+	//__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
     /* Указатель на структуру заголовка протокола eth в пакете */
 	struct ethhdr *eth;
     /* Указатель на структуру заголовка протокола ip в пакете */
@@ -709,7 +708,7 @@ unsigned int Hook_Func(uint hooknum,
 	    	  *больше если недостаточно одной сети*/	    	     	
 	    	 if(kys_service_channel_packet_pre_last_byte==input_mac_prelast_byte)
 	    	 {	
-	    	  //printk(">>INPUT_SERIVCE_CHANNEL_MAC<<\n\r");
+	    	   printk(">>INPUT_SERIVCE_CHANNEL_PACKET<<\n\r");
 	    	  //входной пакет SA :00-25-01-00-11-2D  (или MAC адрес нашего КY-S)
 	    	  //              DA :01-ff-ff-ff-22-xx  
 	    	  //в данном случае xx это номер ip подсети где находиться ставим в соответствие
@@ -1159,10 +1158,12 @@ static int tdm_recieve_thread_two(void *data)
 		        {
 		        	
 			    	
-			    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
-		        	// printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		        	// printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		        	// printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+			    	 printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
+		        	
+			    	 /*printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		        	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		        	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		        	 */
 		        	  
 			    	  TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 		        }
@@ -1177,7 +1178,7 @@ static int tdm_recieve_thread_two(void *data)
 				if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 				{
 					
-					//printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					 printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
@@ -1193,9 +1194,10 @@ static int tdm_recieve_thread_two(void *data)
 				     
 					 ///p2020_get_recieve_virttsec_packet_buf(in_buf_dir2,in_size_dir2,2);
 					 
-					 /*
+					 
 					 printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
-				     printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size_dir2);
+				     /*
+					 printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size_dir2);
 		        	 printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[0],in_buf_dir2[1],in_buf_dir2[2],in_buf_dir2[3],in_buf_dir2[4],in_buf_dir2[5]);
 		        	 printk("+FIFO_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[(in_size_dir2/2)-6],in_buf_dir2[(in_size_dir2/2)-5],in_buf_dir2[(in_size_dir2/2)-4],in_buf_dir2[(in_size_dir2/2)-3],in_buf_dir2[(in_size_dir2/2)-2],in_buf_dir2[(in_size_dir2/2)-1]);
 		        	 */
@@ -1262,10 +1264,10 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       //функция отправки в матрицу коммутации из ethernet	       
 			       //cpu_relax();
 //#if 0			     
-			     if(TDM0_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );*/TDM0_dierction_read();} 			 
-			     if(TDM1_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );*/TDM1_dierction_read();}
-				 if(TDM2_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );*/TDM2_dierction_read();}
-				 if(TDM3_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );*/TDM3_dierction_read();} 
+			     if(TDM0_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );TDM0_dierction_read();} 			 
+			     if(TDM1_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );TDM1_dierction_read();}
+				 if(TDM2_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );TDM2_dierction_read();}
+				 if(TDM3_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );TDM3_dierction_read();} 
 //#endif
 				 /*
 				 if(TDM4_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}

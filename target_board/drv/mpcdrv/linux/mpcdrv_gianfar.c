@@ -170,8 +170,8 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 //p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 
-//p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
-//p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
+p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 //Start GIANFAR DRIVER eth1.
 //int	(*ndo_init_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_init;
@@ -206,7 +206,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 
 	
 	// Set RCTRL to PROMISC mode
-	printk("++Enable Promis mode for eth2++\n\r");
+	printk("++Enable Promis mode for eth2+\n\r");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
@@ -246,13 +246,11 @@ Return Value:
 void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
 {
 	// printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
-	 printk("+++Revert_MAC+++\n\r");
+	   printk("+++Revert_MAC+++\n\r");
 	  //Подмена MAC заголовков для отправки обратно КY-S;
 	  memcpy(out_mac,dst,6);
 	  memcpy(out_mac+3,src,6);    
-      
-	
-	 // printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
+	  printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
 	  
 	  
 }
@@ -292,10 +290,11 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	  //put to buffer 
      transmit_tsec_packet.data  = in_buf;
 	 transmit_tsec_packet.length= in_size;
-	 
-	 //Send Packet to ethernet eTSEC2
+	       
+	 //Send Packet to ethernet eTSEC1
 	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec1_dev);
-	 
+	 //Send Packet to ethernet eTSEC2
+	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
 	//printk("OK\n\r");
 	
 	
