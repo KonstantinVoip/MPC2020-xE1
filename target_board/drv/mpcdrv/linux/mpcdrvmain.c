@@ -107,9 +107,8 @@ GENERAL NOTES
 #include <linux/if_packet.h>
 
 #include <linux/icmp.h>
+#include <linux/if_arp.h>
 
-
-//
 #include <linux/etherdevice.h>
 
 #include <linux/netfilter.h>
@@ -131,7 +130,14 @@ GENERAL NOTES
 
 
 /******************************IP and UDP DEFINE****************************/
- //
+
+//Protocol value on IANA
+//http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+//IP Protocol value
+#define ICMP    0x1
+#define IPv4    0x4
+#define TCP     0x6
+
 #define IPv4_HEADER_LENGTH         20    //20 bait
 #define UDP_HEADER_LENGTH          8     //8 bait
  
@@ -555,17 +561,40 @@ unsigned int Hook_Func_ARP(uint hooknum,
                   int (*okfn)(struct sk_buff *))
 
 {
-	if (skb->protocol == htons(ETH_P_ARP))
+
+struct arphdr *arp;	
+arp=(struct  arphdr *)skb_network_header(skb);
+  
+    if (skb->protocol == htons(ETH_P_ARP))
 	{
 		
-		printk("ARP_OK\n\r");
-		memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
-        recieve_matrica_commutacii_packet.state=true;
-        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
-		
-		//return NF_DROP;
-	
+    	//printk("ARP_OK\n\r");
+    	
+    	/*Отдельная обработка ARP Request Широковещательный пакет потом разберусь как и что
+		 *          SA           |        DA
+		 *       host_MAC        |  ff:ff:ff:ff:ff:ff  (broadcast)   
+		 */
+	    //ARP Broadcast Request ne nado naverno v matricy commutacii
+	    if(arp->ar_op==0x0001)
+	    {
+	    	
+	    	//printk("ARP_broadcast_request_protocol\n\r");
+		    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	        recieve_matrica_commutacii_packet.state=true;
+	        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
+	    	return NF_ACCEPT;
+	        
+	    }
+	    else
+	    {
+	    
+		    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	        recieve_matrica_commutacii_packet.state=true;
+	        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
+	        return NF_ACCEPT;
+	    }   
 	
 	}
 	
@@ -653,19 +682,20 @@ unsigned int Hook_Func(uint hooknum,
 	 if (skb->protocol ==htons(ETH_P_IP))
 	 {
 
+		  
+		 /* 3уровень ICMP protocol*/	
+	     //Обработка ICMP протокол  IANA protocol version's
+		 if(ip->protocol==ICMP)
+		 {
+		   //printk("+ping ICMP protocol+\n\r"); 
+		   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	       recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	       recieve_matrica_commutacii_packet.state=true;
+	       //IP Destination Address
+	       recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+	       return NF_DROP;	 
+		 }
 		 
-		  //printk("protokol =%d\n\r",icmp->type);	
-	    /*
-		  if(icmp->type==(69))
-	      {  
-	      memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-          recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
-          recieve_matrica_commutacii_packet.state=true;
-          recieve_matrica_commutacii_packet.priznak_kommutacii=69;
-	      return NF_DROP;
-	      }
-	    */
-	 
 		     /*Принял от КУ-S Информационный пакет который сожержит
 	          *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	    	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
@@ -689,10 +719,12 @@ unsigned int Hook_Func(uint hooknum,
 	    	 	  g_my_kys_ip_addres=(UINT8)ip->saddr;
 	    		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
 	    		  
+	    		  /*
 	    	 	  printk("\n\r");
 	    	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
 	    	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
-	    	      //Заворачиваю назад с подменой MAC адреса
+	    	      */
+	    	 	  //Заворачиваю назад с подменой MAC адреса
 	    	 	  p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
 	    	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
 	    	 	  
@@ -737,34 +769,6 @@ unsigned int Hook_Func(uint hooknum,
 	 }
 return NF_ACCEPT;	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1351,15 +1355,9 @@ int mpc_init_module(void)
          nf_register_hook(&arp_bundle);
          ////////////////////////////////////////////////
 //#endif         
-         
-         
-         
-         
-         
-         
          //Initialization Functions Structure 
          //recieve_tsec_packet.state=0;
-        // memset(&my_current_kos,0x0000,sizeof(my_current_kos));
+         //memset(&my_current_kos,0x0000,sizeof(my_current_kos));
           
          
          memset(&recieve_matrica_commutacii_packet, 0x0000, sizeof(recieve_matrica_commutacii_packet));

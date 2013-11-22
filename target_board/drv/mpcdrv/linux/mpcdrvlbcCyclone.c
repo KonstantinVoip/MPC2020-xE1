@@ -1239,21 +1239,19 @@ void TDM0_dierction_read ()
   //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
-  ostatok_of_size_packet =(dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
+  ostatok_of_size_packet =(dannie1200)%2;
   if(ostatok_of_size_packet==1)
   {
-	  printk("???Tdm_Dir0_read->>????bad_in_packet_size=%d?????\n\r",dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-          
+	  printk("nechet_packet_direction0_size=%d\n\r",dannie1200);
   }
-  else
-  {	  
+  	  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
 	  {
 	  //mdelay(5);   
       out_buf[i]= plis_read16 (DIR0_PLIS_READ_ADDR400);
       i++;           
-      }while(i<packet_size_hex/*+PATCHlbc_ONE_ITERATION_READ*//*+PATCH_READ_PACKET_SIZE_ADD_ONE*/);
+      }while(i<packet_size_hex);
 
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
@@ -1277,24 +1275,34 @@ void TDM0_dierction_read ()
 	 //priznak ARP 0x806
 	 dir0_priznak_arp_packet =out_buf[6];
 	 
-	 
-	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
 	  // printk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
 	 
-	 
-	   
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
+	   //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
 	   if(dir0_priznak_arp_packet==0x0806)
 	   {
-	 		 //ARP packet for matrica
-	 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
-		 //send to tsec2
+	 	  //ARP packet for matrica
+	 	  //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806); 
+		     //send to tsec2
 		  p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   }
-
+	   //priznak packeta KY-S 
+	   if(dir0_mac_priznak_kys==0x22)
+	   {
+	      //packet kommutacii po mac address
+		  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr); 
+	   }
+	   //packeti commutiruemie po IP header
+	   else
+	   {
+	     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(UINT8)dir0_ip_da_addr); 
+	   }
+	   
+	   
+	   
+	   
 #if 0	 
 	   else
 	   {
@@ -1304,33 +1312,10 @@ void TDM0_dierction_read ()
 #endif  
 	 
 	 
-	 
-	 
-//#if 0 
-	 //priznak packeta KY-S 
-	 if(dir0_mac_priznak_kys==0x22)
-	 {
-		 //packet kommutacii po mac address
-		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr); 
-	 }
-	 
-
-#if 0	 
-	 else
-	 {
-		 //packet kommutacii pi ip grisha graf
-		 ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,dir0_ip_da_addr);
-	 }
-#endif 
-	 
-//#endif
-	 
-	 
+	
 	 #ifdef TDM0_DIR_TEST_ETHERNET_SEND
      p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/);//send to eternet
 	 #endif  
-  }
- 
   tdm0_read_iteration++; 
 }
 
@@ -1368,17 +1353,15 @@ void TDM1_dierction_read ()
 	  
 	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202);
 	  packet_size_hex=dannie1202/2; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir1_read->>ITERATION=%d|1202in_byte=%d|1202in_hex=%d|size=%d|+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  //printk("+Tdm_Dir1_read->>ITERATION=%d|1202in_byte=%d|1202in_hex=%d|size=%d|+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	    
 	    //Проверка что получили целый размер иначе хлам
-	    ostatok_of_size_packet =(dannie1202/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
+	    ostatok_of_size_packet =(dannie1202)%2;
 	    if(ostatok_of_size_packet==1)
 	    {
-	  	  printk("???Tdm_Dir1_read->>????bad_in_packet_size=%d?????\n\r",dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-	            
+	    	printk("nechet_packet_direction1 size=%d\n\r",dannie1202);	            
 	    }
-	    else
-	    {	  
+	    	  
 	  	    //16 bit  or 2 bait Local bus iteration
 	  	    do
 	  	    {
@@ -1412,53 +1395,26 @@ void TDM1_dierction_read ()
 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
 		 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
 		 if(dir1_priznak_arp_packet==0x0806)
-		   {
+		 {
 		 		 //ARP packet for matrica
-		 		//ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
-			    //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);//send to eternet tsec ARP broadcast		   
-			    p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
-		   }
-	  	 if(dir1_mac_priznak_kys==0x22)
-	  	  {
-	  		 //packet kommutacii po mac address
-	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_mac_da_addr); 
-	  	  }
-          
-		 
-		 
-		 
-		 
-		 
-		 
-		 
-/*		 
-		   else
-		   {
-			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_ip_da_addr);
-			   //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202);	 
-		   }
-*/	  	
-	
-		 /*
-	  	 if(dir1_mac_priznak_kys==0x22)
+		 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
+			     p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
+		 }
+	  	 //priznak ky-s
+		 if(dir1_mac_priznak_kys==0x22)
 	  	 {
 	  		 //packet kommutacii po mac address
 	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_mac_da_addr); 
 	  	 }
 	  	 else
 	  	 {
-	  		 //packet kommutacii pi ip grisha graf
-	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_ip_da_addr);
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(UINT8)dir1_ip_da_addr); 
 	  	 }
-	  	 */ 
-	  	 
+		 
 	  	 #ifdef TDM1_DIR_TEST_ETHERNET_SEND
 	       //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 	  	 #endif  
-	  }
-	
 	  tdm1_read_iteration++; 
-	
 }
 
 
@@ -1486,26 +1442,25 @@ void TDM2_dierction_read ()
 	  UINT8   dir2_mac_da_addr   = 0;
 	  //Priznak Sevi Packet 22-ff _predposlednii bait.
 	  UINT8   dir2_mac_priznak_kys = 0; 
-	 
 	  //
 	  UINT16  dir2_priznak_arp_packet=0;
 	  
 	  
 	  memset(&out_buf2, 0x0000, sizeof(out_buf2));
-	 	  
+	  	  
 	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204 );
 	  packet_size_hex=dannie1204/2; //convert byte to element of massive in hex 
 	//  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 	 	    //Проверка что получили целый размер иначе хлам
-	 	    ostatok_of_size_packet =(dannie1204/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/)%2;
+	 	    ostatok_of_size_packet =(dannie1204)%2;
 	 	    if(ostatok_of_size_packet==1)
 	 	    {
-	 	  	  printk("???Tdm_Dir2_read->>????bad_in_packet_size=%d?????\n\r",dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	 	  	  //printk("???Tdm_Dir2_read->>????bad_in_packet_size=%d?????\n\r",dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	            
 	 	    }
-	 	    else
-	 	    {	  
+	 	  //  else
+	 	   // {	  
 	 	  	  //16 bit  or 2 bait Local bus iteration
 	 	  	  do
 	 	  	  {
@@ -1534,60 +1489,30 @@ void TDM2_dierction_read ()
 	 	  	 dir2_mac_priznak_kys = out_buf2[2]>>8;
 	 	  	 ///Arp priznak
 	 	  	 dir2_priznak_arp_packet =out_buf2[6];
-	 	
-	 	  	 
-	 	  	//p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);
-	 	  	 
-	 	  	 
-//#if 0 	  	 
+	 		 
+  	 
 	 	  	 if(dir2_priznak_arp_packet==0x0806)
 	 	  	   {
 	 	  	     //ARP packet for matrica
-	 	  	     //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200/*+PATCH_READ_PACKET_SIZE_ADD_ONE*/,0x0806); 
+	 	  	     //ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,0x0806); 
 	 	  		 //send to eth2
 	 	  	     p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 	 	  	   }
-	 	  	 if(dir2_mac_priznak_kys==0x22)
+	 	  	   if(dir2_mac_priznak_kys==0x22)
 	 	  	   {
 	 	  		 //packet kommutacii po mac address
 	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_mac_da_addr); 
 	 	  	   }
-	
-	 	  	 
-	 	  	 
-	 	  	 
-/*
 	 	  	   else
 	 	  	   {
-	 	  		ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_ip_da_addr);
-	 	  	   }
-
-*/
-
+	 	  		ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(UINT8)dir2_ip_da_addr); 
+	 	  	   }	  	   
 //#endif	 	  	   
-	 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
-	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-	 	  	 
-	 	  	 
-	 	  	 
-	 /*	  	 
-	 	  	 if(dir2_mac_priznak_kys==0x22)
-	 	  	 {
-	 	  		 //packet kommutacii po mac address
-	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE,dir2_mac_da_addr); 
-	 	  	 }
-	 	  	 else
-	 	  	 {
-	 	  		 //packet kommutacii pi ip grisha graf
-	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE,dir2_ip_da_addr);
-	 	  	 }
-	 */	  	  
-	 	  	 
+	    	 
 	 	  	 #ifdef TDM2_DIR_TEST_ETHERNET_SEND
 	 	       //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE);//send to eternet
 	 	  	 #endif  
-	 	  }
-	  
+	 
 	  tdm2_read_iteration++; 
 
 }
