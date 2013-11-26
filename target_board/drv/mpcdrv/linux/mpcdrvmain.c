@@ -159,6 +159,7 @@ GENERAL NOTES
 ///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
 #define MY_KYS_IPADDR        0xC0A8829D             //192.168.130.157
 
+#define GRISHA        0xC0A878AA  
 
 
 static __be32  my_kys_ip_addr    =0;
@@ -583,7 +584,7 @@ arp=(struct  arphdr *)skb_network_header(skb);
 	    if(arp->ar_op==0x0001)
 	    {
 	    	
-	    	//printk("ARP_broadcast_request_protocol\n\r");
+	    	printk("ARP_broadcast_request_protocol\n\r");
 		 
 	    	memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
@@ -595,7 +596,7 @@ arp=(struct  arphdr *)skb_network_header(skb);
 	    }
 	    else
 	    {
-	        
+	    	printk("ARP_reply_protocol\n\r");
 		    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	        recieve_matrica_commutacii_packet.state=true;
@@ -670,6 +671,19 @@ unsigned int Hook_Func(uint hooknum,
      *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
 	
+	 if ((uint)ip->daddr==GRISHA)
+	 {     
+		  printk("++++\n\r");
+	 }
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
@@ -743,7 +757,7 @@ unsigned int Hook_Func(uint hooknum,
 		 if(ip->protocol==ICMP)
 		 { 
 		   
-		   //printk("+ping ICMP protocol =type =0x%x\n\r",icmp->code); 
+		   printk("+ping ICMP protocol =type =0x%x\n\r",icmp->code); 
 		   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	       recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	       recieve_matrica_commutacii_packet.state=true;
@@ -754,19 +768,20 @@ unsigned int Hook_Func(uint hooknum,
 		 
 		 
 		 //Протокл UDP
-		 /*
+		 
 		 if(ip->protocol==UDP)
 		 {	 
 		   
-		   //printk("+callback_UDP_net_filter_functions+\n\r");	 
-			 
+		   
+		   printk("+UDP_GRISH_PACKET|SA_IP  =0x%x\n\r",ip->daddr);
 		   memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 		   recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 		   recieve_matrica_commutacii_packet.state=true;
 		   //IP Destination Address
 		   recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+		
 		   return NF_DROP;	
-		 }*/
+		 }
 		  
     	 /*Пакет от Гришы со структурой графа расположен алогоритм дейкстры
     	  *строю граф для моего МПС на основании котрого будет дальнейшая маршрутизация 
@@ -774,8 +789,8 @@ unsigned int Hook_Func(uint hooknum,
     	  *кратчайших расстояний пакет заканчиваеться на*/
     	 //result_comparsion=strcmp(kys_deicstra_mps_packet_da_mac,buf_mac_dst);
     	 
-		 //if(input_mac_last_word==kys_deicstra_packet_mac_last_word)
-    	 //{ 
+		 if(input_mac_last_word==kys_deicstra_packet_mac_last_word)
+    	 { 
     		 //1. Функция построения графа и поиска оптимального пути.
     		 //printk("+INPUT_PACKET_MY_MPC_STROI_GRAF-\n\r");
     		 if ((uint)ip->daddr==g_my_kys_ip_addres)
@@ -809,7 +824,7 @@ unsigned int Hook_Func(uint hooknum,
     			 return NF_DROP;
     			 //put();
     		 }
-    	 //} _end Seva MAC adress analize;
+    	 } //_end Seva MAC adress analize;
 		 
 	
 		      /*Пакет предназначенный для отправки в служебный канал пакет с данными от Севы фишка в следующем
@@ -1341,8 +1356,9 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       {
 			    	     //printk("matrica|packet\n\r");
 			    	    
-			    	     ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii); 
-			    	     //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+			    	    // ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii); 
+			    	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
+			    	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
 			    	     recieve_matrica_commutacii_packet.state=0;	   
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
