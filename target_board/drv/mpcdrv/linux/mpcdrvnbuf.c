@@ -773,7 +773,7 @@ u16 status=0;
 u16 static set_iteration_dir0=0;  
 unsigned long flags;
     
-     printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
+     //printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
      //set packet size to fifo buffer
      
      spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);

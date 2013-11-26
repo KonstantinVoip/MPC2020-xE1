@@ -242,8 +242,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		    //Send ARP ZAPROS vo vse Napravlenia po logike veschei.
    		    //4 napravlenia only 4 MPC
    		    nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   		    nbuf_set_datapacket_dir1  (in_buf ,in_size);  
-   	   	    nbuf_set_datapacket_dir2  (in_buf ,in_size);
+   		    //nbuf_set_datapacket_dir1  (in_buf ,in_size);  
+   	   	    //nbuf_set_datapacket_dir2  (in_buf ,in_size);
    		    //nbuf_set_datapacket_dir3  (in_buf ,in_size);
    		    return ;
    	     }
@@ -286,7 +286,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       if(priznak_kommutacii==sosed1_kys_ipaddr)
       {
         //send to direction0 sosed KY-S
-    	printk("Send to IP sosed 192.168.130.156 direction 0\n\r");
+    	//printk("Send to IP sosed 192.168.130.156 direction 0\n\r");
     	nbuf_set_datapacket_dir0  (in_buf ,in_size);	
         return;
       } 
@@ -295,7 +295,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       if(priznak_kommutacii==sosed2_kys_ipaddr)
       {
         //send to direction0 sosed KY-S
-    	printk("Send to IP sosed 192.168.130.157 direction 0\n\r");
+    	//printk("Send to IP sosed 192.168.130.157 direction 0\n\r");
     	nbuf_set_datapacket_dir1  (in_buf ,in_size);	
         return;
       } 
@@ -303,7 +303,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
      if(priznak_kommutacii==sosed3_kys_ipaddr)
      {
         //send to direction0 sosed KY-S  Andreu Efremov KY-S
-    	printk("Send to IP sosed 10.2.120.80 direction 0\n\r");
+    	//printk("Send to IP sosed 10.2.120.80 direction 0\n\r");
     	nbuf_set_datapacket_dir2  (in_buf ,in_size);	
         return;
       } 
@@ -311,7 +311,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     
       else
       {
-      printk("Warning no_ngraf_priznak_kommutacii=0x%x\n\r",priznak_kommutacii);
+      //printk("Warning no_ngraf_priznak_kommutacii=0x%x\n\r",priznak_kommutacii);
       return;	
       }
     
@@ -611,14 +611,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		printk("setevie_elementi_ip_packet=0x%x\n\r",setevoi_element[i].my_setevoi_element_ip); 
 	 }*/
 	 
-	 
+	 Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 
    //Пока в качестве заглушки используем Алгоритм для поиска пакета с удалённым IP_мультиплексора который не
    //входит в число соседей моего корневого.
    //+нужно изъять паралельные связи которые не ведут нас к удалённому мултиплексору(пока оставлю это)
-	 
-	 
-	 
   //Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 // 
 #if 0	
@@ -656,6 +653,10 @@ static void Algoritm_puti_udalennogo_ip_and_chisla_hop()
 
   
   
+	
+	
+	
+	
 }
 
 

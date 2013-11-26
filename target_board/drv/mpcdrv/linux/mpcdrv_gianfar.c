@@ -206,6 +206,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 
 	
 	// Set RCTRL to PROMISC mode
+
 	printk("++Enable Promis mode for eth2+\n\r");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
@@ -232,7 +233,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	gfar_write(&regs->gaddr5, 0xffffffff);
 	gfar_write(&regs->gaddr6, 0xffffffff);
 	gfar_write(&regs->gaddr7, 0xffffffff);
-  */
+ */ 
 	
 }
 

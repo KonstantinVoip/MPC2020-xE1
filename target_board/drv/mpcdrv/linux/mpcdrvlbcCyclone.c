@@ -1236,7 +1236,7 @@ void TDM0_dierction_read ()
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
   packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
-  //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
   ostatok_of_size_packet =(dannie1200)%2;
@@ -1354,7 +1354,8 @@ void TDM1_dierction_read ()
 	  dannie1202 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1202);
 	  packet_size_hex=dannie1202/2; //convert byte to element of massive in hex 
 	  //printk("+Tdm_Dir1_read->>ITERATION=%d|1202in_byte=%d|1202in_hex=%d|size=%d|+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex,dannie1202+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-	    
+	  printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);  
+	  
 	    //Проверка что получили целый размер иначе хлам
 	    ostatok_of_size_packet =(dannie1202)%2;
 	    if(ostatok_of_size_packet==1)
@@ -1450,7 +1451,7 @@ void TDM2_dierction_read ()
 	  	  
 	  dannie1204 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1204 );
 	  packet_size_hex=dannie1204/2; //convert byte to element of massive in hex 
-	//  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 	 	    //Проверка что получили целый размер иначе хлам
 	 	    ostatok_of_size_packet =(dannie1204)%2;
