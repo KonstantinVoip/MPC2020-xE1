@@ -739,8 +739,8 @@ unsigned int Hook_Func(uint hooknum,
 	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
 	      */
 	 	  //Заворачиваю назад с подменой MAC адреса
-	 	  p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
-	      p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
+	 	 // p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
+	      //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
 	 	  
 	      //Сообщаю состояние что принял инофрмационный пакета передаю в матрицу коммутации эту информацию
 	      //чтобы дальше с ней работать.
@@ -752,12 +752,12 @@ unsigned int Hook_Func(uint hooknum,
 	
 	   /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
 	     *например 341 или что-то подобное 111*/    		
-        /* if(((uint)skb->mac_len+(uint)skb->len)%2==1)
+        if(((uint)skb->mac_len+(uint)skb->len)%2==1)
           { 
 	       printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
 		  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
            return NF_ACCEPT; 
-          }*/
+          }
 	
 	  
 	      /* 
@@ -902,7 +902,7 @@ unsigned int Hook_Func(uint hooknum,
 	      } //kys_service_channel_packet_pre_last_byte==input_mac_prelast_byte
 	   
       #endif 	 
-	   return NF_ACCEPT;   	   	 
+	  return NF_ACCEPT;   	   	 
 	 }
 return NF_ACCEPT;	
 }
@@ -1299,7 +1299,7 @@ static int tdm_recieve_thread_two(void *data)
 		        {
 		        	
 			    	
-			    	 //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
+			    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
 		        	
 			    	 /*printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);

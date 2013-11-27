@@ -1256,10 +1256,10 @@ void TDM0_dierction_read ()
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
-#ifdef  TDM_DIR_0_READ_DEBUG	  
+//#ifdef  TDM_DIR_0_READ_DEBUG	  
 	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
 	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-#endif	  
+//#endif	  
 	  
 	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
 	  //Пока сделано очень шрубо потом доработаю.
@@ -1277,15 +1277,25 @@ void TDM0_dierction_read ()
 	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
-	  // printk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
+	  // rintk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
+	 //broadcast frame arp request
 	 
+	 
+	   if(dir0_mac_da_addr==0xff)
+	   {
+		 
+		 //  printk ("tdmo broadcast\n\r");
+		  //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0xffff);  
+		   p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,1);
+	   }
+	
 	   //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
 	   if(dir0_priznak_arp_packet==0x0806)
 	   {
 	 	  //ARP packet for matrica
-	 	  //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806); 
+	 	  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806); 
 		     //send to tsec2
-		  p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
+		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   }
 	   //priznak packeta KY-S 
@@ -1297,7 +1307,8 @@ void TDM0_dierction_read ()
 	   //packeti commutiruemie po IP header
 	   else
 	   {
-	     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(UINT8)dir0_ip_da_addr); 
+	       printk("else\n\r");
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr); 
 	   }
 	   
 	   
