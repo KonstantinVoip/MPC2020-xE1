@@ -258,8 +258,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		    //nbuf_set_datapacket_dir3  (in_buf ,in_size);
    		   
    		   //Poka net Razbora gde visit KOS na pervom vyhode
-   		    // p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
-   		    // p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   		    p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   		    p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
    		    
    		    return ;
    	     }
