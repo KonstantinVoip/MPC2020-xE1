@@ -155,7 +155,8 @@ GENERAL NOTES
 
 
 #define P2020_MPCRDB_KIT      1
-
+#define PRIZNAK_ETHERNET      00
+#define PRIZNAK_TDM           11
 
 ///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
 //#define MY_KYS_IPADDR        0xC0A8829D             //192.168.130.157
@@ -283,7 +284,7 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
 extern bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u8 otkuda_paket_tsec_tdm);
 /*устанавливаем MAC моего KY-S */
 extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 
@@ -337,6 +338,7 @@ static struct ethdata_packet
 	u16 data[759] ;
 	u16 length;
     u16 state;
+    u8  priznak_otkuda_packet_tdm_or_eth;
     u32 priznak_kommutacii;
 };
 static struct ethdata_packet  recieve_mygraf_packet,recieve_matrica_commutacii_packet,recieve_tsec_packet;
@@ -602,8 +604,8 @@ arp=(struct  arphdr *)skb_network_header(skb);
  {	
 	 //printk(">>>last8_preword =0x%04x<<|\n\r",input_mac_sa_addr[1]);
 
-    if (skb->protocol == htons(ETH_P_ARP))
-	{
+   // if (skb->protocol == htons(ETH_P_ARP))
+	//{
     	//printk("ARP_OK\n\r");
     	/*Отдельная обработка ARP Request Широковещательный пакет потом разберусь как и что
 		 *          SA           |        DA
@@ -640,11 +642,13 @@ arp=(struct  arphdr *)skb_network_header(skb);
 	        //recieve_matrica_commutacii_packet.state=true;
 	        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
 	        recieve_matrica_commutacii_packet.state=true;
+	        recieve_matrica_commutacii_packet.priznak_otkuda_packet_tdm_or_eth=PRIZNAK_ETHERNET;
+	        
 	        //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
 	        return NF_DROP;
 	    }   
 	
-	}//end ETH protocol ETP_P_ARP
+	//}//end ETH protocol ETP_P_ARP
 
  }    
     
@@ -750,14 +754,14 @@ unsigned int Hook_Func(uint hooknum,
 	 }
 	
 	
-	   /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
-	     *например 341 или что-то подобное 111*/    		
-        if(((uint)skb->mac_len+(uint)skb->len)%2==1)
-          { 
-	       printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
-		  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-           return NF_ACCEPT; 
-          }
+	 /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
+	  *например 341 или что-то подобное 111*/    		
+     if(((uint)skb->mac_len+(uint)skb->len)%2==1)
+     { 
+	  printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
+	  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+      return NF_ACCEPT; 
+     }
 	
 	  
 	      /* 
@@ -770,14 +774,14 @@ unsigned int Hook_Func(uint hooknum,
           */
 
 	  //2 уровень пришёл Ethernet пакет 0x800
-	 if (skb->protocol ==htons(ETH_P_IP))
-	 {
+	 // if (skb->protocol ==htons(ETH_P_IP))
+	 //{
 
 		 /*Самое первое \то информационный пакет*/
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
 	  	
-		// if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
-		// { 
+		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+		 { 
 		 
 	
 			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
@@ -786,8 +790,8 @@ unsigned int Hook_Func(uint hooknum,
              recieve_matrica_commutacii_packet.state=true;
              //IP Destination Address
              recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
-			 
-             
+			 return NF_DROP; 
+		 }     
              
              
              
@@ -902,8 +906,8 @@ unsigned int Hook_Func(uint hooknum,
 	      } //kys_service_channel_packet_pre_last_byte==input_mac_prelast_byte
 	   
       #endif 	 
-	  return NF_ACCEPT;   	   	 
-	 }
+	 // return NF_ACCEPT;   	   	 
+	// }
 return NF_ACCEPT;	
 }
 
@@ -1401,7 +1405,7 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       {
 			    	     //printk("matrica|packet\n\r");
 			    	    
-			    	       ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii); 
+			    	       ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii,recieve_matrica_commutacii_packet.priznak_otkuda_packet_tdm_or_eth); 
 			    	       
 			    	    // p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
 			    	    // p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);

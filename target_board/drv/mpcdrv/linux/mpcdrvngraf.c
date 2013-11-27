@@ -240,7 +240,7 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii)
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u8 otkuda_paket_tsec_tdm)
 {
    UINT16  out_mac[12];
    UINT16  mac1[3];
@@ -278,16 +278,34 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    if(priznak_kommutacii==0x0806)
    {
    		
-	    //Берём MAC DA
+	   //Откуда пришёл REPLY?
+	   
+	   //Шлюзовой ?отправляем на выход etsec2 
+	   //Если из ethernet отпрявляем в TDM
+	   
+
+	    //ARP Reply zapros
+	    //Берём MAC DA destination address
 	    memcpy(mac1,in_buf,6);
-	    //printk("reply_mac_da_|0x%02x|0x%02x|0x%02x\n\r",mac1[0],mac1[1],mac1[2]);   
+	    //Берём MAC SA source address
 	    
-	    //DEST MAC address 
-	      //Берём MAC SA address от НМС3 идёт фреём
-	       //для шлюзового мы висим на 2 ethernet порту
+	   //SA MAC input packet    //00-25-01-00-1F-05
+	    memcpy(mac2,&in_buf[3],6);
+	       //printk("podmena_mac_src_|0x%04x|0x%04x|0x%04x\n\r",mac1[0],mac1[1],mac1[2]);
+	    
+ 	    /*
+	     if(mac2[2]==my_current_kos.mac_address[5])
+	     {
+	       	
+	    	 
+	     }*/
+	      
+	    
+	      //ARP REPLY идёт к НМС3 MAC DA 
 	      if(mac1[2]==nms3_mac)
 	       {
 	    	   
+	    	 
 	    	  //printk("Send arp reply ->>eth2|diro\n\r"); 
 	    	  nbuf_set_datapacket_dir0  (in_buf ,in_size);
 	    	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast

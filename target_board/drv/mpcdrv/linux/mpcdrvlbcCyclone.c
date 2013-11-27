@@ -127,7 +127,7 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 
 //extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направитъ*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii);
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u8 otkuda_paket_tsec_tdm);
 
 
 //extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
@@ -1293,7 +1293,7 @@ void TDM0_dierction_read ()
 	   if(dir0_priznak_arp_packet==0x0806)
 	   {
 	 	  //ARP packet for matrica
-	 	  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806); 
+	 	  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806,0x11); 
 		     //send to tsec2
 		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
@@ -1302,13 +1302,13 @@ void TDM0_dierction_read ()
 	   if(dir0_mac_priznak_kys==0x22)
 	   {
 	      //packet kommutacii po mac address
-		  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr); 
+		  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr,0x11); 
 	   }
 	   //packeti commutiruemie po IP header
 	   else
 	   {
 	       printk("else\n\r");
-		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr); 
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr,0x11); 
 	   }
 	   
 	   
@@ -1416,11 +1416,11 @@ void TDM1_dierction_read ()
 		 if(dir1_mac_priznak_kys==0x22)
 	  	 {
 	  		 //packet kommutacii po mac address
-	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_mac_da_addr); 
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_mac_da_addr,0x11); 
 	  	 }
 	  	 else
 	  	 {
-	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(UINT8)dir1_ip_da_addr); 
+	  		 ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(UINT8)dir1_ip_da_addr,0x11); 
 	  	 }
 		 
 	  	 #ifdef TDM1_DIR_TEST_ETHERNET_SEND
@@ -1513,11 +1513,11 @@ void TDM2_dierction_read ()
 	 	  	   if(dir2_mac_priznak_kys==0x22)
 	 	  	   {
 	 	  		 //packet kommutacii po mac address
-	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_mac_da_addr); 
+	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_mac_da_addr,0x11); 
 	 	  	   }
 	 	  	   else
 	 	  	   {
-	 	  		ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(UINT8)dir2_ip_da_addr); 
+	 	  		ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(UINT8)dir2_ip_da_addr,0x11); 
 	 	  	   }	  	   
 //#endif	 	  	   
 	    	 
@@ -1604,12 +1604,12 @@ void TDM3_dierction_read  ()
 	  	 	  	 if(dir3_mac_priznak_kys==0x22)
 	  	 	  	 {
 	  	 	  		 //packet kommutacii po mac address
-	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_mac_da_addr); 
+	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_mac_da_addr,0x11); 
 	  	 	  	 }
 	  	 	  	 else
 	  	 	  	 {
 	  	 	  		 //packet kommutacii pi ip grisha graf
-	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_ip_da_addr);
+	  	 	  		 ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE,dir3_ip_da_addr,0x11);
 	  	 	  	 }
 	  	 	  	  
 	  	 	  	 
