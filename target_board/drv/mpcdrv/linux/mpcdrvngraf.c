@@ -138,12 +138,23 @@ extern void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
 
 //Static tablica sosedei on matrica commutacii dli ky-s
 //соседи KY-S
-                                  //192.168.130.156
+
+/*
+                                   //192.168.130.156
 static __be32  sosed1_kys_ipaddr = 0x9c;
                                   //192.168.130.157
 static __be32  sosed2_kys_ipaddr = 0x9d;
                                   //10.2.120.80
 static __be32  sosed3_kys_ipaddr = 0x50;
+*/
+
+//192.168.120.170  //Gateway
+static __be32  sosed1_kys_ipaddr = 0xAA;
+//192.168.120.171 //sosed
+static __be32  sosed2_kys_ipaddr = 0xAB;
+//192.168.120.172 //sosed
+static __be32  sosed3_kys_ipaddr = 0xAC;
+
 
 
 
@@ -245,6 +256,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		    //nbuf_set_datapacket_dir1  (in_buf ,in_size);  
    	   	    //nbuf_set_datapacket_dir2  (in_buf ,in_size);
    		    //nbuf_set_datapacket_dir3  (in_buf ,in_size);
+   		   
+   		   //Poka net Razbora gde visit KOS na pervom vyhode
+   		    // p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   		    // p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   		    
    		    return ;
    	     }
   
