@@ -18,7 +18,7 @@
 * $Source: 
 * $State: Debug$
 * $Revision: 0.0.1 $ $Name: $
-* $Date: 2012/09/21 10:40:51 $
+* $Date: 2012/09/21 10:40:51 $recieve_matrica_commutacii_packet.state=true;
 * $Locker: $
 *
 * Module's revision history:
@@ -633,12 +633,13 @@ input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 	    }
 	    else
 	    {   
-	    	printk("ARP_reply_SA_MAC=0x%04\n\r",input_mac_sa_addr[1]);
+	    	printk("ARP_reply_SA_MAC=0x%04x\n\r",input_mac_sa_addr[1]);
 		    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
-	        recieve_matrica_commutacii_packet.state=true;
+	        //recieve_matrica_commutacii_packet.state=true;
 	        recieve_matrica_commutacii_packet.priznak_kommutacii=ETH_P_ARP;
-	        
+	        p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+	        recieve_matrica_commutacii_packet.state=true;
 	        return NF_ACCEPT;
 	    }   
 	
@@ -1393,10 +1394,10 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       {
 			    	     //printk("matrica|packet\n\r");
 			    	    
-			    	      ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii); 
+			    	      //ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii); 
 			    	    
-			    	    // p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
-			    	    // p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+			    	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
+			    	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
 			    	     recieve_matrica_commutacii_packet.state=0;	   
 			       }
 			       //функция отправки в матрицу коммутации из ethernet	       
