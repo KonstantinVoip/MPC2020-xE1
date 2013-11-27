@@ -615,8 +615,7 @@ input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 	   	    //Broadcast ARP ot GRISHI ili dobavlu ot moego KY-S potom dobavlu
             if(input_mac_sa_addr[1]==nms3_mac)
             {	
-		    	printk("ARP_broadcast_request_protocol\n\r");
-		    	printk(">>>last32_sa_=0x%04x<<|\n\r",input_mac_sa_addr[1]);
+		    	printk("ARP_broadcast_request_SA_MAC=0x%04x\n\r",input_mac_sa_addr[1]);
 		    	memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 		        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 		        recieve_matrica_commutacii_packet.state=true;
@@ -630,16 +629,11 @@ input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 	    		return NF_DROP;
 	    	
 	    	}
-	            	
-
-	      	
-	
-	        
+	            	    
 	    }
 	    else
-	    {
-	    	printk("ARP_reply_protocol\n\r");
-	    	printk(">>>last32_sa_=0x%04x<<|\n\r",input_mac_sa_addr[1]);
+	    {   
+	    	printk("ARP_reply_SA_MAC=0x%04\n\r",input_mac_sa_addr[1]);
 		    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	        recieve_matrica_commutacii_packet.state=true;
@@ -783,7 +777,15 @@ unsigned int Hook_Func(uint hooknum,
 		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 		 { 
 		 
-		   printk("GRISHACKET\n\r");
+	
+			 printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
+	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+             recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+             recieve_matrica_commutacii_packet.state=true;
+             //IP Destination Address
+             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+			 
+             #if 0 
 		 
 			 	 /* 3уровень ICMP protocol*/	
 			 	 //Обработка ICMP протокол  IANA protocol version's
@@ -816,6 +818,8 @@ unsigned int Hook_Func(uint hooknum,
 		        return NF_DROP;	
 		        }
 		  
+          #endif    
+		        
     	        /*Пакет от Гришы со структурой графа расположен алогоритм дейкстры
     	         *строю граф для моего МПС на основании котрого будет дальнейшая маршрутизация 
     	          *анализирую ip заголовок если совпадает с адресом моего КУ-S то строю граф
