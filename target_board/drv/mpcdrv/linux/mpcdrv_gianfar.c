@@ -460,7 +460,7 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 	    switch (ret) 
 		{
 		 case NETDEV_TX_OK:
-		 //printk("mpcdrv:->>>>>>>>>>>>>>>>>>>>NETDEV_Transmit_OK\n");
+		 printk("mpcdrv:->>>>>>>>>>>>>>>>>>>>NETDEV_Transmit_OK\n");
 		 break;
 	
 	

@@ -780,18 +780,18 @@ unsigned int Hook_Func(uint hooknum,
 		 /*Самое первое \то информационный пакет*/
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
 	  	
-		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
-		 { 
+		// if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+		// { 
 		 
 	
-			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
+			 printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
 	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
              recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
              recieve_matrica_commutacii_packet.state=true;
              //IP Destination Address
              recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
-			 return NF_DROP; 
-		 }     
+			 //return NF_DROP; 
+		 //}     
              
              
              

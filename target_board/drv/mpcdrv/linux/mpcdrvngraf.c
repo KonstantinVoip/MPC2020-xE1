@@ -246,7 +246,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  mac1[3];
    UINT16  mac2[3];
    UINT32  nms3_mac =0x5f4e;
-   u8 chluz =1;
+   u8 chluz =0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
    if(my_current_kos.state==0){return;}
   
@@ -370,11 +370,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    return ;
    }
   
-      //printk("++ngraf_priznak_kommutacii=0x%x++\n\r",priznak_kommutacii);
+   printk("++ngraf_priznak_kommutacii=0x%x++\n\r",(u8)priznak_kommutacii);
      
         //Пакет пришёл для моего адреса моего КY-S
         //в ethernet его
-   if(priznak_kommutacii==my_current_kos.ip_addres)
+   if((u8)priznak_kommutacii==(u8)my_current_kos.ip_addres)
      {
         /*********************/
        printk("Send to ->>KYS eth1 \n\r");
@@ -404,19 +404,29 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       return;
       }
  
- /*  
+  
       if(priznak_kommutacii== nms3_ip_addr)
       {
       // send to direction0 sosed KY-S  Andreu Efremov KY-S
-  	  //printk("Send to ->>>> NMS3 packet\n\r");
-  	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
-  	
+  	  printk("Send to ->>>> NMS3 packet\n\r");
+  	 // p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
+  	  nbuf_set_datapacket_dir0  (in_buf ,in_size);
   	//nbuf_set_datapacket_dir2  (in_buf ,in_size);	
       return;
       } 
-*/
    
    
+   /*
+      if(priznak_kommutacii==sosed2_kys_ipaddr)
+      {
+        //send to direction0 sosed KY-S
+    	printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
+    	nbuf_set_datapacket_dir0  (in_buf ,in_size);	
+        return;
+      } 
+   */
+      
+      
     
       if(priznak_kommutacii==sosed1_kys_ipaddr)
       {
