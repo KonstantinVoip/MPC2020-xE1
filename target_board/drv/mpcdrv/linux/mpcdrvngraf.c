@@ -240,18 +240,141 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u8 otkuda_paket_tsec_tdm)
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii)
 {
    UINT16  out_mac[12];
    UINT16  mac1[3];
    UINT16  mac2[3];
-   UINT32  nms3_mac =0x5f4e;
-   
+   static UINT16 iteration=0;
+   UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
-   u8 chluz =0;
+   
+   
+   
+   
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
    if(my_current_kos.state==0){return;}
+   
+    //printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
+  // printk("my_kos_ip_addr=0x%x\n\r",my_current_kos.ip_addres);
+   
+   
+   /////////////////////////////////////// ARP ZAPROSI///////////////////////////////////////////
+
+   if(priznak_kommutacii==0xFFFF)
+   {
+   
+	   //printk("Send broadcast arp to ->>eth1|dir0|dir1 \n\r");
+	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+	   nbuf_set_datapacket_dir0  (in_buf ,in_size);
+
+   }
+   
+   if(priznak_kommutacii==0x806)
+   {
+   
+	   
+	   //Если я шлюз то отправляю в eth2
+	   if(priznak_scluz==1)
+	   {	   
+	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
+	   }
+	   else  //если нет то отправлю в tdm direction
+	   {	   
+	   nbuf_set_datapacket_dir0  (in_buf ,in_size);     
+	   }
   
+   }
+   
+   //////////////////////////////////////END ARP _ZAPROSI///////////////////////////
+  
+   if(priznak_kommutacii==my_current_kos.ip_addres)
+     {
+         //send to direction0 sosed KY-S
+     	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
+         p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);	
+   
+     }
+   
+      
+   
+   
+   
+   
+   
+   //NMS3 IP address 192.168.120.76(4c)
+   if(priznak_kommutacii==0x4c)
+     {
+         //send to direction0 sosed KY-S
+     	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
+         
+	    if(priznak_scluz==1)
+	  	 {
+	     p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
+	  	 }
+	    else
+	    {
+	    	nbuf_set_datapacket_dir0  (in_buf ,in_size);
+	    	
+	    }
+	   
+	  	 
+	}
+   
+   
+   
+   
+   
+   //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
+   
+   iteration++;
+   
+   /*
+   
+   printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
+   iteration++;
+   
+   
+   if(priznak_kommutacii==0xFFFF)
+   {
+   
+	   printk("Send broadcast arp to ->>eth1|dir0|dir1 \n\r");
+	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
+   }
+   */
+   
+   /*
+   if(priznak_kommutacii==0xaa)
+     {
+       //send to direction0 sosed KY-S
+   	   printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
+       p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);	
+       return;
+     }
+   
+   if(priznak_kommutacii==0x4c)
+        {
+          //send to direction0 sosed KY-S
+      	   printk("Send to NMS2 192.168.120.76 direction 0\n\r");
+      	 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
+          return;
+        }
+    */
+   
+   
+   /*
+   if(priznak_kommutacii==0x806)
+   {
+       
+	   printk("Scluz Arp_reply form eht1->to nms 3  ->eth2\n\r");
+	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
+       
+   }
+   */
+   
+   
+#if 0  
    
    //Широковещетельный фрем ARP broadcast
    if(priznak_kommutacii==0xFFFF)
@@ -319,7 +442,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	   
 	 	}
 	 	   
-	   
+	        
 	       //если не шлюзовй то отправляем дальше в direction tdm0
 	       
      		 
@@ -335,7 +458,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    		   //Poka net Razbora gde visit KOS na pervom vyhode
    		    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
    		    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
-   		    
+  
+ 	
+	 	
    return ;
    }
   
@@ -515,7 +640,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
    
    
-   
+#endif 	   
    
    //Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
     //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet

@@ -1310,8 +1310,8 @@ void TDM0_dierction_read ()
 	   //packeti commutiruemie po IP header
 	   else
 	   {
-	       printk("paket po ip hesder\n\r");
-		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr,0x11); 
+	      // printk("paket po ip hesder\n\r");
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_ip_da_addr,0x11); 
 	   }
 	   
 	   
