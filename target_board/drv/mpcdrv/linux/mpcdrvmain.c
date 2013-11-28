@@ -1285,8 +1285,7 @@ static int tdm_recieve_thread_two(void *data)
 	u16  in_buf_dir3[757];
 	u16  in_size_dir3=0;
 	
-	
-	
+    
 	
 	while(!kthread_should_stop()) 
 		{
@@ -1301,19 +1300,14 @@ static int tdm_recieve_thread_two(void *data)
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 			    if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
-		        	
-			    	
-			    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 
-		        	
+			    	 //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
 			    	 /*printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
 		        	 */
-		        	  
-			    	  TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
-		             
+			    	 TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 		        }
-				
+			
 			}			
 	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
 	
@@ -1353,7 +1347,8 @@ static int tdm_recieve_thread_two(void *data)
 		        	 //mdelay(250);
 				}	 		
 			}
-    /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
+   
+		  /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
 		    if(TDM3_direction_WRITE_READY()==1)
 		    {
 		    	if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
@@ -1391,15 +1386,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 				//выполняемая работа потоковой функции
 				// msleep( 100 );  	 
 			       schedule();
-			     
+			       
 			       //функция построения графа
-			      
 			       if (get_tsec_state()==1)
 			       {	   
 			       ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
 			       get();
 			       }
-			      
 			       //функция отправки в матрицу коммутации
 			       if(recieve_matrica_commutacii_packet.state==1)
 			       {
