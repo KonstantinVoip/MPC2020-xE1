@@ -1257,8 +1257,8 @@ void TDM0_dierction_read ()
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
 //#ifdef  TDM_DIR_0_READ_DEBUG	  
-	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	    //printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	    //printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 //#endif	  
 	  
 	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
@@ -1299,11 +1299,14 @@ void TDM0_dierction_read ()
 		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   }
 	   //priznak packeta KY-S 
+	  
+	   
 	   if(dir0_mac_priznak_kys==0x22)
 	   {
 	      //packet kommutacii po mac address
 		  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr,0x11); 
 	   }
+	   
 	   //packeti commutiruemie po IP header
 	   else
 	   {
