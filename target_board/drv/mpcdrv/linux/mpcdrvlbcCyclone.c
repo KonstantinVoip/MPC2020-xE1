@@ -864,7 +864,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     static UINT16 tdm0_write_iteration=0;
     u16 hex_element_size=0;
     u8  dop_nechet_packet=0;
-    u16 packet_size =511;
+    //u16 packet_size =511;
     
     #ifdef PLIS_DEBUG_1400 
     u16 dannie1400 =0; 
@@ -1271,11 +1271,11 @@ void TDM0_dierction_read ()
 	  //SET to FIFO buffer recieve TDM0 direction FIFO buffer
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
-//#ifdef  TDM_DIR_0_READ_DEBUG	  
+#ifdef  TDM_DIR_0_READ_DEBUG	  
 	   
 	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
 	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
-//#endif	  
+#endif	  
 	  
 	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
 	  //Пока сделано очень шрубо потом доработаю.

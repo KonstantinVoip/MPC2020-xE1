@@ -1340,6 +1340,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
 		        	 */
 			    	 TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
+			    	 mdelay(60);
 		        }
 			
 			}			
