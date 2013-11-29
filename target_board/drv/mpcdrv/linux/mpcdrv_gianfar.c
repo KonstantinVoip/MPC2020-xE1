@@ -233,7 +233,7 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	gfar_write(&regs->gaddr5, 0xffffffff);
 	gfar_write(&regs->gaddr6, 0xffffffff);
 	gfar_write(&regs->gaddr7, 0xffffffff);
- */ 
+ */
 	
 }
 

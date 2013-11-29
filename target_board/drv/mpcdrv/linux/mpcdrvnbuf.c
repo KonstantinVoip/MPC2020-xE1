@@ -772,9 +772,19 @@ void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
 u16 status=0;
 u16 static set_iteration_dir0=0;  
 unsigned long flags;
-    
+u8 dop_nechet_packet =0;    
      //printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
      //set packet size to fifo buffer
+
+/*
+if((in_size)%2==1)
+{ 
+	printk("+odd_packet=%d+\n\r",in_size); 
+    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+	dop_nechet_packet=1;
+}
+in_size = in_size+dop_nechet_packet;
+*/ 
      
      spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
      

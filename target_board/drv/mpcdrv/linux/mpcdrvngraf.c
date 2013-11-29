@@ -148,20 +148,23 @@ static __be32  sosed2_kys_ipaddr = 0x9d;
 static __be32  sosed3_kys_ipaddr = 0x50;
 */
 
-/*Sosedi IP addrress */
+/*****************************************Sosedi IP addrress**********************************/
 
 //192.168.120.170  //Gateway
-static __be32  sosed1_kys_ipaddr = 0xAA;
+static __be32  sosed_mp1_kys_ipaddr = 0xAA;
 //192.168.120.171 //sosed
-static __be32  sosed2_kys_ipaddr = 0xAB;
+static __be32  sosed_mp2_kys_ipaddr = 0xAB;
 //192.168.120.172 //sosed
-static __be32  sosed3_kys_ipaddr = 0xAC;
+static __be32  sosed_mp3_kys_ipaddr = 0xAC;
+//192.168.120.173 //sosed
+static __be32  sosed_mp4_kys_ipaddr = 0xAD;
+
 //192.168.120.76
-static __be32  nms3_ip_addr       =0x4C;     
+static __be32  nms3_ip_addr       =   0x4C;     
 
 
 
-/*Sosedi po  MAC address  */
+/*****************************************Sosedi po  MAC address***********************************/
 static __be32  nms3_damac_address = 0x5f4e;
 
 
@@ -246,7 +249,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT16  mac1[3];
    UINT16  mac2[3];
    static UINT16 iteration=0;
-   UINT8   priznak_scluz=0;
+   UINT8   priznak_scluz=1;
    //priznal Scluzovogo MPC
    
    
@@ -255,7 +258,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
    if(my_current_kos.state==0){return;}
    
-    //printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
+   // printk("ngraf_packet=%d \n\r",in_size);
+   // printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
   // printk("my_kos_ip_addr=0x%x\n\r",my_current_kos.ip_addres);
    
    
@@ -284,10 +288,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	   nbuf_set_datapacket_dir0  (in_buf ,in_size);     
 	   }
   
+	   
    }
+   //////////////////////////////////////END ARP _ZAPROSI///////////////////////////  
    
-   //////////////////////////////////////END ARP _ZAPROSI///////////////////////////
-  
+   
    if(priznak_kommutacii==my_current_kos.ip_addres)
      {
          //send to direction0 sosed KY-S
@@ -296,14 +301,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
      }
    
-      
-   
-   
-   
-   
-   
-   //NMS3 IP address 192.168.120.76(4c)
-   if(priznak_kommutacii==0x4c)
+    //NMS3 IP address 192.168.120.76(4c)
+    if(priznak_kommutacii==nms3_ip_addr)
      {
          //send to direction0 sosed KY-S
      	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
@@ -317,13 +316,22 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	    	nbuf_set_datapacket_dir0  (in_buf ,in_size);
 	    	
 	    }
-	   
-	  	 
+  	  	 
 	}
+    
+  /////////////////////////Sosedi Commutacia///////////////////////
+ if(priznak_scluz==1)  
+ {   
+    
+   if(priznak_kommutacii==0xab)
+     {
+       //send to direction0 sosed KY-S
+   	   printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
+       nbuf_set_datapacket_dir0  (in_buf ,in_size);
+       //return;
+     }
    
-   
-   
-   
+ }  
    
    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast

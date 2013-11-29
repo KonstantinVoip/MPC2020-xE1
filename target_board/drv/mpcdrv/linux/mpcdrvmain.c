@@ -716,7 +716,36 @@ unsigned int Hook_Func(uint hooknum,
      *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
 	
+#if 0	
+	if(((uint)skb->mac_len+(uint)skb->len)%2==1)
+    { 
+	  
+		
+           /*		
+		   printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
+	        //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+			memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
+		    recieve_tsec_packet.length=(uint)skb->mac_len+(uint)skb->len;	
+		  //  printk("input_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
+		    loopback_write();
+		    //loopback_read();
+           */
+		 return NF_ACCEPT; 
+    }
+#endif	
 	
+	
+	
+	
+	
+	
+	
+
+    
+    
+    
+    
+    
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
 	 {
 	 	  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
@@ -756,13 +785,16 @@ unsigned int Hook_Func(uint hooknum,
 	
 	 /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
 	  *например 341 или что-то подобное 111*/    		
-     if(((uint)skb->mac_len+(uint)skb->len)%2==1)
+     
+	
+	 
+	 if(((uint)skb->mac_len+(uint)skb->len)%2==1)
      { 
 	  //printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
 	  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
       return NF_ACCEPT; 
      }
-	
+	 
 	  
 	      /* 
 	      if(((uint)skb->mac_len+(uint)skb->len)<200)
@@ -779,24 +811,20 @@ unsigned int Hook_Func(uint hooknum,
 
 		 /*Самое первое \то информационный пакет*/
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
-	  	
+	      
 		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 		 { 
-		 
-	
-			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
-	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-             recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
-             recieve_matrica_commutacii_packet.state=true;
-             //IP Destination Address
-             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
-			
-             
-             
-             
-             return NF_DROP; 
 		
-		 
+			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
+             //recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	         //printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
+			
+	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
+             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+             recieve_matrica_commutacii_packet.state=true;
+             return NF_DROP; 
+	
 		 }     
              
              

@@ -863,15 +863,27 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 	u16 i=0;
     static UINT16 tdm0_write_iteration=0;
     u16 hex_element_size=0;
- 
+    u8  dop_nechet_packet=0;
+    u16 packet_size =511;
     
     #ifdef PLIS_DEBUG_1400 
     u16 dannie1400 =0; 
 	#endif	   
     
     
+     //printk("in_size=%d\n\r",in_size);
     
-    hex_element_size=in_size/2;
+    
+    //printk("ostatok_ot_delenia=%d|in_size=%d\n\r",(in_size)%2,in_size);
+	if((in_size)%2==1)
+    { 
+		printk("+odd_packet=%d+\n\r",in_size); 
+	    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+    	dop_nechet_packet=1;
+    }
+    
+    
+    hex_element_size=(in_size/2)+dop_nechet_packet;
     //Set size on PLIS in byte
    
     
@@ -880,7 +892,8 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-   #endif
+    
+	#endif
     
 	
 	plis_write16(DIR0_PLIS_PACKSIZE_ADDR1600,in_size);
@@ -1235,15 +1248,17 @@ void TDM0_dierction_read ()
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
-  packet_size_hex=dannie1200/2; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  packet_size_hex=(dannie1200/2)+1; //convert byte to element of massive in hex 
+  //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
+  /*
   ostatok_of_size_packet =(dannie1200)%2;
   if(ostatok_of_size_packet==1)
   {
 	  printk("nechet_packet_direction0_size=%d\n\r",dannie1200);
   }
+  */	
   	  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
@@ -1257,8 +1272,9 @@ void TDM0_dierction_read ()
 	  //nbuf_set_datapacket_dir0 (out_buf,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE);
   
 //#ifdef  TDM_DIR_0_READ_DEBUG	  
-	    //printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
-	    //printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
+	   
+	    printk("+Tdm_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[0],out_buf[1],out_buf[2],out_buf[3],out_buf[4],out_buf[5]);
+	    printk("+Tdm_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",out_buf[packet_size_hex-5],out_buf[packet_size_hex-4],out_buf[packet_size_hex-3],out_buf[packet_size_hex-2],out_buf[packet_size_hex-1],out_buf[packet_size_hex]);
 //#endif	  
 	  
 	  //Пока в одной подсети использую последниее цифры потом конечно нужно доделать будет и сделать.
