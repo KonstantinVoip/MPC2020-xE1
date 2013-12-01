@@ -1235,7 +1235,10 @@ void TDM0_dierction_read ()
   UINT16 packet_size_hex=0;
   UINT16 ostatok_of_size_packet=0;
   UINT16  out_buf[760];//1518 bait;
-  
+  UINT8   dobavka_esli_packet_nechetnii=0;  
+
+  //
+  __be32  dir0_target_arp_ip_da_addr=0;
   //IP DA address read on direction 0
   __be32  dir0_ip_da_addr    = 0;
   //MAC DA address read on direction 0
@@ -1248,7 +1251,15 @@ void TDM0_dierction_read ()
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   
   dannie1200 = plis_read16 (DIR0_PLIS_PACKSIZE_ADDR1200 );
-  packet_size_hex=(dannie1200/2)+1; //convert byte to element of massive in hex 
+  
+  //Если пакет нечётный читаем на еденицу больше из шины local bus;
+  if((dannie1200)%2==1)
+  {
+	  dobavka_esli_packet_nechetnii=1; 
+  }
+  
+
+  packet_size_hex=(dannie1200/2)+dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
   //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
   //Проверка что получили целый размер иначе хлам
@@ -1291,12 +1302,16 @@ void TDM0_dierction_read ()
 	 //priznak ARP 0x806
 	 dir0_priznak_arp_packet =out_buf[6];
 	 
+	 
+	 
+	 
 	 //printk("++dir0_ip_da_addr=0x%x|dir0_mac_da_addr=0x%x+\n\r",dir0_ip_da_addr,dir0_mac_da_addr);
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
 	  // rintk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
 	 //broadcast frame arp request
 	 
 	 
+	 /*
 	   if(dir0_mac_da_addr==0xff)
 	   {
 		 
@@ -1304,32 +1319,45 @@ void TDM0_dierction_read ()
 		  //ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0xffff);  
 		   p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,1);
 	   }
+	 */
 	
 	   //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
 	   if(dir0_priznak_arp_packet==0x0806)
-	   {
-	 	  //ARP packet for matrica
-	 	  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,0x0806,0x11); 
-		     //send to tsec2
+	   { 
+		  //ARP packet for matrica
+		   memcpy(&dir0_target_arp_ip_da_addr,out_buf+16+14+8,4);
+		   printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_target_arp_ip_da_addr,0x11);   
+	 	   
+	 	  //send to tsec2
 		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
-		 //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
+		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200);//send to eternet tsec ARP broadcast
 	   }
+	   else
+	   {
+	      // printk("paket po ip hesder\n\r");
+		     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_ip_da_addr,0x11); 
+	   }
+	   
+	   
+	   
 	   //priznak packeta KY-S 
 	  
-	   
+	   /*
 	   if(dir0_mac_priznak_kys==0x22)
 	   {
 	      //packet kommutacii po mac address
 		  ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_mac_da_addr,0x11); 
 	   }
-	   
+	   */
 	   //packeti commutiruemie po IP header
+	   /*
 	   else
 	   {
 	      // printk("paket po ip hesder\n\r");
 		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_ip_da_addr,0x11); 
 	   }
-	   
+	   */
 	   
 	   
 	   

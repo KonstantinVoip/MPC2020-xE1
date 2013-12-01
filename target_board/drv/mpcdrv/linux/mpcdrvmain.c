@@ -107,12 +107,15 @@ GENERAL NOTES
 #include <linux/if_packet.h>
 
 #include <linux/icmp.h>
+#include <linux/udp.h>
 #include <linux/if_arp.h>
 
 #include <linux/etherdevice.h>
 
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
+
+
 
 
 
@@ -580,27 +583,38 @@ unsigned int Hook_Func_ARP(uint hooknum,
                   int (*okfn)(struct sk_buff *))
 
 {
-//UINT32  nms3_mac =0x5f4e;
-//UINT32  input_mac_sa_addr[1];
-	
-	
+//Куда идёт arp запрос ip адрес берём из пакета ARP
+UINT32  target_arp_ip_da_addr=0;
 /* Указатель на структуру заголовка протокола eth в пакете */
-//struct ethhdr *eth;
-//eth=(struct ethhdr *)skb_mac_header(skb);
-//////////////////////////////////////////////////	
+/*struct ethhdr *eth;
+eth=(struct ethhdr *)skb_mac_header(skb);*/
 
-
+/*
 struct arphdr *arp;	
 arp=(struct  arphdr *)skb_network_header(skb);
-  
+*/ 
 
+//memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header+16+14+8,4);
+//memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
+//printk("ARP request DA 0x%x\n\r",target_arp_ip_da_addr);
+
+//target_arp_ip_da_addr 	
+//printk("+ARP_PACKET|0x%04x|0x%04x|\n\r",recieve_matrica_commutacii_packet.data[0],recieve_matrica_commutacii_packet.data[1]);
+//printk("ARP_broadcast_request_SA_MAC\n\r");
 //memcpy(input_mac_sa_addr,eth->h_source,6);
 //input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 //Last four byte mac _address input_mac_last_word
-
-
- if(g_my_kys_state==1)  //Information packet OK
- {	
+    if(g_my_kys_state==1)    //Information packet OK
+    {	
+      memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
+      printk("ARP zaprosi na ip da address 0x%x\n\r",target_arp_ip_da_addr);
+ 	  memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+      recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);   
+      recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)target_arp_ip_da_addr;	   		 
+      recieve_matrica_commutacii_packet.state=true;
+      return NF_ACCEPT;
+    } 
+	 
 	 //printk(">>>last8_preword\n\r");
 
    //if (skb->protocol == htons(ETH_P_ARP))
@@ -612,7 +626,9 @@ arp=(struct  arphdr *)skb_network_header(skb);
 		 */
 	    //ARP Broadcast Request ne nado naverno v matricy commutacii
 	    //printk("arp_op=0x%x",arp->ar_op);
-    	
+    
+	 
+#if 0	 
     	if(arp->ar_op==0x0001)
 	    {
 	    	
@@ -647,12 +663,12 @@ arp=(struct  arphdr *)skb_network_header(skb);
 	        return NF_DROP;
 	    }   
 	
-	
+#endif	
    //}//end ETH protocol ETP_P_ARP
 
- }    
+  //}    
     
-//return NF_ACCEPT;	
+return NF_ACCEPT;	
 }
 
 
@@ -687,19 +703,33 @@ unsigned int Hook_Func(uint hooknum,
 	struct icmphdr *icmp;
 		
 	
+	//
+	UINT16  udp_dest_port=0;
 	UINT32  input_mac_da_addr[1];
 	UINT16  input_mac_last_word;
 	UINT8   input_mac_prelast_byte;
 	UINT8   input_mac_last_byte;  //priznac commutacii po mac
 	
-	
+	//Фильтрация 2 го уровня по ETH заголовку
 	eth=(struct ethhdr *)skb_mac_header(skb);
 	 //Фильтрация 3 го уровня по IP
 	ip = (struct iphdr *)skb_network_header(skb);
     //ICMP пакет
 	icmp= (struct icmphdr*)skb_transport_header(skb);
+	//UDP пакет 
+	udph = (struct udphdr *)skb_transport_header(skb);
 	
 	
+	
+	
+	
+
+	
+	
+	
+	
+	
+
 	memcpy(input_mac_da_addr,eth->h_dest,6);
 	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
 	//Last four byte mac _address input_mac_last_word
@@ -709,43 +739,14 @@ unsigned int Hook_Func(uint hooknum,
 	input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
 	input_mac_last_byte = input_mac_last_word;
+
+//#if 0  //Global comment	
 	
 	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
 	//printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
     /*Принял от КУ-S Информационный пакет который сожержит
      *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
-	
-#if 0	
-	if(((uint)skb->mac_len+(uint)skb->len)%2==1)
-    { 
-	  
-		
-           /*		
-		   printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
-	        //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-			memcpy(recieve_tsec_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len);
-		    recieve_tsec_packet.length=(uint)skb->mac_len+(uint)skb->len;	
-		  //  printk("input_len=%d\n\r",(uint)skb->mac_len+(uint)skb->len);
-		    loopback_write();
-		    //loopback_read();
-           */
-		 return NF_ACCEPT; 
-    }
-#endif	
-	
-	
-	
-	
-	
-	
-	
-
-    
-    
-    
-    
-    
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
 	 {
 	 	  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
@@ -757,15 +758,12 @@ unsigned int Hook_Func(uint hooknum,
 	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил    
 		  //Копируем данные из информационного пакета в MAC и IP адрес    	  
 	 	  //Берём IP адрес нашего КУ-S и MAC
-		  
 		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
 	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
-		   
 	 	  /*заполняем структуру для нашего КY-S */	 	  
 		  CUR_KYS_IP_ADDR	= ip->saddr;  
 	 	  g_my_kys_ip_addres=(UINT8)ip->saddr;
 		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
-		  
 		  /*
 	 	  printk("\n\r");
 	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
@@ -781,32 +779,29 @@ unsigned int Hook_Func(uint hooknum,
 	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,g_my_kys_mac_addr);  	  
 	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	 }
-	
+		
 	
 	 /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
 	  *например 341 или что-то подобное 111*/    		
-     
-	
-	 
+	 /*
 	 if(((uint)skb->mac_len+(uint)skb->len)%2==1)
      { 
 	  //printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
 	  //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
       return NF_ACCEPT; 
-     }
-	 
-	  
-	      /* 
-	      if(((uint)skb->mac_len+(uint)skb->len)<200)
-	      { 
-		  printk("drop\n\r");
-	      return NF_ACCEPT;
-	      //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-	      }
-          */
+     }*/
+	   
+	 /* 
+	 if(((uint)skb->mac_len+(uint)skb->len)<200)
+	 { 
+     printk("drop\n\r");
+	 return NF_ACCEPT;
+	 //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
+	 }
+     */
 
-	  //2 уровень пришёл Ethernet пакет 0x800
-	 // if (skb->protocol ==htons(ETH_P_IP))
+	 //2 уровень пришёл Ethernet пакет 0x800
+	 //if (skb->protocol ==htons(ETH_P_IP))
 	 //{
 
 		 /*Самое первое \то информационный пакет*/
@@ -814,11 +809,25 @@ unsigned int Hook_Func(uint hooknum,
 	      
 		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 		 { 
-		
+				 
 			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
              //recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	         //printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
-			
+  
+	            //Пришёл пакет от Гришы на 18000 порт для построения матрицы коммутации       
+		        //Пока просто проверяю построение матрицы коммутации и маршрутизации
+			     memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
+			     if (udp_dest_port==18000)
+				 {
+			    	//printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+					 printk("UDP packet from Grisha sodergit structura seti\n\r");	 
+	    	    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
+	    	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
+	    	    	 recieve_tsec_packet.state=true;
+				     return NF_DROP; 
+			    	 
+				 } 	
+			       		 
 	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
              recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
@@ -850,15 +859,12 @@ unsigned int Hook_Func(uint hooknum,
 		 
 		        if(ip->protocol==UDP)
 		        {	 
-		   
-		   
 		        printk("+UDP_GRISH_PACKET|SA_IP  =0x%x\n\r",ip->daddr);
 		        memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 		        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 		        recieve_matrica_commutacii_packet.state=true;
 		         //IP Destination Address
 		        recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
-		
 		        return NF_DROP;	
 		        }
 		  
@@ -892,8 +898,7 @@ unsigned int Hook_Func(uint hooknum,
     	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
     	    	 recieve_tsec_packet.state=true;
     	    	 return NF_DROP;		 
-    		 
-    		 }
+    		    }
     		 else
     		 {
              //в функции должен отправить пакет и признак коммутации по которому определю куда его пихнуть
@@ -942,6 +947,9 @@ unsigned int Hook_Func(uint hooknum,
       #endif 	 
 	 // return NF_ACCEPT;   	   	 
 	// }
+//#endif //end Global comment
+ 
+	    	 
 return NF_ACCEPT;	
 }
 
@@ -1307,7 +1315,7 @@ static int tdm_recieve_thread_two(void *data)
 {
 	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );	
 	u16 status=0;
-	u16  in_buf_dir0[757];
+	unsigned char  in_buf_dir0[1514];
 	u16  in_size_dir0=0;
 	
 	u16  in_buf_dir1[757];
@@ -1335,17 +1343,23 @@ static int tdm_recieve_thread_two(void *data)
 			    if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
 			    	 //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-			    	 /*printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		        	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+			    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		        	 
+			    	 /*
+			    	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
 		        	 */
+			    	 /*
+			    	 printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		        	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+			    	 */
 			    	 TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 			    	 mdelay(60);
 		        }
 			
 			}			
 	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
-	
+//#if 0	
 			if(TDM1_direction_WRITE_READY()==1)
 			{
 		       
@@ -1422,13 +1436,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 				// msleep( 100 );  	 
 			       schedule();
 			       
-			       //функция построения графа
-			       /*
+			       //функция обработки пакета для построения графа
 			       if (get_tsec_state()==1)
 			       {	   
 			       ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
 			       get();
-			       }*/
+			       }
+			       
 			       //функция отправки в матрицу коммутации
 			       if(recieve_matrica_commutacii_packet.state==1)
 			       {

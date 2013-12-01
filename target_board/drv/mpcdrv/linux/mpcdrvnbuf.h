@@ -56,7 +56,7 @@
  */
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
-bool nbuf_get_datapacket_dir0  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir0  ( unsigned char *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir1  ( u16 *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir2  ( u16 *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir3  ( u16 *in_buf , u16 *in_size);
@@ -68,7 +68,7 @@ bool nbuf_get_datapacket_dir8  ( u16 *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir9  ( u16 *in_buf , u16 *in_size);
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
-void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
+void nbuf_set_datapacket_dir0  (const unsigned char *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size);
@@ -116,7 +116,9 @@ struct mpcfifo {
 typedef struct description_packet
 {
  u16 size;	
- u16 data[757];
+ 
+ //u16 data[757];
+ unsigned char data[1514];
  
 }DATA_lbc;
 

@@ -74,7 +74,9 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 //FIFO Function 
 static unsigned int mpcfifo_term(struct mpcfifo *rbd_p);
 //static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj);
-static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf);
+//static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf);
+   
+static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const unsigned char *buf);
 static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj);
 static unsigned int mpcfifo_flush(struct mpcfifo *rbd_p);
 static unsigned int mpcfifo_num(struct mpcfifo *rbd_p);
@@ -251,7 +253,8 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
+//static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
+static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const unsigned char *buf)
 {
 	u16 i;
 	DATA_lbc  ps;
@@ -265,7 +268,8 @@ static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf)
 	
 	for(i=0;i<ps.size;i++)
 	{
-		ps.data[i]=(u16)buf[i];
+		//ps.data[i]=(u16)buf[i];
+		ps.data[i]=buf[i];   
 	}
 	
 	rbd_p->q[rbd_p->tail++]=ps;
@@ -340,7 +344,9 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 	
 	for(i=0;i<local.size;i++)
 	{
-		*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
+		//*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
+		  *(((u8 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
+	
 	}
 	rbd_p->head++;
 	
@@ -497,7 +503,8 @@ Syntax:      	    nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size
 Remarks:			get data from FIFO buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
+//bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
+bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
 {
 	 //u16 out_buf_dir0[757];
 	 u16  packet_size_hex=0;
@@ -524,10 +531,16 @@ bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
 	   }
 	 spin_unlock_irqrestore(fifo_put_to_tdm0_dir->lock,flags);
 	 
-	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
+	//printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
+	 /*
 	 packet_size_in_byte=(fifo_put_to_tdm0_dir->cur_get_packet_size)*2;
 	 *in_size=packet_size_in_byte;
-
+	 */
+	 
+	 *in_size=fifo_put_to_tdm0_dir->cur_get_packet_size;
+	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0,fifo_put_to_tdm0_dir->cur_get_packet_size);
+	 
+	 
 
 	
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
@@ -767,7 +780,7 @@ Syntax:      	    void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 i
 Remarks:			set data to fifo buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir0  (const unsigned char *in_buf ,const u16 in_size)
 {
 u16 status=0;
 u16 static set_iteration_dir0=0;  
@@ -788,7 +801,12 @@ in_size = in_size+dop_nechet_packet;
      
      spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
      
-     fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
+     //comment kosta for hex 01.12.13
+     //fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
+     
+      printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0,in_size);	
+      fifo_put_to_tdm0_dir->cur_put_packet_size=in_size;
+     
      //Set to the FIFO buffer
 	  status=mpcfifo_put(fifo_put_to_tdm0_dir, in_buf);  
 	 //mpcfifo_print(fifo_tdm0_dir_read, 0);

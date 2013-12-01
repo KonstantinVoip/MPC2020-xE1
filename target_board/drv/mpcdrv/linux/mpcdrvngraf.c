@@ -124,7 +124,7 @@ extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 
 /*Extern fifo buffer function*/
-extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir0  (const unsigned char *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size);
@@ -264,20 +264,18 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
    
    /////////////////////////////////////// ARP ZAPROSI///////////////////////////////////////////
-
+   /*
    if(priznak_kommutacii==0xFFFF)
    {
-   
 	   //printk("Send broadcast arp to ->>eth1|dir0|dir1 \n\r");
 	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
 	   nbuf_set_datapacket_dir0  (in_buf ,in_size);
-
    }
+   
+   
    
    if(priznak_kommutacii==0x806)
    {
-   
-	   
 	   //Если я шлюз то отправляю в eth2
 	   if(priznak_scluz==1)
 	   {	   
@@ -286,10 +284,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	   else  //если нет то отправлю в tdm direction
 	   {	   
 	   nbuf_set_datapacket_dir0  (in_buf ,in_size);     
-	   }
-  
-	   
+	   }   
    }
+   */
+   
    //////////////////////////////////////END ARP _ZAPROSI///////////////////////////  
    
    
@@ -327,7 +325,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
      {
        //send to direction0 sosed KY-S
    	   //printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
-       nbuf_set_datapacket_dir0  (in_buf ,in_size);
+         nbuf_set_datapacket_dir0  (in_buf ,in_size);
        //return;
      }
    
