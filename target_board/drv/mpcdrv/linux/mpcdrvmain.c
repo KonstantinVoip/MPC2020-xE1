@@ -562,7 +562,7 @@ UINT16 loopbackout_size=0;
 #define NMS3_IP_ADDR     0xC0A8784C  //192.168.120.76
 UINT32  CUR_KYS_IP_ADDR =0x00000000; //
 
-
+#define SEVA_NMS_IP_ADDR 0xC0A88261  //192.168.130.97 
 
 
 
@@ -607,7 +607,7 @@ arp=(struct  arphdr *)skb_network_header(skb);
     if(g_my_kys_state==1)    //Information packet OK
     {	
       memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
-      printk("ARP zaprosi na ip da address 0x%x\n\r",target_arp_ip_da_addr);
+      //printk("ARP zaprosi na ip da address 0x%x\n\r",target_arp_ip_da_addr);
  	  memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
       recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);   
       recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)target_arp_ip_da_addr;	   		 
@@ -807,7 +807,9 @@ unsigned int Hook_Func(uint hooknum,
 		 /*Самое первое \то информационный пакет*/
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
 	      
-		 if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+	      
+	     //if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+		 if (((uint)ip->saddr==SEVA_NMS_IP_ADDR)||(uint)ip->daddr==SEVA_NMS_IP_ADDR)
 		 { 
 				 
 			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
@@ -1318,20 +1320,19 @@ static int tdm_recieve_thread_two(void *data)
 	unsigned char  in_buf_dir0[1514];
 	u16  in_size_dir0=0;
 	
-	u16  in_buf_dir1[757];
+	unsigned char  in_buf_dir1[1514];
 	u16  in_size_dir1=0;
 	
-	u16  in_buf_dir2[757];
+	unsigned char  in_buf_dir2[1514];
 	u16  in_size_dir2=0;
 	
-	u16  in_buf_dir3[757];
+	unsigned char  in_buf_dir3[1514];
 	u16  in_size_dir3=0;
 	
     
 	
 	while(!kthread_should_stop()) 
 		{
-	    
 		schedule();
 		
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
@@ -1354,7 +1355,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
 			    	 */
 			    	 TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
-			    	 mdelay(60);
+			    	 mdelay(32);
 		        }
 			
 			}			
@@ -1372,7 +1373,8 @@ static int tdm_recieve_thread_two(void *data)
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
 					TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
-				    //mdelay(150);
+					mdelay(60);
+					//mdelay(150);
 				}		
 			
 			}
@@ -1393,6 +1395,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 */
 		        	 //mdelay(250); //250 миллисекунд задержки перед отправкой
 		        	 TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
+		        	 mdelay(60);
 		        	 //mdelay(250);
 				}	 		
 			}
@@ -1407,7 +1410,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
 		    	   TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
-		    	   
+		    	   mdelay(60);
 		    	}
             }	    
 		   //mdelay(150);  

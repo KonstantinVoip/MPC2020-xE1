@@ -538,7 +538,7 @@ bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
 	 */
 	 
 	 *in_size=fifo_put_to_tdm0_dir->cur_get_packet_size;
-	 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0,fifo_put_to_tdm0_dir->cur_get_packet_size);
+	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0,fifo_put_to_tdm0_dir->cur_get_packet_size);
 	 
 	 
 
@@ -562,7 +562,7 @@ Syntax:      	    void nbuf_get_datapacket_dir1 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir1 (u16 *in_buf ,u16 *in_size)
+bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
 {
 	 //u16 out_buf_dir1[757];
 	 u16  packet_size_hex=0;
@@ -588,8 +588,11 @@ bool nbuf_get_datapacket_dir1 (u16 *in_buf ,u16 *in_size)
 	 spin_unlock_irqrestore(fifo_put_to_tdm1_dir->lock,flags);
 	 
 	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
-	 packet_size_in_byte=(fifo_put_to_tdm1_dir->cur_get_packet_size)*2;
-	 *in_size=packet_size_in_byte;
+	//packet_size_in_byte=(fifo_put_to_tdm1_dir->cur_get_packet_size)*2;
+	//*in_size=packet_size_in_byte;
+	 *in_size=fifo_put_to_tdm1_dir->cur_get_packet_size;
+	 
+	 
 	 //отправляю в ethernet
 	 
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
@@ -609,7 +612,7 @@ Syntax:      	    void nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir2 (u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir2 (unsigned char *in_buf , u16 *in_size)
 {
 	 //u16  out_buf_dir2[757];
 	 u16  packet_size_hex=0;
@@ -633,8 +636,12 @@ bool nbuf_get_datapacket_dir2 (u16 *in_buf , u16 *in_size)
 	 	 
 	 
 	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir2 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir2);
-	 packet_size_in_byte=(fifo_put_to_tdm2_dir->cur_get_packet_size)*2;
-	 *in_size=packet_size_in_byte;
+	 //packet_size_in_byte=(fifo_put_to_tdm2_dir->cur_get_packet_size)*2;
+	 //*in_size=packet_size_in_byte;
+	   
+	 *in_size=fifo_put_to_tdm2_dir->cur_get_packet_size;
+	  
+	 
 	 
 	  //mdelay(250);
 	 //отправляю в ethernet
@@ -655,7 +662,7 @@ Syntax:      	    nbuf_get_datapacket_dir3 (const u16 *in_buf ,const u16 in_size
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir3 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir3 (unsigned char *in_buf , u16 *in_size)
 {
 	 //u16 out_buf_dir3[757];
 	 u16  packet_size_hex=0;
@@ -678,8 +685,10 @@ bool nbuf_get_datapacket_dir3 ( u16 *in_buf , u16 *in_size)
 	 
 	 spin_unlock_irqrestore(fifo_put_to_tdm3_dir->lock,flags);
 	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir3 Iteration=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir3);
-	 packet_size_in_byte=(fifo_put_to_tdm3_dir->cur_get_packet_size)*2;
-	 *in_size=packet_size_in_byte;
+	// packet_size_in_byte=(fifo_put_to_tdm3_dir->cur_get_packet_size)*2;
+	// *in_size=packet_size_in_byte;
+	 *in_size=fifo_put_to_tdm3_dir->cur_get_packet_size;
+	 
 	 
 	 /*
 	 status=mpcfifo_get(fifo_put_to_tdm3_dir, out_buf_dir3);
@@ -804,7 +813,7 @@ in_size = in_size+dop_nechet_packet;
      //comment kosta for hex 01.12.13
      //fifo_put_to_tdm0_dir->cur_put_packet_size=in_size/2;
      
-      printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0,in_size);	
+     // printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0,in_size);	
       fifo_put_to_tdm0_dir->cur_put_packet_size=in_size;
      
      //Set to the FIFO buffer
@@ -821,7 +830,7 @@ Syntax:      	    void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction1
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir1  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir1=0;  
@@ -830,8 +839,10 @@ void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 in_size)
 	     //set packet size to fifo buffer
 	     spin_lock_irqsave(fifo_put_to_tdm1_dir->lock,flags);
 	     
-	     fifo_put_to_tdm1_dir->cur_put_packet_size=in_size/2;
-	 
+	     //fifo_put_to_tdm1_dir->cur_put_packet_size=in_size/2;
+	       fifo_put_to_tdm1_dir->cur_put_packet_size=in_size; 
+	     
+	     
 	     //Set to the FIFO buffer
 		  status=mpcfifo_put(fifo_put_to_tdm1_dir, in_buf);  
 		 
@@ -846,7 +857,7 @@ Syntax:      	    void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction2
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir2  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir2=0;  
@@ -858,8 +869,10 @@ void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 in_size)
 	     
 	     spin_lock_irqsave(fifo_put_to_tdm2_dir->lock,flags);
 	     //set packet size to fifo buffer
-	       fifo_put_to_tdm2_dir->cur_put_packet_size=in_size/2;
-	 
+	     //fifo_put_to_tdm2_dir->cur_put_packet_size=in_size/2;
+	       fifo_put_to_tdm2_dir->cur_put_packet_size=in_size;
+	       
+	     
 	     //Set to the FIFO buffer
 		  status=mpcfifo_put(fifo_put_to_tdm2_dir, in_buf);  
 		 
@@ -875,7 +888,7 @@ Syntax:      	    void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction3
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir3  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir3=0;  
@@ -884,8 +897,9 @@ void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 in_size)
 	     //printk(">>.>>>>>>>>>>>>nbuf_set_datapacket_dir3|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir3);	 
 	     //set packet size to fifo buffer
 	     spin_lock_irqsave(fifo_put_to_tdm3_dir->lock,flags);
+	     fifo_put_to_tdm3_dir->cur_put_packet_size=in_size;
 	     
-	     fifo_put_to_tdm3_dir->cur_put_packet_size=in_size/2;
+	     //fifo_put_to_tdm3_dir->cur_put_packet_size=in_size/2;
 	 
 	     //Set to the FIFO buffer
 		  status=mpcfifo_put(fifo_put_to_tdm3_dir, in_buf);  
