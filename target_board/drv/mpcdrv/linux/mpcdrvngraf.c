@@ -88,16 +88,59 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip);
 
-
+static void dijkstra(int start);
 
 /* KERNEL MODULE HANDLING */
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
+#define INT_MAX  0xffffffff
 
+//количество узлов в сети
+static const int N =4;
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
+/*Добавил дома Алгоритм Дейкстры*/
+/*соединение для нашей схемы*/
+//Матрица соединенй
+static bool adj_matrix[4][4]=
+{
+// ---0--|---1--|-2-|---3---|  
+   0    ,1    ,1   ,0,
+   1    ,0    ,1   ,0,
+   1    ,1    ,0   ,1,
+   0    ,0    ,1   ,0 
+};
+
+
+/*Матрица смежностей(стоимостей)для алгоритма Дейкстра
+ исходные данные для построение путей
+*/
+static unsigned short int cost[4][4]=
+{
+ 
+// ---0--|---1--|-2-|---3---|  
+   0     ,5     ,10 ,0xffff,
+   6     ,0     ,10 ,0xffff,
+   10    ,10    ,0  ,10,
+   0xffff,0xffff,10 ,0 
+};
+
+//массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний
+unsigned short dist[4]={0xffff,0xffff,0xffff,0xffff};
+//массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока
+unsigned short used[4]={0,0,0,0};
+//массив кратчайших путей
+signed short C[4]={-1,-1,-1,-1};
+
+
+
+
+
+
+
+
 
 
 /*****************************************************************************/
@@ -595,7 +638,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		printk("setevie_elementi_ip_packet=0x%x\n\r",setevoi_element[i].my_setevoi_element_ip); 
 	 }*/
 	 
-	 Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
+	// Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 
    //Пока в качестве заглушки используем Алгоритм для поиска пакета с удалённым IP_мультиплексора который не
    //входит в число соседей моего корневого.
@@ -632,14 +675,71 @@ Parameters:     	Алгоритм полсчета числа прыжков и 
 Remarks:			timer functions 
 Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
-static void Algoritm_puti_udalennogo_ip_and_chisla_hop()
+static void dijkstra(int start)
 {
+	   bool in_tree[4] = {false};
+       int i; 
+	   dist[start] = 0; // понятно почему, не так ли? ;)
+	   int cur = start; // вершина, с которой работаем
+	   int prom;
+	   int a;
+	  	   
+	   // пока есть необработанная вершина
+	   while(!in_tree[cur])
+	   {
+	      in_tree[cur] = true;
 
-  
-  
-	
-	
-	
+	      for(i = 0; i < N; i++)
+	      {
+	         // если между cur и i есть ребро
+	         if(adj_matrix[cur][i])
+	         {
+	            // считаем расстояние до вершины i:
+	            // расстояние до cur + вес ребра
+	            int d = dist[cur] + cost[cur][i];
+	            // если оно меньше, чем уже записанное
+	            if(d < dist[i])
+	            {
+	               dist[i]   = d;   // обновляем его
+	               C[i] = cur; // и "родителя"
+	            }
+	         }
+	      }
+
+	      // ищем нерассмотренную вершину  с минимальным расстоянием
+	      int min_dist = INT_MAX;
+	      for(i = 0; i < N; i++)
+	      {
+	         if(!in_tree[i] && dist[i] < min_dist)
+	         {
+	            cur      = i;
+	            min_dist = dist[i];
+	         }
+	      }
+	   }
+
+	   //printf("STOP\n\r");
+	   /*
+	   *  После окончания алгоритма значение c[i] будет указывать вершину, предпоследнюю в кратчайшем пути от start до i, 
+	   *  и сам путь восстанавливается простым циклом.
+	   */ 
+
+	   // Теперь:
+	   // в dist[i] минимальное расстояние от start до i
+	   // в parent[i] вершина, из которой лежит оптимальный путь в i
+	   // нужно распечатать пути
+	   //Кратчайшие маршруты 
+	   a = start;
+	   printk("Marshrutization:\n\r");
+	   for (i=0; i<N; i++)
+	   {
+	        //C ->матрица стоимостей
+	        if (i!=a && cost[C[i]][i]!=NULL)
+	        {
+	         printk("from %d to %d =cost %d\n\r",start,i,dist[i]);
+	        }
+
+	   }
 	
 }
 
