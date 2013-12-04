@@ -720,16 +720,6 @@ unsigned int Hook_Func(uint hooknum,
 	udph = (struct udphdr *)skb_transport_header(skb);
 	
 	
-	
-	
-	
-
-	
-	
-	
-	
-	
-
 	memcpy(input_mac_da_addr,eth->h_dest,6);
 	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
 	//Last four byte mac _address input_mac_last_word

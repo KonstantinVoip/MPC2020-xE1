@@ -94,7 +94,7 @@ static void dijkstra(int start);
 /*****************************************************************************/
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
-#define INT_MAX  0xffffffff
+#define INT_MAX  0xffff
 
 //количество узлов в сети
 static const int N =4;
@@ -121,8 +121,8 @@ static unsigned short int cost[4][4]=
 {
  
 // ---0--|---1--|-2-|---3---|  
-   0     ,5     ,10 ,0xffff,
-   6     ,0     ,10 ,0xffff,
+   0     ,10     ,10 ,0xffff,
+   10     ,0     ,10 ,0xffff,
    10    ,10    ,0  ,10,
    0xffff,0xffff,10 ,0 
 };
@@ -298,13 +298,15 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
    
+   
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
    if(my_current_kos.state==0){return;}
    
    // printk("ngraf_packet=%d \n\r",in_size);
    // printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
    // printk("my_kos_ip_addr=0x%x\n\r",my_current_kos.ip_addres);   
-   if(priznak_kommutacii==my_current_kos.ip_addres)
+   
+   /*if(priznak_kommutacii==my_current_kos.ip_addres)
      {
          //send to direction0 sosed KY-S
      	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
@@ -312,6 +314,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
 	   
      }
+    */
    
     //NMS3 IP address 192.168.120.76(4c)
     //SEVA NMS IP address 192.168.130.97
@@ -331,8 +334,48 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	    	
 	    }
   	  	 
-	}
+	 }
     
+     
+     if(priznak_kommutacii==my_current_kos.ip_addres)
+       {
+           //send to direction0 sosed KY-S
+       	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");
+  	   //printk("Send to IP sosed 192.168.130.170 direction 0\n\r");     
+  	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+  	   
+       }
+     else
+       {
+    	 if(priznak_kommutacii==0xac)
+    	 {	 
+    	 printk("priznak _commuracii 0xac\n\r");
+    	 nbuf_set_datapacket_dir0  (in_buf ,in_size);
+    	 }
+       
+    	 
+       }
+     
+     
+     
+   //Add Udalenni Multipleksor
+   //Add Udalenni Multipleksor
+   
+   /*  
+   if(priznak_kommutacii==0xac)
+     {
+        //send to direction0 sosed KY-S
+    	   //printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
+      nbuf_set_datapacket_dir0  (in_buf ,in_size);
+          //return;
+      }
+   */  
+     
+     
+     
+     
+     
+     
  /////////////////////////Sosedi Commutacia///////////////////////
  if(priznak_scluz==1)  
  {   
@@ -345,6 +388,19 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
        //return;
      }
    
+    //Add Udalenni Multipleksor
+    if(priznak_kommutacii==0xac)
+     {
+       //send to direction0 sosed KY-S
+   	   //printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
+         nbuf_set_datapacket_dir0  (in_buf ,in_size);
+       //return;
+     }
+   
+ 
+ 
+ 
+ 
  }  
    
    //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
@@ -432,7 +488,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	//printk (">>>>>>>>>.packet _for _my _mps>>>>>>>>>>>>>>\n\r");
 	//nbuf_set_datapacket_dir0  (in_buf ,in_size);
-	
+	u16 start = 3;
 
 	
 //#if 0	
@@ -632,11 +688,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		     
 	 }
 	 //printk("!!!!!!!!!OK_MATRICA_IS_FULL\n\r!!!!!!!!!!!");
-	 /*
+	 
 	 for(i=0;i<max_kolichestvo_setvich_elementov_onpacket;i++)
 	 {
 		printk("setevie_elementi_ip_packet=0x%x\n\r",setevoi_element[i].my_setevoi_element_ip); 
-	 }*/
+	 }
 	 
 	// Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	 
@@ -662,6 +718,8 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 //#endif	
 	
+	dijkstra(start);
+	// Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
 	return 0;
 	
 }
@@ -679,7 +737,7 @@ static void dijkstra(int start)
 {
 	   bool in_tree[4] = {false};
        int i; 
-	   dist[start] = 0; // понятно почему, не так ли? ;)
+	   dist[start] = 0; 
 	   int cur = start; // вершина, с которой работаем
 	   int prom;
 	   int a;
@@ -730,15 +788,32 @@ static void dijkstra(int start)
 	   // нужно распечатать пути
 	   //Кратчайшие маршруты 
 	   a = start;
-	   printk("Marshrutization:\n\r");
+	   printk("Route_tab MP[%d] ip=0x%x\n\r",start,my_current_kos.ip_addres);
 	   for (i=0; i<N; i++)
 	   {
-	        //C ->матрица стоимостей
+	   
+		   //C ->матрица стоимостей
 	        if (i!=a && cost[C[i]][i]!=NULL)
 	        {
-	         printk("from %d to %d =cost %d\n\r",start,i,dist[i]);
+	        	//printk("Ot MP[%d] -> MP[%d] hop = %d |C[i]=%d\n\r",start,i,dist[i],C[i]);
+	          	if(dist[i]==10)
+	          	{
+	          	  printk("Ot MP[%d] -> MP[%d] hop = %d \n\r",start,i,dist[i]);
+	          	}
+	        	
+	        	if(dist[i]==20)
+	          	{
+	          	
+	          	 printk("Ot MP[%d] -> MP[%d] ->MP[%d]  hop = %d \n\r",start,C[i],i,dist[i]);
+	          		
+	          	}
+	        	
+	         //printk("from %d to %d =cost %d\n\r",start,i,dist[i]);
+	         //printk("i=%d,C[i]=%d\n\r",i,C[i]);
 	        }
 
+	     //printk("i=%d,C[i]=%d\n\r",i,C[i]);  
+	        
 	   }
 	
 }
