@@ -318,8 +318,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
     //NMS3 IP address 192.168.120.76(4c)
     //SEVA NMS IP address 192.168.130.97
-    //if(priznak_kommutacii==nms3_ip_addr)
-     if(priznak_kommutacii==seva_nms_ip_addr)
+      if(priznak_kommutacii==nms3_ip_addr)
+     //if(priznak_kommutacii==seva_nms_ip_addr)
      {
          //send to direction0 sosed KY-S
      	 //printk("Send to IP sosed 192.168.120.170 direction 0\n\r");

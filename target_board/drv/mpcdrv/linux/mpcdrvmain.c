@@ -798,8 +798,8 @@ unsigned int Hook_Func(uint hooknum,
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
 	      
 	      
-	     //if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
-		 if (((uint)ip->saddr==SEVA_NMS_IP_ADDR)||(uint)ip->daddr==SEVA_NMS_IP_ADDR)
+	      if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+		 //if (((uint)ip->saddr==SEVA_NMS_IP_ADDR)||(uint)ip->daddr==SEVA_NMS_IP_ADDR)
 		 { 
 				 
 			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
