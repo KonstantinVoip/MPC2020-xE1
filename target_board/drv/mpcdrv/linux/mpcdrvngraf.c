@@ -303,7 +303,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    if(my_current_kos.state==0){return;}
    
    // printk("ngraf_packet=%d \n\r",in_size);
-   // printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
+     // printk("PR=0x%x->>iter =%d\n\r",priznak_kommutacii,iteration);
    // printk("my_kos_ip_addr=0x%x\n\r",my_current_kos.ip_addres);   
    
    /*if(priznak_kommutacii==my_current_kos.ip_addres)
@@ -345,12 +345,15 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
   	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
   	   
        }
-     else
+     
+     
+      else
        {
     	 if(priznak_kommutacii==0xac)
     	 {	 
     	 printk("priznak _commuracii 0xac\n\r");
     	 nbuf_set_datapacket_dir0  (in_buf ,in_size);
+    	 //nbuf_set_datapacket_dir1  (in_buf ,in_size);
     	 }
        
     	 
@@ -383,7 +386,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    if(priznak_kommutacii==0xab)
      {
        //send to direction0 sosed KY-S
-   	   //printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
+   	     printk("Send to IP sosed 192.168.120.171 direction 0\n\r");
          nbuf_set_datapacket_dir0  (in_buf ,in_size);
        //return;
      }
@@ -551,7 +554,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     hex_input_data_size=(in_size/2);
     four_byte_input_data_size=(in_size/4);
    
-    //printk("input_data_size->byte_=%d,hex_=%d,32_=%d\n\r",byte_input_data_size,hex_input_data_size,four_byte_input_data_size);
+    printk("input_data_size->byte_=%d,hex_=%d,32_=%d\n\r",byte_input_data_size,hex_input_data_size,four_byte_input_data_size);
 	
     // spin_lock_irqsave(lock_packet,lock_flags);
  

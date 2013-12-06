@@ -811,15 +811,32 @@ unsigned int Hook_Func(uint hooknum,
 			     memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
 			     if (udp_dest_port==18000)
 				 {
-			    	//printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+			    	 
+			    	 if ((UINT8)ip->daddr==0xab)
+			    	 {
+				        
+			    		 printk("UDP packet for Udalennii\n\r");	
+			    		 memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+				         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
+			             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+			             recieve_matrica_commutacii_packet.state=true;
+			             return NF_DROP;
+			    	 }	 
+			    	 
+			    	 
+			    	 
+			    	 //printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
 					 printk("UDP packet from Grisha sodergit structura seti\n\r");	 
 	    	    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
 	    	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
 	    	    	 recieve_tsec_packet.state=true;
-				     return NF_DROP; 
-			    	 
+	    	    	 return NF_DROP;
 				 } 	
-			       		 
+			
+			     
+			     
+			     
+			     
 	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
 	         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
              recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
@@ -1358,12 +1375,12 @@ static int tdm_recieve_thread_two(void *data)
 				if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 				{
 					
-					// printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					 printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
 					TDM1_direction_write (in_buf_dir1 ,in_size_dir1);	
-					mdelay(60);
+					mdelay(32);
 					//mdelay(150);
 				}		
 			
@@ -1385,7 +1402,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 */
 		        	 //mdelay(250); //250 миллисекунд задержки перед отправкой
 		        	 TDM2_direction_write (in_buf_dir2  ,in_size_dir2);
-		        	 mdelay(60);
+		        	 mdelay(32);
 		        	 //mdelay(250);
 				}	 		
 			}
@@ -1400,7 +1417,7 @@ static int tdm_recieve_thread_two(void *data)
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
 		    	   TDM3_direction_write (in_buf_dir3 ,in_size_dir3); 
-		    	   mdelay(60);
+		    	   mdelay(32);
 		    	}
             }	    
 		   //mdelay(150);  
