@@ -588,7 +588,7 @@ UINT32  target_arp_ip_da_addr=0;
 /* Указатель на структуру заголовка протокола eth в пакете */
 /*struct ethhdr *eth;
 eth=(struct ethhdr *)skb_mac_header(skb);*/
-
+//printk("ARP_broadcast_request_SA_MAC\n\r");
 /*
 struct arphdr *arp;	
 arp=(struct  arphdr *)skb_network_header(skb);
@@ -604,7 +604,9 @@ arp=(struct  arphdr *)skb_network_header(skb);
 //memcpy(input_mac_sa_addr,eth->h_source,6);
 //input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 //Last four byte mac _address input_mac_last_word
-    if(g_my_kys_state==1)    //Information packet OK
+ 
+
+  if(g_my_kys_state==1)    //Information packet OK
     {	
       memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
       //printk("ARP zaprosi na ip da address 0x%x\n\r",target_arp_ip_da_addr);
@@ -769,7 +771,43 @@ unsigned int Hook_Func(uint hooknum,
 	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,g_my_kys_mac_addr);  	  
 	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	 }
-		
+	
+     
+	 memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+     recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
+     recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+     recieve_matrica_commutacii_packet.state=true;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	//Пакеты С Графом на первый пакет на 18000 порт
+    //Пока просто проверяю построение матрицы коммутации и маршрутизации
+    /* memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
+     if (udp_dest_port==18000)
+	 {
+    	 printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+		 printk("UDP packet from Grisha sodergit structura seti\n\r");	 
+    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
+    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
+    	 recieve_tsec_packet.state=true;
+    	 return NF_DROP;
+	 } 	//end UDP port 18000
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	 /*Не пропускаю пакеты (DROP) с длинной нечётным количеством байт
 	  *например 341 или что-то подобное 111*/    		
@@ -798,20 +836,53 @@ unsigned int Hook_Func(uint hooknum,
 	     /*Фильтрую пакеты по адресу источника это Гришин НМС3 192.168.120.76 */	      
 	      
 	      
-	      if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+	     // if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 		 //if (((uint)ip->saddr==SEVA_NMS_IP_ADDR)||(uint)ip->daddr==SEVA_NMS_IP_ADDR)
-		 { 
-				 
+		 // { 
+				
+		    	 //printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+				 //printk("UDP packet from Grisha sodergit structura seti\n\r");
 			 //printk("ip->saddr=0x%x|ip->daaddr=0x%x|protokol=0x%x\n\r",(uint)ip->saddr,(uint)ip->daddr,ip->protocol);
              //recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	         //printk("+Drop_packet_size=%d|\n\r",(uint)skb->mac_len+(uint)skb->len);
   
-	            //Пришёл пакет от Гришы на 18000 порт для построения матрицы коммутации       
+	            //Пришёл пакет от Гришы на 18000 порт для построения матрицы коммутации или удалённому      
 		        //Пока просто проверяю построение матрицы коммутации и маршрутизации
-			     memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
+			    
+	             /*
+	             memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
 			     if (udp_dest_port==18000)
 				 {
 			    	 
+			    	
+		
+			    	 
+			    	 
+			    	 printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+					 printk("UDP packet from Grisha sodergit structura seti\n\r");	 
+	    	    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
+	    	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
+	    	    	 recieve_tsec_packet.state=true;
+	    	    	 return NF_DROP;
+				 } 	//end UDP port 18000
+			    */
+			     
+			     
+			     
+			 /*    
+	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
+             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+             recieve_matrica_commutacii_packet.state=true;
+             return NF_DROP;*/ 
+	
+		 //}     
+             
+             
+         
+			     
+			     
+		    	 /*
 			    	 if ((UINT8)ip->daddr==0xab)
 			    	 {
 				        
@@ -822,31 +893,17 @@ unsigned int Hook_Func(uint hooknum,
 			             recieve_matrica_commutacii_packet.state=true;
 			             return NF_DROP;
 			    	 }	 
-			    	 
-			    	 
-			    	 
-			    	 //printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
-					 printk("UDP packet from Grisha sodergit structura seti\n\r");	 
-	    	    	 memcpy(recieve_tsec_packet.data ,skb->data+IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH,(uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH)); 
-	    	    	 recieve_tsec_packet.length =  (uint)skb->len-(IPv4_HEADER_LENGTH+UDP_HEADER_LENGTH);
-	    	    	 recieve_tsec_packet.state=true;
-	    	    	 return NF_DROP;
-				 } 	
-			
+			    	 */
 			     
 			     
 			     
 			     
-	         memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-	         recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
-             recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
-             recieve_matrica_commutacii_packet.state=true;
-             return NF_DROP; 
-	
-		 }     
-             
-             
-             
+			     
+			     
+			     
+			     
+			     
+			     
        #if 0 
 		 
 			 	 /* 3уровень ICMP protocol*/	
@@ -1361,7 +1418,7 @@ static int tdm_recieve_thread_two(void *data)
 			    	 printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
 		        	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
 			    	 */
-			    	 TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
+			    	 //TDM0_direction_write (in_buf_dir0 ,in_size_dir0);
 			    	 mdelay(32);
 		        }
 			
@@ -1447,12 +1504,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       schedule();
 			       
 			       //функция обработки пакета для построения графа
+			       /*
 			       if (get_tsec_state()==1)
 			       {	   
 			       ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
 			       get();
 			       }
-			       
+			       */
 			       //функция отправки в матрицу коммутации
 			       if(recieve_matrica_commutacii_packet.state==1)
 			       {

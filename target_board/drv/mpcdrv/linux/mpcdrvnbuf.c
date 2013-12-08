@@ -515,7 +515,7 @@ bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
 	 
 	// printk(">>>>>>>>>>>>++++++++++++++++++++<<<<<<<<<<<<<<<<\n\r");
 	 //spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
-	 
+//#if 0	 
 	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|Iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 status=mpcfifo_get(fifo_put_to_tdm0_dir, in_buf);
 	 //printk(">>>>>>>>>>>>+++++++status=%d++++++++++++<<<<<<<<<<<<<<<<\n\r",status);
@@ -547,7 +547,8 @@ bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
 	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir0,packet_size_in_byte);//send to eternet	 
 #endif	 
  	 
- 	 
+
+//#endif	 
  	 get_iteration_dir0++;
      return status;
  	 
