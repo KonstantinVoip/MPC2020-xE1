@@ -606,6 +606,8 @@ arp=(struct  arphdr *)skb_network_header(skb);
 //Last four byte mac _address input_mac_last_word
  
 
+
+
   if(g_my_kys_state==1)    //Information packet OK
     {	
       memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
@@ -617,8 +619,9 @@ arp=(struct  arphdr *)skb_network_header(skb);
       return NF_ACCEPT;
     } 
 	 
+  
+  
 	 //printk(">>>last8_preword\n\r");
-
    //if (skb->protocol == htons(ETH_P_ARP))
    //{
     	//printk("ARP_OK\n\r");
@@ -728,9 +731,10 @@ unsigned int Hook_Func(uint hooknum,
 	input_mac_last_word=input_mac_da_addr[1];
 	//Last byte mac address for priznac_commutacii;
 	//priznac commutacii po mac;
-	input_mac_prelast_byte=input_mac_last_word>>8;
+	
+	//input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
-	input_mac_last_byte = input_mac_last_word;
+	//input_mac_last_byte = input_mac_last_word;
 
 //#if 0  //Global comment	
 	
@@ -772,13 +776,18 @@ unsigned int Hook_Func(uint hooknum,
 	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	 }
 	
-     
+	
+	
+	
+	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
+	{	
+	 //Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
 	 memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
      recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
      recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
      recieve_matrica_commutacii_packet.state=true;
-	
-	
+	 return NF_DROP;
+	}
 	
 	
 	

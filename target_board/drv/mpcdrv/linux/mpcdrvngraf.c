@@ -328,17 +328,17 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     static UINT16 iteration=0;
    //UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
-    my_current_kos.ip_addres=0xAA;
+   // my_current_kos.ip_addres=0xAA;
     UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
-   //if(my_current_kos.state==0){return;}
+   if(my_current_kos.state==0){return;}
    
    //Пакет моему KY-S
    
    if(priznak_kommutacii==my_current_kos.ip_addres)
      {
        
-	     printk("priznak_kommutacii==0xaa\n\r");
+	   //printk("priznak_kommutacii==0xaa\n\r");
 	   //Если пакет моему KY-S  и признак коммутации порт 18000 то это
 	   //матрицы коммутации       
 	          memcpy(&udp_dest_port,&in_buf[18],2); 
@@ -351,12 +351,12 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          } //end UDP port 18000
 	          
 	          //если другой пакет отправляем KY-S в eth1
-	         /*
+	         
 	          else
 	          {
 	        	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
 	          }
-  	          */
+  	          
       }  
   
  /*  
@@ -722,7 +722,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   //и матрицу коммутации.	
 
 //#if 0
-//просматриваем все пары связности	(количество сетевых элементов)
+//просматриваем все пары связности	(количество сетевых элементов в пакете)
 for(i=0;i<1/*number_of_par_sviaznosti_in_packet*/;i++)
 {	
 	//первую пару свзяности
