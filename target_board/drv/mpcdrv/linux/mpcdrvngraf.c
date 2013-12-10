@@ -102,7 +102,7 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 /*	PRIVATE FUNCTION PROTOTYPES					                             */
 /*****************************************************************************/
 static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
-static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip);
+static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *mk8_sosed_vyhod);
 
 static void dijkstra(int start);
 
@@ -271,7 +271,7 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip)
+static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *mk8_sosed_vyhod)
 {
 
     static iteration =0;
@@ -281,7 +281,7 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
      UINT16 l_last_polovinka_sosed =0;
 	 UINT8  l_my_posad_mesto=0;
 	 UINT8  l_my_mk8_vihod=0;
-	
+	 UINT8  l_sosed_mk8_vihod=0;
 	
 	//IP адрес источника
 	l_ipaddr  = in_sviaz_array[0]; 	
@@ -295,8 +295,9 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	l_sosed_ipaddr  = l_first_polovinka_sosed;
 	l_sosed_ipaddr  = (l_sosed_ipaddr<<16); 
 	l_sosed_ipaddr = l_sosed_ipaddr +l_last_polovinka_sosed;
+	l_sosed_mk8_vihod=(UINT8)(in_sviaz_array[2]);
 	
-	
+	//printk("l_sosed_mk8_vihod=%d\n\r",l_sosed_mk8_vihod);
 	
 	//printk("iter=%d->>SOSED_IP_ADDR=0x%x->mk8_vihod=%d \n\r",iteration,l_sosed_ipaddr,l_my_mk8_vihod);
 	  
@@ -310,6 +311,8 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	*posad_mesto=l_my_posad_mesto;
 	*mk8_vyhod=l_my_mk8_vihod;
 	*sosed_ip=l_sosed_ipaddr;
+    *mk8_sosed_vyhod=l_sosed_mk8_vihod;
+	
 	iteration++;
 }
 
@@ -338,7 +341,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
   
-    if (priznak_kommutacii==multipleksor[0].curr_ipaddr)
+    if (priznak_kommutacii==(u8)multipleksor[0].curr_ipaddr)
     {
 	   //Если пакет моему KY-S  и признак коммутации порт 18000 то это
 	   //матрицы коммутации       
@@ -355,9 +358,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          {
 	        	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
 	          } 	
-      }
-    
-    if(priznak_kommutacii==multipleksor[0].nms3_ipaddr)
+      
+     }
+
+   
+    if(priznak_kommutacii==(u8)multipleksor[0].nms3_ipaddr)
     {
         //send to direction0 sosed KY-S
     	
@@ -373,7 +378,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
  	  	 
 	}
     
-      
+   
   if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
   {
 	  
@@ -409,7 +414,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	  }
 	  
   }
-   
+ 
 
 
    
@@ -577,7 +582,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
    
    UINT8 my_posad_mesto=0;
    UINT8 my_mk8_vihod=0;
-   
+   UINT8 sosed_mk8_vyhod=0;
    
    UINT16 number_of_multipleksorov_in_packet=1;
    //здесь храниться длинна одной связи либо в байтах либо в количестве элементов по 4 байта каждый; 
@@ -603,6 +608,14 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		  	  	  	  	  	  	  	  	  	  	  	  	  0    ,0    ,0   ,0 
 		  	  	  	  	  	  	  	  	  	   };	
   	 	
+    
+    for(i=0;i<in_size;i++)
+    {
+    	
+    	printk("0x%x ",in_buf[i]);
+    }
+   
+   
 	//18 это в пакете наш  UDP  порт destination
 	memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	printk ("NMS3_ip_addr =<0x%x>\n\r",nms3_ip_addres);
@@ -655,17 +668,18 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	printk("all_number_of_par_sviaznosti_in_tek_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
 	printk("tek_kolichestvo_par_dli_dannogo_elementa= %d\n\r",tek_kolichestvo_par_dli_dannogo_elementa); 
-	
+	//parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
 	
   //Рассчитываем количество узловых мультплексоров в пакете	
-  if(number_of_par_sviaznosti_in_packet>1)
+/* 
+if(number_of_par_sviaznosti_in_packet>1)
   {	
 	
 	//просматриваем все пары связности в пакете
 	for(m=0;m<number_of_par_sviaznosti_in_packet;m++)
 	{
 		
-		parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
+		parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
 		//стартовые условия
 		if(m=0)
 		{
@@ -693,42 +707,47 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   }
 	
   printk("kolichestvo_multiplekosorov_in_packet= %d\n\r",number_of_multipleksorov_in_packet); 
+ */
   
   //Теперь нужно определить кто я  с точки зрения пакета котроый пришёл
   //пакет для маршрутизации () от меня  (1)
   //или пакет пакет для прокладки трассы от остальных ко мне
   //Как узнать?
-  dlinna_pari_sviaznosti_byte=0;
+ 
+ // dlinna_pari_sviaznosti_byte=0;
   //1.Ищу вхождения что маршрутизация от меня ()
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {
-	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
+	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
 	  //пакет исходит от меня построение маршрута от меня я нашёл себя
-	  if(my_current_kos.ip_addres==l_ipaddr)
+	  if(my_current_kos.ip_addres==(u8)l_ipaddr)
 	  {
+		//printk("++\n\r");
 		multipleksor[0].ipaddr_sosed[i]=(u8)sosed_ipaddr;
 		multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod;
 		  
 	  }
       //я сосед висящий на первой связи
-	  if(my_current_kos.ip_addres==sosed_ipaddr)
+	  if(my_current_kos.ip_addres==(u8)sosed_ipaddr)
       {
-		
-		  
-		  
-		 multipleksor[1].ipaddr_sosed[i]=(u8)l_ipaddr;
-	     multipleksor[1].tdm_direction_sosed[i]=my_mk8_vihod;
-    	  
+		 multipleksor[0].ipaddr_sosed[i]=(u8)l_ipaddr;
+	     multipleksor[0].tdm_direction_sosed[i]=sosed_mk8_vyhod;
       }
 	  
 	  
    dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
   }
+ 
+  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
+  {	  
+  printk("MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
+  }
   
-  
-  
-  
-  
+  //printk("MPO->ip_sosed=0x%x|tdm_dir->%d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+  /*
+  printk("MP1->ip_sosed=0x%x|tdm_dir->%d\n\r",multipleksor[1].ipaddr_sosed[0],multipleksor[1].tdm_direction_sosed[0]);
+  printk("MP1->ip_sosed=0x%x|tdm_dir->%d\n\r",multipleksor[1].ipaddr_sosed[1],multipleksor[1].tdm_direction_sosed[1]);
+  */
   
   
   
