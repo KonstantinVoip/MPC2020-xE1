@@ -283,6 +283,8 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
+extern UINT16 marsrutiazation_enable;
+
 
 /*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
 extern bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
@@ -592,11 +594,15 @@ UINT32  target_arp_ip_da_addr=0;
 /*struct ethhdr *eth;
 eth=(struct ethhdr *)skb_mac_header(skb);*/
 //printk("ARP_broadcast_request_SA_MAC\n\r");
-/*
-struct arphdr *arp;	
-arp=(struct  arphdr *)skb_network_header(skb);
-*/ 
 
+//struct arphdr *arp;	
+//arp=(struct  arphdr *)skb_network_header(skb);
+ 
+const char *virt_dev=0;
+//input_mac_prelast_byte=input_mac_last_word>>8;
+//priznac chto iformation channel packet;
+//input_mac_last_byte = input_mac_last_word;
+virt_dev=skb->dev->name;
 //memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header+16+14+8,4);
 //memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
 //printk("ARP request DA 0x%x\n\r",target_arp_ip_da_addr);
@@ -608,9 +614,38 @@ arp=(struct  arphdr *)skb_network_header(skb);
 //input_mac_sa_addr[1]=input_mac_sa_addr[1]>>16;
 //Last four byte mac _address input_mac_last_word
  
+    //Нет пакета с Гришиной маршрутизацией прозрачно ARP прокидываю
+    if (marsrutiazation_enable==0)
+    {
+   	    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+    	//Пришёл ARP Request от Гришы отпраялю КY-S в eth1
+    	//Простая коммутация из порта в порт
+	     if (virt_dev && !strcasecmp(virt_dev ,"eth1"))
+	     {
+	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+	     printk("__no_marshrutiaztion_ARP_Reply ->to eth2 grisha_nms3\n\r");
+	     }	 
+	     if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+	     {
+	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);	 
+	     printk("__no_marshrutiaztion_ARP_Request ->to eth1 ky-s\n\r");
+	     }
+        /*
+        if(arp->ar_op==0x0001)
+        {
+    	p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
+    	printk("__no_marshrutiaztion_ARP_Request ->to eth1 ky-s\n\r");
+        }
+    	else  //Пришёл ARP Reply отправляю его в eth2 НМС3
+    	{
+    	p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2); 
+    	printk("__no_marshrutiaztion_ARP_Reply ->to eth2 grisha_nms3\n\r");
+    	}*/	
+    return NF_DROP;
+    }	
 
-
-
+    
   if(g_my_kys_state==1)    //Information packet OK
     {	
       memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
@@ -733,12 +768,12 @@ unsigned int Hook_Func(uint hooknum,
 	//Last four byte mac _address input_mac_last_word
 	input_mac_last_word=input_mac_da_addr[1];
 	//Last byte mac address for priznac_commutacii;
-	//priznac commutacii po mac;
-	
+	//priznac coconst char *virt_dev=0;mmutacii po mac;
+	const char *virt_dev=0;
 	//input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
 	//input_mac_last_byte = input_mac_last_word;
-
+	virt_dev=skb->dev->name;
 //#if 0  //Global comment	
 	
 	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
@@ -779,9 +814,36 @@ unsigned int Hook_Func(uint hooknum,
 	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	 }
 	
+    //Нет маршрутизации для шлюзового работаем как коммутатор 0 уровня.без маршрутизации надо проверить как это живёт
+	if (marsrutiazation_enable==0)
+	    {
+		 //Простая коммутация из порта в порт
+		 memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	     recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+	     if (virt_dev && !strcasecmp(virt_dev ,"eth1"))
+	     {
+	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+	     }	 
+	     if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
+	     {
+	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);	 
+	     }
+	   
+	    return NF_DROP;
+	    }	
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
 	 //Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
@@ -791,7 +853,7 @@ unsigned int Hook_Func(uint hooknum,
      recieve_matrica_commutacii_packet.state=true;
 	 return NF_DROP;
 	}
-	
+	*/
 	
 	
 	

@@ -47,6 +47,9 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
+extern UINT16 marsrutiazation_enable;
+
+
 ///CURRENT _KYS
 static struct KY_S
 {
@@ -335,30 +338,6 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    if(my_current_kos.state==0){return;}
    printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-   /*
-   if(priznak_kommutacii==my_current_kos.ip_addres)
-     {
-       
-	   //printk("priznak_kommutacii==0xaa\n\r");
-	   //Если пакет моему KY-S  и признак коммутации порт 18000 то это
-	   //матрицы коммутации       
-	          memcpy(&udp_dest_port,&in_buf[18],2); 
-	          //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
-	          if (udp_dest_port==18000)
-	          {
-	        	  //строим матрицу коммутации
-	            ngraf_packet_for_my_mps(in_buf ,in_size);
-	            
-	          } //end UDP port 18000
-	          
-	          //если другой пакет отправляем KY-S в eth1
-	         
-	          else
-	          {
-	        	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
-	          }
-  	          
-      }  */
   
     if (priznak_kommutacii==multipleksor[0].curr_ipaddr)
     {
@@ -370,7 +349,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          {
 	        	  //строим матрицу коммутации
 	            ngraf_packet_for_my_mps(in_buf ,in_size);
-	            
+	            marsrutiazation_enable=1;
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
