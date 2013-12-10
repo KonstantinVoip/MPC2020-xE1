@@ -258,7 +258,6 @@ void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 	my_current_kos.ip_addres=ip_addres;
 	my_current_kos.mac_address=mac_address;
 	multipleksor[0].curr_ipaddr=ip_addres;
-	multipleksor[0].nms3_ipaddr=0x4c;
 	printk("++Set_Multiplecsor_IP_and_MAC_OK++\n\r");
 	printk("State =0x%x>>IP=0x%x,MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",state,ip_addres,my_current_kos.mac_address[0],my_current_kos.mac_address[1],my_current_kos.mac_address[2],my_current_kos.mac_address[3],my_current_kos.mac_address[4],my_current_kos.mac_address[5]);
 }
@@ -336,7 +335,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
    if(my_current_kos.state==0){return;}
-   printk("PR_commut =0x%x \n\r",priznak_kommutacii);
+   //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
   
     if (priznak_kommutacii==multipleksor[0].curr_ipaddr)
@@ -543,65 +542,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 #endif 
    iteration++;
 
-   
-    
-   //Признак коммутации ->>>пакет предназначенный для отправки обратно моему КY-S или пакет с Гришиным графом для удалённого МПС
-   //(не шлюзового МПС)
-   //матрица коммутации после построения Гришиного пакета.    
-#if 0   
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[0])
-   {
-    //Здесь кладём пакет в FIFO на отправку в нужное направление .TDM накапливаем пакеты
-	  nbuf_set_datapacket_dir0  (in_buf ,in_size);
-   }
-   
-   
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[1])
-   {	   
-   //Сосед на направлении 2
-	  nbuf_set_datapacket_dir1  (in_buf ,in_size);
-   }
-	
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[2])
-   {
-	   //Сосед на направлении 3
-	  nbuf_set_datapacket_dir2  (in_buf ,in_size);
-   }
-   
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[3])
-   {	   
-   //Сосед на направлении 4
-	  nbuf_set_datapacket_dir3  (in_buf ,in_size);
-   }
-  
-   
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[4])
-   {	   
-   //Сосед на направлении 5
-	  nbuf_set_datapacket_dir4  (in_buf ,in_size);
-   }
-	  
-   
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[5])
-   {	   
-   //Сосед на направлении 6
-	  nbuf_set_datapacket_dir5  (in_buf ,in_size);
-   }   
-	
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[6])
-   {	   
-   //Сосед на направлении 7
-	  nbuf_set_datapacket_dir6  (in_buf ,in_size);
-   }
-	  
-   if(priznak_kommutacii==setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[7])
-   {	   
-	  //Сосед на направлении 8
-	  nbuf_set_datapacket_dir7  (in_buf ,in_size);
-   }
-#endif  
- 	
-	
+ 
  	 //ICMP запрос Echo requeest   
      //Функция тупо отправляем в Ethernet пришедший буффер нужно доделать от какого device (eth0,eth1,eth2)
      //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size);//send to eternet
@@ -632,9 +573,13 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   __be32  curr_ipaddr=0;
    UINT16 iteration=0;
    UINT16 i,j;
+   UINT16 m=0;  //структура с текущим мультиплексором
+   
    UINT8 my_posad_mesto=0;
    UINT8 my_mk8_vihod=0;
    
+   
+   UINT16 number_of_multipleksorov_in_packet=1;
    //здесь храниться длинна одной связи либо в байтах либо в количестве элементов по 4 байта каждый; 
    UINT16 dlinna_pari_sviaznosti_byte=0;
    //Для МК-8 8 пар связности для одного сетевого элемента.
@@ -659,12 +604,12 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		  	  	  	  	  	  	  	  	  	   };	
   	 	
 	//18 это в пакете наш  UDP  порт destination
-	//memcpy(&nms3_ip_addres,&in_buf[13],4); 
-	//printk ("NMS3_ip_addr =<0x%x>\n\r",nms3_ip_addres);
-	//multipleksor[0].nms3_ipaddr=nms3_ip_addres;
+	memcpy(&nms3_ip_addres,&in_buf[13],4); 
+	printk ("NMS3_ip_addr =<0x%x>\n\r",nms3_ip_addres);
+	multipleksor[0].nms3_ipaddr=nms3_ip_addres;
 	//memcpy(&protocol_version,&in_buf[13],4);
 	//printk ("NMS3_protocol_version =0x%x>\n\r",protocol_version);
-	
+
 	memcpy(&scluz_ip_addres,&in_buf[25],4);
 	printk ("Scluz_ip_addr =<0x%x>\n\r",scluz_ip_addres);
 	multipleksor[0].gate_ipaddr=scluz_ip_addres;
@@ -704,24 +649,135 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	
 	//max_kolichestvo_setvich_elementov_onpacket=1;
-	number_of_par_sviaznosti_in_packet=in_size/DLINNA_SVYAZI;
+	number_of_par_sviaznosti_in_packet=razmer_data_graf_massive/DLINNA_SVYAZI;
 	//вычислить количество пар для данного элемента
-	tek_kolichestvo_par_dli_dannogo_elementa=2;
+	//tek_kolichestvo_par_dli_dannogo_elementa=2;
 	
-	printk("number_of_par_sviaznosti_in_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
+	printk("all_number_of_par_sviaznosti_in_tek_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
 	printk("tek_kolichestvo_par_dli_dannogo_elementa= %d\n\r",tek_kolichestvo_par_dli_dannogo_elementa); 
 	
+	
+  //Рассчитываем количество узловых мультплексоров в пакете	
+  if(number_of_par_sviaznosti_in_packet>1)
+  {	
+	
+	//просматриваем все пары связности в пакете
+	for(m=0;m<number_of_par_sviaznosti_in_packet;m++)
+	{
+		
+		parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
+		//стартовые условия
+		if(m=0)
+		{
+		curr_ipaddr=l_ipaddr;
+		}
+		//стартовые условия
+		if(curr_ipaddr==l_ipaddr)
+		{
+		   printk("iteraton in packet++\n\r");	
+		}
+		else
+		{
+		number_of_multipleksorov_in_packet++;
+		}
+	//модифицируем значение текущего ip.
+	curr_ipaddr=l_ipaddr;	
+	//переходим к следующей связи в пакете
+	dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
+	}
+  
+  }
+  else
+  {
+	 number_of_multipleksorov_in_packet=1;
+  }
+	
+  printk("kolichestvo_multiplekosorov_in_packet= %d\n\r",number_of_multipleksorov_in_packet); 
+  
+  //Теперь нужно определить кто я  с точки зрения пакета котроый пришёл
+  //пакет для маршрутизации () от меня  (1)
+  //или пакет пакет для прокладки трассы от остальных ко мне
+  //Как узнать?
+  dlinna_pari_sviaznosti_byte=0;
+  //1.Ищу вхождения что маршрутизация от меня ()
+  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
+  {
+	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
+	  //пакет исходит от меня построение маршрута от меня я нашёл себя
+	  if(my_current_kos.ip_addres==l_ipaddr)
+	  {
+		multipleksor[0].ipaddr_sosed[i]=(u8)sosed_ipaddr;
+		multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod;
+		  
+	  }
+      //я сосед висящий на первой связи
+	  if(my_current_kos.ip_addres==sosed_ipaddr)
+      {
+		
+		  
+		  
+		 multipleksor[1].ipaddr_sosed[i]=(u8)l_ipaddr;
+	     multipleksor[1].tdm_direction_sosed[i]=my_mk8_vihod;
+    	  
+      }
+	  
+	  
+   dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+	
+	/*
 	if(multipleksor[0].priznac_shcluzovogo==0)
 	{
 		return;
 	}
+	*/
+// parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip)
+    /*Просматриваем все пары связности которые есть в пакете*/	
+	//тут должно быть количество сетевых элементов в пакете (мультплексоров)
+	//for(i=0;i<number_of_multipleksorov_in_packet;i++)
+	//{
 	
-  //Нужно грамотно распарсить пакет
-  //что мы из него узнаем?
-  //количество сетевых элементов с которыми соединён.
-  //и матрицу коммутации.	
+			//тут будет общее количество пар связности в пакете
+	
+ /* 
+            for(j=0;j<number_of_par_sviaznosti_in_packet;j++)
+			{		
+				//Парсим одну свзь на элементы
+				parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
+				
+				//Заполняю элементы матрицы маршрутизации для моего KY-S(моего IP)
+				//маршрутизацию от меня к удалённому
+				
+				//Для шлюзового это действует
+				if(my_current_kos.ip_addres==l_ipaddr)
+				{
+				multipleksor[i].ipaddr_sosed[j]=(u8)sosed_ipaddr;
+			    multipleksor[i].tdm_direction_sosed[j]=my_mk8_vihod;	
+			    }
+				dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3; 
+			}
+		  
+  */
 
-//#if 0
+
+	//}
+	
+	
+	
+	
+#if 0
 //просматриваем все пары связности	(количество сетевых элементов в пакете)
 for(i=0;i<1/*number_of_par_sviaznosti_in_packet*/;i++)
 {	
@@ -767,11 +823,10 @@ for(i=0;i<1/*number_of_par_sviaznosti_in_packet*/;i++)
 	
 }	
 
-   
 
 printk("MPO->ip_sosed=0x%x|tdm_dir->%d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
 printk("MPO->ip_sosed=0x%x|tdm_dir->%d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
-//#endif
+#endif
 
 
 #if 0    
