@@ -166,12 +166,12 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
 //Set multicast configuration for  1 and 2 device
-//p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
+p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 //p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 
-p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
-p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
+//p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
+//p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 
 //Start GIANFAR DRIVER eth1.
 //int	(*ndo_init_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_init;
@@ -382,6 +382,12 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id)
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
 	//p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
+	if(tsec_id==0)
+	{
+		p2020_get_from_tdmdir_and_put_to_ethernet(tsec0_dev);
+	}
+	
+	
 	
 	if(tsec_id==1)
 	{

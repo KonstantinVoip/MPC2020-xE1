@@ -326,7 +326,7 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii)
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_arp_sender)
 {
    //UINT16  out_mac[12];
    //UINT16  mac1[3];
@@ -337,10 +337,25 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    // my_current_kos.ip_addres=0xAA;
     UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
-   if(my_current_kos.state==0){return;}
+  // if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-  
+    
+    
+    //Дополнительное условие проверки ARP
+    if(priznak_nms3_arp_sender)
+    {
+       if((u8)multipleksor[0].curr_ipaddr==priznak_kommutacii)
+       {
+    	   multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
+       }
+        
+    }
+    
+   
+   
+ 
+   
     if (priznak_kommutacii==(u8)multipleksor[0].curr_ipaddr)
     {
 	   //Если пакет моему KY-S  и признак коммутации порт 18000 то это
@@ -608,13 +623,13 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		  	  	  	  	  	  	  	  	  	  	  	  	  0    ,0    ,0   ,0 
 		  	  	  	  	  	  	  	  	  	   };	
   	 	
-    
+    /*
     for(i=0;i<in_size;i++)
     {
     	
     	printk("0x%x ",in_buf[i]);
     }
-   
+    */
    
 	//18 это в пакете наш  UDP  порт destination
 	memcpy(&nms3_ip_addres,&in_buf[13],4); 

@@ -127,7 +127,7 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 
 //extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направитъ*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u8 otkuda_paket_tsec_tdm);
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr);
 
 
 //extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
@@ -1279,6 +1279,7 @@ void TDM0_dierction_read ()
 
   //
   __be32  dir0_target_arp_ip_da_addr=0;
+  __be32  dir0_target_arp_nms_sa_addr  =0;      
   //IP DA address read on direction 0
   __be32  dir0_ip_da_addr    = 0;
   //MAC DA address read on direction 0
@@ -1342,10 +1343,10 @@ void TDM0_dierction_read ()
 		  //ARP packet for matrica  //2 bait massive 
 		  //16+14+8= 
 		   
-		   //memcpy(&dir0_target_arp_ip_da_addr,out_buf+16+14+8,4);
+		   memcpy(&dir0_target_arp_nms_sa_addr,out_buf+14,4);
 		   memcpy(&dir0_target_arp_ip_da_addr,out_buf+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_target_arp_ip_da_addr,0x11);   
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_target_arp_ip_da_addr,(u8)dir0_target_arp_nms_sa_addr);   
 	 	   
 	 	  //send to tsec2
 		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
@@ -1354,7 +1355,7 @@ void TDM0_dierction_read ()
 	   else
 	   {
 	      // printk("paket po ip hesder\n\r");
-		     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_ip_da_addr,0x11); 
+		     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,(u8)dir0_ip_da_addr,0x0000); 
 	   }
 	   
 	   //priznak packeta KY-S 
@@ -1394,7 +1395,7 @@ void TDM1_dierction_read ()
 	  
 	  
 	  __be32  dir1_target_arp_ip_da_addr=0;
-	  
+	  __be32  dir1_target_arp_nms_sa_addr=0; 
 	  UINT8   dir1_dobavka_esli_packet_nechetnii=0; 
 	  //IP DA address read on direction 1
 	  __be32  dir1_ip_da_addr    = 0;
@@ -1454,9 +1455,10 @@ void TDM1_dierction_read ()
 		 if(dir1_priznak_arp_packet==0x0806)
 		 {
 		 		 
+			   memcpy(&dir1_target_arp_nms_sa_addr,out_buf1+14,4);
 			   memcpy(&dir1_target_arp_ip_da_addr,out_buf1+19,4);
 			   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(u8)dir1_target_arp_ip_da_addr,0x11);  
+			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(u8)dir1_target_arp_ip_da_addr,(u8)dir1_target_arp_nms_sa_addr);  
 			     //ARP packet for matrica
 		 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 			     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -1464,7 +1466,7 @@ void TDM1_dierction_read ()
 	  	 //priznak ky-s
 	  	 else
 	  	 {
-	  		ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(u8)dir1_ip_da_addr,0x11); 	  	 
+	  		ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,(u8)dir1_ip_da_addr,0x0000); 	  	 
 	  	 }
 		 
 		 
@@ -1506,6 +1508,7 @@ void TDM2_dierction_read ()
 	 
 	  //
 	  __be32  dir2_target_arp_ip_da_addr=0;
+	  __be32  dir2_target_arp_nms_sa_addr=0;
 	  UINT8   dir2_dobavka_esli_packet_nechetnii=0; 
 	  
 	  
@@ -1571,15 +1574,17 @@ void TDM2_dierction_read ()
   	 
 	 	  	 if(dir2_priznak_arp_packet==0x0806)
 	 	  	   {
-				   memcpy(&dir2_target_arp_ip_da_addr,out_buf2+19,4);
+				   
+	 	  		   memcpy(&dir2_target_arp_nms_sa_addr,out_buf2+14,4);
+	 	  		   memcpy(&dir2_target_arp_ip_da_addr,out_buf2+19,4);
 				   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(u8)dir2_target_arp_ip_da_addr,0x11);  
+				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(u8)dir2_target_arp_ip_da_addr,dir2_target_arp_nms_sa_addr);  
 	 	  		 
 	 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 	 	  	   } 
 	 	  	   else
 	 	  	   {   
-	 	  	     ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(UINT8)dir2_ip_da_addr,0x11);  
+	 	  	     ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(UINT8)dir2_ip_da_addr,0x0000);  
 	 	  	   }	  	   
 
 	 	  	 
@@ -1623,6 +1628,7 @@ void TDM3_dierction_read  ()
 	  	 	  
 	  //
 	  __be32  dir3_target_arp_ip_da_addr=0;
+	  __be32  dir3_target_arp_nms_sa_addr=0;
 	  UINT8   dir3_dobavka_esli_packet_nechetnii=0; 
 	  
 	  //IP DA address read on direction 1
@@ -1681,15 +1687,16 @@ void TDM3_dierction_read  ()
 	  	 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
 		 	  	 if(dir3_priznak_arp_packet==0x0806)
 		 	  	   {
-					   memcpy(&dir3_target_arp_ip_da_addr,out_buf3+19,4);
+		 	  		   memcpy(&dir3_target_arp_nms_sa_addr,out_buf3+14,4);
+		 	  		   memcpy(&dir3_target_arp_ip_da_addr,out_buf3+19,4);
 					   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(u8)dir3_target_arp_ip_da_addr,0x11);  
+					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(u8)dir3_target_arp_ip_da_addr,dir3_target_arp_nms_sa_addr);  
 		 	  		 
 		 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 		 	  	   } 
 		 	  	   else
 		 	  	   {   
-		 	  	     ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(UINT8)dir3_ip_da_addr,0x11);  
+		 	  	     ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(UINT8)dir3_ip_da_addr,0x0000);  
 		 	  	   }	
 	  	 	  	 
 	  	 	  	 
