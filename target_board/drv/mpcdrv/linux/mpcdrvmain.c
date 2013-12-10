@@ -617,31 +617,20 @@ virt_dev=skb->dev->name;
     //Нет пакета с Гришиной маршрутизацией прозрачно ARP прокидываю
     if (marsrutiazation_enable==0)
     {
-   	    memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-        recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+   	     memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+         recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
     	//Пришёл ARP Request от Гришы отпраялю КY-S в eth1
     	//Простая коммутация из порта в порт
 	     if (virt_dev && !strcasecmp(virt_dev ,"eth1"))
 	     {
 	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
-	     printk("__no_marshrutiaztion_ARP_Reply ->to eth2 grisha_nms3\n\r");
+	     //printk("__no_marshrutiaztion_ARP_Reply ->to eth2 grisha_nms3\n\r");
 	     }	 
 	     if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	     {
 	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);	 
-	     printk("__no_marshrutiaztion_ARP_Request ->to eth1 ky-s\n\r");
+	     //printk("__no_marshrutiaztion_ARP_Request ->to eth1 ky-s\n\r");
 	     }
-        /*
-        if(arp->ar_op==0x0001)
-        {
-    	p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
-    	printk("__no_marshrutiaztion_ARP_Request ->to eth1 ky-s\n\r");
-        }
-    	else  //Пришёл ARP Reply отправляю его в eth2 НМС3
-    	{
-    	p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2); 
-    	printk("__no_marshrutiaztion_ARP_Reply ->to eth2 grisha_nms3\n\r");
-    	}*/	
     return NF_DROP;
     }	
 
@@ -818,31 +807,37 @@ unsigned int Hook_Func(uint hooknum,
 	if (marsrutiazation_enable==0)
 	    {
 		 //Простая коммутация из порта в порт
-		 memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
-	     recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
+		 //memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+	     //recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);
 	     if (virt_dev && !strcasecmp(virt_dev ,"eth1"))
 	     {
-	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+	     //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
+	      p2020_get_recieve_virttsec_packet_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len,2);
 	     }	 
 	     if (virt_dev && !strcasecmp(virt_dev ,"eth2"))
 	     {
-	     p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);	 
+	     //если пришёл пакет первый пакет с маршрутизацией на порт 18000 из eth2 где включен НМС3 я его не отправляю в eth1 
+	       memcpy(&udp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
+	       if (udp_dest_port==18000)
+	       {
+		      memcpy(recieve_matrica_commutacii_packet.data ,skb->mac_header,(uint)skb->mac_len+(uint)skb->len); 
+		      recieve_matrica_commutacii_packet.length =(uint)skb->mac_len+(uint)skb->len;
+	          recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
+	          recieve_matrica_commutacii_packet.state=true;
+	       }	   
+	       else
+	       {	   
+	       //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);	 
+	       p2020_get_recieve_virttsec_packet_buf(skb->mac_header,(uint)skb->mac_len+(uint)skb->len,1);
+	       }
+	     
+	     
 	     }
 	   
 	    return NF_DROP;
 	    }	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	/*
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
