@@ -47,6 +47,51 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /*****************************************************************************/
+static u16 ok_170 [32]=
+{
+	0x0050, 0xC224, 0xFF73, 0x7071, 
+	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
+	0x0032, 0x6355, 0x0000, 0x3F11,
+	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
+	0x784C, 0xE4BA, 0x4650, 0x001E, 
+	0xA06E, 0x546F, 0x706F, 0x2E76,
+	0x312E, 0x6F6B, 0x2E00, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000
+		
+};
+
+static u16 er_170 [32]=
+{
+	0x0050, 0xC224, 0xFF73, 0x7071, 
+	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
+	0x0032, 0x6355, 0x0000, 0x3F11,
+	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
+	0x784C, 0xE4BA, 0x4650, 0x001E, 
+	0xF6C6, 0x546F, 0x706F, 0x2E76,
+	0x312E, 0x6572, 0x6F72, 0x722E, 
+	0x0000, 0x0000, 0x0000, 0x0000
+		
+};
+
+/*
+static u16 ok_171 [32]=
+{
+	0x0050, 0xC224, 0xFF73, 0x7071, 
+	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
+	0x0032, 0x6355, 0x0000, 0x3F11,
+	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
+	0x784C, 0xE4BA, 0x4650, 0x001E, 
+	0xA06E, 0x546F, 0x706F, 0x2E76,
+	0x312E, 0x6F6B, 0x2E00, 0x0000, 
+	0x0000, 0x0000, 0x0000, 0x0000
+		
+};
+*/
+
+
+
+
+
 extern UINT16 marsrutiazation_enable;
 
 
@@ -238,18 +283,6 @@ UINT8  priznac_scluz=255;//состояние не опредлено
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 {	
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
@@ -316,8 +349,6 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	iteration++;
 }
 
-
-
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u16 priznak_kommutacii)
 Parameters:     	void data
@@ -340,7 +371,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
   // if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    multipleksor[0].priznac_shcluzovogo=1;
+   multipleksor[0].priznac_shcluzovogo=1;
    // printk("priznak arp_sender =0x%x\n\r",priznak_nms3_arp_sender);
     //Дополнительное условие проверки ARP
     if(priznak_nms3_arp_sender)
@@ -353,10 +384,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
         
     }
     
-   
-   
- 
-   
+  
     if (priznak_kommutacii==(u8)multipleksor[0].curr_ipaddr)
     {
 	   //Еслиr пакет моему KY-S  и признак коммутации порт 18000 то это
@@ -366,9 +394,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          if (udp_dest_port==18000)
 	          {
 	        	  //строим матрицу коммутации
-	            printk("+ngraf_packet+\n\r");
+	            //printk("+ngraf_packet+\n\r");
 	        	ngraf_packet_for_my_mps(in_buf ,in_size);
-	            marsrutiazation_enable=1;
+	        	p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
+	        	marsrutiazation_enable=1;
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
@@ -741,10 +770,18 @@ if(number_of_par_sviaznosti_in_packet>1)
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {
 	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
+	  if((sosed_ipaddr==0)||(my_mk8_vihod==0)||(sosed_mk8_vyhod==0))
+	  {
+	   printk("ERROR _BAD _MARSHRUTIAZTION PACKET\n\r!!");	  
+	   memset(&multipleksor ,0x0000, sizeof(multipleksor));
+	   break; 
+	  }	  
+	  
 	  //пакет исходит от меня построение маршрута от меня я нашёл себя
 	  if(my_current_kos.ip_addres==(u8)l_ipaddr)
 	  {
 		//printk("++\n\r");
+		  
 		multipleksor[0].ipaddr_sosed[i]=(u8)sosed_ipaddr;
 		multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod;
 		  
