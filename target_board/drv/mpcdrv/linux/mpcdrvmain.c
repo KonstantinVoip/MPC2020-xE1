@@ -283,7 +283,7 @@ const char * lbc_notready_to_write =   "data_write_ready_NOT";
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-extern UINT16 marsrutiazation_enable;
+
 
 
 /*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
@@ -462,7 +462,7 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 	
 	ngraf_packet_for_matrica_kommutacii(in_buf,in_size,(u8)target_arp_ip_da_addr,(u8)target_arp_nms_sa_addr);	
 	
-	return 1;
+	//return 1;
  
  
  }	 
@@ -808,9 +808,9 @@ unsigned int Hook_Func(uint hooknum,
 	 //Фильтрация 3 го уровня по IP
 	ip = (struct iphdr *)skb_network_header(skb);
     //ICMP пакет
-	icmp= (struct icmphdr*)skb_transport_header(skb);
+	//icmp= (struct icmphdr*)skb_transport_header(skb);
 	//UDP пакет 
-	udph = (struct udphdr *)skb_transport_header(skb);
+	//udph = (struct udphdr *)skb_transport_header(skb);
 	
 	
 	memcpy(input_mac_da_addr,eth->h_dest,6);
@@ -819,11 +819,11 @@ unsigned int Hook_Func(uint hooknum,
 	input_mac_last_word=input_mac_da_addr[1];
 	//Last byte mac address for priznac_commutacii;
 	//priznac coconst char *virt_dev=0;mmutacii po mac;
-	const char *virt_dev=0;
+	//const char *virt_dev=0;
 	//input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
 	//input_mac_last_byte = input_mac_last_word;
-	virt_dev=skb->dev->name;
+	//virt_dev=skb->dev->name;
 //#if 0  //Global comment	
 	
 	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
@@ -831,6 +831,15 @@ unsigned int Hook_Func(uint hooknum,
     /*Принял от КУ-S Информационный пакет который сожержит
      *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
+	 //printk("+Drop_packet_size=%d|->>%d|data=%d\n\r",(uint)skb->mac_len,(uint)skb->len,(uint)skb->data_len);
+	 if((skb->mac_len+skb->len)==42) 
+	 {
+	 printk("bad input packet size =%d\n\r",skb->mac_len+skb->len);
+	 return NF_DROP;
+	 } 
+	 
+	
+	
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
 	 {
 	 	  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
@@ -863,6 +872,11 @@ unsigned int Hook_Func(uint hooknum,
 	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,g_my_kys_mac_addr);  	  
 	 return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС  	  
 	 }
+	
+	 //printk("udph->dest =0x%x|%d\n\r",udph->dest,udph->dest);
+	 
+	
+	
 	
 /*	
 	if (marsrutiazation_enable==0)
