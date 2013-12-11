@@ -340,14 +340,15 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
   // if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    
-    
+    multipleksor[0].priznac_shcluzovogo=1;
+   // printk("priznak arp_sender =0x%x\n\r",priznak_nms3_arp_sender);
     //Дополнительное условие проверки ARP
     if(priznak_nms3_arp_sender)
     {
        if((u8)multipleksor[0].curr_ipaddr==priznak_kommutacii)
        {
-    	   multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
+    	   multipleksor[0].nms3_ipaddr=(u8)priznak_nms3_arp_sender;
+           //printk("+multipleksor[0].nms3_ipaddr=0x%x+\n\r",multipleksor[0].nms3_ipaddr);
        }
         
     }
@@ -358,20 +359,25 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
     if (priznak_kommutacii==(u8)multipleksor[0].curr_ipaddr)
     {
-	   //Если пакет моему KY-S  и признак коммутации порт 18000 то это
+	   //Еслиr пакет моему KY-S  и признак коммутации порт 18000 то это
 	   //матрицы коммутации       
 	          memcpy(&udp_dest_port,&in_buf[18],2); 
 	          //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
 	          if (udp_dest_port==18000)
 	          {
 	        	  //строим матрицу коммутации
-	            ngraf_packet_for_my_mps(in_buf ,in_size);
+	            printk("+ngraf_packet+\n\r");
+	        	ngraf_packet_for_my_mps(in_buf ,in_size);
 	            marsrutiazation_enable=1;
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
 	          {
+	        	  
+	        	  //printk("Send my KY-S packet 0x%x\n\r",(u8)multipleksor[0].curr_ipaddr);
 	        	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+	         
+	          
 	          } 	
       
      }
@@ -382,10 +388,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
         //send to direction0 sosed KY-S
     	
     	printk("Send to NMS3 ip 0x%x \n\r",multipleksor[0].nms3_ipaddr);
-	    if(multipleksor[0].priznac_shcluzovogo==1)
-	  	{
+	   if(multipleksor[0].priznac_shcluzovogo==1)
+	    {
 	     p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
 	  	}
+	   
 	    else
 	    {
 	     nbuf_set_datapacket_dir0  (in_buf ,in_size);

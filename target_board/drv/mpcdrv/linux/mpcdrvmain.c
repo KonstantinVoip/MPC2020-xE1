@@ -656,8 +656,13 @@ eth=(struct ethhdr *)skb_mac_header(skb);*/
     }	
 */
     
-  //if(g_my_kys_state==1)    //Information packet OK
-   // {	
+  if(g_my_kys_state==1)    //Information packet OK
+    {	
+	 
+	  
+	  
+	  //if (recieve_matrica_commutacii_packet.state==false)
+	 // {	  
 	  memcpy(&target_arp_nms_sa_addr,skb->mac_header+28,4);
 	  memcpy(&target_arp_ip_da_addr,skb->mac_header+16+14+8,4);
       //printk("ARP _ZAPROS _ot NMS3  0x%x\n\r",target_arp_nms_sa_addr);
@@ -666,9 +671,11 @@ eth=(struct ethhdr *)skb_mac_header(skb);*/
       recieve_matrica_commutacii_packet.length = ((uint)skb->mac_len+(uint)skb->len);   
       recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)target_arp_ip_da_addr;	   		    
       recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr=(UINT8)target_arp_nms_sa_addr;
+      //ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii,recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr); 
       recieve_matrica_commutacii_packet.state=true;
+	 // }
       return NF_ACCEPT;
-  //  } 
+   } 
 	 
   
   
@@ -898,7 +905,11 @@ unsigned int Hook_Func(uint hooknum,
      recieve_matrica_commutacii_packet.priznak_kommutacii=(UINT8)ip->daddr;
      recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr=NULL;
      recieve_matrica_commutacii_packet.state=true;
-	 return NF_DROP;
+     
+		
+		//ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii,recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr); 
+
+     return NF_DROP;
 	}
 	
 	
@@ -1628,17 +1639,19 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			       /*
 			       if (get_tsec_state()==1)
 			       {	   
-			       ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
+			       //ngraf_packet_for_my_mps(get_tsec_packet_data() ,get_tsec_packet_length());
+			       ngraf_packet_for_matrica_kommutacii(get_tsec_packet_data(),get_tsec_packet_length(),recieve_matrica_commutacii_packet.priznak_kommutacii,recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr); 	   
 			       get();
-			       }
-			       */
+			       }*/
+			       
 			       //функция отправки в матрицу коммутации
 			       if(recieve_matrica_commutacii_packet.state==1)
 			       {
 			    	       //printk("matrica|packet\n\r");
-			    	    
+			    	
 			    	       ngraf_packet_for_matrica_kommutacii(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,recieve_matrica_commutacii_packet.priznak_kommutacii,recieve_matrica_commutacii_packet.priznak_nms3_ot_arp_sa_addr); 
-			    	       recieve_matrica_commutacii_packet.state=0;	
+			    	       recieve_matrica_commutacii_packet.state=0;
+			    	       //   recieve_matrica_commutacii_packet.state=0;	
 			    	       //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,1);
 			    	       //p2020_get_recieve_virttsec_packet_buf(recieve_matrica_commutacii_packet.data,recieve_matrica_commutacii_packet.length,2);
 			    	      // recieve_matrica_commutacii_packet.state=0;	   
