@@ -447,7 +447,7 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 {
 	UINT32  target_arp_ip_da_addr =0;
 	UINT32  target_arp_nms_sa_addr=0;
-	
+	//printk("get_ethernet_packet=0x%x\n\r",priznak_packet);
 	if(priznak_packet ==0x0800)
 	{
 		target_arp_ip_da_addr=(UINT8)in_buf[16];
@@ -459,7 +459,8 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 	  memcpy(&target_arp_ip_da_addr,in_buf+19,4);
 	}	
 	
-	ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr);	
+	
+	ngraf_packet_for_matrica_kommutacii(in_buf,in_size,(u8)target_arp_ip_da_addr,(u8)target_arp_nms_sa_addr);	
 	
 	return 1;
  

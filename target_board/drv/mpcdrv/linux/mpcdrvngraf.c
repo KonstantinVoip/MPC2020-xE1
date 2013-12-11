@@ -374,7 +374,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          else
 	          {
 	        	  
-	        	  //printk("Send my KY-S packet 0x%x\n\r",(u8)multipleksor[0].curr_ipaddr);
+	        	 // printk("Send my KY-S packet 0x%x\n\r",(u8)multipleksor[0].curr_ipaddr);
 	        	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
 	         
 	          
@@ -387,7 +387,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     {
         //send to direction0 sosed KY-S
     	
-    	printk("Send to NMS3 ip 0x%x \n\r",multipleksor[0].nms3_ipaddr);
+    	//printk("Send to NMS3 ip 0x%x \n\r",multipleksor[0].nms3_ipaddr);
 	   if(multipleksor[0].priznac_shcluzovogo==1)
 	    {
 	     p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
