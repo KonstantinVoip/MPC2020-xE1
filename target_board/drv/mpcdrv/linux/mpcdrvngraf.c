@@ -365,7 +365,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    // multipleksor[0].priznac_shcluzovogo=1;
+   // multipleksor[0].priznac_shcluzovogo=1;
    
      /*
     memcpy(&udp_dest_port,&in_buf[18],2); 
@@ -396,7 +396,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     }
     
   
-    if (priznak_kommutacii==(u8)multipleksor[0].curr_ipaddr)
+    if (priznak_kommutacii==(u8)my_current_kos.ip_addres/*multipleksor[0].curr_ipaddr*/)
     {
 	   //Еслиr пакет моему KY-S  и признак коммутации порт 18000 то это
 	   //матрицы коммутации       
@@ -435,7 +435,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	   
 	    else
 	    {
-	     nbuf_set_datapacket_dir0  (in_buf ,in_size);
+	     //nbuf_set_datapacket_dir0  (in_buf ,in_size);
+	       nbuf_set_datapacket_dir1  (in_buf ,in_size);
 	    }
  	  	 
 	}
