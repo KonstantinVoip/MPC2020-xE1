@@ -41,20 +41,20 @@ GENERAL NOTES
 /*****************************************************************************/
 #include "mpcdrvngraf.h"
 /*External Header*/
-
+#include <linux/delay.h>  // mdelay ,ms
 //extern void get_ipaddr_my_kys(UINT8 *state,UINT32 *ip_addres,UINT8 *mac_address);
 //extern struct KY_S my_current_kos;
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
-/*****************************************************************************/
-UINT8 marshrutization_enable=0;
+/***********************ic******************************************************/
+//static UINT8 marshrutization_enable=0;
 
 
 
 static u16 ok_170 [32]=
 {
-	0x0050, 0xC224, 0xFF73, 0x7071, 
-	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
+	0x001b, 0x2180, 0x4923, 0x0050, 
+	0xC224, 0x594E, 0x0800, 0x4500, 
 	0x0032, 0x6355, 0x0000, 0x3F11,
 	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
 	0x784C, 0xE4BA, 0x4650, 0x001E, 
@@ -99,7 +99,7 @@ static struct KY_S
 UINT32 ip_addres;
 UINT8  *mac_address;
 bool   state;
-//UINT8  marshrutization_enable; 
+UINT8  marshrutization_enable; 
 }my_current_kos;
 
 
@@ -290,6 +290,7 @@ void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 	my_current_kos.state=state;
 	my_current_kos.ip_addres=ip_addres;
 	my_current_kos.mac_address=mac_address;
+	my_current_kos.marshrutization_enable=0;
 	multipleksor[0].curr_ipaddr=ip_addres;
 	printk("++Set_Multiplecsor_IP_and_MAC_OK++\n\r");
 	printk("State =0x%x>>IP=0x%x,MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",state,ip_addres,my_current_kos.mac_address[0],my_current_kos.mac_address[1],my_current_kos.mac_address[2],my_current_kos.mac_address[3],my_current_kos.mac_address[4],my_current_kos.mac_address[5]);
@@ -371,7 +372,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-   // multipleksor[0].priznac_shcluzovogo=1;
+    multipleksor[0].priznac_shcluzovogo=1;
    
     
     /*
@@ -392,7 +393,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
        if(/*(u8)multipleksor[0].curr_ipaddr*/(u8)my_current_kos.ip_addres==priznak_kommutacii)
        {
     	   multipleksor[0].nms3_ipaddr=(u8)priznak_nms3_arp_sender;
-           //printk("+multipleksor[0].nms3_ipaddr=0x%x+\n\r",multipleksor[0].nms3_ipaddr);
+           printk("+multipleksor[0].nms3_ipaddr=0x%x+\n\r",multipleksor[0].nms3_ipaddr);
        }
         
     }
@@ -410,7 +411,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	            //printk("+ngraf_packet+\n\r");
 	        	//p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
 	        	ngraf_packet_for_my_mps(in_buf ,in_size);
-	        	//p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
+	        	//mdelay(200);
+	        	p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
@@ -424,7 +426,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    
     if(priznak_kommutacii==(u8)multipleksor[0].nms3_ipaddr)
     {
-        //send to direction0 sosed KY-S
+    	//printk("marshrutization_enable=%d",marshrutization_enable);
+    	//send to direction0 sosed KY-S
     	//printk("Send to NMS3 ip 0x%x \n\r",multipleksor[0].nms3_ipaddr);
 	   if(multipleksor[0].priznac_shcluzovogo==1)
 	    {
@@ -433,7 +436,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	    else
 	    {
 	        //у нас нет марщрутизации на удалённом нужно прокинуть ARP назад
-	    	if(marshrutization_enable==0)
+	    	//if(marshrutization_enable==0)
+	    	if(my_current_kos.marshrutization_enable==0)
 	    	{
 	   	       //видимо откуда пришёл ARP туда его и загоняем назад	
 	    	  
@@ -446,10 +450,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	    	}
 	    	
 	    	//есть таблица маршрутизации где НМС3?
-	    	if(marshrutization_enable==1)
+	    	//if(marshrutization_enable==1)
+	    	
+	    	if(my_current_kos.marshrutization_enable==1)
 	    	{
 	    		//Признак коммутации Ip адрес шлюзового ip = 192.169.120.170 туда и гоним пакеты
-	    		priznak_kommutacii=multipleksor[0].gate_ipaddr;
+	    		priznak_kommutacii=(u8)multipleksor[0].gate_ipaddr;
+	    		printk("nms3_da->>marshrutization_enable1->priznak_kommutacii=%d\n\r",priznak_kommutacii);
 	    		//Все пакеты гоним к ip шлюзового	
 	    		if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[0])
 	    		{
@@ -777,7 +784,8 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   printk("MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
   }
  
- marshrutization_enable==1; //Есть таблица маршрутизации
+  my_current_kos.marshrutization_enable==1;
+ //marshrutization_enable=1; //Есть таблица маршрутизации
  iteration++;
 
 #if 0	
