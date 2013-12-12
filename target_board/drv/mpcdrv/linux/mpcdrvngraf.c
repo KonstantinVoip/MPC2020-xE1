@@ -362,7 +362,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    // my_current_kos.ip_addres=0xAA;
     UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
-     if(my_current_kos.state==0){return;}
+    if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
     // multipleksor[0].priznac_shcluzovogo=1;
@@ -404,7 +404,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
 	          if (udp_dest_port==18000)
 	          {
-	        	  //строим матрицу коммутации
+	        	  //Пакет для матрицы коммутации
 	            //printk("+ngraf_packet+\n\r");
 	        	//p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
 	        	ngraf_packet_for_my_mps(in_buf ,in_size);
@@ -461,7 +461,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
                                               
   if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[1])
   {
-	  printk("Send to 1 IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+	  printk("Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
 	  switch(multipleksor[0].tdm_direction_sosed[1])
 	  {
 	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
@@ -569,11 +569,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     	printk("0x%x ",in_buf[i]);
     }
     */
-   
+    memset(&multipleksor ,0x0000, sizeof(multipleksor));
      
     
-    printk("---------------------------------------------\n\r");
-    printk("matrica_packet_recieve=%d\n\r",iteration);
+    printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
+    //printk("matrica_packet_recieve=%d\n\r",iteration);
     //18 это в пакете наш  UDP  порт destination
 	printk("IP_status:"); 
    
