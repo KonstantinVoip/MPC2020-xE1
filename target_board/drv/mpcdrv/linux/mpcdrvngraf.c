@@ -365,7 +365,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
      if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-     multipleksor[0].priznac_shcluzovogo=1;
+    // multipleksor[0].priznac_shcluzovogo=1;
    
      /*
     memcpy(&udp_dest_port,&in_buf[18],2); 
@@ -382,7 +382,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     
     
 //#if 0   
-    multipleksor[0].priznac_shcluzovogo=1;
+  
    // printk("priznak arp_sender =0x%x\n\r",priznak_nms3_arp_sender);
     //Дополнительное условие проверки ARP
     if(priznak_nms3_arp_sender)
@@ -406,8 +406,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          {
 	        	  //строим матрицу коммутации
 	            //printk("+ngraf_packet+\n\r");
-	        	p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
+	        	//p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
 	        	ngraf_packet_for_my_mps(in_buf ,in_size);
+	        	//p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
@@ -440,10 +441,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	}
     
    
-  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[0])
+  if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[0])
   {
 	  
-	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+	  printk("Send 0 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
 	  switch(multipleksor[0].tdm_direction_sosed[0])
 	  {
 	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
@@ -458,9 +459,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	  }  
    }
                                               
-  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[1])
+  if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[1])
   {
-	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+	  printk("Send to 1 IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
 	  switch(multipleksor[0].tdm_direction_sosed[1])
 	  {
 	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
@@ -476,9 +477,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	  
   }
 
-  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[2])
+  if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[2])
   {
-	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[2],multipleksor[0].tdm_direction_sosed[2]);
+	  printk("Send 2 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[2],multipleksor[0].tdm_direction_sosed[2]);
 	  switch(multipleksor[0].tdm_direction_sosed[2])
 	  {
 	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;

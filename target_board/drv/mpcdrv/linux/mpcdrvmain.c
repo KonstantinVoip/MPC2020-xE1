@@ -1582,7 +1582,7 @@ static int tdm_recieve_thread_two(void *data)
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 			    if(nbuf_get_datapacket_dir0 (&in_buf_dir0 ,&in_size_dir0)==1)
 		        {
-			    	 printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
 			    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	 
 			    	 /*
@@ -1607,7 +1607,7 @@ static int tdm_recieve_thread_two(void *data)
 				if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 				{
 					
-					 printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					// printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
@@ -1626,7 +1626,7 @@ static int tdm_recieve_thread_two(void *data)
 					 ///p2020_get_recieve_virttsec_packet_buf(in_buf_dir2,in_size_dir2,2);
 					 
 					 
-					 printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
+					 //printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
 				     /*
 					 printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size_dir2);
 		        	 printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[0],in_buf_dir2[1],in_buf_dir2[2],in_buf_dir2[3],in_buf_dir2[4],in_buf_dir2[5]);
@@ -1644,7 +1644,7 @@ static int tdm_recieve_thread_two(void *data)
 		    {
 		    	if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
 		    	{
-		    	   printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
+		    	  // printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
 		    	     //printk("+FIF3_DIRO_insize_byte=%d\n\r+",in_size); 
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
