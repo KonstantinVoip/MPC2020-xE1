@@ -315,15 +315,6 @@ UINT16 dannie802=0;
 	//printk("Status_dir1 =%d\n\r",status);
 
 return status;
-
-
-
-
-
-
-
-
-		
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM2_direction_READ_READY(void)			 
@@ -1064,7 +1055,7 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 	
 	plis_write16(DIR3_PLIS_PACKSIZE_ADDR1606,in_size);
 	
-	for(i=0;i<hex_element_size+PATCHlbc_ONE_ITERATION_WRITE;i++)
+	for(i=0;i<hex_element_size/*+PATCHlbc_ONE_ITERATION_WRITE*/;i++)
 	{
 		plis_write16(DIR3_PLIS_WRITE_ADDR206  ,in_buf[i]);
 	}
@@ -1578,7 +1569,7 @@ void TDM2_dierction_read ()
 	 	  		   memcpy(&dir2_target_arp_nms_sa_addr,out_buf2+14,4);
 	 	  		   memcpy(&dir2_target_arp_ip_da_addr,out_buf2+19,4);
 				   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(u8)dir2_target_arp_ip_da_addr,dir2_target_arp_nms_sa_addr);  
+				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,(u8)dir2_target_arp_ip_da_addr,(u8)dir2_target_arp_nms_sa_addr);  
 	 	  		 
 	 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 	 	  	   } 
@@ -1690,7 +1681,7 @@ void TDM3_dierction_read  ()
 		 	  		   memcpy(&dir3_target_arp_nms_sa_addr,out_buf3+14,4);
 		 	  		   memcpy(&dir3_target_arp_ip_da_addr,out_buf3+19,4);
 					   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(u8)dir3_target_arp_ip_da_addr,dir3_target_arp_nms_sa_addr);  
+					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,(u8)dir3_target_arp_ip_da_addr,(u8)dir3_target_arp_nms_sa_addr);  
 		 	  		 
 		 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 		 	  	   } 

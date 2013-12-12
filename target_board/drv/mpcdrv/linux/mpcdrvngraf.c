@@ -356,17 +356,18 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //UINT16  out_mac[12];
    //UINT16  mac1[3];
    //UINT16  mac2[3];
-    static UINT16 iteration=0;
+   // static UINT16 iteration=0;
    //UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
-    my_current_kos.ip_addres=0xAA;
+   // my_current_kos.ip_addres=0xAA;
     UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
-  // if(my_current_kos.state==0){return;}
+     if(my_current_kos.state==0){return;}
    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
+     multipleksor[0].priznac_shcluzovogo=1;
    
-    
+     /*
     memcpy(&udp_dest_port,&in_buf[18],2); 
     //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
     if (udp_dest_port==18000)
@@ -375,12 +376,12 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       //printk("+ngraf_packet+\n\r");
   	  ngraf_packet_for_my_mps(in_buf ,in_size);
     }
+    */
     
     
     
     
-    
-#if 0   
+//#if 0   
     multipleksor[0].priznac_shcluzovogo=1;
    // printk("priznak arp_sender =0x%x\n\r",priznak_nms3_arp_sender);
     //Дополнительное условие проверки ARP
@@ -405,9 +406,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          {
 	        	  //строим матрицу коммутации
 	            //printk("+ngraf_packet+\n\r");
-	        	ngraf_packet_for_my_mps(in_buf ,in_size);
 	        	p2020_get_recieve_virttsec_packet_buf(ok_170,64,2);
-	        	
+	        	ngraf_packet_for_my_mps(in_buf ,in_size);
 	          } //end UDP port 18000          
 	          //если другой пакет отправляем KY-S в eth1
 	          else
@@ -440,7 +440,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	}
     
    
-  if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
+  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[0])
   {
 	  
 	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
@@ -454,11 +454,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       //case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);
       //case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);
       //case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);
-      default:break;
+      default:printk("?UNIKNOWN0 TDM DIRECTION =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
 	  }  
    }
                                               
-  if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
+  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[1])
   {
 	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
 	  switch(multipleksor[0].tdm_direction_sosed[1])
@@ -471,15 +471,40 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
      // case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);
      // case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);
      // case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);
-      default:break;
+      default: printk("?UNIKNOWN1 TDM DIRECTION =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
 	  }
 	  
   }
-#endif 
+
+  if (priznak_kommutacii==(u8)multipleksor[0].ipaddr_sosed[2])
+  {
+	  printk("Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[2],multipleksor[0].tdm_direction_sosed[2]);
+	  switch(multipleksor[0].tdm_direction_sosed[2])
+	  {
+	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
+	  case 2:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+      case 3:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+      case 4:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
+     // case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);
+     // case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);
+     // case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);
+     // case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);
+      default:printk("?UNIKNOWN2 TDM DIRECTION =%d?\n\r",multipleksor[0].tdm_direction_sosed[2]); break;
+	  }
+	  
+  }
+  
+  
+  
+  
+  
+  
+  
+  //#endif 
   
   //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);//send to eternet tsec ARP broadcast
   //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);//send to eternet tsec ARP broadcast
-  iteration++;	  	
+  //iteration++;	  	
 }
 
 

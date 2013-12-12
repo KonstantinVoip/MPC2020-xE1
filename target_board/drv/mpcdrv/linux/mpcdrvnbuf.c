@@ -514,7 +514,7 @@ bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
 	 u16  status=0;
 	 
 	// printk(">>>>>>>>>>>>++++++++++++++++++++<<<<<<<<<<<<<<<<\n\r");
-	 //spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
+	 spin_lock_irqsave(fifo_put_to_tdm0_dir->lock,flags);
 //#if 0	 
 	// printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|Iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0);
 	 status=mpcfifo_get(fifo_put_to_tdm0_dir, in_buf);
@@ -705,7 +705,6 @@ bool nbuf_get_datapacket_dir3 (unsigned char *in_buf , u16 *in_size)
 	 //Copy Massive to out functions
 	 //*in_size=packet_size_in_byte;
 	 //*in_buf=out_buf_dir3;
-	 
 	 //отправляю в ethernet	 
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET
 	   p2020_get_recieve_virttsec_packet_buf(out_buf_dir3,packet_size_in_byte);//send to eternet	 
