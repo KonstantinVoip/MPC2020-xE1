@@ -56,6 +56,7 @@
  */
 
 //debug plis address 1400
+#define PLIS_LINK_TDM_DIR20           20
 #define PLIS_ADDR1400           	1400
 #define PATCHlbc_ONE_ITERATION_READ    1
 #define PATCHlbc_ONE_ITERATION_WRITE   1
@@ -70,7 +71,8 @@ typedef enum
 	 PLIS_PHYSICAL_RESOURCE_START = 0xef000000,
 	 PLIS_PHYSICAL_RESOURCE_SIZE  = 0x01000000,
 	 PLIS_WRITE_SUCCESS = 0x0003
-	
+     	
+
 }Plis_register_value;
 
 
@@ -79,7 +81,7 @@ typedef enum
 typedef enum{
   
    //TDM DIR 0 REGISTER
-     DIR0_PLIS_WRITEOK_ADDR30 			    = 30,  //0x1E  plis write success address
+	 DIR0_PLIS_WRITEOK_ADDR30 			    = 30,  //0x1E  plis write success address
      DIR0_PLIS_READ_BUG_ADDR800 			= 800, //plis patch read register
      DIR0_PLIS_READOK_ADDR1000  		    = 1000,//read ok start
      DIR0_PLIS_PACKSIZE_ADDR1200            = 1200,//plis read in  packet size 
