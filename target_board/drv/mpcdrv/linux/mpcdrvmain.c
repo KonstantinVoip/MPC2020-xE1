@@ -685,10 +685,10 @@ unsigned int Hook_Func(uint hooknum,
 	 {	 
 	    //Протокол TCP нужно фтльтровать порт 7
 		 memcpy(&tcp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
-		 printk("+TCP _protocol=0x%x\n\r+",ip->protocol);
-         if(tcp_dest_port==7)
+		 //printk("+TCP _protocol=0x%x|port =0x%x\n\r+",ip->protocol,tcp_dest_port);
+         if((tcp_dest_port==7)||(tcp_dest_port==59097))
          {
-        	 printk("port 7 _echo drop\n\r");
+        	 printk("port 7 or 59097 _echo drop\n\r");
         	 return NF_DROP; 
          }
 		

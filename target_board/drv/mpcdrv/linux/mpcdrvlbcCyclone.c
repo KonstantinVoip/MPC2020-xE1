@@ -878,7 +878,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     //Set size on PLIS in byte
    
     
-    //printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -1291,7 +1291,7 @@ void TDM0_dierction_read ()
   
 
   packet_size_hex=(dannie1200/2)+dir0_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-  //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
     	  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
