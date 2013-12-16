@@ -239,7 +239,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM0_direction_READ_READY(void)
+UINT16 TDM1_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
 UINT16 dannie800=0;
@@ -283,7 +283,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM1_direction_READ_READY(void)
+UINT16 TDM2_direction_READ_READY(void)
 {
 UINT16 dannie1002=0;
 UINT16 status =0; 
@@ -324,7 +324,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM2_direction_READ_READY(void)
+UINT16 TDM3_direction_READ_READY(void)
 {
  UINT16 dannie1004=0;
  UINT16 status =0;
@@ -367,7 +367,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM3_direction_READ_READY(void)
+UINT16 TDM4_direction_READ_READY(void)
 {
 	UINT16 dannie1006=0;
 	UINT16 status =0;
@@ -409,7 +409,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM4_direction_READ_READY(void)
+UINT16 TDM5_direction_READ_READY(void)
 {
 	
 	UINT16 dannie1008=0;
@@ -441,7 +441,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM5_direction_READ_READY(void)
+UINT16 TDM6_direction_READ_READY(void)
 {
 	UINT16 dannie1010=0;
 	UINT16 tdmdir5_count_visim=0;
@@ -472,7 +472,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM6_direction_READ_READY(void)
+UINT16 TDM7_direction_READ_READY(void)
 {
 	UINT16 dannie1012=0;
 	UINT16 tdmdir6_count_visim=0;
@@ -501,7 +501,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM7_direction_READ_READY(void)
+UINT16 TDM8_direction_READ_READY(void)
 {
 	UINT16 dannie1014=0;
 	UINT16 tdmdir7_count_visim=0;
@@ -532,7 +532,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM8_direction_READ_READY(void)
+UINT16 TDM9_direction_READ_READY(void)
 {
 
 	UINT16 dannie1016=0;
@@ -564,7 +564,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-UINT16 TDM9_direction_READ_READY(void)
+UINT16 TDM10_direction_READ_READY(void)
 {
 	UINT16 dannie1018=0;
 	UINT16 tdmdir9_count_visim=0;
@@ -599,7 +599,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM0_direction_WRITE_READY(void)
+UINT16 TDM1_direction_WRITE_READY(void)
 {
   UINT16  dannie30=1;
 
@@ -641,7 +641,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM1_direction_WRITE_READY(void)
+UINT16 TDM2_direction_WRITE_READY(void)
 {
     UINT16  dannie32=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
@@ -662,7 +662,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM2_direction_WRITE_READY(void)
+UINT16 TDM3_direction_WRITE_READY(void)
 {
 	UINT16  dannie34=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
@@ -684,7 +684,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM3_direction_WRITE_READY(void)
+UINT16 TDM4_direction_WRITE_READY(void)
 {
 	UINT16  dannie36=1; 
 	//Next step Set delay to write succes operations !!!!!!!!!!!
@@ -706,7 +706,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM4_direction_WRITE_READY(void)
+UINT16 TDM5_direction_WRITE_READY(void)
 {
 	UINT16  dannie38=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -725,7 +725,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM5_direction_WRITE_READY(void)
+UINT16 TDM6_direction_WRITE_READY(void)
 {
 	UINT16  dannie40=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -748,7 +748,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM6_direction_WRITE_READY(void)
+UINT16 TDM7_direction_WRITE_READY(void)
 {
 	UINT16  dannie42=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -771,7 +771,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM7_direction_WRITE_READY(void)
+UINT16 TDM8_direction_WRITE_READY(void)
 {
 	UINT16  dannie44=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -794,7 +794,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM8_direction_WRITE_READY(void)
+UINT16 TDM9_direction_WRITE_READY(void)
 {
 	UINT16  dannie46=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -818,7 +818,7 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-UINT16 TDM9_direction_WRITE_READY(void)
+UINT16 TDM10_direction_WRITE_READY(void)
 {
 	UINT16  dannie48=1; 
 	     //Next step Set delay to write succes operations !!!!!!!!!!!
@@ -848,7 +848,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
@@ -878,7 +878,8 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     //Set size on PLIS in byte
    
     
-    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    printk("+Tdm_Dir1_write->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -915,7 +916,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm1_write_iteration=0;
@@ -932,7 +933,7 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
     
 	
 	hex_element_size=(in_size/2)+dir1_dop_nechet_packet;   
-    printk("+Tdm_Dir1_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
+    printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
 	
 
 #ifdef  TDM_DIR_1_WRITE_DEBUG	    
@@ -968,7 +969,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
@@ -991,8 +992,7 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
     
     
     //hex_element_size=in_size/2;
-    
-   // printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+     printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
 #ifdef  TDM_DIR_2_WRITE_DEBUG	   
     printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
@@ -1026,7 +1026,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
@@ -1044,7 +1044,7 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
     }
     
 	hex_element_size=(in_size/2)+dir3_dop_nechet_packet; 
-    //printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
+    printk("+Tdm_Dir4_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
 	
     
 #ifdef  TDM_DIR_3_WRITE_DEBUG	   
@@ -1074,7 +1074,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM5_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm4_write_iteration=0;
@@ -1104,7 +1104,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM5_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM6_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm5_write_iteration=0;
@@ -1133,7 +1133,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM6_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM7_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm6_write_iteration=0;
@@ -1162,7 +1162,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM7_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm7_write_iteration=0;
@@ -1192,7 +1192,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM9_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm8_write_iteration=0;
@@ -1221,7 +1221,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM9_direction_write (const u16 *in_buf ,const u16 in_size)
+void TDM10_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
     static UINT16 tdm9_write_iteration=0;
@@ -1257,14 +1257,14 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM0_dierction_read ()
+void TDM1_dierction_read ()
 //void TDM0_dierction_read  (UINT16 *out_buf,UINT16  out_size_byte)
 {
   UINT16 dannie1200=0; 
   UINT16 i=0;		  
   static UINT16 tdm0_read_iteration=0;
   UINT16 packet_size_hex=0;
-  UINT16 ostatok_of_size_packet=0;
+ // UINT16 ostatok_of_size_packet=0;
   UINT16  out_buf[760];//1518 bait;
   UINT8   dir0_dobavka_esli_packet_nechetnii=0;  
 
@@ -1289,9 +1289,9 @@ void TDM0_dierction_read ()
 	  dir0_dobavka_esli_packet_nechetnii=1; 
   }
   
-
+  
   packet_size_hex=(dannie1200/2)+dir0_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  printk("+Tdm_Dir1_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
     	  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
@@ -1316,9 +1316,9 @@ void TDM0_dierction_read ()
 	  
 	  //IP DA address read on direction 0
 	  //dir0_ip_da_addr    = out_buf[16];
-	    memcpy(&dir0_ip_da_addr,out_buf+15,4);
+	 memcpy(&dir0_ip_da_addr,out_buf+15,4);
 	    
-	    //MAC DA address read on direction 0
+	 //MAC DA address read on direction 0
 	 dir0_mac_da_addr   = out_buf[2];
 	 //определяю признак KY-S по mac адресам 
 	 dir0_mac_priznak_kys = out_buf[2]>>8;
@@ -1376,14 +1376,14 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM1_dierction_read ()
+void TDM2_dierction_read ()
 {
 
 	  UINT16 dannie1202=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm1_read_iteration=0;
 	  UINT16 packet_size_hex=0;
-	  UINT16 ostatok_of_size_packet=0;
+	  //UINT16 ostatok_of_size_packet=0;
 	  UINT16  out_buf1[760];//1518 bait;
 	  
 	  
@@ -1412,7 +1412,7 @@ void TDM1_dierction_read ()
 	  
 	  
 	  packet_size_hex=(dannie1202/2)+dir1_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-	  printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);  
+	  printk("+Tdm_Dir2_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);  
 	  //16 bit  or 2 bait Local bus iteration
 	        do
 	        {
@@ -1491,13 +1491,13 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM2_dierction_read ()
+void TDM3_dierction_read ()
 {
 	  UINT16 dannie1204=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm2_read_iteration=0;
 	  UINT16 packet_size_hex=0;
-	  UINT16 ostatok_of_size_packet=0;
+	  //UINT16 ostatok_of_size_packet=0;
 	  UINT16  out_buf2[760];//1518 bait;
 	 
 	  //
@@ -1530,7 +1530,7 @@ void TDM2_dierction_read ()
 	  
 	  packet_size_hex=(dannie1204/2)+dir2_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex
 	  	  
-	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  printk("+Tdm_Dir3_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 
 	  
@@ -1612,13 +1612,13 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM3_dierction_read  ()
+void TDM4_dierction_read  ()
 {
 	  UINT16 dannie1206=0; 
 	  UINT16 i=0;		  
 	  static UINT16 tdm3_read_iteration=0;
 	  UINT16 packet_size_hex=0;
-	  UINT16 ostatok_of_size_packet=0;
+	  //UINT16 ostatok_of_size_packet=0;
 	  UINT16  out_buf3[760];//1518 bait;
 	  	 	  
 	  //
@@ -1646,8 +1646,8 @@ void TDM3_dierction_read  ()
 	  }
 	  packet_size_hex=(dannie1206/2)+dir3_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex
 	  
-
-	  //printk("+Tdm_Dir3_read->>ITERATION=%d|1206in_byte=%d|1206in_hex=%d|size=%d|+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+      
+	  printk("+Tdm_Dir4_read->>ITERATION=%d|1206in_byte=%d|1206in_hex=%d|size=%d|+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 
 	  	 	  	//16 bit  or 2 bait Local bus iteration
 	            do
@@ -1725,7 +1725,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM4_dierction_read  ()
+void TDM5_dierction_read  ()
 {
 	  UINT16 dannie1208=0; 
 	  UINT16 i=0;		  
@@ -1773,7 +1773,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM5_dierction_read  ()
+void TDM6_dierction_read  ()
 {
 	  UINT16 dannie1210=0; 
 	  UINT16 i=0;		  
@@ -1818,7 +1818,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM6_dierction_read  ()
+void TDM7_dierction_read  ()
 {
 	  UINT16 dannie1212=0; 
 	  UINT16 i=0;		  
@@ -1862,7 +1862,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM7_dierction_read  ()
+void TDM8_dierction_read  ()
 {
 	  UINT16 dannie1214=0; 
 	  UINT16 i=0;		  
@@ -1905,7 +1905,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM8_dierction_read  ()
+void TDM9_dierction_read  ()
 {
 	
 	  UINT16 dannie1216=0; 
@@ -1959,7 +1959,7 @@ Return Value:	Returns 1 on success and negative value on failure.
 				= 1												Success
 				=-1												Failure
 ***************************************************************************************************/
-void TDM9_dierction_read  ()
+void TDM10_dierction_read  ()
 {
 
 	  UINT16 dannie1218=0; 

@@ -504,11 +504,11 @@ Remarks:			get data from FIFO buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
 //bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
-bool nbuf_get_datapacket_dir0 (unsigned char *in_buf ,u16 *in_size)
+bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
 {
 	 //u16 out_buf_dir0[757];
-	 u16  packet_size_hex=0;
-	 u16  packet_size_in_byte=0;
+	 //u16  packet_size_hex=0;
+	// u16  packet_size_in_byte=0;
 	 u16  static get_iteration_dir0=0;
 	 unsigned long flags;
 	 u16  status=0;
@@ -563,11 +563,11 @@ Syntax:      	    void nbuf_get_datapacket_dir1 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
+bool nbuf_get_datapacket_dir2 (unsigned char *in_buf ,u16 *in_size)
 {
 	 //u16 out_buf_dir1[757];
-	 u16  packet_size_hex=0;
-	 u16  packet_size_in_byte;
+	 //u16  packet_size_hex=0;
+	 //u16  packet_size_in_byte;
 	 u16  status=0;
 	 u16  static get_iteration_dir1=0;
 	 unsigned long flags;
@@ -613,11 +613,11 @@ Syntax:      	    void nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir2 (unsigned char *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir3 (unsigned char *in_buf , u16 *in_size)
 {
 	 //u16  out_buf_dir2[757];
-	 u16  packet_size_hex=0;
-	 u16  packet_size_in_byte;
+	// u16  packet_size_hex=0;
+	 //u16  packet_size_in_byte;
 	 u16  status=0;
 	 u16  static get_iteration_dir2=0;
 	 unsigned long flags;
@@ -663,11 +663,11 @@ Syntax:      	    nbuf_get_datapacket_dir3 (const u16 *in_buf ,const u16 in_size
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir3 (unsigned char *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir4 (unsigned char *in_buf , u16 *in_size)
 {
 	 //u16 out_buf_dir3[757];
-	 u16  packet_size_hex=0;
-	 u16  packet_size_in_byte;
+	// u16  packet_size_hex=0;
+	 //u16  packet_size_in_byte;
 	 u16  static get_iteration_dir3=0;
 	 u16 status=0;
 	 unsigned long flags;
@@ -725,7 +725,7 @@ Syntax:      	    void nbuf_get_datapacket_dir4 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir4 (u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir5 (u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -734,7 +734,7 @@ Syntax:      	   void nbuf_get_datapacket_dir5 (const u16 *in_buf ,const u16 in_
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir5 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir6 ( u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -743,7 +743,7 @@ Syntax:      	    void nbuf_get_datapacket_dir6 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir6 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir7 ( u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -752,7 +752,7 @@ Syntax:      	    void nbuf_get_datapacket_dir7 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir7 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir8 ( u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -761,7 +761,7 @@ Syntax:      	    void nbuf_get_datapacket_dir8 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir8 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir9 ( u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -770,7 +770,7 @@ Syntax:      	    void nbuf_get_datapacket_dir9 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-bool nbuf_get_datapacket_dir9 ( u16 *in_buf , u16 *in_size)
+bool nbuf_get_datapacket_dir10 ( u16 *in_buf , u16 *in_size)
 {
 		
 }
@@ -789,12 +789,12 @@ Syntax:      	    void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 i
 Remarks:			set data to fifo buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir0  (const unsigned char *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir1  (const unsigned char *in_buf ,const u16 in_size)
 {
 u16 status=0;
 u16 static set_iteration_dir0=0;  
 unsigned long flags;
-u8 dop_nechet_packet =0;    
+//u8 dop_nechet_packet =0;    
      //printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
      //set packet size to fifo buffer
 
@@ -830,7 +830,7 @@ Syntax:      	    void nbuf_set_datapacket_dir1  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction1
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir1  (const unsigned char *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir2  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir1=0;  
@@ -857,7 +857,7 @@ Syntax:      	    void nbuf_set_datapacket_dir2  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction2
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir2  (const unsigned char *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir3  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir2=0;  
@@ -888,7 +888,7 @@ Syntax:      	    void nbuf_set_datapacket_dir3  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo direction3
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir3  (const unsigned char *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir4  (const unsigned char *in_buf ,const u16 in_size)
 {
 	u16 status=0;
 	u16 static set_iteration_dir3=0;  
@@ -912,7 +912,7 @@ Syntax:             void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir4  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }
@@ -921,7 +921,7 @@ Syntax:      	    void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }
@@ -930,7 +930,7 @@ Syntax:      	    void nbuf_get_datapacket_dir9 (const u16 *in_buf ,const u16 in
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }
@@ -939,7 +939,7 @@ Syntax:      	    void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }
@@ -948,7 +948,7 @@ Syntax:      	    void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }
@@ -957,7 +957,7 @@ Syntax:      	    void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 i
 Remarks:			get data packet and set to fifo
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size)
+void nbuf_set_datapacket_dir10  (const u16 *in_buf ,const u16 in_size)
 {
 	
 }

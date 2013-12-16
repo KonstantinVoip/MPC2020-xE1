@@ -190,7 +190,6 @@ void LocalBusCyc3_Init();
 //void TDM0_dierction_read  (u16 *out_buf,u16 out_size_byte);
 
 
-void TDM0_dierction_read  ();
 void TDM1_dierction_read  ();
 void TDM2_dierction_read  ();
 void TDM3_dierction_read  ();
@@ -200,10 +199,10 @@ void TDM6_dierction_read  ();
 void TDM7_dierction_read  ();
 void TDM8_dierction_read  ();
 void TDM9_dierction_read  ();
+void TDM10_dierction_read ();
 
 
 /* Write Data to direction */
-void TDM0_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM1_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM2_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM3_direction_write (const u16 *in_buf ,const u16 in_size);
@@ -213,10 +212,10 @@ void TDM6_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM7_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM8_direction_write (const u16 *in_buf ,const u16 in_size);
 void TDM9_direction_write (const u16 *in_buf ,const u16 in_size);
+void TDM10_direction_write (const u16 *in_buf ,const u16 in_size);
 
 
 /*Ready Read DATA */
-UINT16 TDM0_direction_READ_READY(void);
 UINT16 TDM1_direction_READ_READY(void);
 UINT16 TDM2_direction_READ_READY(void);
 UINT16 TDM3_direction_READ_READY(void);
@@ -226,10 +225,10 @@ UINT16 TDM6_direction_READ_READY(void);
 UINT16 TDM7_direction_READ_READY(void);
 UINT16 TDM8_direction_READ_READY(void);
 UINT16 TDM9_direction_READ_READY(void);
+UINT16 TDM10_direction_READ_READY(void);
 
 
 /*Ready Write Data*/
-UINT16 TDM0_direction_WRITE_READY(void);
 UINT16 TDM1_direction_WRITE_READY(void);
 UINT16 TDM2_direction_WRITE_READY(void);
 UINT16 TDM3_direction_WRITE_READY(void);
@@ -239,6 +238,7 @@ UINT16 TDM6_direction_WRITE_READY(void);
 UINT16 TDM7_direction_WRITE_READY(void);
 UINT16 TDM8_direction_WRITE_READY(void);
 UINT16 TDM9_direction_WRITE_READY(void);
+UINT16 TDM10_direction_WRITE_READY(void);
 
 
 
