@@ -878,7 +878,7 @@ void TDM0_direction_write (const u16 *in_buf ,const u16 in_size)
     //Set size on PLIS in byte
    
     
-    printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    //printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
 	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
@@ -1291,7 +1291,7 @@ void TDM0_dierction_read ()
   
 
   packet_size_hex=(dannie1200/2)+dir0_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-  printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+  //printk("+Tdm_Dir0_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
     	  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
@@ -1315,8 +1315,10 @@ void TDM0_dierction_read ()
 	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
 	  
 	  //IP DA address read on direction 0
-	 dir0_ip_da_addr    = out_buf[16];
-	  //MAC DA address read on direction 0
+	  //dir0_ip_da_addr    = out_buf[16];
+	    memcpy(&dir0_ip_da_addr,out_buf+15,4);
+	    
+	    //MAC DA address read on direction 0
 	 dir0_mac_da_addr   = out_buf[2];
 	 //определяю признак KY-S по mac адресам 
 	 dir0_mac_priznak_kys = out_buf[2]>>8;
@@ -1410,7 +1412,7 @@ void TDM1_dierction_read ()
 	  
 	  
 	  packet_size_hex=(dannie1202/2)+dir1_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-	 // printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);  
+	  printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_read_iteration,dannie1202,packet_size_hex);  
 	  //16 bit  or 2 bait Local bus iteration
 	        do
 	        {
@@ -1432,7 +1434,8 @@ void TDM1_dierction_read ()
 	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
 	  	  
 	  	  //IP DA address read on direction 0
-	  	 dir1_ip_da_addr    = out_buf1[16];
+	  	  memcpy(&dir1_ip_da_addr,out_buf1+15,4);   
+	  	  // dir1_ip_da_addr    = out_buf1[16];
 	  	  //MAC DA address read on direction 0
 	  	 dir1_mac_da_addr   = out_buf1[2];
 	  	 //определяю признак KY-S по mac адресам 
@@ -1527,7 +1530,7 @@ void TDM2_dierction_read ()
 	  
 	  packet_size_hex=(dannie1204/2)+dir2_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex
 	  	  
-	 // printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
+	  printk("+Tdm_Dir2_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
 	 	    
 
 	  
@@ -1554,7 +1557,8 @@ void TDM2_dierction_read ()
 	 	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
 	 	  	  
 	 	  	  //IP DA address read on direction 0
-	 	  	 dir2_ip_da_addr    = out_buf2[16];
+	 	  	 memcpy(&dir2_ip_da_addr,out_buf2+15,4);
+	 	  	    // dir2_ip_da_addr    = out_buf2[16];
 	 	  	  //MAC DA address read on direction 0
 	 	  	 dir2_mac_da_addr   = out_buf2[2];
 	 	  	 //определяю признак KY-S по mac адресам 
@@ -1666,7 +1670,8 @@ void TDM3_dierction_read  ()
 	  	 	  	  //Пока затычка в виде if коммутируем по MAC признак коммутации у на последняя цифра MAC DA являеться номером подсети
 	  	 	  	  
 	  	 	  	  //IP DA address read on direction 0
-	  	 	  	 dir3_ip_da_addr    = out_buf3[16];
+	  	 	  	memcpy(&dir3_ip_da_addr,out_buf3+15,4);
+	  	 	  	    //dir3_ip_da_addr    = out_buf3[16];
 	  	 	  	  //MAC DA address read on direction 0
 	  	 	  	 dir3_mac_da_addr   = out_buf3[2];
 	  	 	  	 //определяю признак KY-S по mac адресам 

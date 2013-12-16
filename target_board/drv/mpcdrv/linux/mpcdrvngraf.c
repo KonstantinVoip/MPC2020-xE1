@@ -333,7 +333,7 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	
 	//printk("l_sosed_mk8_vihod=%d\n\r",l_sosed_mk8_vihod);
 	//
-	printk("\n\r");
+	//printk("\n\r");
 	// printk("iter=%d->>SOSED_IP_ADDR=0x%x->mk8_vihod=%d \n\r",iteration,l_sosed_ipaddr,l_my_mk8_vihod);
 	  
 	  //printk("|array[2]=0x%x \n\r+",in_sviaz_array[2]);
@@ -374,7 +374,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
     if(my_current_kos.state==0){return;}
-   //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
+    //printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
     multipleksor[0].priznac_shcluzovogo=1;
    
@@ -398,7 +398,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
        if(my_current_kos.ip_addres==priznak_kommutacii)	 
        {
     	   multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
-           printk("+multipleksor[0].nms3_ipaddr=0x%x+\n\r",multipleksor[0].nms3_ipaddr);
+           //printk("+multipleksor[0].nms3_ipaddr=0x%x+\n\r",multipleksor[0].nms3_ipaddr);
+    	   printk("Send ARP my KY-S  packet 0x%x\n\r",my_current_kos.ip_addres);
+    	   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
        }
       
        
@@ -407,8 +409,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
  
        	   if(multipleksor[0].priznac_shcluzovogo==1)
        	   {
-       		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
+       		   //printk("arp_send2\n\r");
+       		  
+       		   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);	
        	   }
+       	   
+       	   
+       	   
        	   else
        	   {	   
        	   //Шлюз не шлюзzzяpriznak_kommutacii)
@@ -416,12 +423,16 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	       nbuf_set_datapacket_dir1  (in_buf ,in_size);   //dircteion 2
    	       nbuf_set_datapacket_dir2  (in_buf ,in_size);   //dircteion 3
    	       nbuf_set_datapacket_dir3  (in_buf ,in_size);   //dircteion  
-           }   
+           }
        //Если признак коммутации НМС3 адрес для ARP
        } 
        
    }
+   else
+   { 
     
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
     
     //Пакеты которые идут с DA ip адресом KY-S мультиплексора (моего)
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,7 +455,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	          //если другой пакет отправляем KY-S в eth1
 	          else
 	          {
-	          // printk("Send my KY-S packet 0x%x\n\r",(u8)multipleksor[0].curr_ipaddr);
+	          printk("Send my KY-S packet 0x%x\n\r",my_current_kos.ip_addres);
 	          p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
 	          } 	
       
@@ -486,7 +497,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 	    	//{
 	    		//Признак коммутации Ip адрес шлюзового ip = 192.169.120.170 туда и гоним пакеты
 	    		priznak_kommutacii=multipleksor[0].gate_ipaddr;
-	    		printk("nms3_da->>marshrutization_enable1->priznak_kommutacii=%d\n\r",priznak_kommutacii);
+	    		//printk("nms3_da->>marshrutization_enable1->priznak_kommutacii=%d\n\r",priznak_kommutacii);
 	    		//Все пакеты гоним к ip шлюзового	
 	    		if (priznak_kommutacii==/*(u8)*/multipleksor[0].ipaddr_sosed[0])
 	    		{
@@ -598,7 +609,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
      	 }
 
     }//end priznak scluzovogo     	 
-     	 
+ }   	 
 //#endif  
   
 	  	
@@ -791,7 +802,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  //пакет исходит от меня построение маршрута от меня я нашёл себя
 	  if(my_current_kos.ip_addres==l_ipaddr)
 	  {
-	   printk("++my_mk8_vihod=%d|sosed_mk8_vyhod=%d++\n\r",my_mk8_vihod,sosed_mk8_vyhod);
+	   //printk("++my_mk8_vihod=%d|sosed_mk8_vyhod=%d++\n\r",my_mk8_vihod,sosed_mk8_vyhod);
 	   multipleksor[0].ipaddr_sosed[i]=sosed_ipaddr;
 	   multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod;
 		  
@@ -799,7 +810,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
       //я сосед висящий на первой связи
 	  if(my_current_kos.ip_addres==sosed_ipaddr)
       {
-		 printk("-my_mk8_vihod=%d|sosed_mk8_vyhod=%d-\n\r",my_mk8_vihod,sosed_mk8_vyhod);
+		 //printk("-my_mk8_vihod=%d|sosed_mk8_vyhod=%d-\n\r",my_mk8_vihod,sosed_mk8_vyhod);
 		 multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
 	     multipleksor[0].tdm_direction_sosed[i]=sosed_mk8_vyhod;
       }

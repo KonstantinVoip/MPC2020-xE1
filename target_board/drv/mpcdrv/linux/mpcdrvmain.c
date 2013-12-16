@@ -546,9 +546,10 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 	//printk("get_ethernet_packet=0x%x\n\r",priznak_packet);
 	if(priznak_packet ==0x0800)
 	{
-		wake_up(&myevent_waitqueue);
-		target_arp_ip_da_addr=(UINT8)in_buf[16];
-		
+		//printk("ip\n\r");
+		//wake_up(&myevent_waitqueue);
+		memcpy(&target_arp_ip_da_addr,in_buf+15,4);
+		//target_arp_ip_da_addr=in_buf[16];
 	}	
 	if(priznak_packet==0x0806)
 	{
@@ -701,7 +702,8 @@ unsigned int Hook_Func(uint hooknum,
 	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
 	 	  /*заполняем структуру для нашего КY-S */	 	  
 		  CUR_KYS_IP_ADDR	= ip->saddr;  
-	 	  g_my_kys_ip_addres=(UINT8)ip->saddr;
+	 	 // g_my_kys_ip_addres=(UINT8)ip->saddr;
+		  g_my_kys_ip_addres=ip->saddr;
 		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
 		  /*
 	 	  printk("\n\r");
