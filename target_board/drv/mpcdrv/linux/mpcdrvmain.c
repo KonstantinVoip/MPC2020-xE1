@@ -635,7 +635,7 @@ unsigned int Hook_Func(uint hooknum,
 	
 	u16 priznak_packet=0x0800; //ip packet; 
 	//
-	//UINT16  udp_dest_port=0;
+	UINT16  tcp_dest_port=0;
 	UINT32  input_mac_da_addr[1];
 	UINT16  input_mac_last_word;
 	UINT8   input_mac_prelast_byte;
@@ -679,6 +679,28 @@ unsigned int Hook_Func(uint hooknum,
 	 } 
 	 
 	
+	 //Фильтрация по TCP  порт 7()
+	 //Протокл TCP    
+	 if(ip->protocol==TCP)
+	 {	 
+	    //Протокол TCP нужно фтльтровать порт 7
+		 memcpy(&tcp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
+		 printk("+TCP _protocol=0x%x\n\r+",ip->protocol);
+         if(tcp_dest_port==7)
+         {
+        	 printk("port 7 _echo drop\n\r");
+        	 return NF_DROP; 
+         }
+		
+	   return NF_ACCEPT;	
+	 }
+	 
+	 
+	 
+	 
+	 
+	 
+	 
 	/*Принял от КУ-S Информационный пакет который сожержит
 	*IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
