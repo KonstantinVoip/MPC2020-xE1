@@ -255,7 +255,6 @@ static inline ktime_t ktime_now(void);
 /*	PRIVATE GLOBALS							     */
 //////////////////////////////////////////////////////////////////////////////////
 
-
 ///////////////////////THREAD TEST FUNCTIONS FOR MPC P2020///////////////
 static char *sj( void ) { static char s[ 40 ];sprintf( s, "%08ld :", jiffies );return s;}
 static char *st( int lvl ) { static char s[ 40 ];sprintf( s, "%skthread [%05d:%d]",ktime_now(),current->pid, lvl );return s;}
@@ -548,7 +547,7 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 	{
 		//printk("ip\n\r");
 		//wake_up(&myevent_waitqueue);
-		memcpy(&target_arp_ip_da_addr,in_buf+15,4);
+	 memcpy(&target_arp_ip_da_addr,in_buf+15,4);
 		//target_arp_ip_da_addr=in_buf[16];
 	}	
 	if(priznak_packet==0x0806)

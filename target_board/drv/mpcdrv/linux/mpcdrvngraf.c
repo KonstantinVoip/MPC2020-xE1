@@ -376,7 +376,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-   multipleksor[0].priznac_shcluzovogo=1;
+    multipleksor[0].priznac_shcluzovogo=1;
    
     //для отладки на ките 
     /*
@@ -391,6 +391,136 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     
 //#if 0 
     printk("priznak arp_sender =0x%x|priznak commuutaci=0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    
+    
+    //Обрабатываем пакеты для шлюзвого
+    if(multipleksor[0].priznac_shcluzovogo==1)
+    {
+    	//Признак ARP
+    	if(priznak_nms3_arp_sender)
+    	{
+    		//да это ARP //обрабатываем особыам образом ARP пакет
+    		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
+    		if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+    		{
+    		 multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
+    		 //отправляем моему KY-S в eth1 
+    		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+    		}
+    	
+    		//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
+    		if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
+    		{
+    			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    		}
+    
+    		
+    		//Тепреь ARP к соседям только через таблицу маршрутизации проверяем что есть
+    		//если нет то brake
+    		if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
+    		{
+    	       printk("ARP_NMS3->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+    		   switch(multipleksor[0].tdm_direction_sosed[0])
+    		   {
+    		   case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
+    		   case 2:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    		   case 3:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    		   case 4:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;  
+         	   default:printk("?ARP_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+    		   }	    		
+    	   }	
+    	   if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
+           {
+        	  printk("ARP_NMS3->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+        	  switch(multipleksor[0].tdm_direction_sosed[1])
+        	  {
+        	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
+        	  case 2:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+        	  case 3:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+        	  case 4:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;  
+        	  default:printk("?ARP_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+        	  }	    		
+           }	
+    	//И так далее по количеству соседей;		
+    	}//END _priznak_nms3_arp_sender
+    	
+    	
+    	//Признак обычных пакетов от шлюзового
+    	else
+    	{
+    	    //Пакет идёт от c SA адрес НМС3 к и DA моего KY-S шлюзового пакеты к шлюзу.
+      		if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+        	{
+        	    //Пакет с матрицой коммутации для моего МПС шлюзового
+      			memcpy(&udp_dest_port,&in_buf[18],2); 
+      			if (udp_dest_port==18000)
+      		    {
+      			  ngraf_packet_for_my_mps(in_buf ,in_size);
+      		    }
+      			//если обычные пакеты.без маршрутизации
+      			else
+      			{	
+      			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+      			}
+        	
+        	}
+    		//Пакет идёт назад к НМС3
+    		if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
+    		{
+    			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    		}
+  
+    		//Соседи по таблице маршрутизации
+    		//Тепреь ARP к соседям только через таблицу маршрутизации проверяем что есть
+    		//если нет то brake
+    		if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
+    		{
+    	       printk("PACK_NMS3->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+    		   switch(multipleksor[0].tdm_direction_sosed[0])
+    		   {
+    		   case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
+    		   case 2:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    		   case 3:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    		   case 4:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;  
+         	   default:printk("?PACK_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+    		   }	    		
+    	   }	
+    	   if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
+           {
+        	  printk("PACK_NMS3->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+        	  switch(multipleksor[0].tdm_direction_sosed[1])
+        	  {
+        	  case 1:nbuf_set_datapacket_dir0  (in_buf ,in_size);break;
+        	  case 2:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+        	  case 3:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+        	  case 4:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;  
+        	  default:printk("?PACK_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+        	  }	    		
+           }
+  		
+    	}//END PRIZNAK NMS3 packet
+    	
+    
+    }
+    //Обработка нешлюзовых
+    else
+    {
+    	
+    	
+    	
+    	
+    	
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    #if 0 
+    
     //Дополнительное условие проверки ARP отдельно ARP обрабатываем
     if(priznak_nms3_arp_sender)
     {
@@ -624,7 +754,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 
      }//end priznak scluzovogo     	 
  }   	 
-//#endif  
+#endif  
   
 	  	
 }
