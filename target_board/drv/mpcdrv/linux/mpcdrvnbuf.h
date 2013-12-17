@@ -60,24 +60,24 @@ bool nbuf_get_datapacket_dir1  ( unsigned char *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir2  ( unsigned char *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir3  ( unsigned char *in_buf , u16 *in_size);
 bool nbuf_get_datapacket_dir4  ( unsigned char *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir5  ( u16 *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir6  ( u16 *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir7  ( u16 *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir8  ( u16 *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir9  ( u16 *in_buf , u16 *in_size);
-bool nbuf_get_datapacket_dir10  ( u16 *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir5  ( unsigned char *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir6  ( unsigned char *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir7  ( unsigned char *in_buf , u16 *in_size);
+bool nbuf_get_datapacket_dir8  ( unsigned char *in_buf , u16 *in_size);
+//bool nbuf_get_datapacket_dir9  ( unsigned char *in_buf , u16 *in_size);
+//bool nbuf_get_datapacket_dir10  (unsigned char *in_buf , u16 *in_size);
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 void nbuf_set_datapacket_dir1  (const unsigned char *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir2  (const unsigned char *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir3  (const unsigned char *in_buf ,const u16 in_size);
 void nbuf_set_datapacket_dir4  (const unsigned char *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
-void nbuf_set_datapacket_dir10 (const u16 *in_buf ,const u16 in_size);
+void nbuf_set_datapacket_dir5  (const unsigned char *in_buf ,const u16 in_size);
+void nbuf_set_datapacket_dir6  (const unsigned char *in_buf ,const u16 in_size);
+void nbuf_set_datapacket_dir7  (const unsigned char *in_buf ,const u16 in_size);
+void nbuf_set_datapacket_dir8  (const unsigned char *in_buf ,const u16 in_size);
+//void nbuf_set_datapacket_dir9  (const unsigned char *in_buf ,const u16 in_size);
+//void nbuf_set_datapacket_dir10 (const unsigned char *in_buf ,const u16 in_size);
 /////////////////////////////////////////////////////////////////////////////////////
 
 

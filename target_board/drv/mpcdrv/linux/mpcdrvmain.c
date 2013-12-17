@@ -320,6 +320,20 @@ static int tdm_recieve_thread_two(void *data)
 	unsigned char  in_buf_dir4[1514];
 	u16  in_size_dir4=0;
 	
+	unsigned char  in_buf_dir5[1514];
+	u16  in_size_dir5=0;
+	
+	unsigned char  in_buf_dir6[1514];
+	u16  in_size_dir6=0;
+	
+	unsigned char  in_buf_dir7[1514];
+	u16  in_size_dir7=0;
+	
+	unsigned char  in_buf_dir8[1514];
+	u16  in_size_dir8=0;
+	
+	
+	
     
 	
 	while(!kthread_should_stop()) 
@@ -404,7 +418,96 @@ static int tdm_recieve_thread_two(void *data)
 		    	   mdelay(32);
 		    	}
             }	    
-		   //mdelay(150);  
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	    
+		    if(TDM5_direction_WRITE_READY()==1)
+		    {			
+		    		        
+		      //Есть пакет в буфере FIFO на отправку по направлению 0
+		      if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
+		      {
+		    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+		        //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		    		        	 
+		        /*
+		        printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		    	printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		        */
+		    	/*
+		        printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		    	printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		    	*/
+		    	TDM5_direction_write (in_buf_dir5 ,in_size_dir5);
+		    	mdelay(32);
+		      }
+		    			
+		   }
+		   ///////////////////////
+		   if(TDM6_direction_WRITE_READY()==1)
+		   {			
+		    		        
+		      //Есть пакет в буфере FIFO на отправку по направлению 0
+		      if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
+		      {
+		         // printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+		    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 	        	 
+		    	 /*
+		    	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		    	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		    	 */
+		    	 /*
+		         printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		    	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		    	 */
+		    	 TDM6_direction_write (in_buf_dir6 ,in_size_dir6);
+		    	 mdelay(32);
+		      }
+		    			
+		   }
+		    /////////////////
+		  if(TDM7_direction_WRITE_READY()==1)
+		  {			
+		    //Есть пакет в буфере FIFO на отправку по направлению 0
+		    if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
+		    {
+		     // printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+		     //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		     /*
+		     printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		     */
+		     /*
+		     printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */
+		     TDM7_direction_write (in_buf_dir7 ,in_size_dir7);
+		     mdelay(32);
+		     }
+		    			
+		   }
+		    ////////////////////////////
+		    if(TDM8_direction_WRITE_READY()==1)
+		    {			
+		      //Есть пакет в буфере FIFO на отправку по направлению 0
+		      if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
+		      {
+		      //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+		      //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
+		      /*
+		      printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		      printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
+		      */
+		      /*
+		      printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		      printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		      */
+		      TDM8_direction_write (in_buf_dir8 ,in_size_dir8);
+		      mdelay(32);
+		      }
+		    			
+		    }
+		 
+		  
 //#endif	
 		    
 		}
@@ -434,17 +537,17 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			     if(TDM2_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );*/TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );*/TDM3_dierction_read();}
 				 if(TDM4_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );*/TDM4_dierction_read();} 
-//#endif
-				 /*
-				 if(TDM5_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );TDM4_dierction_read();}
-				 if(TDM6_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );TDM5_dierction_read();}
-				 if(TDM7_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );TDM6_dierction_read();}
-				 if(TDM8_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR7------>%s---------------\n\r",lbc_ready_toread );TDM7_dierction_read();}
-			     if(TDM9_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR8------>%s---------------\n\r",lbc_ready_toread );TDM8_dierction_read();}
-				 if(TDM10_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR9------>%s---------------\n\r",lbc_ready_toread );TDM9_dierction_read();}
+				 if(TDM5_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );*/TDM5_dierction_read();}
+				 if(TDM6_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );*/TDM6_dierction_read();}
+				 if(TDM7_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );*/TDM7_dierction_read();}
+				 if(TDM8_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR7------>%s---------------\n\r",lbc_ready_toread );*/TDM8_dierction_read();}
 			     
-			     */
-			
+				 //if(TDM9_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR8------>%s---------------\n\r",lbc_ready_toread );TDM8_dierction_read();}
+				 //if(TDM10_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR9------>%s---------------\n\r",lbc_ready_toread );TDM9_dierction_read();}
+			     
+			     
+//#endif
+				 
 			}
 		printk( "%s find signal!\n", st( N ) );
 		printk( "%s is completed\n", st( N ) );

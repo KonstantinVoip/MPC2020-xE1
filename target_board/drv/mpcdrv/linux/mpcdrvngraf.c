@@ -232,11 +232,14 @@ extern void nbuf_set_datapacket_dir1  (const unsigned char *in_buf ,const u16 in
 extern void nbuf_set_datapacket_dir2  (const unsigned char *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir3  (const unsigned char *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir4  (const unsigned char *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir5  (const unsigned char *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir6  (const unsigned char *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir7  (const unsigned char *in_buf ,const u16 in_size);
+extern void nbuf_set_datapacket_dir8  (const unsigned char *in_buf ,const u16 in_size);
+
+
+
 /*
-extern void nbuf_set_datapacket_dir5  (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_set_datapacket_dir6  (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_set_datapacket_dir7  (const u16 *in_buf ,const u16 in_size);
-extern void nbuf_set_datapacket_dir8  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir9  (const u16 *in_buf ,const u16 in_size);
 extern void nbuf_set_datapacket_dir10 (const u16 *in_buf ,const u16 in_size);*/
 
@@ -365,20 +368,20 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //UINT16  out_mac[12];
    //UINT16  mac1[3];
    //UINT16  mac2[3];
-   // static UINT16 iteration=0;
+   //static UINT16 iteration=0;
    //UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
-     //my_current_kos.ip_addres=0xC0A878AA;  //shluz
-	 //my_current_kos.ip_addres=0xC0A878AB;    //sosed 1
-	 //my_current_kos.ip_addres=0xC0A878AC;    //sosed 2
+   //my_current_kos.ip_addres=0xC0A878AA;  //shluz
+   //my_current_kos.ip_addres=0xC0A878AB;    //sosed 1
+   //my_current_kos.ip_addres=0xC0A878AC;    //sosed 2
 	
 	UINT16  udp_dest_port=0;
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-   // multipleksor[0].priznac_shcluzovogo=1;
-   
+    // multipleksor[0].priznac_shcluzovogo=1;
+     
     //для отладки на ките 
     /*
     memcpy(&udp_dest_port,&in_buf[18],2); 
@@ -392,8 +395,6 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     
 //#if 0 
   // printk("priznak arp_sender =0x%x|priznak commuutaci=0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
-    
-    
     //Обрабатываем пакеты для шлюзвого
     if(multipleksor[0].priznac_shcluzovogo==1)
     {
@@ -434,6 +435,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
     				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    				case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+    				case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+    				case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+    				case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
     				default:printk("?ARP_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     				}	    		
     			}	
@@ -445,7 +450,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     				case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    				case 5:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    				case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    				case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
+    				case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;
     				default:printk("?ARP_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     				}	    		
     			}	
@@ -497,7 +506,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     				case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    				case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+    				case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+    				case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+    				case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break;
     				default:printk("?PACK_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     				}	    		
     			}	
@@ -509,7 +522,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     				case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    				case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    				case 5:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    				case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    				case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
+    				case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
     				default:printk("?PACK_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     				}	    		
     			}
@@ -542,7 +559,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	
     	    		
     	    		//Попробую ход конём пока нет идёт пакет назад
-    	    		if((multipleksor[0].ipaddr_sosed[0]==0)||(multipleksor[0].ipaddr_sosed[1]==0))
+    	    		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
     			    {
     	    			//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
     	    			if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
@@ -551,6 +568,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			 //пока в первое и второе
     	    			 nbuf_set_datapacket_dir1  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir2  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir3  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir4  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir5  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir6  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir7  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);
+    	    			
     	    			}
     			    
     			    }//end multipleksor table of marsrutiazation
@@ -569,7 +593,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     	    			      case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     	    			      case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    	    			      case 5:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    	    			      case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    	    			      case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
+    	    			      case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
     	    			      default:printk("?ARP_PACK_->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     	    			      }	    		
     	    			    			
@@ -582,7 +610,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     	    			      case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     	    			      case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    	    			      case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+    	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+    	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+    	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
     	    			      default:printk("?ARP_PACK_EL->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     	    			      }	    		
     	    			    }
@@ -616,7 +648,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	    }
     	    		
     	    		//Нет таблицы маршрутизации
-    	    		if((multipleksor[0].ipaddr_sosed[0]==0)||(multipleksor[0].ipaddr_sosed[1]==0))
+    	    		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
     			    {
 
     	    			if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
@@ -625,7 +657,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			 //пока в первое и второе
     	    			 nbuf_set_datapacket_dir1  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir2  (in_buf ,in_size);
-    	    			//p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    	    			 nbuf_set_datapacket_dir3  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir4  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir5  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir6  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir7  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);
+    	    			 //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
     	    			}		
     	    			
     			    }
@@ -646,6 +684,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	    			      case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
    	    			      case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+   	    			      case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+   	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+   	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+   	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
    	    			      default:printk("?PACK_->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
    	    			      }	    		
    	    			    			
@@ -659,6 +701,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	    			      case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
    	    			      case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
    	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+   	    			      case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+   	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+   	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+   	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
    	    			      default:printk("?PACK_EL->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
    	    			      }	    		
    	    			    }
