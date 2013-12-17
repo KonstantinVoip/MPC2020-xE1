@@ -420,6 +420,7 @@ static int tdm_recieve_thread_two(void *data)
             }	    
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	    
+#if 0
 		    if(TDM5_direction_WRITE_READY()==1)
 		    {			
 		    		        
@@ -508,7 +509,7 @@ static int tdm_recieve_thread_two(void *data)
 		    }
 		 
 		  
-//#endif	
+    #endif	
 		    
 		}
 	printk( "%s find signal!\n", st( N ) );
@@ -537,11 +538,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 			     if(TDM2_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );*/TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );*/TDM3_dierction_read();}
 				 if(TDM4_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );*/TDM4_dierction_read();} 
+				 
+#if 0
 				 if(TDM5_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );*/TDM5_dierction_read();}
 				 if(TDM6_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );*/TDM6_dierction_read();}
 				 if(TDM7_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );*/TDM7_dierction_read();}
 				 if(TDM8_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR7------>%s---------------\n\r",lbc_ready_toread );*/TDM8_dierction_read();}
-			     
+#endif			     
 				 //if(TDM9_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR8------>%s---------------\n\r",lbc_ready_toread );TDM8_dierction_read();}
 				 //if(TDM10_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR9------>%s---------------\n\r",lbc_ready_toread );TDM9_dierction_read();}
 			     

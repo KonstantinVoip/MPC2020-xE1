@@ -126,10 +126,10 @@ void Init_FIFObuf()
 	 memset(&fifo_put_to_tdm2_dir, 0x0000, sizeof(fifo_put_to_tdm2_dir)); 
 	 memset(&fifo_put_to_tdm3_dir, 0x0000, sizeof(fifo_put_to_tdm3_dir)); 
 	 memset(&fifo_put_to_tdm4_dir, 0x0000, sizeof(fifo_put_to_tdm4_dir)); 
-	 memset(&fifo_put_to_tdm5_dir, 0x0000, sizeof(fifo_put_to_tdm5_dir)); 
+	 /*memset(&fifo_put_to_tdm5_dir, 0x0000, sizeof(fifo_put_to_tdm5_dir)); 
 	 memset(&fifo_put_to_tdm6_dir, 0x0000, sizeof(fifo_put_to_tdm6_dir)); 
 	 memset(&fifo_put_to_tdm7_dir, 0x0000, sizeof(fifo_put_to_tdm7_dir)); 
-	 memset(&fifo_put_to_tdm8_dir, 0x0000, sizeof(fifo_put_to_tdm8_dir)); 
+	 memset(&fifo_put_to_tdm8_dir, 0x0000, sizeof(fifo_put_to_tdm8_dir)); */
 	 
 	 //INIT FIFO DEIRECTION0 PUT to direction 0
 	 fifo_put_to_tdm1_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
@@ -150,7 +150,8 @@ void Init_FIFObuf()
 	 fifo_put_to_tdm4_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_4);
      if(!fifo_put_to_tdm4_dir) {printk("???Transmit FIFO DIRECTION_4 Initialization Failed??? \n\r");}   
      printk("+FIFO_4_TRANSMIT_INIT_OK+\n\r"); 
-    
+  
+     /*
 	 fifo_put_to_tdm5_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_5);
      if(!fifo_put_to_tdm5_dir) {printk("???Transmit FIFO DIRECTION_5 Initialization Failed??? \n\r");}   
      printk("+FIFO_5_TRANSMIT_INIT_OK+\n\r");
@@ -165,7 +166,7 @@ void Init_FIFObuf()
      
 	 fifo_put_to_tdm8_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_8);
      if(!fifo_put_to_tdm8_dir) {printk("???Transmit FIFO DIRECTION_8 Initialization Failed??? \n\r");}   
-     printk("+FIFO_8_TRANSMIT_INIT_OK+\n\r");
+     printk("+FIFO_8_TRANSMIT_INIT_OK+\n\r");*/
      //Only Future 10 directions
 }
 
@@ -185,10 +186,10 @@ void Clear_FIFObuf()
 	kfree(fifo_put_to_tdm2_dir);
 	kfree(fifo_put_to_tdm3_dir);
 	kfree(fifo_put_to_tdm4_dir);
-	kfree(fifo_put_to_tdm5_dir);
+	/*kfree(fifo_put_to_tdm5_dir);
 	kfree(fifo_put_to_tdm6_dir);
 	kfree(fifo_put_to_tdm7_dir);
-	kfree(fifo_put_to_tdm8_dir);
+	kfree(fifo_put_to_tdm8_dir);*/
 	printk("+free_fifo_buffer_OK+\n\r");
 	
 }

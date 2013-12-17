@@ -380,7 +380,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    // multipleksor[0].priznac_shcluzovogo=1;
+    multipleksor[0].priznac_shcluzovogo=1;
      
     //для отладки на ките 
     /*
@@ -401,6 +401,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	//Признак ARP
     	if(priznak_nms3_arp_sender)
     	{
+    		printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    		
     		//да это ARP //обрабатываем особыам образом ARP пакет
     		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
     		if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
@@ -547,6 +549,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	if(priznak_nms3_arp_sender)
     	    	{
     	        
+    	    		//printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    	    		
     	    		//да это ARP //обрабатываем особыам образом ARP пакет
     	    		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
     	    		if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
@@ -570,17 +574,19 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			 nbuf_set_datapacket_dir2  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir3  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir4  (in_buf ,in_size);
+    	    			 /*
     	    			 nbuf_set_datapacket_dir5  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir6  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir7  (in_buf ,in_size);
-    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);*/
     	    			
     	    			}
     			    
     			    }//end multipleksor table of marsrutiazation
     	    		else //Появилась таблица маршрутизации
     	    		{
-    	    		   if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
+    	    		   
+    	    		  if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
     	    		   {
     	    			   priznak_kommutacii=multipleksor[0].gate_ipaddr;   
     	    		   }
@@ -594,10 +600,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			      case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     	    			      case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
     	    			      case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
-    	    			      case 5:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
-    	    			      case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
-    	    			      case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
-    	    			      case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
+    	    			      case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+    	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+    	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+    	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
     	    			      default:printk("?ARP_PACK_->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     	    			      }	    		
     	    			    			
@@ -659,10 +665,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			 nbuf_set_datapacket_dir2  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir3  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir4  (in_buf ,in_size);
-    	    			 nbuf_set_datapacket_dir5  (in_buf ,in_size);
+    	    			/* nbuf_set_datapacket_dir5  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir6  (in_buf ,in_size);
     	    			 nbuf_set_datapacket_dir7  (in_buf ,in_size);
-    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);
+    	    			 nbuf_set_datapacket_dir8  (in_buf ,in_size);*/
     	    			 //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
     	    			}		
     	    			
