@@ -377,7 +377,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    multipleksor[0].priznac_shcluzovogo=1;
+   // multipleksor[0].priznac_shcluzovogo=1;
    
     //для отладки на ките 
     /*
@@ -391,7 +391,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     }*/
     
 //#if 0 
-   printk("priznak arp_sender =0x%x|priznak commuutaci=0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+  // printk("priznak arp_sender =0x%x|priznak commuutaci=0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
     
     
     //Обрабатываем пакеты для шлюзвого
@@ -417,9 +417,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     
     		
     		//Выполняем проверку что есть таблица маршрутизации если нет то ничего не шлём
-    		if((multipleksor[0].ipaddr_sosed[0]==0)||(multipleksor[0].ipaddr_sosed[1]==0))
+    		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
 		    {
-    		 	printk("ARP_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
+    		 	//printk("ARP_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
 		    }
     		else
     		{
@@ -482,9 +482,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
   
     		
     		//Выполняем проверку что есть таблица маршрутизации если нет то ничего не шлём
-    		if((multipleksor[0].ipaddr_sosed[0]==0)||(multipleksor[0].ipaddr_sosed[1]==0))
+    		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
 		    {
-    		 	printk("PACK_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
+    		 	//printk("PACK_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
 		    }
     		else
     		{
@@ -536,6 +536,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		{
     	    		 multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
     	    		 //отправляем моему KY-S в eth1 
+    	    		 printk("Send ARP to KYS\n\r");
     	    		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     	    		}
     	    	
@@ -608,7 +609,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		   //если обычные пакеты.без маршрутизации
     	    		   else
     	    		   {	
-    	    		   p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+    	    		    printk("SendPackto KY-S\n\r");
+    	    			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     	    		   }
     	    		        	
     	    	    }
