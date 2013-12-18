@@ -164,7 +164,9 @@ static const int N =4;
 /*****************************************************************************/
 /*Добавил дома Алгоритм Дейкстры*/
 /*соединение для нашей схемы*/
-//Матрица соединенй
+//Матрица соединенй  исходные данные для 4 узлов
+#if 0
+
 static bool adj_matrix[4][4]=
 {
 // ---0--|---1--|-2-|---3---|  
@@ -194,11 +196,33 @@ unsigned short dist[4]={0xffff,0xffff,0xffff,0xffff};
 unsigned short used[4]={0,0,0,0};
 //массив кратчайших путей
 signed short C[4]={-1,-1,-1,-1};
+#endif
 
 
+//Эксперементы с 3 узлами исходные состояния не заполненых матриц
+static bool adj_matrix[3][3]=
+{
+//-0--|---1--|-2-|  
+   0    ,0    ,0, 
+   0    ,0    ,0,
+   0    ,0    ,0 
+};
 
+static unsigned short int cost[3][3]=
+{
+ 
+// ---0--|---1--|---2---|  
+   0xffff,0xffff,0xffff,
+   0xffff,0xffff,0xffff,
+   0xffff,0xffff,0xffff 
+};
 
-
+//массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний
+unsigned short dist[3]={0xffff,0xffff,0xffff};
+//массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока
+unsigned short used[3]={0,0,0};
+//массив кратчайших путей
+signed short C[3]={-1,-1,-1};
 
 
 
@@ -380,7 +404,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    //multipleksor[0].priznac_shcluzovogo=1;
+    multipleksor[0].priznac_shcluzovogo=1;
      
     //для отладки на ките 
     /*
@@ -401,7 +425,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	//Признак ARP
     	if(priznak_nms3_arp_sender)
     	{
-    		printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    		//printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
     		
     		//да это ARP //обрабатываем особыам образом ARP пакет
     		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
@@ -481,6 +505,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       			//если обычные пакеты.без маршрутизации
       			else
       			{	
+      			//printk("SEND_KYS\n\r");
       			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
       			}
         	
@@ -736,8 +761,14 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
 
-  //Что нам нужно для Алгоритма?
-
+  //Что нам нужно для Алгоритма Дейкстра?
+  UINT16 num_of_setevich_elementov = 3;
+  
+  
+  //Конец для Дейкстры
+  
+  
+  
   UINT8 smeshenie_grisha_scluz=0;
   UINT32 data_graf_massive[32]; //128 bait 4 *32 bait
   UINT16 razmer_data_graf_massive=0;
@@ -747,7 +778,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   __be32  curr_ipaddr=0;
    static UINT16 iteration=0;
    UINT16 i,j;
-   UINT16 m=0;  //структура с текущим мультиплексором
+  // UINT16 m=0;  //структура с текущим мультиплексором
    
    UINT8 my_posad_mesto=0;
    UINT8 my_mk8_vihod=0;
@@ -787,10 +818,10 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     memset(&multipleksor ,0x0000, sizeof(multipleksor));
      
     
-    printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
+     printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
     //printk("matrica_packet_recieve=%d\n\r",iteration);
     //18 это в пакете наш  UDP  порт destination
-	printk("IP_status:"); 
+	 printk("IP_status:"); 
    
     memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	if(nms3_ip_addres==0){printk("?bad nms3_ip_addres =0?\n\r");return -1;}
@@ -815,7 +846,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	else{printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);
 	priznac_scluz=0;multipleksor[0].priznac_shcluzovogo=0;}
 	
-    printk("Matrica Status:");  
+   // printk("Matrica Status:");  
 	//Первые 8 байт это название Гришиного протокола,следующие 4 байт это ip адрес шлюза. = 12 байт
 	smeshenie_grisha_scluz=(4+8);  //смещение 12 байт или 6 элементов в hex;
 	razmer_data_graf_massive=in_size-42-smeshenie_grisha_scluz; //размер данных в массиве
@@ -925,262 +956,46 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  //Обработка пары которой нет предназначена ни для меня ни для кого нужно высчитать маршрут к далеко стоящему
 	  if((my_current_kos.ip_addres !=l_ipaddr)&&(my_current_kos.ip_addres !=sosed_ipaddr))
 	  {
+	     UINT16 m,n;
+		 /* Алгоритм Дейкстры нужен для определения как работаь с удалёнными */
+		 
+	     
+	     
+	     //заполняем матрицу двухмерный массив коммутации(соединений) для дейкстры
+		 /*
+	     for(m=0;m<3;m++)
+		    for(n=0;n<3;n++)
+		    	adj_matrix[m][n]=1;	
+	     */
+	     
+	         
+	     
+	     
+	     // adj_matrix[m][n];
+		  
+		  
+		  /*++++++Нужно подумать как работать с ним++++++++*/ 
+		  //dijkstra(num_of_setevich_elementov);
+		  /*  
 		  //здесь должен быть алгоритм как лучше отправить его дейкстра
 		  printk("-udal_sosed=0x%x||my_mk8_vihod=%d|\n\r",sosed_ipaddr,my_mk8_vihod);
 		  //l_ipaddr каков адрес соседа это ближайший мультиплексор
 		  //sosed_mk8_vyhod это ближайший выход
-		  multipleksor[0].ipaddr_sosed[i]=sosed_ipaddr;
+		  multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
 		  multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod ;
-		  
-	  }
-	  
-	  
-	  
-	  
+		  */
+	  }  
    dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
   }
  
   
-  
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {	  
-  printk("[i=%d]MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",i,my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
+  //printk("[i=%d]MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",i,my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
   }
  
-  //my_current_kos.marshrutization_enable==1;
- //marshrutization_enable=1; //Есть таблица маршрутизации
- iteration++;
-
-#if 0	
-	u16 hex_input_data_size       = 0;	
-	u16 byte_input_data_size      = 0;
-    u16 four_byte_input_data_size = 0;
-	u16 iteration=0;
-    
-    u16 razmer_array_element =400;
-    
-    //__be32  my_kys_ipaddr;
-    __be32  l_ipaddr=0;
-    __be32  sosed_ipaddr=0;
-    __be32  last_ip_addr=0;
-    
-    
-    __be32   proba1=0;
-    __be32   proba2=0;
-     UINT16  proba3=0;
-    
-     UINT16 first_polovinka_sosed=0;
-     UINT16 last_polovinka_sosed =0;
-    
-     UINT16 i,j;
-     UINT16 size_my_mas=0;
-     UINT16 size_input_data=0;
-     
-     UINT8 my_posad_mesto=0;
-     UINT8 my_mk8_vihod=0;
-     
-     
-     //for deijctra
-     UINT16 number_of_par_sviaznosti_in_packet=0;
-     UINT16 dlinna_pari_sviaznosti_byte=0;
-     UINT16 max_kolichestvo_par_v_odnom_setevom_elemente=8;  //для МК8 10 связей может быть потом больше
-     //UINT16 kolichestvo_iteration_on_this_packet=0; 
-     UINT16 max_kolichestvo_setvich_elementov_onpacket=0;//количестов сетевых элементов в пакете.
-     
-    
-     UINT16 dlinna_svyazi_elements_of_massive=0;
-     
-     
-     //длинна связи =12 байт размер одного элемента массива =4 байт
-     dlinna_svyazi_elements_of_massive=DLINNA_SVYAZI/4;
-
-     //razmer massiva = 400_element u32 po 4 bait   = 400*4 = 1600 bait s zapasom
-     UINT32 mas_1[razmer_array_element];
-    
-     ///////////////////////Берём адрес моего сетевого элемент исходящая вершина графа////////////////
-     //my_kys_ipaddr=get_ipaddr_my_kys();
-     //my_kys_ipaddr=0xc0a86f01;  //пока делаю подставу.
-    
-
-    size_my_mas=sizeof(mas_1);
-	//printk("sizeof_my_mas= %d\n\r",size_my_mas) ;
-	//size_input_data=sizeof(in_buf);
-	//printk("sizeof_input_data= %d\n\r ",size_input_data) ;
-	
-    byte_input_data_size=in_size;
-    hex_input_data_size=(in_size/2);
-    four_byte_input_data_size=(in_size/4);
-   
-    printk("input_data_size->byte_=%d,hex_=%d,32_=%d\n\r",byte_input_data_size,hex_input_data_size,four_byte_input_data_size);
-	
-    // spin_lock_irqsave(lock_packet,lock_flags);
- 
-   
-	memset(&mas_1,0x0000,size_my_mas);	
-	memcpy(mas_1,in_buf,byte_input_data_size);
-	
-	
-  
-	
-	//printk("+ngraf_get_data_rfirst|0x%08x|0x%08x|0x%08x|0x%08x+\n\r",mas_1[0],mas_1[1],mas_1[2],mas_1[3]);
-	//printk("+ngraf_get_data_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[hex_element_size-4],mas[hex_element_size-3],mas[hex_element_size-2],mas[hex_element_size-1]);	
-    //first 4 bait my kys_ip_address
-	
-	//подсчитываем количество связей (пар) в пакете DLINN_SVYAZI 12 bait
-	//odna sviaz:
-	//Istochnic                               ||Priemnic
-	//IP-address|nomer_PM|nomer_port_isch_MK8 ||//IP-address|nomer_PM|nomer_port_priemnic_MK8
-	//(4-bait)   (1-bait)     (1-bait)        ||(4-bait)   (1-bait)     (1-bait)    
-	  
-	  /*number_of_par_sviaznosti = общий размер данных в пакете 1440 байт /12 байт длинна одной пары связности = 120 пар
-	   *kolichestvo_iteration_on_this_packet = 120 пар /количество пар для одного сетевого элемента в случае МК8 - 10 = 12
-	   *итого получаеться 12 сетевых элемeнтов по 10 связей в каждом. 
-	   * 
-	   */
-	
-	  number_of_par_sviaznosti_in_packet=in_size/DLINNA_SVYAZI;
-	  max_kolichestvo_setvich_elementov_onpacket=(number_of_par_sviaznosti_in_packet/max_kolichestvo_par_v_odnom_setevom_elemente);
-	
-	  
-      
-	  printk("max_kolichestvo_setvich_elementov_onpacket= %d\n\r",max_kolichestvo_setvich_elementov_onpacket);
-	  printk("number_of_par_sviaznosti_in_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
-	  printk("max_kolichestvo_par_v_odnom_setevom_elemente= %d\n\r",max_kolichestvo_par_v_odnom_setevom_elemente); 
-	  
-	  
-	  ///////////////////////////////////////////////////////////////////////////////////// 
-	  
-	  /*
-	  printk("SOSED_IP_ADDR=0x%x\n\r",sosed_ipaddr);
-	  printk("MY_MPS_SOSED>>first_polovinka=0x%x|last_polovinka_=0x%x\n\r",first_polovinka_sosed,last_polovinka_sosed);
-	  printk("perv_element_dejcstra= 0x%x>>my_posad_mesto=%d>>>my_mk8_vihod=%d\n\r",l_ipaddr,my_posad_mesto,my_mk8_vihod);
-	  */
-		    
-  	  
-     //общее количество пар связносит 120 каждая равно 12 байт
-	 for(i=0;i<max_kolichestvo_setvich_elementov_onpacket;i++)
-	 {
-		 //Рассматриваем первыую пару связности 
-		 //Заполняем матрицу от ip адреса от моего МПС к 10 направлениям МК8 к соседям для первой пары
-		 //Пока ничего не знаю о соседях
-		 ////////////////////////////////
-		 //parse_pari_svyaznosti(&mas_1[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
-		 //ip сетевого элемента идущего первым
-		 //setevoi_element[i].my_setevoi_element_ip=l_ipaddr;
-		 
-		 	for (j=0;j<max_kolichestvo_par_v_odnom_setevom_elemente;j++)
-		 	{
-		 	   //должны запонить 10 связей
-		 	   //если нет связи ставим 0xffff
-		 		//printk("dlinna_pari_sviaznosti_byte =%d\n\r",dlinna_pari_sviaznosti_byte);
-		 		parse_pari_svyaznosti(&mas_1[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr);
-		 		
-		 		///last_ip_addr=l_ipaddr;
-		 		if(j==0)
-		 		{
-		 			setevoi_element[i].my_setevoi_element_ip=l_ipaddr;	
-		 			last_ip_addr=l_ipaddr;
-		 		}
-		 		
-		 		//Ситуация заполнения узла
-		 		if(last_ip_addr==l_ipaddr)
-		 		{	  
-		 			 //Есть коммутация МК8 на этом направлении
-		 			 //printk("vhiogdenia =%d\n\r",)
-		 			 //printk("iteration=%d|setevie_elementi_ip_packet=0x%x\n\r",iteration,l_ipaddr);
-		 			 //printk("iteration=%d|posad_mesto=%d\n\r",iteration,my_mk8_vihod);
-		 			 if(j==my_mk8_vihod-1)
-		 			 {	  
-		 			 //Отладочная информация для проверки 	 
-		 			 //printk("i=my_mk8_vihod=%d|j=%d,sosedip=0x%x,+\n\r",my_mk8_vihod,j,sosed_ipaddr);
-		 			 setevoi_element[i].matrica_commutacii_current_mpc_sosedi[j]=est_current_napr_mk8_svyaz; 
-		 			 setevoi_element[i].matrica_ipadrr_sosedi_cur_mpc[j]= sosed_ipaddr;
-		 			 }
-		 			 else
-		 			 {  
-		 			 //printk("--no_my_mk8_vihod--\n\r");
-		 			 setevoi_element[i].matrica_commutacii_current_mpc_sosedi[j]=no_current_napr_mk8_svyaz; 
-		 			 setevoi_element[i].matrica_ipadrr_sosedi_cur_mpc[j]= no_current_napr_mk8_svyaz;
-		 			 }
-		 			
-		 			iteration++;
-		 			last_ip_addr=l_ipaddr;
-		 			dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+dlinna_svyazi_elements_of_massive;
-		 		}
-		 		else
-		 		{
-		 			iteration=0;
-		 			break;
-		 		}
-		        		
-		 	}
-		 	//dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+DLINNA_SVYAZI;
-		 	//смещаемся на следующею 3 элемента связь +12 bait  //3*4 =12 bait
-		 	//cледующая связь
-		 
-				 
-	 } //OK заполнили распарсили пакет с графом на кускию
-	
-	 		 
-	  
-	
-	 //Ищу свой сетевой элемент если с моим ip и от него проверяю коммутацию.исходящею от меня 
-	 /*
-	 while(max_kolichestvo_setvich_elementov_onpacket)
-	 {
-		 
-		 
-	 }
-	 */
-	 
-	 // 
-	 proba1=setevoi_element[0].my_setevoi_element_ip;	
-	 printk("Cornevoi_setevoi_elemnt_ip=%x\n\r",proba1);
-	 
-	 for(j=0;j<max_kolichestvo_par_v_odnom_setevom_elemente;j++)
-	 {
-	 		 
-		     proba3=setevoi_element[0].matrica_commutacii_current_mpc_sosedi[j];
-		     proba2=setevoi_element[0].matrica_ipadrr_sosedi_cur_mpc[j];
-		     
-		     printk("mk8_naprav=0x%x->>",proba3);
-		     printk("ip_sosed=0x%x\n\r" ,proba2);
-		     
-	 }
-	 //printk("!!!!!!!!!OK_MATRICA_IS_FULL\n\r!!!!!!!!!!!");
-	 
-	 for(i=0;i<max_kolichestvo_setvich_elementov_onpacket;i++)
-	 {
-		printk("setevie_elementi_ip_packet=0x%x\n\r",setevoi_element[i].my_setevoi_element_ip); 
-	 }
-	 
-	// Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
-	 
-   //Пока в качестве заглушки используем Алгоритм для поиска пакета с удалённым IP_мультиплексора который не
-   //входит в число соседей моего корневого.
-   //+нужно изъять паралельные связи которые не ведут нас к удалённому мултиплексору(пока оставлю это)
-  //Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
-	 // 
-#if 0	
-	printk("+ngraf_get_datapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,in_size/2);
-	printk("+ngraf_get_data_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[0],mas[1],mas[2],mas[3]);
-	printk("+ngraf_get_data_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",mas[hex_element_size-4],mas[hex_element_size-3],mas[hex_element_size-2],mas[hex_element_size-1]);	
-#endif
-	
-		
-#if 0	
-	printk("+ngraf_get_indatapacket\in_size_mas_byte= %d|hex= %d+\n\r",in_size,hex_element_size);
-	printk("+ngraf_get_indata_rfirst|0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3]);
-	printk("+ngraf_get_indata_rlast |0x%04x|0x%04x|0x%04x|0x%04x+\n\r",in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);	
-#endif 
-
-	
-	
-#endif	
-	
-	//dijkstra(start);
-	// Algoritm_puti_udalennogo_ip_and_chisla_hop(); 
-	return 0;
+  iteration++;
+  return 0;
 	
 }
 

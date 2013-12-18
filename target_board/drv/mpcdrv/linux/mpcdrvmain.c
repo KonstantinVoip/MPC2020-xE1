@@ -199,8 +199,8 @@ UINT16  kys_deicstra_packet_mac_last_word=0xff11;
 /***********************	PRIVATE STATIC FUNCTION DEFENITION****************/
 /*****************************************************************************/
 //static void Hardware_p2020_set_configuartion();
-static inline bool get_ethernet_packet(const u16 *in_buf ,const u16 in_size,const u16 priznak_packet);
-
+//static inline bool get_ethernet_packet(const u16 *in_buf ,const u16 in_size,const u16 priznak_packet);
+static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 priznak_packet);  
 
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
@@ -644,10 +644,17 @@ Parameters:
 Remarks:			Set hardware configuration for p2020 processor
 Return Value:	    0  =>  Success  ,-EINVAL => Failure
 ***************************************************************************************************/
-static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,const u16 priznak_packet)
+//static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,const u16 priznak_packet)
+static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 priznak_packet)
 {
 	UINT32  target_arp_ip_da_addr =0;
 	UINT32  target_arp_nms_sa_addr=0;
+	//u16 l_data_packet[759];
+	
+	//memset(&l_data_packet, 0x0000, sizeof(l_data_packet));
+	//memcpy(l_data_packet,in_buf,in_size);
+	
+//#if 0	
 	//printk("get_ethernet_packet=0x%x\n\r",priznak_packet);
 	if(priznak_packet ==0x0800)
 	{
@@ -661,9 +668,16 @@ static inline bool get_ethernet_packet(const u16 in_buf[757] ,const u16 in_size,
 	  memcpy(&target_arp_nms_sa_addr,in_buf+14,4);
 	  memcpy(&target_arp_ip_da_addr,in_buf+19,4);
 	}	
+	
+	//printk("get_ethernet_packet=0x%x\n\r",target_arp_ip_da_addr);
 	//ngraf_packet_for_matrica_kommutacii(in_buf,in_size,(u8)target_arp_ip_da_addr,(u8)target_arp_nms_sa_addr);	
 	ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr);
-	//return 1;
+	//ngraf_packet_for_matrica_kommutacii(l_data_packet,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr);
+	
+	//#endif	
+	
+	
+	return 1;
  
  }	 
 
