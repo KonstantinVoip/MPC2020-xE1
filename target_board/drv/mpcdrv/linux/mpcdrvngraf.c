@@ -430,7 +430,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     			//если нет то brake
     			if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
     			{
-    				printk("ARP_NMS3->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+    				printk("ARP_NMS3->Send to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
     				switch(multipleksor[0].tdm_direction_sosed[0])
     				{
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -441,12 +441,12 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
     				case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
     				case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
-    				default:printk("?ARP_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+    				default:printk("?ARP_NMS3->Send  UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     				}	    		
     			}	
     			if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
     			{
-    				printk("ARP_NMS3->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+    				printk("ARP_NMS3->Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
     				switch(multipleksor[0].tdm_direction_sosed[1])
     				{
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -457,7 +457,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
     				case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;
-    				default:printk("?ARP_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+    				default:printk("?ARP_NMS3->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     				}	    		
     			}	
     			
@@ -465,8 +465,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	//И так далее по количеству соседей;		
     	}//END _priznak_nms3_arp_sender
     	
-    	
-    	//Признак обычных пакетов от шлюзового
+  	
+ //++++++++++++++++++++++++Признак обычных пакетов для шлюзового+++++++++++++++++++++++++
     	else
     	{
     	    //Пакет идёт от c SA адрес НМС3 к и DA моего KY-S шлюзового пакеты к шлюзу.
@@ -502,7 +502,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		
     			if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
     			{
-    				printk("PACK_NMS3->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+    				printk("PACK_NMS3->Send to IP sosed 0x%x dir %d\n\r",multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
     				switch(multipleksor[0].tdm_direction_sosed[0])
     				{
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -513,12 +513,12 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
     				case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
     				case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break;
-    				default:printk("?PACK_NMS3->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+    				default:printk("?PACK_NMS3->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     				}	    		
     			}	
     			if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
     			{
-    				printk("PACK_NMS3->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+    				printk("PACK_NMS3->Send to IP sosed 0x%x direction %d\n\r",multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
     				switch(multipleksor[0].tdm_direction_sosed[1])
     				{
     				case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -529,7 +529,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     				case 6:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     				case 7:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
     				case 8:nbuf_set_datapacket_dir4  (in_buf ,in_size);break; 
-    				default:printk("?PACK_NMS3->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+    				default:printk("?PACK_NMS3->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     				}	    		
     			}
   		
@@ -539,7 +539,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	
     
     }
-    //Обработка нешлюзовых Элементов //
+//+++++++++++++++++++++++++++++++++Обработка нешлюзовых Элементов++++++++++++++++++++++++++++++//
     /***************************************************************************************************
      *************************************************************************************************** 
      ***************************************************************************************************/
@@ -557,7 +557,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		{
     	    		 multipleksor[0].nms3_ipaddr=priznak_nms3_arp_sender;
     	    		 //отправляем моему KY-S в eth1 
-    	    		 printk("Send ARP to KYS\n\r");
+    	    		 //printk("Send ARP to KYS\n\r");
     	    		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     	    		}
     	    	
@@ -593,7 +593,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			
     	    		     if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
     	    			    {
-    	    			  	  printk("ARP_PACK_0x%x->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].curr_ipaddr,multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+    	    			  	  printk("ARP_ot_0x%x->Send  to IP sosed 0x%x dir %d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
     	    			 	  switch(multipleksor[0].tdm_direction_sosed[0])
     	    			 	  {
     	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -604,13 +604,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
     	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
     	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
-    	    			      default:printk("?ARP_PACK_->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+    	    			      default:printk("?ARP_ot_->Send  UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
     	    			      }	    		
     	    			    			
     	    			   }	
     	    			 if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
     	    			    {
-    	    			      printk("ARP_PACK_0x%x->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].curr_ipaddr,multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+    	    			      printk("ARP_ot_0x%x->Send  to IP sosed 0x%x direction %d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
     	    			      switch(multipleksor[0].tdm_direction_sosed[1])
     	    			      {
     	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -621,7 +621,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
     	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
     	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
-    	    			      default:printk("?ARP_PACK_EL->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+    	    			      default:printk("?ARP_ot_->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
     	    			      }	    		
     	    			    }
     	    			
@@ -629,11 +629,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		
     	    	}//end priznak 	priznak_nms3_arp_sender
     	    	
-    	    	
-    	    	
+    //+++++++++++++++++++++обрабатываем обычные пакеты+++++++++++++++++++++++++	    	
    
     	    	
-    	    	else //обрабатываем обычные пакеты
+    	    	else
     	    	{
     	    		//Пакет идёт от c SA адрес НМС3 к и DA моего KY-S шлюзового пакеты к шлюзу.
     	    		if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
@@ -647,7 +646,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		   //если обычные пакеты.без маршрутизации
     	    		   else
     	    		   {	
-    	    		    printk("SendPackto KY-S\n\r");
+    	    		    //printk("SendPackto KY-S\n\r");
     	    			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     	    		   }
     	    		        	
@@ -683,7 +682,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	    		       
     	    			if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[0])
    	    			    {
-   	    			  	  printk("PACK_0x%x->Send 0 to IP sosed 0x%x dir %d\n\r",multipleksor[0].curr_ipaddr,multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
+   	    			  	  printk("PACK_ot_0x%x->Send to IP sosed 0x%x dir %d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[0],multipleksor[0].tdm_direction_sosed[0]);
    	    			 	  switch(multipleksor[0].tdm_direction_sosed[0])
    	    			 	  {
    	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -694,13 +693,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
    	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
    	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
-   	    			      default:printk("?PACK_->Send 0 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
+   	    			      default:printk("?PACK_ot->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[0]);break;
    	    			      }	    		
    	    			    			
    	    			   }	
    	    			    if (priznak_kommutacii==multipleksor[0].ipaddr_sosed[1])
    	    			    {
-   	    			      printk("PACK_0x%x->Send 1 to IP sosed 0x%x direction %d\n\r",multipleksor[0].curr_ipaddr,multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
+   	    			      printk("PACK_ot_0x%x->Send to IP sosed 0x%x direction %d\n\r",my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[1],multipleksor[0].tdm_direction_sosed[1]);
    	    			      switch(multipleksor[0].tdm_direction_sosed[1])
    	    			      {
    	    			      case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
@@ -711,7 +710,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    	    			      case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
    	    			      case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
    	    			      case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
-   	    			      default:printk("?PACK_EL->Send 1 UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
+   	    			      default:printk("?PACK_ot->Send UNICNOWN to IP sosed 0x%x direction  =%d?\n\r",multipleksor[0].tdm_direction_sosed[1]);break;
    	    			      }	    		
    	    			    }
     	    		    			
