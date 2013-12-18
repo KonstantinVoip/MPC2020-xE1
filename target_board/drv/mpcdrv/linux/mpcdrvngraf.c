@@ -380,7 +380,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
    //Пакет моему KY-S
-    multipleksor[0].priznac_shcluzovogo=1;
+    //multipleksor[0].priznac_shcluzovogo=1;
      
     //для отладки на ките 
     /*
@@ -929,7 +929,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		  printk("-udal_sosed=0x%x||my_mk8_vihod=%d|\n\r",sosed_ipaddr,my_mk8_vihod);
 		  //l_ipaddr каков адрес соседа это ближайший мультиплексор
 		  //sosed_mk8_vyhod это ближайший выход
-		  multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
+		  multipleksor[0].ipaddr_sosed[i]=sosed_ipaddr;
 		  multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod ;
 		  
 	  }
