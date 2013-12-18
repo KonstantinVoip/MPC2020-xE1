@@ -865,7 +865,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   //Рассчитываем количество узловых мультплексоров в пакете			
 	//просматриваем все пары связности в пакете ищем вхождения.
 	
-  	
+/*  	
 	for(m=0;m<number_of_par_sviaznosti_in_packet+1;m++)
 	{
 		parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
@@ -885,7 +885,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		curr_ipaddr=l_ipaddr;
 	}
   printk("mp_uzlov_isch= <%d>\n\r",number_of_multipleksorov_in_packet); 
-  
+ */ 
   //Рабочая штука
   
  
@@ -922,6 +922,19 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		 multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
 	     multipleksor[0].tdm_direction_sosed[i]=sosed_mk8_vyhod;
       }
+	  //Обработка пары которой нет предназначена ни для меня ни для кого нужно высчитать маршрут к далеко стоящему
+	  if((my_current_kos.ip_addres !=l_ipaddr)&&(my_current_kos.ip_addres !=sosed_ipaddr))
+	  {
+		  //здесь должен быть алгоритм как лучше отправить его дейкстра
+		  printk("-udal_sosed=0x%x||my_mk8_vihod=%d|\n\r",sosed_ipaddr,my_mk8_vihod);
+		  //l_ipaddr каков адрес соседа это ближайший мультиплексор
+		  //sosed_mk8_vyhod это ближайший выход
+		  multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
+		  multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod ;
+		  
+	  }
+	  
+	  
 	  
 	  
    dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
