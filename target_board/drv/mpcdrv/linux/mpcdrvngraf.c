@@ -993,7 +993,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   UINT16 k=0;
   UINT8  max_v=255;
   UINT8  bo,b1,b2,b3;
-  
+  UINT8  matrica_sviaznosto[3][3];
   
   //spin_lock_irqsave(my_lock_djcstra,flags);
   for(i=0;i<max_v;i++)
@@ -1023,6 +1023,45 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  
   }
   spin_unlock_irqrestore(my_lock_djcstra,flags);
+  
+  //Заполняем матрицу связности adj[i][j];
+
+	  
+	  for(j=0;j<num_of_uzlov_v_seti;j++)
+	  {
+		  //рассматриваем первую свзяь
+		  for(i=0;i<num_of_svyazi;i++)
+		  {
+			  if(b[j]==(UINT8)num_pari[i].ip_addr)
+			  {
+				 //если есть связь что мы будем делать //b[0] это нулевой элемент шлюз заполняем матрицу от него 
+				 //мы нашли нужную пару первое вхождение
+				  
+				  matrica_sviaznosto[j][i]=1;
+			  }
+			  else
+			  {
+				
+				  
+			  }
+			  
+			  
+			  
+		  }
+	    
+		  
+		    //num_pari[i].ip_addr==b[j];
+		  
+	  }
+	 //ищем первое вхождение  //170 = 170
+
+	  
+	  
+	  
+	  //matrica_sviaznosto[i]
+	  
+	  
+  
   
   
   //b2=b[2];
