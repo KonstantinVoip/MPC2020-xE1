@@ -48,7 +48,7 @@ GENERAL NOTES
 /*	PRIVATE MACROS							     */
 /***********************ic******************************************************/
 //static UINT8 marshrutization_enable=0;
-
+spinlock_t my_lock_djcstra;
 
 
 static u16 ok_170 [32]=
@@ -125,6 +125,15 @@ UINT8  priznac_shcluzovogo;
 //UINT8  marshrutization_enable; //есть таблица маршрутизации ,или нет.
 }multipleksor[4];
 
+struct pari_sviaznosti
+{
+UINT32  ip_addr;
+UINT8   posad_mesto;
+UINT8   mk8_vihod;
+UINT32  soedinen_s_ipaddr;
+}num_pari[10];
+
+
 
 
 
@@ -147,9 +156,13 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 /*	PRIVATE FUNCTION PROTOTYPES					                             */
 /*****************************************************************************/
 static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
-static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *mk8_sosed_vyhod);
+static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto,u8 *mk8_sosed_vyhod);
 
 static void dijkstra(int start);
+/*функция Алгоритма сортировки подсчётом */
+static void calculation_sort(const u8 *array,const u16 count);
+
+
 
 /* KERNEL MODULE HANDLING */
 /*****************************************************************************/
@@ -333,7 +346,7 @@ Remarks:			timer functions
 Return Value:	    1  =>  Success  ,-1 => Failure
 
 ***************************************************************************************************/
-static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *mk8_sosed_vyhod)
+static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto ,u8 *mk8_sosed_vyhod)
 {
 
     static iteration =0;
@@ -343,8 +356,10 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
      UINT16 l_last_polovinka_sosed =0;
 	 UINT8  l_my_posad_mesto=0;
 	 UINT8  l_my_mk8_vihod=0;
+	 UINT8  l_sosed_posad_mesto=0; 
 	 UINT8  l_sosed_mk8_vihod=0;
-	
+
+	 
 	//IP адрес источника
 	l_ipaddr  = in_sviaz_array[0]; 	
 	//посадочное место
@@ -357,7 +372,12 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	l_sosed_ipaddr  = l_first_polovinka_sosed;
 	l_sosed_ipaddr  = (l_sosed_ipaddr<<16); 
 	l_sosed_ipaddr = l_sosed_ipaddr +l_last_polovinka_sosed;
-	l_sosed_mk8_vihod=(UINT8)(in_sviaz_array[2]);
+	
+	l_sosed_posad_mesto =(UINT8)(in_sviaz_array[2]>>8); 
+	l_sosed_mk8_vihod   =(UINT8)(in_sviaz_array[2]);
+	
+	
+	//printk("l_sosed_posad_mesto= 0x%x\n\r",l_sosed_posad_mesto);
 	
 	//printk("l_sosed_mk8_vihod=%d\n\r",l_sosed_mk8_vihod);
 	//
@@ -375,7 +395,8 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
 	*mk8_vyhod=l_my_mk8_vihod;
 	*sosed_ip=l_sosed_ipaddr;
     *mk8_sosed_vyhod=l_sosed_mk8_vihod;
-	
+    *sosed_posad_mesto=l_sosed_posad_mesto;
+    
 	iteration++;
 }
 
@@ -763,7 +784,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 
   //Что нам нужно для Алгоритма Дейкстра?
   UINT16 num_of_setevich_elementov = 3;
-  
+  UINT16 l_iter=0;
   
   //Конец для Дейкстры
   
@@ -781,6 +802,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   // UINT16 m=0;  //структура с текущим мультиплексором
    
    UINT8 my_posad_mesto=0;
+   UINT8 sosed_posad_mesto=0;
    UINT8 my_mk8_vihod=0;
    UINT8 sosed_mk8_vyhod=0;
    
@@ -797,6 +819,18 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
    UINT16 number_of_par_sviaznosti_in_packet=0;
    //Количество сетевых элементов в пакете
    UINT16 max_kolichestvo_setvich_elementov_onpacket=0;
+  
+   //////////////////////////////////////Дополнительные параметры////////////////////
+   //всего количество связей в пакете
+   UINT16 num_of_svyazi=0;
+   //количество узлов в сети
+   UINT16 num_of_uzlov_v_seti=0;
+   //
+   UINT8  araay_neotsort_of_ip_sviazei[16];
+   
+   
+   unsigned long flags;
+   
    
    
    //Нет соединений ничего не соединено
@@ -818,20 +852,20 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     memset(&multipleksor ,0x0000, sizeof(multipleksor));
      
     
-     printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
+    // printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
     //printk("matrica_packet_recieve=%d\n\r",iteration);
     //18 это в пакете наш  UDP  порт destination
-	 printk("IP_status:"); 
+	// printk("IP_status:"); 
    
     memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	if(nms3_ip_addres==0){printk("?bad nms3_ip_addres =0?\n\r");return -1;}
-	printk ("NMS3=<0x%x>|",nms3_ip_addres);
+	//printk ("NMS3=<0x%x>|",nms3_ip_addres);
 	multipleksor[0].nms3_ipaddr=nms3_ip_addres;
 
 	//memcpy(&protocol_version,&in_buf[13],4);
 	//printk ("NMS3_protocol_version =0x%x>\n\r",protocol_version);
 	memcpy(&scluz_ip_addres,&in_buf[25],4);
-	printk ("SCHLUZ=<0x%x>\n\r",scluz_ip_addres);
+	//printk ("SCHLUZ=<0x%x>\n\r",scluz_ip_addres);
 	if(scluz_ip_addres==0){printk("?bad scluz_ip_address =0?\n\r");return -1;}
 	multipleksor[0].gate_ipaddr=scluz_ip_addres;
 	
@@ -839,11 +873,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	if(my_current_kos.ip_addres==0){printk("?bad current_kos.ip_addres exit=0?\n\r");return -1;}
 	
 	//Определяем что мы шлюз
-	printk("Setevoi status:");
+	//printk("Setevoi status:");
 	if(my_current_kos.ip_addres==scluz_ip_addres)
-	{ printk("<MP_Scluz>ip_addr=<0x%x>\n\r",my_current_kos.ip_addres);
+	{/* printk("<MP_Scluz>ip_addr=<0x%x>\n\r",my_current_kos.ip_addres);*/
 	priznac_scluz=1;multipleksor[0].priznac_shcluzovogo=1;}
-	else{printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);
+	else{/*printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);*/
 	priznac_scluz=0;multipleksor[0].priznac_shcluzovogo=0;}
 	
    // printk("Matrica Status:");  
@@ -852,7 +886,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	razmer_data_graf_massive=in_size-42-smeshenie_grisha_scluz; //размер данных в массиве
 	if(razmer_data_graf_massive<12){printk("?bad razmer_data_graf_massive =%d bait?\n\r",razmer_data_graf_massive);return -1;}
 	
-	printk("graf_bait=%d|",razmer_data_graf_massive);
+	//printk("graf_bait=%d|\n\r",razmer_data_graf_massive);
 	
 	
 	//21 байт это начало данных.+смещение получаем массив пар связности
@@ -924,80 +958,263 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   //пакет для маршрутизации () от меня  (1)
   //или пакет пакет для прокладки трассы от остальных ко мне
   //Как узнать?
-  dlinna_pari_sviaznosti_byte=0;
+ // dlinna_pari_sviaznosti_byte=0;
   //1.Ищу вхождения что маршрутизация от меня ()
-  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
+spin_lock_irqsave(my_lock_djcstra,flags);
+
+	
+for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {
-	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
-	  
-	  /*
-	  if((sosed_ipaddr==0)||(my_mk8_vihod==0)||(sosed_mk8_vyhod==0)||l_ipaddr==0)
-	  {
-	   printk("?ERROR _BAD _MARSHRUTIAZTION PACKET?\n\r");	  
-	   memset(&multipleksor ,0x0000, sizeof(multipleksor));
-	   return -1; 
-	  }	*/  
-	  
-	  //пакет исходит от меня построение маршрута от меня я нашёл себя
-	  if(my_current_kos.ip_addres==l_ipaddr)
-	  {
-	   //printk("++my_mk8_vihod=%d|sosed_mk8_vyhod=%d++\n\r",my_mk8_vihod,sosed_mk8_vyhod);
-	   multipleksor[0].ipaddr_sosed[i]=sosed_ipaddr;
-	   multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod;
-		  
-	  }
-      //я сосед висящий на первой связи
-	  if(my_current_kos.ip_addres==sosed_ipaddr)
-      {
-		 //printk("-my_mk8_vihod=%d|sosed_mk8_vyhod=%d-\n\r",my_mk8_vihod,sosed_mk8_vyhod);
-		 multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
-	     multipleksor[0].tdm_direction_sosed[i]=sosed_mk8_vyhod;
-      }
-	  //Обработка пары которой нет предназначена ни для меня ни для кого нужно высчитать маршрут к далеко стоящему
-	  if((my_current_kos.ip_addres !=l_ipaddr)&&(my_current_kos.ip_addres !=sosed_ipaddr))
-	  {
-	     UINT16 m,n;
-		 /* Алгоритм Дейкстры нужен для определения как работаь с удалёнными */
-		 
-	     
-	     
-	     //заполняем матрицу двухмерный массив коммутации(соединений) для дейкстры
-		 /*
-	     for(m=0;m<3;m++)
-		    for(n=0;n<3;n++)
-		    	adj_matrix[m][n]=1;	
-	     */
-	     
-	         
-	     
-	     
-	     // adj_matrix[m][n];
-		  
-		  
-		  /*++++++Нужно подумать как работать с ним++++++++*/ 
-		  //dijkstra(num_of_setevich_elementov);
-		  /*  
-		  //здесь должен быть алгоритм как лучше отправить его дейкстра
-		  printk("-udal_sosed=0x%x||my_mk8_vihod=%d|\n\r",sosed_ipaddr,my_mk8_vihod);
-		  //l_ipaddr каков адрес соседа это ближайший мультиплексор
-		  //sosed_mk8_vyhod это ближайший выход
-		  multipleksor[0].ipaddr_sosed[i]=l_ipaddr;
-		  multipleksor[0].tdm_direction_sosed[i]=my_mk8_vihod ;
-		  */
-	  }  
+	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_posad_mesto,&sosed_mk8_vyhod);
+      
+	  //1 элемент в свзяи
+	  num_pari[0+i+l_iter].ip_addr=l_ipaddr;
+	  num_pari[0+i+l_iter].mk8_vihod=my_mk8_vihod;
+	  num_pari[0+i+l_iter].posad_mesto=my_posad_mesto;
+	  num_pari[0+i+l_iter].soedinen_s_ipaddr=sosed_ipaddr; //С кем соединён первый
+	  // 2 элемент в свзяи
+	  num_pari[1+i+l_iter].ip_addr=sosed_ipaddr;
+	  num_pari[1+i+l_iter].mk8_vihod=sosed_mk8_vyhod;
+	  num_pari[1+i+l_iter].posad_mesto=sosed_posad_mesto;
+	  num_pari[1+i+l_iter].soedinen_s_ipaddr=l_ipaddr; //С кем соединён второй
+	  l_iter=1;
    dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
-  }
+  }//end for cicle
  
+  //Количество всего полных связей в пакете
+  num_of_svyazi=number_of_par_sviaznosti_in_packet*2;
+  //num_of_uzlov_v_seti=3;
+  for(i=0;i<num_of_svyazi;i++)
+  {
+	  araay_neotsort_of_ip_sviazei[i]=(UINT8)num_pari[i].ip_addr; 
+  }
+ // UINT8 j=0;
+  UINT8  c[255],b[255];
+  UINT16 k=0;
+  UINT8  max_v=255;
+  UINT8  bo,b1,b2,b3;
   
+  
+  //spin_lock_irqsave(my_lock_djcstra,flags);
+  for(i=0;i<max_v;i++)
+  {
+	  c[i]=0;
+  }
+  
+  
+  for(i=0;i<num_of_svyazi;i++)
+  {
+  c[araay_neotsort_of_ip_sviazei[i]]++;	
+  }
+  
+  for(i=0;i<max_v;i++)
+  {
+	  for(j=0;j<c[i];j++)
+	  {
+		  if(j==0)
+		  {
+		  b[k++]=i;  
+		  num_of_uzlov_v_seti++;
+		  //printk("i=%d|j=%d\n\r",i,j);
+		  }
+	   
+	  }
+	  
+	  
+  }
+  spin_unlock_irqrestore(my_lock_djcstra,flags);
+  
+  
+  //b2=b[2];
+  //printk("num_of_uzlov_v_seti=%d\n\r",num_of_uzlov_v_seti);
+
+    
+
+  //printk("b[0]=%d,b[1]=%d\n\r",b[0],b[1]);
+  //calculation_sort(araay_neotsort_of_ip_sviazei,num_of_svyazi);
+  
+  
+  
+  
+  
+  
+  //распечатываем неотсортированных элементов просто тупо набор данных массив целых числе ip адресов
+  /*
+  for(i=0;i<num_of_svyazi;i++)
+  {
+	  printk("neotsort_mas =%x\n\r",araay_of_ip_sviazei[i]);
+  }
+  */
+  
+  
+  
+  
+  
+  //Распечатываем пары связности
+  /*
+  for(i=0;i<num_of_svyazi;i++)
+  {
+	  printk("I=[%d],ip_addr=0x%x,mk8_vihod=%d,posad_mesto=0x%x,soed_s_ipaddr=0x%x\n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].posad_mesto,num_pari[i].soedinen_s_ipaddr);  
+  }
+  */
+  
+  
+  /*
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {	  
-  //printk("[i=%d]MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",i,my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
+  printk("[i=%d]MP[%x]->ip_sosed=0x%x|tdm_dir->%d\n\r",i,my_current_kos.ip_addres,multipleksor[0].ipaddr_sosed[i],multipleksor[0].tdm_direction_sosed[i]);
   }
+  */
  
   iteration++;
   return 0;
 	
 }
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    static void calculation_sort(u8 * array,u16 count)
+Parameters:     	Сортировка подсчётом количества сетевых элементов в сети
+Remarks:			timer functions 
+Return Value:	    1  =>  Success  ,-1 => Failure
+***************************************************************************************************/
+static void calculation_sort(const u8 *array,const u16 count)
+{
+UINT16 i=0,j=0;	
+UINT16 min=0,max=0;  //минимальный и максимальный элемент во входном массиве  array[1..count]
+UINT16 k=0;          //количество элементов во вспомогательном массиве;	      c[1..k]
+UINT8  c[256];        //вспомогательный массив из k элементов                  с[1..k]
+UINT8  b[256];        //выходная отсортированная последовательность            b[1..count]
+UINT8  a[4]={172,171,172,170};
+UINT8  max_v=255;    //максимальное значение которое принимает массив
+UINT8  n = 4 ;       //количество элементов в массиве
+                 
+
+                /* 
+                for(i=0;i<max_v;i++)
+                {
+                 c[i]=0;	 	
+                }*/
+                
+                memset(&c,0x00,sizeof(c[256]));
+                memset(&b,0x00,sizeof(c[256]));
+                
+                
+                for(i=0;i<n;i++)
+                {
+                  c[a[i]]++;	
+                }
+                k=0;
+                for(i=0;i<max_v;i++)
+                {
+                	for(j=0;j<c[i];j++)
+                	{
+                		
+                		//b[k++]=i;
+                		//array[k++]=i;
+                	    //printk("i=%d|j=%d\n\r",i,j);
+                	    //if(j==0)
+                	    //{
+                	    	//b[k]=i;
+                	       // printk("i=%d,k=%d|b[k++]=%d\n\r",i,k,b[k]) ;
+                	    
+                	    //}
+                		
+                	}
+                	 
+                	
+                }
+                
+                  printk("STOP\n\r");
+                
+               // printk("STOP ,k=%d,a[0]=%d,\n\r",k,b[0]);
+                /*Находим минимальный и максимальный элементы массива*/
+                
+                /*
+                min=max=array[0];
+                for(i=1;i<count;i++)
+                {
+                	if(array[i]<min) min=array[i];
+                	else if (array[i]>max) max=array[i];
+                	
+                }*/
+                
+                //printk("min= %x |max =%x\n\r",min,max);  
+                //vrode_pravilno ++
+                
+                //k=max-min+1; //разброс
+                //printk("k=%x\n\r",k);
+                /*
+                for(i=0;i<count;i++)
+                {
+                printk("neotsort_mas =%x\n\r",a[i]);
+                }
+                */
+           
+                
+#if 0         
+                /*Заполнение массивов нулями да делаем memset потом*/
+                for(i=0;i<count;i++)
+                {
+                	
+             
+                	
+                }
+                ////////////////////////////////////////
+                for(i=0;i<k;i++)
+                {
+                
+        
+                }
+                //////////////////////////////////////
+               
+                /*
+                for(i=0;i<count;i++)
+                {
+  	
+                }
+                */
+
+
+#endif       
+                
+                
+                ////////////////////////////////// 
+                ////////выводим на печать////////
+                
+                /*
+                for(i=0;i<k;i++)
+                {
+                printk("otsort_mas =%x\n\r",b[i]);
+                }
+                */
+                
+                
+                
+                
+//распечатываем неотсортированных элементов просто тупо набор данных массив целых числе ip адресов
+ /*
+ for(l_i=0;l_i<count;l_i++)
+ {
+ printk("neotsort_mas =%x\n\r",array[l_i]);
+ }
+ */
+	
+}
+
+
+
+
+
+
+
+
+
 
 
 

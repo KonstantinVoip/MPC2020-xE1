@@ -141,13 +141,10 @@ GENERAL NOTES
 #define TCP     0x6  //decimal 6
 #define UDP     0x11 //decimal 17
 
-#define BROADCAST_FRAME 0xFFFF  //
-
+#define BROADCAST_FRAME 0xFFFF           //
 #define IPv4_HEADER_LENGTH         20    //20 bait
 #define UDP_HEADER_LENGTH          8     //8 bait
  
-
-
 
 ///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
 /*IP Addrress*/
