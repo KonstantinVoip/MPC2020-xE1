@@ -443,10 +443,13 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     //Обрабатываем пакеты для шлюзвого
     if(multipleksor[0].priznac_shcluzovogo==1)
     {
+    	
+    	//printk("packet_to_scluz\n\r");
+    	
     	//Признак ARP
     	if(priznak_nms3_arp_sender)
     	{
-    		//printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    		//printk("ARP_ot_NMS3 =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
     		
     		//да это ARP //обрабатываем особыам образом ARP пакет
     		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
@@ -467,7 +470,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		//Выполняем проверку что есть таблица маршрутизации если нет то ничего не шлём
     		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
 		    {
-    		 	//printk("ARP_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
+    		 	//return;
+    			//printk("ARP_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
 		    }
     		else
     		{
@@ -526,7 +530,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       			//если обычные пакеты.без маршрутизации
       			else
       			{	
-      			//printk("SEND_KYS\n\r");
+      			printk("PACK_ot_NMS3_SEND_KYS\n\r");
       			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
       			}
         	
@@ -541,7 +545,10 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		//Выполняем проверку что есть таблица маршрутизации если нет то ничего не шлём
     		if((multipleksor[0].ipaddr_sosed[0]==0)&&(multipleksor[0].ipaddr_sosed[1]==0))
 		    {
-    		 	//printk("PACK_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
+    		 	
+    			//return;
+    			 // printk("PACK_ot_NMS3_NO_MARSRUTIZATION_TABLE\n\r");
+		        //break;
 		    }
     		else
     		{
@@ -960,7 +967,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   //Как узнать?
  // dlinna_pari_sviaznosti_byte=0;
   //1.Ищу вхождения что маршрутизация от меня ()
-spin_lock_irqsave(my_lock_djcstra,flags);
+//spin_lock_irqsave(my_lock_djcstra,flags);
 
 	
 for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
@@ -988,24 +995,15 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {
 	  araay_neotsort_of_ip_sviazei[i]=(UINT8)num_pari[i].ip_addr; 
   }
- // UINT8 j=0;
   UINT8  c[255],b[255];
   UINT16 k=0;
   UINT8  max_v=255;
-  UINT8  bo,b1,b2,b3;
-  UINT8  matrica_sviaznosto[3][3];
+  UINT8  matrica_sviaznosto[4][4];
+  UINT8  dejcstar_input_matrix[3][3];
   
   //spin_lock_irqsave(my_lock_djcstra,flags);
-  for(i=0;i<max_v;i++)
-  {
-	  c[i]=0;
-  }
-  
-  
-  for(i=0;i<num_of_svyazi;i++)
-  {
-  c[araay_neotsort_of_ip_sviazei[i]]++;	
-  }
+  for(i=0;i<max_v;i++){c[i]=0;}
+  for(i=0;i<num_of_svyazi;i++){c[araay_neotsort_of_ip_sviazei[i]]++;}
   
   for(i=0;i<max_v;i++)
   {
@@ -1022,61 +1020,212 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  
 	  
   }
-  spin_unlock_irqrestore(my_lock_djcstra,flags);
   
-  //Заполняем матрицу связности adj[i][j];
+  //spin_unlock_irqrestore(my_lock_djcstra,flags);
+  
+  /*
+  printk("+num_of_node=%d+\n\r",num_of_uzlov_v_seti);
+  //распечатываем отсортированный массив
+  for(i=0;i<num_of_uzlov_v_seti;i++)
+  {
+	  printk("b[%d]=%d\n\r",i,b[i]);
+  }*/
 
-	  
-	  for(j=0;j<num_of_uzlov_v_seti;j++)
+  UINT8 mas_for0[8];
+  UINT8 mas_for1[8];
+  UINT8 mas_for2[8];
+  UINT8 mas_for3[8];
+  memset(&mas_for0,0x00,sizeof(mas_for0));
+  memset(&mas_for1,0x00,sizeof(mas_for1));
+  
+  //Нужно наоборот сделать для каждого сетвого элемента 
+  //определить сколько у нас связей
+  //просматриваем каждый узел который у нас есть и смотрим сколько связей для него
+  for(j=0;j<num_of_uzlov_v_seti;j++)
+  {
+      
+	  //смотрим вхождения с нужным IP для 0 1,2 итд узлов
+	  for(i=0;i<num_of_svyazi;i++)
 	  {
-		  //рассматриваем первую свзяь
-		  for(i=0;i<num_of_svyazi;i++)
+  
+		  if(b[j]==(UINT8)num_pari[i].ip_addr)
 		  {
-			  if(b[j]==(UINT8)num_pari[i].ip_addr)
-			  {
-				 //если есть связь что мы будем делать //b[0] это нулевой элемент шлюз заполняем матрицу от него 
-				 //мы нашли нужную пару первое вхождение
-				  
-				  matrica_sviaznosto[j][i]=1;
-			  }
-			  else
-			  {
-				
-				  
-			  }
+			  //Теперь нужно запомнить совпадения для кажого b[j] где оно в какой паре находиться и сколько их всего
+			   matrica_sviaznosto[j][i]=55;
+			   //неважно в каком порядке будут идти пары главное заполнить матрицу;
+			   //matrica_sviaznosto[j][0]=
+			   //printk("j=%d,i=%d,\n\r",j,i);
+		  }
+		  else
+		  {
+			   matrica_sviaznosto[j][i]=00;
+		  }
+		  
+	  }
+		  
+  }
+  
+//Нужна ещё одна сортировка на количество элементов связей входящих в массив  
+  mas_for0[1]=22;
+  
+  
+  /*
+  for(i=0;i<num_of_svyazi;i++)
+  { 	
+	  
+	  if(matrica_sviaznosto[0][i]==55)
+	  {
+		  mas_for0[i]=22;  
+	  }
+	  
+  }*/
+  /*
+  UINT8 l=0;
+  for(i=0;i<num_of_svyazi;i++)
+   { 	
+	  
+	  
+	  if(matrica_sviaznosto[1][i]==55)
+	  {
+		  l++;
+		  mas_for1[l]=22;  
+	  }  
+   }
+   //
+  */
+  
+  ///////////////////////////////////////////
+  /*
+  for(j=0;j<4;j++)
+  {	  
+    printk("mas_for0[%d] =%d\n\r",j,mas_for0[j]);
+ // printk("mas_for1[%d] =%d\n\r",j,mas_for1[j]);
+  
+  }*/
+  
+  
+  
+  //Распечатываем двухмерную матрицу соединений в которой лежит соответствие того что нам нужно;
+ /* 
+  for(j=0;j<num_of_uzlov_v_seti;j++)
+  {
+	  for(i=0;i<num_of_svyazi;i++)
+	  {
+	   if(matrica_sviaznosto[j][i]==55)  
+	   {	   
+	   //Нужна дополнительная логика 
+	   printk("node=%d[ip =%d]|num_pari=%d,mat[]=%d\n\r",j,b[j],i,matrica_sviaznosto[j][i]);	  
+	   }
+	  
+	  }
+  
+   }
+  */
+
+//#if 0  
+  //новые индексы уже окончательно
+  UINT16 q_stroka=0,w_stolbec=0;
+  //dejcstar_input_matrix[q][w]
+  for(q_stroka=0;q_stroka<num_of_uzlov_v_seti;q_stroka++)
+  {
+	  
+	  for(w_stolbec=0;w_stolbec<num_of_uzlov_v_seti;w_stolbec++)
+	  {
+		  //диагонали которые пересекаються заполянем нулями
+		  if(q_stroka==w_stolbec)
+		  {
+			  dejcstar_input_matrix[q_stroka][w_stolbec]=0;  
+		  }
+		  else
+		  {
+			  num_of_uzlov_v_seti;
+			 //Нужна дополнительная проверка на то откуда брать данные
+			 //для заполнения матрицы для каждой строки и столбца.
+			 if(q_stroka==0)
+			 {	 
+			    
+				 
+				 mas_for0[1]=22;
+				 
+				 
+				 
+				 
+			 } 
+			  
+			  
+			  
+			  
+			  
+			  
+			  
+			  //Нужно взять нужные пары где находиться строка 170  столбец для 171 какя пара для них заполнена
+			  //из пакета 
+			  
+			  /*if(matrica_sviaznosto[q_stroka][w_stolbec]==55)  
+			   {	   
+			   printk("mat[]=%d\n\r",matrica_sviaznosto[q_stroka][w_stolbec]);	  
+			   }*/
+			  //printk ("num_pari[%d].soedinen_s_ipaddr=%d \n\r",w_stolbec,(UINT8)num_pari[w_stolbec].soedinen_s_ipaddr);
+			  //остальные 1 и 2 нужно запонить значениями 
+			    
+			   
+			  
+			   //dejcstar_input_matrix[q_stroka][w_stolbec]=1;
 			  
 			  
 			  
 		  }
-	    
-		  
-		    //num_pari[i].ip_addr==b[j];
-		  
-	  }
-	 //ищем первое вхождение  //170 = 170
+		  //теперь заполняем саму матрицу коммутации  
+	      
+	  
+	  
+	  
+	  }  
+  
+  }
+//#endif 
+  
+  ///Распечатываем окончательную матрицу для алгоритма уже виден свет в тоннеле Дейкстра
+  /*
+  for(q_stroka=0;q_stroka<num_of_uzlov_v_seti;q_stroka++)
+  {
+	  
+	  for(w_stolbec=0;w_stolbec<num_of_uzlov_v_seti;w_stolbec++)
+	  {
 
-	  
-	  
-	  
-	  //matrica_sviaznosto[i]
-	  
-	  
+		  printk("q_str=%d|w_stolb=%d,djcstra[]=%d\n\r",q_stroka,w_stolbec,dejcstar_input_matrix[q_stroka][w_stolbec]);
+		    
+	  }  
+  
+  }
+  */
   
   
   
-  //b2=b[2];
-  //printk("num_of_uzlov_v_seti=%d\n\r",num_of_uzlov_v_seti);
+  
+  
+  
+  //логика заполнения матрицы коммутации
+  //просматриваем все доступные соединения из пакета
+  /*
+  for(i=0;i<num_of_svyazi;i++)
+  {
+	  //просматриваем каждый узел который у нас есть и строим матрицу коммутации
+	  for(j=0;j<num_of_uzlov_v_seti;j++)
+	  {
+		 //ищем сколько соединений есть для каждого конкретного узла.
+		 if(b[j]==(UINT8)num_pari[i].ip_addr)
+		 {
+		   //неважно в каком порядке будут идти пары главное заполнить матрицу;
+		   //matrica_sviaznosto[j][0]=
+		  printk("j=%d,sviaz=%d,b[j]=%d,\n\r",j,i,b[j]);
+		 }
+	  }//end num_of_uzlov_v_seti
+   }//end num_of_svyazi
+   */
+   printk("---------------STOP------------------\n\r");
+   
 
-    
-
-  //printk("b[0]=%d,b[1]=%d\n\r",b[0],b[1]);
-  //calculation_sort(araay_neotsort_of_ip_sviazei,num_of_svyazi);
-  
-  
-  
-  
-  
-  
   //распечатываем неотсортированных элементов просто тупо набор данных массив целых числе ip адресов
   /*
   for(i=0;i<num_of_svyazi;i++)
@@ -1084,11 +1233,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  printk("neotsort_mas =%x\n\r",araay_of_ip_sviazei[i]);
   }
   */
-  
-  
-  
-  
-  
+    
   //Распечатываем пары связности
   /*
   for(i=0;i<num_of_svyazi;i++)
@@ -1096,8 +1241,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  printk("I=[%d],ip_addr=0x%x,mk8_vihod=%d,posad_mesto=0x%x,soed_s_ipaddr=0x%x\n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].posad_mesto,num_pari[i].soedinen_s_ipaddr);  
   }
   */
-  
-  
+  //распечатывем пары
   /*
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   {	  

@@ -345,7 +345,7 @@ static int tdm_recieve_thread_two(void *data)
 				//Есть пакет в буфере FIFO на отправку по направлению 0
 			    if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 		        {
-			    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			    	 printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
 			    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
 		        	 
 			    	 /*
@@ -370,7 +370,7 @@ static int tdm_recieve_thread_two(void *data)
 				if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
 				{
 					
-					// printk("-----------WRITELoopback_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 
+					 printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite); 
 					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
 		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
@@ -389,7 +389,7 @@ static int tdm_recieve_thread_two(void *data)
 					 ///p2020_get_recieve_virttsec_packet_buf(in_buf_dir2,in_size_dir2,2);
 					 
 					 
-					 //printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite);    
+					 printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);    
 				     /*
 					 printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size_dir2);
 		        	 printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[0],in_buf_dir2[1],in_buf_dir2[2],in_buf_dir2[3],in_buf_dir2[4],in_buf_dir2[5]);
@@ -407,7 +407,7 @@ static int tdm_recieve_thread_two(void *data)
 		    {
 		    	if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
 		    	{
-		    	  // printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);
+		    	   printk("-----------WRITELoopback_dir4_routine----->%s---------------\n\r",lbc_ready_towrite);
 		    	     //printk("+FIF3_DIRO_insize_byte=%d\n\r+",in_size); 
 		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
@@ -610,7 +610,7 @@ static int tdm_recieve_thread(void *data)
     //r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    
    //Запускаем первый тред (приём данных с local bus)
-   r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
+  // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    /*
    priority.sched_priority=0;
    sched_setscheduler(r_t1, SCHED_IDLE, &priority); 
@@ -619,7 +619,7 @@ static int tdm_recieve_thread(void *data)
    */
    
    //Запускаем второй тред	
-   r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
+ //  r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
    /*
    priority1.sched_priority=0;
    sched_setscheduler(r_t2, SCHED_IDLE, &priority1);
@@ -1007,8 +1007,8 @@ void mpc_cleanup_module(void)
 	msleep(10);
 	//kthread_stop(test_thread_tdm); 
 	
-	  kthread_stop(r_t1);
-      kthread_stop(r_t2);
+	  //kthread_stop(r_t1);
+      //kthread_stop(r_t2);
     Clear_FIFObuf();
 
       
