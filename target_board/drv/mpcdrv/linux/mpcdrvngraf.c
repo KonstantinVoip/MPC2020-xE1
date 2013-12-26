@@ -1164,8 +1164,6 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   { 
 	  
 	  //printk("[j=%d] |[num=%d]  \n\r",j,num_of_seodineni_for_node[j]);
-	  
-	  
 	  for(i=0;i<num_of_svyazi;i++)
 	  {
 		  printk("[j=%d] |[i=%d] ->> val=%d   \n\r",j,i,temp_sv[j][i]); 
@@ -1183,9 +1181,10 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 //#if 0  
 
   UINT16 q_stroka=0,w_stolbec=0;
-  for(q_stroka=0;q_stroka<num_of_uzlov_v_seti;q_stroka++)
+  for(q_stroka=0;q_stroka<=num_of_uzlov_v_seti;q_stroka++)
   {
 	  //диагонали которые пересекаються заполянем нулями
+	  
 	  if(q_stroka==w_stolbec)
 	  {
 		  dejcstar_input_matrix[q_stroka][w_stolbec]=0;  
@@ -1200,24 +1199,25 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 		  {	   
 		      UINT8 l_val=0; //значение с кем соединён
 			  UINT8 l_num_pari=0; //порядковый номер пары откуда брать это значение последовательный опрос
-			  UINT8 l_num_of_for_this_element=0;//количество соединений(связей) для этого узла.
-		      
+			  UINT8 l_num_of_sviaz_for_this_element=0;//количество соединений(связей) для этого узла.
+		      printk("++++++++++node=%d_ip=%d+++++++++++\n\r",q_stroka,b[q_stroka]);
 			  
 			  
 			  //откуда взять это значение
-			  l_num_of_for_this_element	= num_of_seodineni_for_node[q_stroka];
-			  printk("l_num_of_for_this_element	=%d\n\r",l_num_of_for_this_element);
-			  
+		      l_num_of_sviaz_for_this_element	= num_of_seodineni_for_node[q_stroka];
+			  printk("l_num_of_sviaz_for_this_element =%d\n\r",l_num_of_sviaz_for_this_element);
+           //#if 0
 			   //цикл заполнения столбцов для данной строки
-			   for(i=0;i<l_num_of_for_this_element;i++)
+			   for(i=0;i<l_num_of_sviaz_for_this_element;i++)
 			   {	   
 				  //q_stroka это элемент начинаю со 170; откуда бы вытянуть
 				  //связи для данного элемента должны распологаться последовательно
 				  //от 0 до сколько их всего 
 				  //l_num_pari=temp_matrica[q_stroka][l_num_of_for_this_element];
-				  l_num_pari=temp_sv[i][l_num_of_for_this_element-1];
+				  l_num_pari=temp_sv[i][i];
 				  printk("l_num_pari	=%d\n\r",l_num_pari);
 				  
+				  /*
 		      	  l_val=(UINT8)num_pari[l_num_pari].soedinen_s_ipaddr;
 		      	  printk("l_val=%d\n\r",l_val);
 		      
@@ -1229,16 +1229,22 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 		      	  {
 		      		dejcstar_input_matrix[q_stroka][w_stolbec]=0;
 		      	  }
-		      	  
+		      	  */
 		      	  //модифицируем столбец
-		      	  w_stolbec++;  
+		      	  //w_stolbec++;  
 			   }
-		          
+            //#endif
+		    w_stolbec++;   
 		  }//end if
 		  //нет соединения нольь
+		  
+		  
+		  
 		  else
 		  {
 			  dejcstar_input_matrix[q_stroka][w_stolbec]=0;  
+			  //модифицируем столбец
+			  w_stolbec++; 
 		  }
 		 	 
 	 // }//end q stroka
@@ -1312,6 +1318,9 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   
   }
 #endif 
+ 
+  
+/*  
   for(q_stroka=0;q_stroka<num_of_uzlov_v_seti;q_stroka++)
   {
 	  
@@ -1323,7 +1332,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  }  
   
   }
-  
+  */
   
   
   
