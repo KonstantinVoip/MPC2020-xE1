@@ -166,11 +166,7 @@ if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
 
 //Set multicast configuration for  1 and 2 device
-//p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
-
-
-
-
+p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
 p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
 

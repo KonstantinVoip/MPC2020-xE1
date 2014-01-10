@@ -47,7 +47,20 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE MACROS							     */
 /***********************ic******************************************************/
-//static UINT8 marshrutization_enable=0;
+/*//////////////////Пока сделаю временные затычки//////*/
+//Глобальная переменная признак шлюза или обычного сетевого элемента
+static UINT8 i_am_schluz=1;
+//Глобальная переменная признак наличия пакета с маршрутизацией 
+static UINT8 packet_from_marsrutiazation=0;
+//Глобальная переменная ip адрес НМС3
+static UINT8 no_marshrutization_nms3_ipaddr=0;
+
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 spinlock_t my_lock_djcstra;
 
 
@@ -103,16 +116,6 @@ UINT8  marshrutization_enable;
 }my_current_kos;
 
 
- 
-/*
-struct ngarf_setevoi_element
-{
-bool   setevoi_elemet_commutacia_zapolnenena;
-UINT32 my_setevoi_element_ip;
-UINT16 matrica_commutacii_current_mpc_sosedi[16];
-UINT32 matrica_ipadrr_sosedi_cur_mpc[16];
-}setevoi_element[16];
-*/
 
 struct ngarf_setevoi_element
 {
@@ -122,7 +125,6 @@ UINT32 gate_ipaddr;
 UINT32 ipaddr_sosed[8];
 UINT8  tdm_direction_sosed[8];
 UINT8  priznac_shcluzovogo;
-//UINT8  marshrutization_enable; //есть таблица маршрутизации ,или нет.
 }multipleksor[4];
 
 struct pari_sviaznosti
@@ -155,7 +157,7 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					                             */
 /*****************************************************************************/
-static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
+//static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto,u8 *mk8_sosed_vyhod);
 
 static void dijkstra(int start);
@@ -340,7 +342,7 @@ void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 	my_current_kos.ip_addres=ip_addres;
 	my_current_kos.mac_address=mac_address;
 	my_current_kos.marshrutization_enable=0;
-	multipleksor[0].curr_ipaddr=ip_addres;
+	//multipleksor[0].curr_ipaddr=ip_addres;
 	printk("++Set_Multiplecsor_IP_and_MAC_OK++\n\r");
 	printk("State =0x%x>>IP=0x%x,MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",state,ip_addres,my_current_kos.mac_address[0],my_current_kos.mac_address[1],my_current_kos.mac_address[2],my_current_kos.mac_address[3],my_current_kos.mac_address[4],my_current_kos.mac_address[5]);
 }
@@ -357,7 +359,7 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto ,u8 *mk8_sosed_vyhod)
 {
 
-    static iteration =0;
+   // static iteration =0;
 	__be32  l_ipaddr=0;
     __be32  l_sosed_ipaddr=0;
      UINT16 l_first_polovinka_sosed=0;
@@ -405,16 +407,14 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
     *mk8_sosed_vyhod=l_sosed_mk8_vihod;
     *sosed_posad_mesto=l_sosed_posad_mesto;
     
-	iteration++;
+	//iteration++;
 }
 
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u16 priznak_kommutacii)
-Parameters:     	void data
-Remarks:			timer functions 
-
+Parameters:     	входной буфер(пакет),размер,ip_адрес назначения,признак что пакет от НМС3,
+Remarks:			В эту функцию идут все пакеты предназначенные для маршрутизации и отправки дальше
 Return Value:	    1  =>  Success  ,-1 => Failure
-
 ***************************************************************************************************/
 void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_arp_sender)
 {
@@ -424,7 +424,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //static UINT16 iteration=0;
    //UINT8   priznak_scluz=0;
    //priznal Scluzovogo MPC
-   //my_current_kos.ip_addres=0xC0A878AA;  //shluz
+   //my_current_kos.ip_addres=0xC0A878AA;    //shluz
    //my_current_kos.ip_addres=0xC0A878AB;    //sosed 1
    //my_current_kos.ip_addres=0xC0A878AC;    //sosed 2
 	
@@ -432,11 +432,11 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //Нельзя начинать передачу пока нет IP и MAC адреса с KY-S
     if(my_current_kos.state==0){return;}
    // printk("PR_commut =0x%x \n\r",priznak_kommutacii);
-   //Пакет моему KY-S
-    multipleksor[0].priznac_shcluzovogo=1;
+   //Признак шлюзового пока делаем так
+   //multipleksor[0].priznac_shcluzovogo=1;
      
     //для отладки на ките 
-    /*
+#if 0
     memcpy(&udp_dest_port,&in_buf[18],2); 
     //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
     if (udp_dest_port==18000)
@@ -444,17 +444,79 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
   	  //строим матрицу коммутации
       //printk("+ngraf_packet+\n\r");
   	  ngraf_packet_for_my_mps(in_buf ,in_size);
-    }*/
+    }
+#endif
     
-//#if 0 
+    /*Отработка ситуации когда для данного мультплексора пока не пришёл пакет с маршрутизацией*/
+    if(packet_from_marsrutiazation==0)
+    {
+    	
+    	/*Если я шлюз*/
+    	if(i_am_schluz==1)
+    	{
+    	  /*обработка ARP пакета для шлюзового*/	
+    	  if(priznak_nms3_arp_sender)
+    	  {
+      		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
+      		if(my_current_kos.ip_addres==priznak_kommutacii) 	
+      		{
+      		 no_marshrutization_nms3_ipaddr=priznak_nms3_arp_sender;
+      		 //отправляем моему KY-S в eth1 
+      		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+      		}
+      	
+      		//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
+      		if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
+      		{
+      		//отправляем обратно НМС3 на выход eth2
+      		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+      		}
+    		  
+    	  }	  
+    	  /*обработка обычного пакета*/
+    	  if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+    	  {
+    		  //Пакет с матрицой коммутации для моего МПС шлюзового
+    		  memcpy(&udp_dest_port,&in_buf[18],2); 
+    		  if (udp_dest_port==18000)
+    		  {
+    			  ngraf_packet_for_my_mps(in_buf ,in_size);
+    		  }
+    		  //если обычные пакеты.без маршрутизации
+    		  else
+    		  {	
+    			  printk("PACK_ot_NMS3_SEND_KYS\n\r");
+    			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+    		  }
+    	        	
+    	  }
+    	  //Пакет идёт назад к НМС3
+    	  if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
+    	  {
+    	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    	  }
+    		
+    		
+    	}//END i_am Scluz
+    	/*Если я обычный сетевой элемент*/
+    	else
+    	{
+    		
+    	}
+    		
+    }//End no marshrutization packet
+    
+    
+    
+#if 0 
   // printk("priznak arp_sender =0x%x|priznak commuutaci=0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
-    //Обрабатываем пакеты для шлюзвого
+    //Обрабатываем пакеты для шлюзвого сетевого элемента
     if(multipleksor[0].priznac_shcluzovogo==1)
     {
     	
     	//printk("packet_to_scluz\n\r");
     	
-    	//Признак ARP
+    	//Обработка ARP пакета для шлюзового
     	if(priznak_nms3_arp_sender)
     	{
     		//printk("ARP_ot_NMS3 =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
@@ -471,6 +533,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
     		if(multipleksor[0].nms3_ipaddr==priznak_kommutacii)
     		{
+    		//отправляем обратно НМС3 на выход eth2
     			p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
     		}
     
@@ -522,8 +585,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	//И так далее по количеству соседей;		
     	}//END _priznak_nms3_arp_sender
     	
-  	
- //++++++++++++++++++++++++Признак обычных пакетов для шлюзового+++++++++++++++++++++++++
+  	    
+        //++++++++++++++++++++++++Признак обычных пакетов для шлюзового+++++++++++++++++++++++++
     	else
     	{
     	    //Пакет идёт от c SA адрес НМС3 к и DA моего KY-S шлюзового пакеты к шлюзу.
@@ -600,7 +663,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	
     
     }
-//+++++++++++++++++++++++++++++++++Обработка нешлюзовых Элементов++++++++++++++++++++++++++++++//
+    //+++++++++++++++++++++++++++++++++Обработка нешлюзовых Элементов++++++++++++++++++++++++++++++//
     /***************************************************************************************************
      *************************************************************************************************** 
      ***************************************************************************************************/
@@ -780,7 +843,9 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	}//END ELSE gloval
     	    	  	
     }//END GLOBAL GLOBAL ELSE
+   
     
+#endif    
 	  	
 }
 
@@ -789,7 +854,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_my_mps(skb->data ,(uint)skb->len)
 Parameters:     	void data
-Remarks:			timer functions 
+Remarks:			Пакет с маршрутизацией для данного МПС 
 
 Return Value:	    1  =>  Success  ,-1 => Failure
 
@@ -798,7 +863,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
 
   //Что нам нужно для Алгоритма Дейкстра?
-  UINT16 num_of_setevich_elementov = 3;
+  //UINT16 num_of_setevich_elementov = 3;
   UINT16 l_iter=0;
   
   //Конец для Дейкстры
@@ -856,44 +921,42 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     	printk("0x%x ",in_buf[i]);
     }
     */
- 
-     
+
+     printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
+     //printk("matrica_packet_recieve=%d\n\r",iteration);
+     //18 это в пакете наш  UDP  порт destination
+     printk("GL_IP_ADDR:"); 
     
-    // printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
-    //printk("matrica_packet_recieve=%d\n\r",iteration);
-    //18 это в пакете наш  UDP  порт destination
-	// printk("IP_status:"); 
-   
     memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	if(nms3_ip_addres==0){printk("?bad nms3_ip_addres =0?\n\r");return -1;}
-	//printk ("NMS3=<0x%x>|",nms3_ip_addres);
+	printk ("NMS3=<0x%x>|",nms3_ip_addres);
 	multipleksor[0].nms3_ipaddr=nms3_ip_addres;
 
 	//memcpy(&protocol_version,&in_buf[13],4);
 	//printk ("NMS3_protocol_version =0x%x>\n\r",protocol_version);
 	memcpy(&scluz_ip_addres,&in_buf[25],4);
-	//printk ("SCHLUZ=<0x%x>\n\r",scluz_ip_addres);
+	printk ("SCHLUZ=<0x%x>\n\r",scluz_ip_addres);
 	if(scluz_ip_addres==0){printk("?bad scluz_ip_address =0?\n\r");return -1;}
 	multipleksor[0].gate_ipaddr=scluz_ip_addres;
 	
 	
 	if(my_current_kos.ip_addres==0){printk("?bad current_kos.ip_addres exit=0?\n\r");return -1;}
 	
-	//Определяем что мы шлюз
-	//printk("Setevoi status:");
+	//Определяем что мы шлюз или простой элемент.
+	printk("Setevoi status:");
 	if(my_current_kos.ip_addres==scluz_ip_addres)
-	{/* printk("<MP_Scluz>ip_addr=<0x%x>\n\r",my_current_kos.ip_addres);*/
+	{ printk("<MP_Scluz>ip_addr=<0x%x>\n\r",my_current_kos.ip_addres);
 	priznac_scluz=1;multipleksor[0].priznac_shcluzovogo=1;}
-	else{/*printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);*/
+	else{printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);
 	priznac_scluz=0;multipleksor[0].priznac_shcluzovogo=0;}
 	
-   // printk("Matrica Status:");  
+    printk("Matrica Status:");  
 	//Первые 8 байт это название Гришиного протокола,следующие 4 байт это ip адрес шлюза. = 12 байт
 	smeshenie_grisha_scluz=(4+8);  //смещение 12 байт или 6 элементов в hex;
 	razmer_data_graf_massive=in_size-42-smeshenie_grisha_scluz; //размер данных в массиве
 	if(razmer_data_graf_massive<12){printk("?bad razmer_data_graf_massive =%d bait?\n\r",razmer_data_graf_massive);return -1;}
 	
-	//printk("graf_bait=%d|\n\r",razmer_data_graf_massive);
+	printk("graf_bait=%d|\n\r",razmer_data_graf_massive);
 	
 	
 	//21 байт это начало данных.+смещение получаем массив пар связности
@@ -1030,7 +1093,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   
   
   
-  printk("num_of_node=%d\n\r",num_of_uzlov_v_seti);
+  printk("num_of_multi_node=%d|",num_of_uzlov_v_seti);
   //распечатываем отсортированный массив
   
   /*
@@ -1110,23 +1173,8 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	 printk("array_j[j]=%d,=%d\n\r",array_j[j],j);
   }*/
   
-  /*
-  unsigned short int cost[3][3]=
-  {
-   
-  // ---0--|---1--|---2---|  
-        0  ,0xffff,10,
-        0xffff,0 ,10,
-        10,10,  0 
-  };
-  */
-
-  
-  
-  
-  
    //пихаем наш массив в Дейкстру
-   dijkstra(2);
+   dijkstra(0);
   
    printk("--------------------STOP-----------------------------\n\r");
    
