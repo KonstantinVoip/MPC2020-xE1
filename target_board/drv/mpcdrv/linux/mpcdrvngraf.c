@@ -416,7 +416,7 @@ Parameters:     	входной буфер(пакет),размер,ip_адре�
 Remarks:			В эту функцию идут все пакеты предназначенные для маршрутизации и отправки дальше
 Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
-void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_arp_sender)
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_arp_sender,u8 tdm_input_read_direction)
 {
    //UINT16  out_mac[12];
    //UINT16  mac1[3];
@@ -473,38 +473,112 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       		}
     		  
     	  }	  
-    	  /*обработка обычного пакета*/
-    	  if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+    	  else
     	  {
-    		  //Пакет с матрицой коммутации для моего МПС шлюзового
-    		  memcpy(&udp_dest_port,&in_buf[18],2); 
-    		  if (udp_dest_port==18000)
+    	  /*обработка обычного пакета для шлюзового*/
+    		  if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
     		  {
+    			  //Пакет с матрицой коммутации для моего МПС шлюзового
+    			  memcpy(&udp_dest_port,&in_buf[18],2); 
+    			  if (udp_dest_port==18000)
+    			  {
     			  ngraf_packet_for_my_mps(in_buf ,in_size);
-    		  }
-    		  //если обычные пакеты.без маршрутизации
-    		  else
-    		  {	
+    			  }
+    			  //если обычные пакеты.без маршрутизации
+    			  else
+    			  {	
     			  printk("PACK_ot_NMS3_SEND_KYS\n\r");
     			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
-    		  }
+    			  }
     	        	
-    	  }
-    	  //Пакет идёт назад к НМС3
-    	  if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
-    	  {
-    	  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
-    	  }
+    		  }
+    		  //Пакет идёт назад к НМС3
+    		  if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
+    		  {
+    			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    		  }
     		
-    		
+    	  }/*конец обработки обычного пакета для шлюзового*/
+    		  
     	}//END i_am Scluz
-    	/*Если я обычный сетевой элемент*/
+    	/* Если я обычный сетевой элемент*/
     	else
     	{
-    		
-    	}
+    	  
+    	    //определяем откуда свалился пакет с какого направления пока нет таблицы маршрутизации
+    		//Здесь мы должны знать откуда с какого направления пришёл ARP пакет чтобы отправить
+    		//его назад пока нет таблицы маршрутизации.
+    		/*обработка ARP пакета для обычного сетевого элемента*/
+    	    if(priznak_nms3_arp_sender)
+    	    {
+    	    	static u8 l_tdm_input_direction=0;
+    	    	
+    	    	//Проверяю что это ARP пакет идёт из tdm направления запоминаю откуда пришёл и отправляю потом назад
+    	    	if(!tdm_input_read_direction==0)
+    	    	{
+    	    	  l_tdm_input_direction =tdm_input_read_direction;
+    	          printk("ARP _Input _direction =%d\n\r",l_tdm_input_direction);
+    	    	}
+    	    	
+    	    	
+    	    	//printk("EL_ARP =nms3_arp_sender= 0x%x |pr_kommut= 0x%x\n\r",priznak_nms3_arp_sender,priznak_kommutacii);
+    	    	    		
+    	    	//да это ARP //обрабатываем особыам образом ARP пакет
+    	    	// пакет идёт к своему КY-S сетевого элемента 
+    	    	if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+    	    	{
+    	    		no_marshrutization_nms3_ipaddr=priznak_nms3_arp_sender;
+    	    		//отправляем моему KY-S в eth1 
+    	    		//printk("Send ARP to KYS\n\r");
+    	    		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+    	    	}
+    	
+    	    	//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
+    	    	if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
+    	    	{
+    	    		//отправляем обратно нзад НМС3 выход откуда пришёл на выход tdm
+    	    		//Здесь надо знать куда отправить обратно пакет в какое направление tdm
+    	    		switch (l_tdm_input_direction)
+    	    		{
+    	    		case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
+    	    		case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
+    	    		case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
+    	    		case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    	    		default:printk("?ARP_NMS3->Send  UNICNOWN to IP sosed \n\r");break;
+    	    		}
+    	    	    			  	    			
+    	    	}
+    	    	    		
+    	   }//End priznak nms3 ARP sender obichi setevoi element
+    	    /*обработка обычного пакета для сетевого элемента*/
+    	  else
+    	  {
+    		  
+    		  //Здесь нам нужно просто получит пакет и построить таблицу маршрутизации
+    		  //больше ничего не надо нам.
+    		  if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
+    		  {
+    			  //Пакет с матрицой коммутации для моего МПС шлюзового
+    			  memcpy(&udp_dest_port,&in_buf[18],2); 
+    			  if (udp_dest_port==18000)
+    			  {
+    			  ngraf_packet_for_my_mps(in_buf ,in_size);
+    			  }
+    	        	
+    		  }
+    		  
+    	  }/*конец обработки обычного пакета для сетевого элемента*/
+    		 
+    	}//End obichii setevoi elemnt
     		
     }//End no marshrutization packet
+    
+    /***************************************************************************************/
+    /*Здесь начинатеться ситуация когда в данном сетевом элемнте есть таблица маршрутизации*/
+    /***************************************************************************************/
+    
+    
+    
     
     
     

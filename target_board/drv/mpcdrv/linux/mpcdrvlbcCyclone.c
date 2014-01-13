@@ -127,7 +127,7 @@ static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 
 //extern void nbuf_set_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направитъ*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr);
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr,u8 tdm_input_read_direction);
 
 
 //extern void p2020_get_recieve_virttsec_packet_buf(UINT16 *buf,UINT16 len);
@@ -230,9 +230,119 @@ static inline void   plis_write16(const UINT16 addr,const  UINT16 value)
    __raw_writew(value, map->virt + PLIS_LINUX_START_DATA_OFFSET+(addr*2));  
 }
 
+//////////////////////////////////////////Тестовые функции работаем по таймерам/////////////////////////////////////////
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM1_direction_READ_READY_event_test(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+***************************************************************************************************/
+void TDM1_direction_READ_READY(void)
+{
+UINT16 dannie1000=0;
+UINT16 dannie800=0;
+
+
+	dannie1000=plis_read16 (DIR1_PLIS_READOK_ADDR1000);
+	//printk("Status1000 =0x%x\n\r",dannie1000);
+	if((dannie1000==0xabc1) || (dannie1000==0x1))
+    {
+	
+		dannie800=plis_read16 (DIR1_PLIS_READ_BUG_ADDR800);
+		if((dannie800==0x1)||(dannie800==0xabc1))
+		{
+			Event_TDM1_direction_READ_READY();
+		}
+		
+  	} 
+
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM2_direction_READ_READY_event_test(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+***************************************************************************************************/
+void TDM2_direction_READ_READY(void)
+{
+UINT16 dannie1002=0;
+UINT16 dannie802=0;
+
+	dannie1002=plis_read16 (DIR2_PLIS_READOK_ADDR1002);
+	if((dannie1002==0xabc1) || (dannie1002==0x1))
+	{
+	    dannie802=plis_read16 (DIR2_PLIS_READ_BUG_ADDR802);
+		if((dannie802==0x1)||(dannie802==0xabc1))
+		{
+			Event_TDM2_direction_READ_READY();
+		}
+		
+	} 
+	//printk("dannie1002_dir1=0x%x->>>>>",dannie1002);
+	//printk("dannie802_dir1=0x%x->>>>>>",dannie802);
+	//printk("Status_dir1 =%d\n\r",status);
+}
 
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM0_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM3_direction_READ_READY_event_test(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+***************************************************************************************************/
+void TDM3_direction_READ_READY(void)
+{
+ UINT16 dannie1004=0;
+ UINT16 dannie804=0;
+
+   
+ printk(">>>>>");
+	dannie1004=plis_read16 (DIR3_PLIS_READOK_ADDR1004);
+	if((dannie1004==0xabc1) || (dannie1004==0x1))
+	{
+		 printk("dannie1004_dir3=0x%x->>>>>",dannie1004);
+		dannie804=plis_read16 (DIR3_PLIS_READ_BUG_ADDR804);
+		if((dannie804==0x1)||(dannie804==0xabc1))
+		{
+			//printk("dannie1004_dir1=0x%x->>>>>",dannie1004);
+			Event_TDM3_direction_READ_READY();
+		}	
+		
+	}	
+	
+	//printk("dannie1004_dir1=0x%x->>>>>",dannie1004);
+	//printk("dannie804_dir1=0x%x->>>>>>",dannie804);
+	//printk("Status_dir2 =%d\n\r",status);
+}
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM4_direction_READ_READY_event_test(void)			 
+Return Value:	    Returns 1 on success and negative value on failure.
+***************************************************************************************************/
+void TDM4_direction_READ_READY(void)
+{
+	UINT16 dannie1006=0;
+	UINT16 dannie806=0;
+
+	dannie1006=plis_read16 (DIR4_PLIS_READOK_ADDR1006);
+	if((dannie1006==0xabc1) || (dannie1006==0x1))
+	{
+		
+		dannie806=plis_read16 (DIR4_PLIS_READ_BUG_ADDR806);
+		if((dannie806==0x1)||(dannie806==0xabc1))
+		{
+			Event_TDM4_direction_READ_READY();
+		}
+			
+	} 
+	//printk("dannie1006_dir1=0x%x->>>>>",dannie1006);
+	//printk("dannie806_dir1=0x%x->>>>>>",dannie806);
+	//printk("Status_dir3 =%d\n\r",status);
+
+}
+
+
+
+
+
+
+
+//Нормальная функция без событий пока комментарю её.
+#if 0
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM1_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -269,14 +379,19 @@ UINT16 status =0;
 	{
 		status =0;
 	}
-/*	printk("dannie1000_dir0=0x%x->>>>>",dannie1000);
+
+	Event_TDM1_direction_READ_READY();
+	//дополнительная обработка для пробуждения потока.
+	//Бужу поток на  приём пакетов
+	/*	printk("dannie1000_dir0=0x%x->>>>>",dannie1000);
 	printk("dannie800_dir0=0x%x->>>>>>",dannie800);
 	printk("Status_dir0 =%d\n\r",status);
 */	
 return status;
 }
+
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM1_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM2_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -315,7 +430,7 @@ UINT16 dannie802=0;
 return status;
 }
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM2_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM3_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -358,7 +473,7 @@ return status;
 	
 }
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM3_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM4_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -399,6 +514,12 @@ UINT16 TDM4_direction_READ_READY(void)
 
 return status;
 }
+#endif
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM5_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
@@ -908,7 +1029,7 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
     //Set size on PLIS in byte
    
     
-   // printk("+Tdm_Dir1_write->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
+    //printk("+Tdm_Dir1_write->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
     
     
 	#ifdef  TDM_DIR_0_WRITE_DEBUG	
@@ -981,7 +1102,7 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
 
 
 /**************************************************************************************************
-Syntax:      	void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
+Syntax:      	void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 Remarks:		This Write to PLIS  address value. 
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1006,7 +1127,7 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
     
 	hex_element_size=(in_size/2)+dir2_dop_nechet_packet; 
     //hex_element_size=in_size/2;
-     //printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+     printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
 #ifdef  TDM_DIR_2_WRITE_DEBUG	   
     printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
 	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
@@ -1032,7 +1153,7 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 }	
 	
 /**************************************************************************************************
-Syntax:      	void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
+Syntax:      	void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
 Remarks:		This Write to PLIS  address value. 
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1370,7 +1491,9 @@ void TDM1_dierction_read ()
   
   
   //printk("+Tdm_Dir1_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-    	  
+    printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex); 
+  
+  
 	  //16 bit  or 2 bait Local bus iteration
 	  do
 	  {
@@ -1417,7 +1540,7 @@ void TDM1_dierction_read ()
 		   memcpy(&dir0_target_arp_nms_sa_addr,out_buf+14,4);
 		   memcpy(&dir0_target_arp_ip_da_addr,out_buf+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_target_arp_ip_da_addr,dir0_target_arp_nms_sa_addr);   
+		   ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_target_arp_ip_da_addr,dir0_target_arp_nms_sa_addr,1);   
 	 	   
 	 	  //send to tsec2
 		  //p2020_get_recieve_virttsec_packet_buf(out_buf,dannie1200,2);
@@ -1426,7 +1549,7 @@ void TDM1_dierction_read ()
 	   else
 	   {
 	      // printk("paket po ip hesder\n\r");
-		     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr,0x0000); 
+		     ngraf_packet_for_matrica_kommutacii(out_buf ,dannie1200,dir0_ip_da_addr,0x0000,0); 
 	   }
 	   
 	   //priznak packeta KY-S 
@@ -1490,7 +1613,7 @@ void TDM2_dierction_read ()
 	  
 	  
 	  packet_size_hex=(dannie1202/2)+dir1_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-	  //printk("+Tdm_Dir2_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_read_iteration,dannie1202,packet_size_hex);  
+	  printk("+Tdm_Dir2_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_read_iteration,dannie1202,packet_size_hex);  
 	  //16 bit  or 2 bait Local bus iteration
 	        do
 	        {
@@ -1530,7 +1653,7 @@ void TDM2_dierction_read ()
 			   memcpy(&dir1_target_arp_nms_sa_addr,out_buf1+14,4);
 			   memcpy(&dir1_target_arp_ip_da_addr,out_buf1+19,4);
 			   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_target_arp_ip_da_addr,dir1_target_arp_nms_sa_addr);  
+			   ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_target_arp_ip_da_addr,dir1_target_arp_nms_sa_addr,2);  
 			     //ARP packet for matrica
 		 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 			     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -1538,7 +1661,7 @@ void TDM2_dierction_read ()
 	  	 //priznak ky-s
 	  	 else
 	  	 {
-	  		ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_ip_da_addr,0x0000); 	  	 
+	  		ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,dir1_ip_da_addr,0x0000,0); 	  	 
 	  	 }
 		 
 		 
@@ -1609,7 +1732,7 @@ void TDM3_dierction_read ()
 	  packet_size_hex=(dannie1204/2)+dir2_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex
 	  	  
 	  //printk("+Tdm_Dir3_read->>ITERATION=%d|1204in_byte=%d|1204in_hex=%d|size=%d|+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex,dannie1204+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-	 	    
+	    printk("+Tdm_Dir3_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_read_iteration,dannie1204,packet_size_hex);  
 
 	  
 	 	  //  else
@@ -1651,13 +1774,13 @@ void TDM3_dierction_read ()
 	 	  		   memcpy(&dir2_target_arp_nms_sa_addr,out_buf2+14,4);
 	 	  		   memcpy(&dir2_target_arp_ip_da_addr,out_buf2+19,4);
 				   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_target_arp_ip_da_addr,dir2_target_arp_nms_sa_addr);  
+				   ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_target_arp_ip_da_addr,dir2_target_arp_nms_sa_addr,3);  
 	 	  		 
 	 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 	 	  	   } 
 	 	  	   else
 	 	  	   {   
-	 	  	     ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_ip_da_addr,0x0000);  
+	 	  	     ngraf_packet_for_matrica_kommutacii(out_buf2 ,dannie1204,dir2_ip_da_addr,0x0000,0);  
 	 	  	   }	  	   
 
 //#endif	 	  	   
@@ -1717,7 +1840,7 @@ void TDM4_dierction_read  ()
 	  
       
 	  //printk("+Tdm_Dir4_read->>ITERATION=%d|1206in_byte=%d|1206in_hex=%d|size=%d|+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex,dannie1206+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-
+	    printk("+Tdm_Dir4_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_read_iteration,dannie1206,packet_size_hex); 
 	  	 	  	//16 bit  or 2 bait Local bus iteration
 	            do
 	  	 	  	{
@@ -1755,13 +1878,13 @@ void TDM4_dierction_read  ()
 		 	  		   memcpy(&dir3_target_arp_nms_sa_addr,out_buf3+14,4);
 		 	  		   memcpy(&dir3_target_arp_ip_da_addr,out_buf3+19,4);
 					   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,dir3_target_arp_ip_da_addr,dir3_target_arp_nms_sa_addr);  
+					   ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,dir3_target_arp_ip_da_addr,dir3_target_arp_nms_sa_addr,4);  
 		 	  		 
 		 	  	     //p2020_get_recieve_virttsec_packet_buf(out_buf2,dannie1204,2);//send to eternet tsec ARP broadcast   
 		 	  	   } 
 		 	  	   else
 		 	  	   {   
-		 	  	     ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,dir3_ip_da_addr,0x0000);  
+		 	  	     ngraf_packet_for_matrica_kommutacii(out_buf3 ,dannie1206,dir3_ip_da_addr,0x0000,0);  
 		 	  	   }	
 	  	 	  	
 	  	 	  	 /*
@@ -1859,7 +1982,7 @@ void TDM5_dierction_read  ()
 		   memcpy(&dir5_target_arp_nms_sa_addr,out_buf5+14,4);
 		   memcpy(&dir5_target_arp_ip_da_addr,out_buf5+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf5 ,dannie1208,dir5_target_arp_ip_da_addr,dir5_target_arp_nms_sa_addr);  
+		   ngraf_packet_for_matrica_kommutacii(out_buf5 ,dannie1208,dir5_target_arp_ip_da_addr,dir5_target_arp_nms_sa_addr,5);  
 		     //ARP packet for matrica
 	 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 		     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -1867,7 +1990,7 @@ void TDM5_dierction_read  ()
   	 //priznak ky-s
   	 else
   	 {
-  		ngraf_packet_for_matrica_kommutacii(out_buf5 ,dannie1208,dir5_ip_da_addr,0x0000); 	  	 
+  		ngraf_packet_for_matrica_kommutacii(out_buf5 ,dannie1208,dir5_ip_da_addr,0x0000,0); 	  	 
   	 }
 	  
 	#ifdef TDM4_DIR_TEST_ETHERNET_SEND
@@ -1957,7 +2080,7 @@ void TDM6_dierction_read  ()
 		   memcpy(&dir6_target_arp_nms_sa_addr,out_buf6+14,4);
 		   memcpy(&dir6_target_arp_ip_da_addr,out_buf6+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf6 ,dannie1210,dir6_target_arp_ip_da_addr,dir6_target_arp_nms_sa_addr);  
+		   ngraf_packet_for_matrica_kommutacii(out_buf6 ,dannie1210,dir6_target_arp_ip_da_addr,dir6_target_arp_nms_sa_addr,6);  
 		     //ARP packet for matrica
 	 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 		     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -1965,7 +2088,7 @@ void TDM6_dierction_read  ()
   	 //priznak ky-s
   	 else
   	 {
-  		ngraf_packet_for_matrica_kommutacii(out_buf6 ,dannie1210,dir6_ip_da_addr,0x0000); 	  	 
+  		ngraf_packet_for_matrica_kommutacii(out_buf6 ,dannie1210,dir6_ip_da_addr,0x0000,0); 	  	 
   	 }
 	  
 	  tdm6_read_iteration++; 
@@ -2039,7 +2162,7 @@ void TDM7_dierction_read  ()
 		   memcpy(&dir7_target_arp_nms_sa_addr,out_buf7+14,4);
 		   memcpy(&dir7_target_arp_ip_da_addr,out_buf7+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf7 ,dannie1212,dir7_target_arp_ip_da_addr,dir7_target_arp_nms_sa_addr);  
+		   ngraf_packet_for_matrica_kommutacii(out_buf7 ,dannie1212,dir7_target_arp_ip_da_addr,dir7_target_arp_nms_sa_addr,7);  
 		     //ARP packet for matrica
 	 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 		     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -2047,7 +2170,7 @@ void TDM7_dierction_read  ()
   	 //priznak ky-s
   	 else
   	 {
-  		ngraf_packet_for_matrica_kommutacii(out_buf7 ,dannie1212,dir7_ip_da_addr,0x0000); 	  	 
+  		ngraf_packet_for_matrica_kommutacii(out_buf7 ,dannie1212,dir7_ip_da_addr,0x0000,0); 	  	 
   	 }
 	 
 	#ifdef TDM6_DIR_TEST_ETHERNET_SEND
@@ -2130,7 +2253,7 @@ void TDM8_dierction_read  ()
 		   memcpy(&dir8_target_arp_nms_sa_addr,out_buf8+14,4);
 		   memcpy(&dir8_target_arp_ip_da_addr,out_buf8+19,4);
 		   //printk("ARP zaprosi on tdm dir0 0x%x\n\r",dir0_target_arp_ip_da_addr);
-		   ngraf_packet_for_matrica_kommutacii(out_buf8 ,dannie1214,dir8_target_arp_ip_da_addr,dir8_target_arp_nms_sa_addr);  
+		   ngraf_packet_for_matrica_kommutacii(out_buf8 ,dannie1214,dir8_target_arp_ip_da_addr,dir8_target_arp_nms_sa_addr,8);  
 		     //ARP packet for matrica
 	 		 //ngraf_packet_for_matrica_kommutacii(out_buf1 ,dannie1202,0x0806); 		   
 		     //p2020_get_recieve_virttsec_packet_buf(out_buf1,dannie1202,2);
@@ -2138,7 +2261,7 @@ void TDM8_dierction_read  ()
   	 //priznak ky-s
   	 else
   	 {
-  		ngraf_packet_for_matrica_kommutacii(out_buf8 ,dannie1214,dir8_ip_da_addr,0x0000); 	  	 
+  		ngraf_packet_for_matrica_kommutacii(out_buf8 ,dannie1214,dir8_ip_da_addr,0x0000,0); 	  	 
   	 }
 	  
 	  

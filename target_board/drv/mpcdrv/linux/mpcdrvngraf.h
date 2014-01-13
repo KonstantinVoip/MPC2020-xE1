@@ -60,7 +60,7 @@ UINT16 marsrutiazation_enable;
 /******************************************************************************/
 //void ngraf_get_datapacket (const u16 *in_buf ,const u16 in_size);
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
-void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr);
+void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr,u8 tdm_input_read_direction);
 void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 //UINT32 ngraf_get_ipaddr_my_kys();  
 

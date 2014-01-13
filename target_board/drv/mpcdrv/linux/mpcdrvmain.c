@@ -146,6 +146,18 @@ GENERAL NOTES
 #define UDP_HEADER_LENGTH          8     //8 bait
  
 
+/*Cтруктура длинны UDP пакета как мы его видим в WIRESHARK */
+//Ethernet заголовок = 14 байт = 0xE 
+//IPv4 заголовок     = 20 байт = 0x14
+//UDP заголовок      = 8  байт = 0x8
+
+/*в IP части*/
+//Поле :Headerlength = 20 ,байт
+//Поле :Totallength  =общая длинна ip пакета без Ethernet части ;Totallength = all_length-Ethernet заголовок
+/*в UDP части*/
+//Поле Length = data_length+udp заголовок.
+
+
 ///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
 /*IP Addrress*/
  //#define SEVA_NMS_IP_ADDR 0xC0A88261  //192.168.130.97
@@ -205,7 +217,7 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 /*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
 //extern bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
 /*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
-extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr);
+extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr,u8 tdm_input_read_direction);
 /*устанавливаем MAC моего KY-S */
 extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 
@@ -213,6 +225,16 @@ extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_add
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
+
+
+extern void Event_TDM1_direction_READ_READY(void);
+extern void Event_TDM2_direction_READ_READY(void);
+extern void Event_TDM3_direction_READ_READY(void);
+extern void Event_TDM4_direction_READ_READY(void);
+
+
+
+
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -239,8 +261,19 @@ static struct hrtimer hr_timer;           //high resolution timer
 struct task_struct *r_t1,*r_t2,*test_thread_tdm;
 static int N=2;
 
-static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue);
-rwlock_t myevent_lock;
+
+
+//Очередь ожидания потока
+//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_read);
+//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_read);
+//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm4_read);
+
+
+
+
+//Критические секции
+rwlock_t myevent_read_tdm1_lock,myevent_read_tdm2_lock,myevent_read_tdm3_lock,myevent_read_tdm4_lock;
 
 
 /*****************************************************************************/
@@ -273,8 +306,14 @@ void timer1_routine(unsigned long data)
 {
  //UINT16  lbcread_state=0;
  //UINT16  out_buf[1518];//1518 bait;
- //printk(KERN_ALERT"+timer1_routine+\n\r"); 
- mod_timer(&timer1, jiffies + msecs_to_jiffies(5000)); // restarting timer
+ //printk(KERN_ALERT"+timer1_routine+\n\r");
+ 
+	
+ TDM1_direction_READ_READY();
+ TDM2_direction_READ_READY();
+ TDM3_direction_READ_READY();
+ TDM4_direction_READ_READY();
+ mod_timer(&timer1, jiffies + msecs_to_jiffies(100)); // restarting timer
  //ktime_now();     
 }
 
@@ -338,7 +377,7 @@ static int tdm_recieve_thread_two(void *data)
 		schedule();
 		
 	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-//#if 0
+#if 0
 		if(TDM1_direction_WRITE_READY()==1)
 			{			
 		        
@@ -417,7 +456,7 @@ static int tdm_recieve_thread_two(void *data)
             }	    
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	    
-#if 0
+//#if 0
 		    if(TDM5_direction_WRITE_READY()==1)
 		    {			
 		    		        
@@ -530,13 +569,13 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 				//выполняемая работа потоковой функции
 				// msleep( 100 );  	 
 			     schedule();
-//#if 0			     
+#if 0			     
 			     if(TDM1_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );*/TDM1_dierction_read();} 			 
 			     if(TDM2_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );*/TDM2_dierction_read();}
 				 if(TDM3_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );*/TDM3_dierction_read();}
 				 if(TDM4_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );*/TDM4_dierction_read();} 
 				 
-#if 0
+//#if 0
 				 if(TDM5_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );*/TDM5_dierction_read();}
 				 if(TDM6_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );*/TDM6_dierction_read();}
 				 if(TDM7_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );*/TDM7_dierction_read();}
@@ -554,8 +593,74 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 	return 0;	
 }
 
+
+
+
 /**************************************************************************************************
-Syntax: static int tdm_test_thread_one(void *data)
+Syntax:      	    void Event_TDM1_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM1_direction_READ_READY(void)
+{
+	
+	//wake_up(&myevent_waitqueue_tdm1_read);
+	printk("ok_event_tdm_read1\n\r");	
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM2_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM2_direction_READ_READY(void)
+{
+	
+	//wake_up(&myevent_waitqueue_tdm2_read);
+	printk("ok_event_tdm_read2\n\r");
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM3_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM3_direction_READ_READY(void)
+{
+	
+	wake_up(&myevent_waitqueue_tdm3_read);
+	printk("ok_event_tdm_read3\n\r");
+}
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM4_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM4_direction_READ_READY(void)
+{
+	
+	//wake_up(&myevent_waitqueue_tdm4_read);
+	printk("ok_event_tdm_read4\n\r");
+}
+
+
+
+
+
+
+
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_test_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+
 ***************************************************************************************************/
 static int tdm_test_thread_one(void *data)
 {
@@ -563,26 +668,49 @@ static int tdm_test_thread_one(void *data)
 	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 	
 	
-	DECLARE_WAITQUEUE (wait, current);	
-	add_wait_queue (&myevent_waitqueue, &wait);
-
+	//DECLARE_WAITQUEUE (wait_tdm_read1, current);	
+	//DECLARE_WAITQUEUE (wait_tdm_read2, current);
+	DECLARE_WAITQUEUE (wait_tdm_read3, current);
+	//DECLARE_WAITQUEUE (wait_tdm_read4, current);
+	//add_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
+	//add_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
+	add_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
+	//add_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	
 	while(!kthread_should_stop()) 
 	{
-	
-	
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
            
-        
-		read_lock (&myevent_lock);
-	 	//printk("uup_1\n\r");
-		read_unlock (&myevent_lock); 
-		
+        //критическая секция
+		/*
+		read_lock (&myevent_read_tdm1_lock);
+	 	TDM1_dierction_read();
+	 	read_unlock (&myevent_read_tdm1_lock); 
+		//	
+		read_lock (&myevent_read_tdm2_lock);
+	 	TDM2_dierction_read();
+	 	read_unlock (&myevent_read_tdm2_lock); 
+	 	//
+		*/
+		read_lock (&myevent_read_tdm3_lock);
+	 	TDM3_dierction_read();
+	 	read_unlock (&myevent_read_tdm3_lock); 
+	    //
+		/*
+	 	read_lock (&myevent_read_tdm4_lock);
+	 	TDM4_dierction_read();
+	 	read_unlock (&myevent_read_tdm4_lock); 
+	    */
 	
-		
+	
 	}
 	set_current_state (TASK_RUNNING);
-	remove_wait_queue (&myevent_waitqueue, &wait);
+	//remove_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
+	//remove_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
+	remove_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
+	//remove_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	
 printk( "%s find signal!\n", st( N ) );	
 return 0;	
 }
@@ -603,11 +731,13 @@ static int tdm_recieve_thread(void *data)
    printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
    
    
+   
+   
    //test_thread_tdm = kthread_run( tdm_test_thread_one,NULL, CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-    // test_thread_tdm = kthread_run( tdm_test_thread_one,(void*)N,"tdm_test_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm = kthread_run( tdm_test_thread_one,(void*)N,"tdm_test_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
    
    
-    //r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
+   // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    
    //Запускаем первый тред (приём данных с local bus)
   // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
@@ -619,7 +749,7 @@ static int tdm_recieve_thread(void *data)
    */
    
    //Запускаем второй тред	
- //  r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
+  // r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
    /*
    priority1.sched_priority=0;
    sched_setscheduler(r_t2, SCHED_IDLE, &priority1);
@@ -667,9 +797,7 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 	}	
 	
 	//printk("get_ethernet_packet=0x%x\n\r",target_arp_ip_da_addr);
-	//ngraf_packet_for_matrica_kommutacii(in_buf,in_size,(u8)target_arp_ip_da_addr,(u8)target_arp_nms_sa_addr);	
-	ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr);
-	//ngraf_packet_for_matrica_kommutacii(l_data_packet,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr);
+	//ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr,0);
 	
 	//#endif	
 	
@@ -862,8 +990,39 @@ unsigned int Hook_Func(uint hooknum,
 	//Фильтр для пакетов от НМС3 и к НМС3  нужн подумать как ручками не прописывать может лучше сделать порт 18000;      
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
-	 //Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
-	   get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
+	   
+		//printk("packet_ok\n\r");
+		
+		/*
+		if(TDM1_direction_WRITE_READY()==1)
+		{	
+		TDM1_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		
+		if(TDM2_direction_WRITE_READY()==1)
+		{	
+		TDM2_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		*/
+		
+		if(TDM3_direction_WRITE_READY()==1)
+		{	
+		TDM3_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		else
+		{
+			printk("no ready\n\r");
+		}
+		
+		/*
+		if(TDM4_direction_WRITE_READY()==1)
+		{	
+		TDM4_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		*/
+		//Бужу поток на  приём пакетов		
+		//Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
+	   //get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
        return NF_DROP;
 	}
 	    	 
@@ -970,10 +1129,10 @@ int mpc_init_module(void)
 	       tdm_recieve_thread(NULL); //start thread functions
 	     
 	     //Timer1
-	       //init_timer(&timer1);
-	       //timer1.function = timer1_routine;
-	       //timer1.data = 1;
-	       //timer1.expires = jiffies + msecs_to_jiffies(2000);//2000 ms 
+	      init_timer(&timer1);
+	      timer1.function = timer1_routine;
+	      timer1.data = 1;
+	      timer1.expires = jiffies + msecs_to_jiffies(50);//2000 ms 
 	
 	     //Timer2
 	    // init_timer(&timer2);
@@ -981,8 +1140,8 @@ int mpc_init_module(void)
 	    // timer2.data = 1;
 	    // timer2.expires = jiffies + msecs_to_jiffies(5000);//2000 ms 
 	
-	     //add_timer(&timer2);  //Starting the timer2
-	     //add_timer(&timer1);  //Starting the timer1
+	      // add_timer(&timer2);  //Starting the timer2
+	         add_timer(&timer1);  //Starting the timer1
 	
   
 
@@ -999,13 +1158,13 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	//del_timer_sync(&timer1);             /* Deleting the timer */
+	del_timer_sync(&timer1);             /* Deleting the timer */
 	//del_timer_sync(&timer2);             /* Deleting the timer */
 	/* Регистрируем */
 	nf_unregister_hook(&bundle);
 	nf_unregister_hook(&arp_bundle);
 	msleep(10);
-	//kthread_stop(test_thread_tdm); 
+	kthread_stop(test_thread_tdm); 
 	
 	  //kthread_stop(r_t1);
       //kthread_stop(r_t2);
