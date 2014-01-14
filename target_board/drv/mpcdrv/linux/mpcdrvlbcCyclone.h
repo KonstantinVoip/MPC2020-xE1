@@ -104,7 +104,7 @@ typedef enum{
      DIR3_PLIS_READ_BUG_ADDR804 		   = 804,
      DIR3_PLIS_READOK_ADDR1004  		   = 1004,
      DIR3_PLIS_PACKSIZE_ADDR1204           = 1204,//       plis read  packet size 
-     DIR3_PLIS_PACKSIZE_ADDR1604           = 1604,
+     DIR3_PLIS_PACKSIZE_ADDR1604           = 1604,//send plis packet size
      DIR3_PLIS_READ_ADDR404                = 404, //0xC8   plis read data
      DIR3_PLIS_WRITE_ADDR204               = 204, //0x190   plis write data 
    
@@ -113,7 +113,7 @@ typedef enum{
      DIR4_PLIS_READ_BUG_ADDR806 		   = 806,
      DIR4_PLIS_READOK_ADDR1006  		   = 1006,
      DIR4_PLIS_PACKSIZE_ADDR1206           = 1206,//       plis read  packet size 
-     DIR4_PLIS_PACKSIZE_ADDR1606           = 1606,
+     DIR4_PLIS_PACKSIZE_ADDR1606           = 1606,//send plis packet size
      DIR4_PLIS_READ_ADDR406                = 406, //0xC8   plis read data
      DIR4_PLIS_WRITE_ADDR206               = 206, //0x190   plis write data
    
@@ -122,7 +122,7 @@ typedef enum{
      DIR5_PLIS_READ_BUG_ADDR808 		   = 808,
      DIR5_PLIS_READOK_ADDR1008  		   = 1008,
      DIR5_PLIS_PACKSIZE_ADDR1208           = 1208,//       plis read  packet size 
-     DIR5_PLIS_PACKSIZE_ADDR1608           = 1608,
+     DIR5_PLIS_PACKSIZE_ADDR1608           = 1608,//send plis packet size
      DIR5_PLIS_READ_ADDR408                = 408, //0xC8   plis read data
      DIR5_PLIS_WRITE_ADDR208               = 208, //0x190   plis write data
    
@@ -220,6 +220,10 @@ extern void Event_TDM1_direction_READ_READY(void);
 extern void Event_TDM2_direction_READ_READY(void);
 extern void Event_TDM3_direction_READ_READY(void);
 extern void Event_TDM4_direction_READ_READY(void);
+extern void Event_TDM5_direction_READ_READY(void);
+extern void Event_TDM6_direction_READ_READY(void);
+extern void Event_TDM7_direction_READ_READY(void);
+extern void Event_TDM8_direction_READ_READY(void);
 
 
 /*Ready Read DATA */
@@ -235,12 +239,20 @@ void TDM3_direction_READ_READY(void);
 //UINT16 TDM4_direction_READ_READY(void);
 void TDM4_direction_READ_READY(void);
 
+//UINT16 TDM5_direction_READ_READY(void);
+void TDM5_direction_READ_READY(void);
 
-UINT16 TDM5_direction_READ_READY(void);
+//UINT16 TDM6_direction_READ_READY(void);
+void TDM6_direction_READ_READY(void);
 
-UINT16 TDM6_direction_READ_READY(void);
-UINT16 TDM7_direction_READ_READY(void);
-UINT16 TDM8_direction_READ_READY(void);
+//UINT16 TDM7_direction_READ_READY(void);
+void TDM7_direction_READ_READY(void);
+
+//UINT16 TDM8_direction_READ_READY(void);
+void TDM8_direction_READ_READY(void);
+
+
+
 //UINT16 TDM9_direction_READ_READY(void);
 //UINT16 TDM10_direction_READ_READY(void);
 

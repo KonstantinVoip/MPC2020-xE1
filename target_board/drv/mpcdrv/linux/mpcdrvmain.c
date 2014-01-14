@@ -231,10 +231,10 @@ extern void Event_TDM1_direction_READ_READY(void);
 extern void Event_TDM2_direction_READ_READY(void);
 extern void Event_TDM3_direction_READ_READY(void);
 extern void Event_TDM4_direction_READ_READY(void);
-
-
-
-
+extern void Event_TDM5_direction_READ_READY(void);
+extern void Event_TDM6_direction_READ_READY(void);
+extern void Event_TDM7_direction_READ_READY(void);
+extern void Event_TDM8_direction_READ_READY(void);
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
@@ -264,16 +264,22 @@ static int N=2;
 
 
 //Очередь ожидания потока
-//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_read);
-//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_read);
+
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_read);
-//static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm4_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm4_read);
 
 
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm5_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm6_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm7_read);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm8_read);
 
 
 //Критические секции
-rwlock_t myevent_read_tdm1_lock,myevent_read_tdm2_lock,myevent_read_tdm3_lock,myevent_read_tdm4_lock;
+rwlock_t myevent_read_tdm1_lock,myevent_read_tdm2_lock,myevent_read_tdm3_lock,myevent_read_tdm4_lock,
+myevent_read_tdm4_lock,myevent_read_tdm5_lock,myevent_read_tdm6_lock,myevent_read_tdm7_lock,myevent_read_tdm8_lock;
 
 
 /*****************************************************************************/
@@ -308,11 +314,16 @@ void timer1_routine(unsigned long data)
  //UINT16  out_buf[1518];//1518 bait;
  //printk(KERN_ALERT"+timer1_routine+\n\r");
  
+
+   TDM1_direction_READ_READY();
+   TDM2_direction_READ_READY();
+   TDM3_direction_READ_READY();
+   TDM4_direction_READ_READY();  
+   TDM5_direction_READ_READY();
+   TDM6_direction_READ_READY();
+   TDM7_direction_READ_READY();
+   TDM8_direction_READ_READY();
 	
- TDM1_direction_READ_READY();
- TDM2_direction_READ_READY();
- TDM3_direction_READ_READY();
- TDM4_direction_READ_READY();
  mod_timer(&timer1, jiffies + msecs_to_jiffies(100)); // restarting timer
  //ktime_now();     
 }
@@ -605,8 +616,8 @@ Return Value:
 void Event_TDM1_direction_READ_READY(void)
 {
 	
-	//wake_up(&myevent_waitqueue_tdm1_read);
-	printk("ok_event_tdm_read1\n\r");	
+	  wake_up(&myevent_waitqueue_tdm1_read);
+	//printk("ok_event_tdm_read1\n\r");	
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM2_direction_READ_READY(void)
@@ -617,8 +628,8 @@ Return Value:
 void Event_TDM2_direction_READ_READY(void)
 {
 	
-	//wake_up(&myevent_waitqueue_tdm2_read);
-	printk("ok_event_tdm_read2\n\r");
+	wake_up(&myevent_waitqueue_tdm2_read);
+	//printk("ok_event_tdm_read2\n\r");
 }
 
 
@@ -632,7 +643,7 @@ void Event_TDM3_direction_READ_READY(void)
 {
 	
 	wake_up(&myevent_waitqueue_tdm3_read);
-	printk("ok_event_tdm_read3\n\r");
+	//printk("ok_event_tdm_read3\n\r");
 }
 
 /**************************************************************************************************
@@ -644,12 +655,62 @@ Return Value:
 void Event_TDM4_direction_READ_READY(void)
 {
 	
-	//wake_up(&myevent_waitqueue_tdm4_read);
-	printk("ok_event_tdm_read4\n\r");
+	wake_up(&myevent_waitqueue_tdm4_read);
+	//printk("ok_event_tdm_read4\n\r");
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM5_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM5_direction_READ_READY(void)
+{
+	
+	wake_up(&myevent_waitqueue_tdm5_read);
+	//printk("ok_event_tdm_read5\n\r");
 }
 
 
+/**************************************************************************************************
+Syntax:      	    void Event_TDM6_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM6_direction_READ_READY(void)
+{
+	
+	  wake_up(&myevent_waitqueue_tdm6_read);
+	//printk("ok_event_tdm_read6\n\r");
+}
 
+/**************************************************************************************************
+Syntax:      	    void Event_TDM7_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM7_direction_READ_READY(void)
+{
+	
+	 wake_up(&myevent_waitqueue_tdm7_read);
+	//printk("ok_event_tdm_read7\n\r");
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM8_direction_READ_READY(void)
+Parameters:     	void *ptr
+Remarks:			 
+Return Value:	   
+***************************************************************************************************/
+void Event_TDM8_direction_READ_READY(void)
+{
+	
+	wake_up(&myevent_waitqueue_tdm8_read);
+	//printk("ok_event_tdm_read8\n\r");
+}
 
 
 
@@ -668,14 +729,28 @@ static int tdm_test_thread_one(void *data)
 	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 	
 	
-	//DECLARE_WAITQUEUE (wait_tdm_read1, current);	
-	//DECLARE_WAITQUEUE (wait_tdm_read2, current);
+	DECLARE_WAITQUEUE (wait_tdm_read1, current);	
+	DECLARE_WAITQUEUE (wait_tdm_read2, current);
 	DECLARE_WAITQUEUE (wait_tdm_read3, current);
-	//DECLARE_WAITQUEUE (wait_tdm_read4, current);
-	//add_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
-	//add_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
+	DECLARE_WAITQUEUE (wait_tdm_read4, current);
+	DECLARE_WAITQUEUE (wait_tdm_read5, current);	
+	DECLARE_WAITQUEUE (wait_tdm_read6, current);
+	DECLARE_WAITQUEUE (wait_tdm_read7, current);
+	DECLARE_WAITQUEUE (wait_tdm_read8, current);
+	
+	
+	
+	add_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
+	add_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
 	add_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
-	//add_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	add_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);	
+	add_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
+	add_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
+	add_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
+	add_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
+	
+	
+	
 	
 	while(!kthread_should_stop()) 
 	{
@@ -683,7 +758,7 @@ static int tdm_test_thread_one(void *data)
 		schedule ();
            
         //критическая секция
-		/*
+		
 		read_lock (&myevent_read_tdm1_lock);
 	 	TDM1_dierction_read();
 	 	read_unlock (&myevent_read_tdm1_lock); 
@@ -692,24 +767,43 @@ static int tdm_test_thread_one(void *data)
 	 	TDM2_dierction_read();
 	 	read_unlock (&myevent_read_tdm2_lock); 
 	 	//
-		*/
 		read_lock (&myevent_read_tdm3_lock);
 	 	TDM3_dierction_read();
 	 	read_unlock (&myevent_read_tdm3_lock); 
 	    //
-		/*
 	 	read_lock (&myevent_read_tdm4_lock);
 	 	TDM4_dierction_read();
-	 	read_unlock (&myevent_read_tdm4_lock); 
-	    */
+	 	read_unlock (&myevent_read_tdm4_lock);
+	    //
+	 	read_lock (&myevent_read_tdm5_lock);
+	 	TDM5_dierction_read();
+	 	read_unlock (&myevent_read_tdm5_lock); 
+	 	//
+	 	read_lock (&myevent_read_tdm6_lock);
+	 	TDM6_dierction_read();
+	 	read_unlock (&myevent_read_tdm6_lock); 
+	 	//
+	 	read_lock (&myevent_read_tdm7_lock);
+	 	TDM7_dierction_read();
+	 	read_unlock (&myevent_read_tdm7_lock); 
+	 	//
+	 	read_lock (&myevent_read_tdm8_lock);
+	 	TDM8_dierction_read();
+	 	read_unlock (&myevent_read_tdm8_lock); 
 	
 	
 	}
 	set_current_state (TASK_RUNNING);
-	//remove_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
-	//remove_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
+	
+	remove_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
+	remove_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
 	remove_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
-	//remove_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	remove_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	remove_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
+	remove_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
+	remove_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
+	remove_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
+	
 	
 printk( "%s find signal!\n", st( N ) );	
 return 0;	
@@ -992,34 +1086,51 @@ unsigned int Hook_Func(uint hooknum,
 	{	
 	   
 		//printk("packet_ok\n\r");
-		
-		/*
+	
 		if(TDM1_direction_WRITE_READY()==1)
 		{	
 		TDM1_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
-		
+		//
 		if(TDM2_direction_WRITE_READY()==1)
 		{	
 		TDM2_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
-		*/
-		
+		//
 		if(TDM3_direction_WRITE_READY()==1)
 		{	
 		TDM3_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
-		else
-		{
-			printk("no ready\n\r");
-		}
-		
-		/*
+        //
 		if(TDM4_direction_WRITE_READY()==1)
 		{	
 		TDM4_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
-		*/
+		//	    
+		if(TDM5_direction_WRITE_READY()==1)
+		{	
+		TDM5_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		//
+		if(TDM6_direction_WRITE_READY()==1)
+		{	
+		TDM6_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		//	
+		if(TDM7_direction_WRITE_READY()==1)
+		{	
+		TDM7_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		//
+		if(TDM8_direction_WRITE_READY()==1)
+		{	
+		TDM8_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		}
+		
+		//printk("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\r");
+		
+		
+		
 		//Бужу поток на  приём пакетов		
 		//Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
 	   //get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
