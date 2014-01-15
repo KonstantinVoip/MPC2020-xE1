@@ -193,15 +193,8 @@ void LocalBusCyc3_Init()
 }
 /**************************************************************************************************
 Syntax:      	    UINT16 plis_read16 (const u16 addr)
-
 Remarks:			This Function wait for complete operations Read/Write. 
-
 Return Value:	    Returns 1 on success and negative value on failure.
-
- 				Value		 									Description
-				-------------------------------------------------------------------------------------
-				= 1												Success
-				=-1												Failure
 ***************************************************************************************************/
 static inline UINT16 plis_read16 (const UINT16 addr)
 {
@@ -239,7 +232,6 @@ void TDM1_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
 UINT16 dannie800=0;
-
 
 	dannie1000=plis_read16 (DIR1_PLIS_READOK_ADDR1000);
 	//printk("Status1000 =0x%x\n\r",dannie1000);
@@ -288,8 +280,7 @@ void TDM3_direction_READ_READY(void)
  UINT16 dannie1004=0;
  UINT16 dannie804=0;
 
-   
- 
+  
 	dannie1004=plis_read16 (DIR3_PLIS_READOK_ADDR1004);
 	if((dannie1004==0xabc1) || (dannie1004==0x1))
 	{
@@ -421,7 +412,7 @@ void TDM8_direction_READ_READY(void)
 }
 
 
-//Нормальная функция без событий пока комментарю её.
+//Нормальная функция готовностьк чтению без событий пока комментарю её.
 #if 0
 /**************************************************************************************************
 Syntax:      	    UINT16 TDM1_direction_READ_READY(void)			 
@@ -764,7 +755,7 @@ UINT16 TDM8_direction_READ_READY(void)
 #if 0
 	
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM8_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM9_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -796,7 +787,7 @@ UINT16 TDM9_direction_READ_READY(void)
 		
 		
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM9_direction_READ_READY(void)			 
+Syntax:      	    UINT16 TDM10_direction_READ_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
 				   -------------------------------------------------------------------------------------
@@ -830,13 +821,163 @@ UINT16 TDM10_direction_READ_READY(void)
 //*************************************WRITE_READY******************************//
 //*****************************************************************************//
 //*****************************************************************************//
+//Тестовые функции работы по событиям.
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM0_direction_WRITE_READY(void)			 
+Syntax:      	    void TDM1_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM1_direction_WRITE_READY(void)
+{
+  UINT16  dannie30=1;
+ //Next step Set delay to write succes operations !!!!!!!!!!!
+ ////////////////////////////////////////////////////////////
+ //mdelay(10);
+ dannie30=plis_read16 (DIR1_PLIS_WRITEOK_ADDR30); 
+ //printk("register 30 dannie= %d ready\n\r",dannie30);
+ if(dannie30==0)
+ {
+	 Event_TDM1_direction_WRITE_READY();
+ }
+
+}
+/**************************************************************************************************
+Syntax:      	    void TDM2_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM2_direction_WRITE_READY(void)
+{
+    UINT16  dannie32=1; 
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	//mdelay(20);
+	dannie32=plis_read16 (DIR2_PLIS_WRITEOK_ADDR32); 
+	//printk("register 30 dannie= %d ready\n\r",dannie30);
+	if(dannie32==0)
+	{
+	Event_TDM2_direction_WRITE_READY();
+	}
+
+}
+
+/**************************************************************************************************
+Syntax:      	    void TDM3_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM3_direction_WRITE_READY(void)
+{
+	UINT16  dannie34=1; 
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	//mdelay(20);
+	dannie34=plis_read16 (DIR3_PLIS_WRITEOK_ADDR34); 
+	//printk("register 34 dannie= %d ready\n\r",dannie3);
+	if(dannie34==0)
+	{
+		Event_TDM3_direction_WRITE_READY();
+	}
+
+}
+
+/**************************************************************************************************
+Syntax:      	    void TDM4_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM4_direction_WRITE_READY(void)
+{
+	UINT16  dannie36=1; 
+	//Next step Set delay to write succes operations !!!!!!!!!!!
+	////////////////////////////////////////////////////////////
+	dannie36=plis_read16 (DIR4_PLIS_WRITEOK_ADDR36); 
+	//printk("register 30 dannie= %d ready\n\r",dannie30);
+	if(dannie36==0)
+	{
+	Event_TDM4_direction_WRITE_READY();
+	}
+	
+}
+/**************************************************************************************************
+Syntax:      	    void TDM5_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM5_direction_WRITE_READY(void)
+{
+	 UINT16  dannie38=1; 
+	 dannie38=plis_read16 (DIR5_PLIS_WRITEOK_ADDR38); 
+	 //printk("register 30 dannie= %d ready\n\r",dannie30);
+	 if(dannie38==0)
+	 {
+	 Event_TDM5_direction_WRITE_READY();
+	 }
+
+}	
+/**************************************************************************************************
+Syntax:      	    void TDM6_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM6_direction_WRITE_READY(void)
+{
+	UINT16  dannie40=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+	 dannie40=plis_read16 (DIR6_PLIS_WRITEOK_ADDR40); 
+	 //printk("register 30 dannie= %d ready\n\r",dannie30);
+	 if(dannie40==0)
+	 {
+		 Event_TDM6_direction_WRITE_READY();
+	 }
+
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void TDM7_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM7_direction_WRITE_READY(void)
+{
+	 UINT16  dannie42=1; 
+	 dannie42=plis_read16 (DIR7_PLIS_WRITEOK_ADDR42); 
+	 //printk("register 30 dannie= %d ready\n\r",dannie30);
+	 if(dannie42==0)
+	 {
+		 Event_TDM7_direction_WRITE_READY();
+	 }
+
+									
+}	
+/**************************************************************************************************
+Syntax:      	    void TDM8_direction_WRITE_READY(void)			 
+Return Value:	    NONE.
+Remarks     :
+***************************************************************************************************/
+void TDM8_direction_WRITE_READY(void)
+{
+	UINT16  dannie44=1; 
+	     //Next step Set delay to write succes operations !!!!!!!!!!!
+	 dannie44=plis_read16 (DIR8_PLIS_WRITEOK_ADDR44); 
+	 //printk("register 30 dannie= %d ready\n\r",dannie30);
+	 if(dannie44==0)
+	 {
+	 Event_TDM8_direction_WRITE_READY();
+	 }															
+}
+
+
+//Нормальная функция готовностьк к записи без событий пока комментарю её.
+#if 0
+/**************************************************************************************************
+Syntax:      	    UINT16 TDM1_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
-				=-1												Failure
+				= 0												Failure
 ***************************************************************************************************/
 UINT16 TDM1_direction_WRITE_READY(void)
 {
@@ -852,28 +993,11 @@ UINT16 TDM1_direction_WRITE_READY(void)
  else
  {return 0;}
  
- //old varioant 
- /*
- while(dannie30)
- {	 
-  dannie30=plis_read16 (DIR0_PLIS_WRITEOK_ADDR30); 	 
-  //printk("register 30 dannie= %d ready\n\r",dannie30);
- }
- */
- //printk("WRITE_READY_OK=%d\n\r",dannie30);
- //return 1; //WRITE READY SUCCESS
- // #ifdef TDM_DIRECTION0_WRITE_DEBUG	
- /*printk("WRITE_READY=%d\n\r",dannie30);
- //#endif
- if (dannie30 ==0) return 1; //WRITE READY SUCCESS
- if (dannie30 ==1) return 0; //NOT READY to write to PLIS
- */
- //else return 0;
 }
 
 
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM1_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM2_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -894,7 +1018,7 @@ UINT16 TDM2_direction_WRITE_READY(void)
 	{return 0;}
 }
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM2_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM3_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -916,7 +1040,7 @@ UINT16 TDM3_direction_WRITE_READY(void)
 	
 }
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM3_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM4_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -938,7 +1062,7 @@ UINT16 TDM4_direction_WRITE_READY(void)
 	
 }
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM4_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM5_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -957,7 +1081,7 @@ UINT16 TDM5_direction_WRITE_READY(void)
 	
 }			
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM5_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM6_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
@@ -975,16 +1099,13 @@ UINT16 TDM6_direction_WRITE_READY(void)
 	 else
 	 {return 0;}
 }				
-				
-				
-				
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM6_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM7_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
-				=-1												Failure
+				= 0												Failure
 ***************************************************************************************************/
 UINT16 TDM7_direction_WRITE_READY(void)
 {
@@ -997,15 +1118,14 @@ UINT16 TDM7_direction_WRITE_READY(void)
 	 {return 0;}
 									
 }					
-					
-					
+										
 /**************************************************************************************************
-Syntax:      	    UINT16 TDM7_direction_WRITE_READY(void)			 
+Syntax:      	    UINT16 TDM8_direction_WRITE_READY(void)			 
 Return Value:	    Returns 1 on success and negative value on failure.
  				Value		 									Description
 				-------------------------------------------------------------------------------------
 				= 1												Success
-				=-1												Failure
+				= 0											Failure
 ***************************************************************************************************/
 UINT16 TDM8_direction_WRITE_READY(void)
 {
@@ -1018,7 +1138,8 @@ UINT16 TDM8_direction_WRITE_READY(void)
 	 else
 	 {return 0;}																
 }					
-						
+#endif
+
 						
 #if 0						
 /**************************************************************************************************
@@ -1087,9 +1208,9 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
-    static UINT16 tdm0_write_iteration=0;
+    static UINT16 tdm1_write_iteration=0;
     u16 hex_element_size=0;
-    u8  dir0_dop_nechet_packet=0;
+    u8  dir1_dop_nechet_packet=0;
     //u16 packet_size =511;
     
     #ifdef PLIS_DEBUG_1400 
@@ -1105,39 +1226,35 @@ void TDM1_direction_write (const u16 *in_buf ,const u16 in_size)
     { 
 		//printk("+odd_packet=%d+\n\r",in_size); 
 	    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-    	dir0_dop_nechet_packet=1;
+    	dir1_dop_nechet_packet=1;
     }
     
     
-    hex_element_size=(in_size/2)+dir0_dop_nechet_packet;
+    hex_element_size=(in_size/2)+dir1_dop_nechet_packet;
     //Set size on PLIS in byte
    
     
-    //printk("+Tdm_Dir1_write->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
-    
-    
-	#ifdef  TDM_DIR_0_WRITE_DEBUG	
-	printk("+Tdm_Dir0_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir0_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-    
-	#endif
+    //printk("+Tdm_Dir1_write->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
+    /*
+	printk("+Tdm_Dir1_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    */
     
 	plis_write16(DIR1_PLIS_PACKSIZE_ADDR1600,in_size);
 	for(i=0;i<hex_element_size;i++)
 	{
-	    //mdelay(1);
+	   
 		plis_write16( DIR1_PLIS_WRITE_ADDR200 ,in_buf[i]);
 	}
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR1_PLIS_WRITEOK_ADDR30 ,PLIS_WRITE_SUCCESS);
-	//printk("+Tdm_Dir0_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm0_write_iteration,in_size,hex_element_size);
 	
 #ifdef PLIS_DEBUG_1400
 	dannie1400 =plis_read16 (PLIS_ADDR1400);
 	printk("Read_Iter_dannie1400_After30_Success->Rdata=0x%x|\n\r",dannie1400);
 #endif	
 	
-	tdm0_write_iteration++;	
+	tdm1_write_iteration++;	
 }
 
 /**************************************************************************************************
@@ -1152,25 +1269,24 @@ Return Value:	Returns 1 on success and negative value on failure.
 void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	u16 i=0;
-    static UINT16 tdm1_write_iteration=0;
+    static UINT16 tdm2_write_iteration=0;
     u16 hex_element_size=0;
-    u8  dir1_dop_nechet_packet=0;
+    u8  dir2_dop_nechet_packet=0;
     
 	if((in_size)%2==1)
     { 
 		//printk("+odd_packet=%d+\n\r",in_size); 
 	    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-    	dir1_dop_nechet_packet=1;
+    	dir2_dop_nechet_packet=1;
     }
     
-	hex_element_size=(in_size/2)+dir1_dop_nechet_packet;   
-   // printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm1_write_iteration,in_size,hex_element_size);
-	
-
-#ifdef  TDM_DIR_1_WRITE_DEBUG	    
-    printk("+Tdm_Dir1_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir1_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-#endif    
+	hex_element_size=(in_size/2)+dir2_dop_nechet_packet;   
+    
+	//printk("+Tdm_Dir2_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
+    /*
+	printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    */
 	
 	plis_write16(DIR2_PLIS_PACKSIZE_ADDR1602,in_size);
 	
@@ -1180,7 +1296,7 @@ void TDM2_direction_write (const u16 *in_buf ,const u16 in_size)
 	}
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR2_PLIS_WRITEOK_ADDR32 ,PLIS_WRITE_SUCCESS);
-	tdm1_write_iteration++;
+	tdm2_write_iteration++;
 
 }
 
@@ -1194,25 +1310,24 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
-    static UINT16 tdm2_write_iteration=0;
+    static UINT16 tdm3_write_iteration=0;
     u16 hex_element_size=0;
-    u8  dir2_dop_nechet_packet=0;
+    u8  dir3_dop_nechet_packet=0;
     
 	if((in_size)%2==1)
     { 
 		//printk("+odd_packet=%d+\n\r",in_size); 
 	    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-    	dir2_dop_nechet_packet=1;
+    	dir3_dop_nechet_packet=1;
     }
     
-	hex_element_size=(in_size/2)+dir2_dop_nechet_packet; 
-    //hex_element_size=in_size/2;
-    // printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
-#ifdef  TDM_DIR_2_WRITE_DEBUG	   
-    printk("+Tdm_Dir2_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir2_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-#endif    
-	
+	hex_element_size=(in_size/2)+dir3_dop_nechet_packet; 
+  
+   //printk("+Tdm_Dir3_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
+   /*
+	printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+   */
 	
 	plis_write16(DIR3_PLIS_PACKSIZE_ADDR1604,in_size);
 	
@@ -1222,13 +1337,8 @@ void TDM3_direction_write (const u16 *in_buf ,const u16 in_size)
 	}
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR3_PLIS_WRITEOK_ADDR34 ,PLIS_WRITE_SUCCESS);
-	
-	
-	//printk("+Tdm_Dir2_write->>!ITERATION=%d!|in_byte=%d|in_hex=%d+\n\r",tdm2_write_iteration,in_size,hex_element_size);
-	//mdelay(250);
-	
-	
-	tdm2_write_iteration++;
+		
+	tdm3_write_iteration++;
 
 }	
 	
@@ -1245,9 +1355,9 @@ void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
 {
 	
 	u16 i=0;
-    static UINT16 tdm3_write_iteration=0;
+    static UINT16 tdm4_write_iteration=0;
     u16 hex_element_size=0;
-    u8  dir3_dop_nechet_packet=0;
+    u8  dir4_dop_nechet_packet=0;
     
     
   
@@ -1255,17 +1365,15 @@ void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
     { 
 		//printk("+odd_packet=%d+\n\r",in_size); 
 	    //пропускаю только пакеты в заголовке ethernet type =0x0800 ARP имеет 0x0806 ETH_P_ARP
-    	dir3_dop_nechet_packet=1;
+    	dir4_dop_nechet_packet=1;
     }
     
-	hex_element_size=(in_size/2)+dir3_dop_nechet_packet; 
-    //printk("+Tdm_Dir4_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm3_write_iteration,in_size,hex_element_size);
-	
-    
-#ifdef  TDM_DIR_3_WRITE_DEBUG	   
-    printk("+Tdm_Dir3_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir3_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-#endif    
+	hex_element_size=(in_size/2)+dir4_dop_nechet_packet; 
+    //printk("+Tdm_Dir4_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm4_write_iteration,in_size,hex_element_size);
+    /*
+	printk("+Tdm_Dir4_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir4_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    */
 	
 	
 	plis_write16(DIR4_PLIS_PACKSIZE_ADDR1606,in_size);
@@ -1276,7 +1384,7 @@ void TDM4_direction_write (const u16 *in_buf ,const u16 in_size)
 	}
 	//WRITE to PLIS SUCCESS
 	plis_write16(DIR4_PLIS_WRITEOK_ADDR36 ,PLIS_WRITE_SUCCESS);
-	tdm3_write_iteration++;
+	tdm4_write_iteration++;
 
 }		
 		
@@ -1306,14 +1414,12 @@ void TDM5_direction_write (const u16 *in_buf ,const u16 in_size)
     
     hex_element_size=(in_size/2)+dir5_dop_nechet_packet;
     //printk("+Tdm_Dir5_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm5_write_iteration,in_size,hex_element_size);
+    /*
+	printk("+Tdm_Dir5_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir5_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+    */
     
     plis_write16(DIR5_PLIS_PACKSIZE_ADDR1608,in_size);
-    
-    /*
-    printk("+Tdm_Dir4_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm4_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir4_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir4_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
-    */
     
 	for(i=0;i<hex_element_size;i++)
 	{
@@ -1352,15 +1458,15 @@ void TDM6_direction_write (const u16 *in_buf ,const u16 in_size)
     
     
     hex_element_size=(in_size/2)+dir6_dop_nechet_packet;
-   // printk("+Tdm_Dir6_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_write_iteration,in_size,hex_element_size);
-    
-    plis_write16(DIR6_PLIS_PACKSIZE_ADDR1610,in_size);
+    //printk("+Tdm_Dir6_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_write_iteration,in_size,hex_element_size);
     /*
-    printk("+Tdm_Dir5_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm5_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir5_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir5_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+  	printk("+Tdm_Dir6_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+  	printk("+Tdm_Dir6_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     */
     
+    
+    plis_write16(DIR6_PLIS_PACKSIZE_ADDR1610,in_size);
+  
 	for(i=0;i<hex_element_size;i++)
 	{
 		plis_write16(DIR6_PLIS_WRITE_ADDR210 ,in_buf[i]);
@@ -1398,13 +1504,13 @@ void TDM7_direction_write (const u16 *in_buf ,const u16 in_size)
   
     hex_element_size=(in_size/2)+dir7_dop_nechet_packet;
     //printk("+Tdm_Dir7_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm7_write_iteration,in_size,hex_element_size);
-    plis_write16(DIR7_PLIS_PACKSIZE_ADDR1612,in_size);
-    
     /*
-    printk("+Tdm_Dir6_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm6_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir6_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir6_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+  	printk("+Tdm_Dir7_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+  	printk("+Tdm_Dir7_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     */
+    
+    
+    plis_write16(DIR7_PLIS_PACKSIZE_ADDR1612,in_size);
     
 	for(i=0;i<hex_element_size;i++)
 	{
@@ -1420,9 +1526,6 @@ Syntax:      	void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
 Remarks:		This Write to PLIS  address value. 
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
-				-------------------------------------------------------------------------------------
-				= 1												Success
-				=-1												Failure
 ***************************************************************************************************/
 void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
 {
@@ -1439,14 +1542,11 @@ void TDM8_direction_write (const u16 *in_buf ,const u16 in_size)
 		dir8_dop_nechet_packet=1;
     }
     
-    
-    
     hex_element_size=(in_size/2)+dir8_dop_nechet_packet;
     //printk("+Tdm_Dir8_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm8_write_iteration,in_size,hex_element_size);
     /*
-    printk("+Tdm_Dir7_write->>iteration=%d|in_byte=%d|in_hex=%d+\n\r",tdm7_write_iteration,in_size,hex_element_size);
-	printk("+Tdm_Dir7_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-	printk("+Tdm_Dir7_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
+	printk("+Tdm_Dir8_wr_rfirst|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	printk("+Tdm_Dir8_wr_rlast |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[hex_element_size-6],in_buf[hex_element_size-5],in_buf[hex_element_size-4],in_buf[hex_element_size-3],in_buf[hex_element_size-2],in_buf[hex_element_size-1]);
     */
     
     plis_write16(DIR8_PLIS_PACKSIZE_ADDR1614,in_size);
@@ -1571,7 +1671,6 @@ void TDM1_dierction_read ()
   
   
   //printk("+Tdm_Dir1_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
-    printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex); 
   
   
 	  //16 bit  or 2 bait Local bus iteration

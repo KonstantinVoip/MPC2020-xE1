@@ -81,9 +81,8 @@ void nbuf_set_datapacket_dir8  (const unsigned char *in_buf ,const u16 in_size);
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
+/*Function Ready to get Data onto the buffer */
+//bool mpcfifo_get_buf_ready(struct mpcfifo *rbd_p);
 
 
 /*****************************************************************************/

@@ -162,8 +162,8 @@ GENERAL NOTES
 /*IP Addrress*/
  //#define SEVA_NMS_IP_ADDR 0xC0A88261  //192.168.130.97
 //#define NMS3_IP_ADDR     0xC0A8784C  //192.168.120.76
-  #define NMS3_IP_ADDR     0xC0A9784C  //192.169.120.76
-   UINT32 CUR_KYS_IP_ADDR =0x00000000; //
+#define NMS3_IP_ADDR     0xC0A9784C  //192.169.120.76
+UINT32 CUR_KYS_IP_ADDR =0x00000000; //
 
  
 /*Первый стартовый информационный пакет от КУ-S содержит информация о IP и моего КУ-S
@@ -226,7 +226,7 @@ extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_add
 extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
-
+/*Функции события готовность к чтению из ПЛИС */
 extern void Event_TDM1_direction_READ_READY(void);
 extern void Event_TDM2_direction_READ_READY(void);
 extern void Event_TDM3_direction_READ_READY(void);
@@ -235,10 +235,38 @@ extern void Event_TDM5_direction_READ_READY(void);
 extern void Event_TDM6_direction_READ_READY(void);
 extern void Event_TDM7_direction_READ_READY(void);
 extern void Event_TDM8_direction_READ_READY(void);
+/*Функции события готовность к записи в ПЛИС */
+extern void Event_TDM1_direction_WRITE_READY(void);
+extern void Event_TDM2_direction_WRITE_READY(void);
+extern void Event_TDM3_direction_WRITE_READY(void);
+extern void Event_TDM4_direction_WRITE_READY(void);
+extern void Event_TDM5_direction_WRITE_READY(void);
+extern void Event_TDM6_direction_WRITE_READY(void);
+extern void Event_TDM7_direction_WRITE_READY(void);
+extern void Event_TDM8_direction_WRITE_READY(void);
+
+
 
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
+
+unsigned char  in_buf_dir1[1514];
+u16  in_size_dir1=0;
+unsigned char  in_buf_dir2[1514];
+u16  in_size_dir2=0;
+unsigned char  in_buf_dir3[1514];
+u16  in_size_dir3=0;
+unsigned char  in_buf_dir4[1514];
+u16  in_size_dir4=0;
+unsigned char  in_buf_dir5[1514];
+u16  in_size_dir5=0;
+unsigned char  in_buf_dir6[1514];
+u16  in_size_dir6=0;
+unsigned char  in_buf_dir7[1514];
+u16  in_size_dir7=0;
+unsigned char  in_buf_dir8[1514];
+u16  in_size_dir8=0;	
 
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
@@ -254,32 +282,42 @@ struct sched_param priority;
 struct sched_param priority1;
 
 /////////////////////////Timer structures//////////////////////////////////////
-struct timer_list timer1,timer2;          //default timer   
+struct timer_list timer1_read,timer2_write;          //default timer   
 static struct hrtimer hr_timer;           //high resolution timer 
 
 ///////////////////TASK _STRUCTURE///////////////
-struct task_struct *r_t1,*r_t2,*test_thread_tdm;
+struct task_struct *r_t1,*r_t2,*test_thread_tdm_read,*test_thread_tdm_write;
 static int N=2;
 
 
 
-//Очередь ожидания потока
-
+//Очередь ожидания потока для чтения
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm4_read);
-
-
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm5_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm6_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm7_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm8_read);
+//Очередь ожидания потока для записи
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm4_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm5_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm6_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm7_write);
+static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm8_write);
 
 
-//Критические секции
+//Критические секции для чтения
 rwlock_t myevent_read_tdm1_lock,myevent_read_tdm2_lock,myevent_read_tdm3_lock,myevent_read_tdm4_lock,
 myevent_read_tdm4_lock,myevent_read_tdm5_lock,myevent_read_tdm6_lock,myevent_read_tdm7_lock,myevent_read_tdm8_lock;
+//Критические секции на запись
+rwlock_t myevent_write_tdm1_lock,myevent_write_tdm2_lock,myevent_write_tdm3_lock,myevent_write_tdm4_lock,
+myevent_write_tdm4_lock,myevent_write_tdm5_lock,myevent_write_tdm6_lock,myevent_write_tdm7_lock,myevent_write_tdm8_lock;
+
 
 
 /*****************************************************************************/
@@ -312,9 +350,7 @@ void timer1_routine(unsigned long data)
 {
  //UINT16  lbcread_state=0;
  //UINT16  out_buf[1518];//1518 bait;
- //printk(KERN_ALERT"+timer1_routine+\n\r");
- 
-
+   //printk(KERN_ALERT"+timer1_routine+\n\r");
    TDM1_direction_READ_READY();
    TDM2_direction_READ_READY();
    TDM3_direction_READ_READY();
@@ -324,7 +360,7 @@ void timer1_routine(unsigned long data)
    TDM7_direction_READ_READY();
    TDM8_direction_READ_READY();
 	
- mod_timer(&timer1, jiffies + msecs_to_jiffies(100)); // restarting timer
+   mod_timer(&timer1_read, jiffies + msecs_to_jiffies(100)); // restarting timer 100 тиковов
  //ktime_now();     
 }
 
@@ -341,7 +377,17 @@ void timer2_routine(unsigned long data)
 	//ktime_now();
 	//get ethernet packet and transmit to cyclone3 local bus //transmit success;
 	//set transmission success;
-    mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
+	TDM1_direction_WRITE_READY();
+	TDM2_direction_WRITE_READY();
+	TDM3_direction_WRITE_READY();
+	TDM4_direction_WRITE_READY();
+	TDM5_direction_WRITE_READY();
+	TDM6_direction_WRITE_READY();
+	TDM7_direction_WRITE_READY();
+	TDM8_direction_WRITE_READY();
+	mod_timer(&timer2_write, jiffies + msecs_to_jiffies(100)); // restarting timer 2sec or 2000msec
+	//ktime_now();
+
 }
 
 /**************************************************************************************************
@@ -615,9 +661,8 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM1_direction_READ_READY(void)
 {
-	
 	  wake_up(&myevent_waitqueue_tdm1_read);
-	//printk("ok_event_tdm_read1\n\r");	
+	  printk("ok_event_tdm_read1\n\r");	
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM2_direction_READ_READY(void)
@@ -629,9 +674,8 @@ void Event_TDM2_direction_READ_READY(void)
 {
 	
 	wake_up(&myevent_waitqueue_tdm2_read);
-	//printk("ok_event_tdm_read2\n\r");
+	printk("ok_event_tdm_read2\n\r");
 }
-
 
 /**************************************************************************************************
 Syntax:      	    void Event_TDM3_direction_READ_READY(void)
@@ -641,9 +685,8 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM3_direction_READ_READY(void)
 {
-	
 	wake_up(&myevent_waitqueue_tdm3_read);
-	//printk("ok_event_tdm_read3\n\r");
+	printk("ok_event_tdm_read3\n\r");
 }
 
 /**************************************************************************************************
@@ -654,9 +697,8 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM4_direction_READ_READY(void)
 {
-	
 	wake_up(&myevent_waitqueue_tdm4_read);
-	//printk("ok_event_tdm_read4\n\r");
+	printk("ok_event_tdm_read4\n\r");
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM5_direction_READ_READY(void)
@@ -666,9 +708,8 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM5_direction_READ_READY(void)
 {
-	
 	wake_up(&myevent_waitqueue_tdm5_read);
-	//printk("ok_event_tdm_read5\n\r");
+	printk("ok_event_tdm_read5\n\r");
 }
 
 
@@ -680,9 +721,8 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM6_direction_READ_READY(void)
 {
-	
 	  wake_up(&myevent_waitqueue_tdm6_read);
-	//printk("ok_event_tdm_read6\n\r");
+	  printk("ok_event_tdm_read6\n\r");
 }
 
 /**************************************************************************************************
@@ -693,11 +733,9 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM7_direction_READ_READY(void)
 {
-	
 	 wake_up(&myevent_waitqueue_tdm7_read);
-	//printk("ok_event_tdm_read7\n\r");
+	printk("ok_event_tdm_read7\n\r");
 }
-
 
 /**************************************************************************************************
 Syntax:      	    void Event_TDM8_direction_READ_READY(void)
@@ -707,10 +745,107 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM8_direction_READ_READY(void)
 {
-	
 	wake_up(&myevent_waitqueue_tdm8_read);
-	//printk("ok_event_tdm_read8\n\r");
+	printk("ok_event_tdm_read8\n\r");
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/**************************************************************************************************
+Syntax:      	    void Event_TDM1_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM1_direction_WRITE_READY(void)
+{
+	  wake_up(&myevent_waitqueue_tdm1_write);
+	  printk("ok_event_tdm_write1\n\r");
+	
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM2_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM2_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm2_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+
+
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM3_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM3_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm3_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM4_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM4_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm4_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void Event_TDM5_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM5_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm5_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM6_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM6_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm6_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM7_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM7_direction_WRITE_READY(void)
+{
+	wake_up(&myevent_waitqueue_tdm7_write);
+	//printk("ok_event_tdm_read7\n\r");
+	
+}
+/**************************************************************************************************
+Syntax:      	    void Event_TDM8_direction_WRITE_READY(void)
+Parameters:     	void *ptr
+Remarks:			    
+***************************************************************************************************/
+void Event_TDM8_direction_WRITE_READY(void)
+{
+	
+	wake_up(&myevent_waitqueue_tdm8_write);
+	//printk("ok_event_tdm_read7\n\r");
+}
+
 
 
 
@@ -721,7 +856,6 @@ Syntax:      	    static int tdm_test_thread_one(void *data)
 Parameters:     	void *ptr
 Remarks:			Testing thread for event low zagruzka cpu 
 Return Value:	    
-
 ***************************************************************************************************/
 static int tdm_test_thread_one(void *data)
 {
@@ -762,7 +896,9 @@ static int tdm_test_thread_one(void *data)
 		read_lock (&myevent_read_tdm1_lock);
 	 	TDM1_dierction_read();
 	 	read_unlock (&myevent_read_tdm1_lock); 
-		//	
+		
+#if 0
+	 	
 		read_lock (&myevent_read_tdm2_lock);
 	 	TDM2_dierction_read();
 	 	read_unlock (&myevent_read_tdm2_lock); 
@@ -790,7 +926,7 @@ static int tdm_test_thread_one(void *data)
 	 	read_lock (&myevent_read_tdm8_lock);
 	 	TDM8_dierction_read();
 	 	read_unlock (&myevent_read_tdm8_lock); 
-	
+#endif	
 	
 	}
 	set_current_state (TASK_RUNNING);
@@ -808,6 +944,111 @@ static int tdm_test_thread_one(void *data)
 printk( "%s find signal!\n", st( N ) );	
 return 0;	
 }
+/**************************************************************************************************
+Syntax:      	    static int tdm_test_thread_two(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_test_thread_two(void *data)
+{
+unsigned int event_id = 0;
+printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
+
+
+	DECLARE_WAITQUEUE (wait_tdm_write1, current);	
+	DECLARE_WAITQUEUE (wait_tdm_write2, current);
+	DECLARE_WAITQUEUE (wait_tdm_write3, current);
+	DECLARE_WAITQUEUE (wait_tdm_write4, current);
+	DECLARE_WAITQUEUE (wait_tdm_write5, current);	
+	DECLARE_WAITQUEUE (wait_tdm_write6, current);
+	DECLARE_WAITQUEUE (wait_tdm_write7, current);
+	DECLARE_WAITQUEUE (wait_tdm_write8, current);
+
+
+	add_wait_queue (&myevent_waitqueue_tdm1_write, &wait_tdm_write1);
+	add_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
+	add_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
+	add_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);	
+	add_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
+	add_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
+	add_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
+	add_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
+	
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		
+//#if 0
+		
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM1_direction_write (in_buf_dir1 ,in_size_dir1);
+		}
+		
+		
+		if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
+		{
+		TDM2_direction_write (in_buf_dir2 ,in_size_dir2);
+		}
+		
+		if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
+		{
+		TDM3_direction_write (in_buf_dir3 ,in_size_dir3);
+		}
+		
+		if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
+		{
+		TDM4_direction_write (in_buf_dir4 ,in_size_dir4);
+		}
+		
+		
+		if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
+		{
+		TDM5_direction_write (in_buf_dir5 ,in_size_dir5);
+		}
+		
+		if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
+		{
+		TDM6_direction_write (in_buf_dir6 ,in_size_dir6);
+		}
+		
+		if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
+		{
+		TDM7_direction_write (in_buf_dir7 ,in_size_dir7);
+		}
+		
+		if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
+		{
+		TDM8_direction_write (in_buf_dir8 ,in_size_dir8);
+		}
+//#endif	
+
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm1_write, &wait_tdm_write1);
+	remove_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
+	remove_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
+	remove_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);	
+	remove_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
+	remove_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
+	remove_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
+	remove_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
+	
+printk( "%s find signal!\n", st( N ) );	
+return 0;			
+}
+
+
+
 
 
 
@@ -828,8 +1069,8 @@ static int tdm_recieve_thread(void *data)
    
    
    //test_thread_tdm = kthread_run( tdm_test_thread_one,NULL, CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-     test_thread_tdm = kthread_run( tdm_test_thread_one,(void*)N,"tdm_test_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-   
+     test_thread_tdm_read  = kthread_run( tdm_test_thread_one,(void*)N,"tdm_read_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write = kthread_run( tdm_test_thread_two,(void*)N,"tdm_write_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
    
    // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    
@@ -1085,13 +1326,23 @@ unsigned int Hook_Func(uint hooknum,
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
 	   
-		//printk("packet_ok\n\r");
-	
-		if(TDM1_direction_WRITE_READY()==1)
-		{	
-		TDM1_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-		}
-		//
+	//printk("packet_ok\n\r");
+		
+	nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+	/*
+	nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    nbuf_set_datapacket_dir4  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
+    nbuf_set_datapacket_dir5  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    nbuf_set_datapacket_dir6  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+    nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+	*/	
+		
+		
+
+		
+#if 0
 		if(TDM2_direction_WRITE_READY()==1)
 		{	
 		TDM2_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
@@ -1126,6 +1377,7 @@ unsigned int Hook_Func(uint hooknum,
 		{	
 		TDM8_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
+#endif
 		
 		//printk("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\r");
 		
@@ -1240,20 +1492,20 @@ int mpc_init_module(void)
 	       tdm_recieve_thread(NULL); //start thread functions
 	     
 	     //Timer1
-	      init_timer(&timer1);
-	      timer1.function = timer1_routine;
-	      timer1.data = 1;
-	      timer1.expires = jiffies + msecs_to_jiffies(50);//2000 ms 
+	      init_timer(&timer1_read);
+	      timer1_read.function = timer1_routine;
+	      timer1_read.data = 1;
+	      timer1_read.expires = jiffies + msecs_to_jiffies(50);//2000 ms 
 	
 	     //Timer2
-	    // init_timer(&timer2);
-	    // timer2.function = timer2_routine;
-	    // timer2.data = 1;
-	    // timer2.expires = jiffies + msecs_to_jiffies(5000);//2000 ms 
+	      init_timer(&timer2_write);
+	      timer2_write.function = timer2_routine;
+	      timer2_write.data = 1;
+	      timer2_write.expires = jiffies + msecs_to_jiffies(50);//2000 ms 
 	
-	      // add_timer(&timer2);  //Starting the timer2
-	         add_timer(&timer1);  //Starting the timer1
 	
+	      add_timer(&timer1_read);  //Starting the timer1 
+	      add_timer(&timer2_write);  //Starting the timer2
   
 
 return 0;
@@ -1269,16 +1521,19 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	del_timer_sync(&timer1);             /* Deleting the timer */
-	//del_timer_sync(&timer2);             /* Deleting the timer */
+	
+	del_timer_sync(&timer1_read);              /* Deleting the timer */
+	del_timer_sync(&timer2_write);             /* Deleting the timer */
 	/* Регистрируем */
 	nf_unregister_hook(&bundle);
 	nf_unregister_hook(&arp_bundle);
 	msleep(10);
-	kthread_stop(test_thread_tdm); 
+	kthread_stop(test_thread_tdm_read); 
+	kthread_stop(test_thread_tdm_write); 
+	 
 	
-	  //kthread_stop(r_t1);
-      //kthread_stop(r_t2);
+	//kthread_stop(r_t1);
+    //kthread_stop(r_t2);
     Clear_FIFObuf();
 
       
@@ -1307,78 +1562,7 @@ MODULE_DESCRIPTION("Test mpc local bus driver");
 
 
 
-/**************************************************************************************************/
-/*                                void loopback_write();                                       */
-/**************************************************************************************************/
-#ifdef TDM0_DIR_TEST_WRITE_LOCAL_LOOPBACK_NO_TIMER
 
-
-void loopback_write()
-{
-UINT16 	loopbacklbcwrite_state=0;
-	
-	//if(recieve_tsec_packet.state==1)
-	//{	
-		
-        //printk("+zdes1+\n\r");
-        
-        loopbacklbcwrite_state=TDM0_direction_WRITE_READY();
-		if (loopbacklbcwrite_state==0)
-		{
-		printk("-----------WRITELoopback_routine----->%s---------------\n\r",lbc_notready_to_write);   
-		}
-			
-		if(loopbacklbcwrite_state==1)
-	    {
-		printk("-----------WRITELoopback_routine----->%s------------------\n\r",lbc_ready_towrite); 
-		
-		TDM0_direction_write (get_tsec_packet_data() ,get_tsec_packet_length()); 
-		   //TDM0_direction_write (softperfect_switch ,1514); 
-		    // TDM0_direction_write (softperfect_switch_hex ,1514);
-		     //TDM0_direction_write (test_full_packet_mas ,1514);
-		
-		//get();	
-	    }
-
-	//}
-	
-}
-#endif
-
-/**************************************************************************************************/
-/*                                 void loopback_read();                                        */
-/**************************************************************************************************/
-#ifdef TDM0_DIR_TEST_READ_LOCAL_LOOPBACK_NO_TIME
-
-void loopback_read()
-{
-UINT16 loopbacklbcread_state=0;	
-UINT16 loopbackout_buf[760];//1518 bait;
-UINT16 loopbackout_size=0;
-
-
-  //clear buffer
-  memset(&loopbackout_buf, 0x0000, sizeof(loopbackout_buf));  
-  
- 
-	 loopbacklbcread_state=TDM0_direction_READ_READY();
-	 if(loopbacklbcread_state==0)
-	 {
-	 printk("------------READLoopback_routine----->%s---------------\n\r",lbc_notready_to_read );		
-	 }
-	    
-	    
-	 if(loopbacklbcread_state==1)
-	 {
-	 printk("------------READLoopback_routine------>%s---------------\n\r",lbc_ready_toread );	
-	  TDM0_dierction_read  (loopbackout_buf,&loopbackout_size);
-	 }
-
-	
-	 
-	 
-}
-#endif
 
 
 

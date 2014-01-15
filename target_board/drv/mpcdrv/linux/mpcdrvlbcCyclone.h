@@ -224,48 +224,61 @@ extern void Event_TDM5_direction_READ_READY(void);
 extern void Event_TDM6_direction_READ_READY(void);
 extern void Event_TDM7_direction_READ_READY(void);
 extern void Event_TDM8_direction_READ_READY(void);
+/*Test for event write_ready function */
+extern void Event_TDM1_direction_WRITE_READY(void);
+extern void Event_TDM2_direction_WRITE_READY(void);
+extern void Event_TDM3_direction_WRITE_READY(void);
+extern void Event_TDM4_direction_WRITE_READY(void);
+extern void Event_TDM5_direction_WRITE_READY(void);
+extern void Event_TDM6_direction_WRITE_READY(void);
+extern void Event_TDM7_direction_WRITE_READY(void);
+extern void Event_TDM8_direction_WRITE_READY(void);
+
+
+
+
+
+
 
 
 /*Ready Read DATA */
 //UINT16 TDM1_direction_READ_READY(void);
 void TDM1_direction_READ_READY(void);
-
 //UINT16 TDM2_direction_READ_READY(void);
 void TDM2_direction_READ_READY(void);
-
 //UINT16 TDM3_direction_READ_READY(void);
 void TDM3_direction_READ_READY(void);
-
 //UINT16 TDM4_direction_READ_READY(void);
 void TDM4_direction_READ_READY(void);
-
 //UINT16 TDM5_direction_READ_READY(void);
 void TDM5_direction_READ_READY(void);
-
 //UINT16 TDM6_direction_READ_READY(void);
 void TDM6_direction_READ_READY(void);
-
 //UINT16 TDM7_direction_READ_READY(void);
 void TDM7_direction_READ_READY(void);
-
 //UINT16 TDM8_direction_READ_READY(void);
 void TDM8_direction_READ_READY(void);
-
-
-
 //UINT16 TDM9_direction_READ_READY(void);
 //UINT16 TDM10_direction_READ_READY(void);
 
 
 /*Ready Write Data*/
-UINT16 TDM1_direction_WRITE_READY(void);
-UINT16 TDM2_direction_WRITE_READY(void);
-UINT16 TDM3_direction_WRITE_READY(void);
-UINT16 TDM4_direction_WRITE_READY(void);
-UINT16 TDM5_direction_WRITE_READY(void);
-UINT16 TDM6_direction_WRITE_READY(void);
-UINT16 TDM7_direction_WRITE_READY(void);
-UINT16 TDM8_direction_WRITE_READY(void);
+//UINT16 TDM1_direction_WRITE_READY(void);
+void   TDM1_direction_WRITE_READY(void);
+//UINT16 TDM2_direction_WRITE_READY(void);
+void   TDM2_direction_WRITE_READY(void);
+//UINT16 TDM3_direction_WRITE_READY(void);
+void   TDM3_direction_WRITE_READY(void);
+//UINT16 TDM4_direction_WRITE_READY(void);
+void   TDM4_direction_WRITE_READY(void);
+//UINT16 TDM5_direction_WRITE_READY(void);
+void   TDM5_direction_WRITE_READY(void);
+//UINT16 TDM6_direction_WRITE_READY(void);
+void   TDM6_direction_WRITE_READY(void);
+//UINT16 TDM7_direction_WRITE_READY(void);
+void   TDM7_direction_WRITE_READY(void);
+//UINT16 TDM8_direction_WRITE_READY(void);
+void   TDM8_direction_WRITE_READY(void);
 //UINT16 TDM9_direction_WRITE_READY(void);
 //UINT16 TDM10_direction_WRITE_READY(void);
 

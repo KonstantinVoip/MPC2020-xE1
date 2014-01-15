@@ -77,7 +77,7 @@ static unsigned int mpcfifo_term(struct mpcfifo *rbd_p);
 //static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const u16 *buf);
    
 static unsigned int mpcfifo_put(struct mpcfifo *rbd_p,const unsigned char *buf);
-static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj);
+static void mpcfifo_get(struct mpcfifo *rbd_p, void *obj);
 static unsigned int mpcfifo_flush(struct mpcfifo *rbd_p);
 static unsigned int mpcfifo_num(struct mpcfifo *rbd_p);
 static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode);
@@ -126,13 +126,11 @@ void Init_FIFObuf()
 	 memset(&fifo_put_to_tdm2_dir, 0x0000, sizeof(fifo_put_to_tdm2_dir)); 
 	 memset(&fifo_put_to_tdm3_dir, 0x0000, sizeof(fifo_put_to_tdm3_dir)); 
 	 memset(&fifo_put_to_tdm4_dir, 0x0000, sizeof(fifo_put_to_tdm4_dir)); 
-	
-	 /*
 	 memset(&fifo_put_to_tdm5_dir, 0x0000, sizeof(fifo_put_to_tdm5_dir)); 
 	 memset(&fifo_put_to_tdm6_dir, 0x0000, sizeof(fifo_put_to_tdm6_dir)); 
 	 memset(&fifo_put_to_tdm7_dir, 0x0000, sizeof(fifo_put_to_tdm7_dir)); 
 	 memset(&fifo_put_to_tdm8_dir, 0x0000, sizeof(fifo_put_to_tdm8_dir));
-	 */
+	 
 	 
 	 //INIT FIFO DEIRECTION0 PUT to direction 0
 	 fifo_put_to_tdm1_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_1);
@@ -154,7 +152,7 @@ void Init_FIFObuf()
      if(!fifo_put_to_tdm4_dir) {printk("???Transmit FIFO DIRECTION_4 Initialization Failed??? \n\r");}   
      printk("+FIFO_4_TRANSMIT_INIT_OK+\n\r"); 
   
-     /*      
+      
 	 fifo_put_to_tdm5_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_5);
      if(!fifo_put_to_tdm5_dir) {printk("???Transmit FIFO DIRECTION_5 Initialization Failed??? \n\r");}   
      printk("+FIFO_5_TRANSMIT_INIT_OK+\n\r");
@@ -170,7 +168,7 @@ void Init_FIFObuf()
 	 fifo_put_to_tdm8_dir=mpcfifo_init(FIFO_PACKET_SIZE_BYTE,FIFO_PACKET_NUM ,GFP_MASK,&my_lock_fifo_8);
      if(!fifo_put_to_tdm8_dir) {printk("???Transmit FIFO DIRECTION_8 Initialization Failed??? \n\r");}   
      printk("+FIFO_8_TRANSMIT_INIT_OK+\n\r");
-     */
+     
      
      //Only Future 10 directions
 }
@@ -249,6 +247,43 @@ struct mpcfifo *mpcfifo_init(unsigned int obj_size,unsigned int obj_num , gfp_t 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /**************************************************************************************************
+Syntax:      	    bool mpcfifo_get_buf_ready(struct mpcfifo *rbd_p)	 
+Return Value:	    Returns 1 on success and negative value on failure.
+ 				    Value		 									Description
+				   -------------------------------------------------------------------------------------
+				   = 1												Success
+				   =-1												Failure
+***************************************************************************************************/
+static bool mpcfifo_get_buf_ready(struct mpcfifo *rbd_p)
+{
+	signed int l_tail=0;
+	//проверяем условие что нормальный указатель в памяти не хлам
+	if(!rbd_p)
+	{return 0;}
+	
+	l_tail=rbd_p->tail;
+    //Буфер пуст взять нечего назад ноль видимо 
+	//printk("l_tail=%d>>rbd_p->head=%d\n\r",l_tail,rbd_p->head);
+	if (l_tail -rbd_p->head ==0)
+	{
+		//mdelay(500);
+		return 0;
+	}
+
+	//schetchic1=rbd_p->head;//-rbd_p->tail;
+	if(rbd_p->head-l_tail==FIFO_PACKET_NUM)
+	{
+		//mdelay(500);
+		//printk(">>>>>>?????????<<<<<\n\r");
+		return 0;
+	}
+	
+	
+  return 1;
+}
+
+
+/**************************************************************************************************
 Syntax:      	    static unsigned int mpcfifo_put(struct mpcfifo *rbd_p, void *obj)		 
 Return Value:	    Returns 1 on success and negative value on failure.
  				    Value		 									Description
@@ -299,37 +334,29 @@ Return Value:	    Returns 1 on success and negative value on failure.
 				   = 1												Success
 				   =-1												Failure
 ***************************************************************************************************/
-static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
+static void mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 {
 	u16 i;
-	signed int schetchic1=0;
-	signed int schetchic=0;
 	DATA_lbc local;
-	unsigned long flags;
-	signed int l_tail=0;
 	
 	
+	
+	//signed int l_tail=0;
+	//Комментарим все проверки перенесли в другую функцию отдельную
+#if 0	
 	//проверяем условие что нормальный указатель в памяти не хлам
 	if(!rbd_p)
 	{return 0;}
 	
-	
 	l_tail=rbd_p->tail;
     //Буфер пуст взять нечего назад ноль видимо 
-
-	
-	
-	
 	//printk("l_tail=%d>>rbd_p->head=%d\n\r",l_tail,rbd_p->head);
-	
 	if (l_tail -rbd_p->head ==0)
 	{
 		//mdelay(500);
 		return 0;
 	}
-	
-	
-	
+
 	//schetchic1=rbd_p->head;//-rbd_p->tail;
 	if(rbd_p->head-l_tail==FIFO_PACKET_NUM)
 	{
@@ -337,14 +364,12 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
 		//printk(">>>>>>?????????<<<<<\n\r");
 		return 0;
 	}
+#endif
 	
-
+	
 	rbd_p->head =rbd_p->head %rbd_p->N;
-	
 	local.size = rbd_p->q[rbd_p->head].size;
-	
 	rbd_p->cur_get_packet_size=rbd_p->q[rbd_p->head].size;
-	
 	for(i=0;i<local.size;i++)
 	{
 		//*(((u16 *)obj) + i) = rbd_p->q[rbd_p->head].data[i];
@@ -361,7 +386,7 @@ static unsigned int mpcfifo_get(struct mpcfifo *rbd_p, void *obj)
    printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[0], local.data[1], local.data[2], local.data[3], local.data[4], local.data[5]);
    printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r", local.data[rbd_p->cur_get_packet_size-6], local.data[rbd_p->cur_get_packet_size-5], local.data[rbd_p->cur_get_packet_size-4], local.data[rbd_p->cur_get_packet_size-3], local.data[rbd_p->cur_get_packet_size-2], local.data[rbd_p->cur_get_packet_size-1]);
    */	
-   return 1;
+
 }
 
 
@@ -500,13 +525,345 @@ static unsigned int mpcfifo_print(struct mpcfifo *rbd_p, int mode)
 /////////////////////External FUNCTION for GET DATA only FIFO's////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
-
 /*****************************************************************************
 Syntax:      	    nbuf_get_datapacket_dir1 (const u16 *in_buf ,const u16 in_size)
 Remarks:			get data from FIFO buffer
 Return Value:	    Returns 1 on success and negative value on failure.
 *******************************************************************************/
-//bool nbuf_get_datapacket_dir0 (u16 *in_buf ,u16 *in_size)
+bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
+{
+ u16  static get_iteration_dir1=0;
+ unsigned long flags;
+ //Буфер готов	
+ if(mpcfifo_get_buf_ready(fifo_put_to_tdm1_dir)==1)
+ {
+	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
+	 spin_lock_irqsave(fifo_put_to_tdm1_dir->lock,flags);
+	 //берём из буфера пакет с данными 
+	 mpcfifo_get(fifo_put_to_tdm1_dir, in_buf);
+	 //берём размер пакета с данными
+	 *in_size=fifo_put_to_tdm1_dir->cur_get_packet_size;
+	 spin_unlock_irqrestore(fifo_put_to_tdm1_dir->lock,flags);
+	 
+	 /* 
+	 printk("+FIFO_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+	 printk("+FIFO_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+	 */
+	#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+	   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+	#endif
+	 
+	get_iteration_dir1++;
+	return 1;
+ }
+ else
+ {
+	 memset(&in_buf,0x0000,sizeof(in_buf));
+	 *in_size=0x0000;
+	 return 0 ;
+ }
+
+}
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir2 (unsigned char *in_buf ,u16 *in_size)
+{
+
+	 u16  static get_iteration_dir2=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm2_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir2|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir2);
+		 spin_lock_irqsave(fifo_put_to_tdm2_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm2_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm2_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm2_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir2_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir2_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir2++;
+		return 1;
+	 }
+	 else
+	 {
+		memset(&in_buf,0x0000,sizeof(in_buf));
+		*in_size=0x0000;
+		return 0 ;
+	 }
+	
+	
+}
+
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir3 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir3 (unsigned char *in_buf ,u16 *in_size)
+{
+   
+	 u16  static get_iteration_dir3=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm3_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir3|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir3);
+		 spin_lock_irqsave(fifo_put_to_tdm3_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm3_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm3_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm3_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir3_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir3_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir3++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		 return 0 ;
+	 }
+	
+
+}
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir4 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir4 (unsigned char *in_buf ,u16 *in_size)
+{
+	 u16  static get_iteration_dir4=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm4_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir4|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir4);
+		 spin_lock_irqsave(fifo_put_to_tdm4_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm4_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm4_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm4_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir4_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir4_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir4++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		 return 0 ;
+	 }
+	
+}
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir5 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir5 (unsigned char *in_buf ,u16 *in_size)
+{
+	 u16  static get_iteration_dir5=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm5_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
+		 spin_lock_irqsave(fifo_put_to_tdm5_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm5_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm5_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm5_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir5_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir5_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir5++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		 return 0 ;
+	 }
+	
+}
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir6 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir6 (unsigned char *in_buf ,u16 *in_size)
+{
+	 u16  static get_iteration_dir6=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm6_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir6|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir6);
+		 spin_lock_irqsave(fifo_put_to_tdm6_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm6_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm6_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm6_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir6_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir6_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir6++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		 return 0 ;
+	 }
+	
+	
+	
+	
+	
+	
+}
+
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir7 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir7 (unsigned char *in_buf ,u16 *in_size)
+{
+	 u16  static get_iteration_dir7=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm7_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir1);
+		 spin_lock_irqsave(fifo_put_to_tdm7_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm7_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm7_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm7_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir7_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir7_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir7++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		return 0 ;
+	 }
+	
+}
+
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir8 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
+bool nbuf_get_datapacket_dir8 (unsigned char *in_buf ,u16 *in_size)
+{
+	 u16  static get_iteration_dir8=0;
+	 unsigned long flags;
+	 //Буфер готов	
+	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm8_dir)==1)
+	 {
+		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir8|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir8);
+		 spin_lock_irqsave(fifo_put_to_tdm8_dir->lock,flags);
+		 //берём из буфера пакет с данными 
+		 mpcfifo_get(fifo_put_to_tdm8_dir, in_buf);
+		 //берём размер пакета с данными
+		 *in_size=fifo_put_to_tdm8_dir->cur_get_packet_size;
+		 spin_unlock_irqrestore(fifo_put_to_tdm8_dir->lock,flags);
+		 
+		 /* 
+		 printk("+FIFO_Dir8_rfirst   |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%02x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
+		 printk("+FIFO_Dir8_rlast    |0x%02x|0x%02x|0x%02x|0x%04x|0x%02x|0x%04x|+\n\r",in_buf[in_size-6],in_buf[in_size-5],in_buf[in_size-4],in_buf[in_size-3],in_buf[in_size-2],in_buf[in_size-1]);
+		 */
+		#ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
+		   p2020_get_recieve_virttsec_packet_buf(out_buf_dir1,packet_size_in_byte);//send to eternet	 
+		#endif
+		 
+		get_iteration_dir8++;
+		return 1;
+	 }
+	 else
+	 {
+		 memset(&in_buf,0x0000,sizeof(in_buf));
+		 *in_size=0x0000;
+		 return 0 ;
+	 }
+	
+}
+
+
+
+/////////////////////////////////////////Старая функция комментарю её она не оптимальна/////////////////////////
+#if 0
+/*****************************************************************************
+Syntax:      	    nbuf_get_datapacket_dir1 (const u16 *in_buf ,const u16 in_size)
+Remarks:			get data from FIFO buffer
+Return Value:	    Returns 1 on success and negative value on failure.
+*******************************************************************************/
 bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
 {
 	 //u16 out_buf_dir0[757];
@@ -541,10 +898,6 @@ bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
 	 
 	 //*in_size=fifo_put_to_tdm0_dir->cur_get_packet_size;
 	 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir0,fifo_put_to_tdm0_dir->cur_get_packet_size);
-	 
-	 
-
-	
 #ifdef DEBUG_GET_FIFO_SEND_TO_ETHERNET 
 	 p2020_get_recieve_virttsec_packet_buf(out_buf_dir0,packet_size_in_byte);//send to eternet	 
 #endif	 
@@ -560,6 +913,8 @@ bool nbuf_get_datapacket_dir1 (unsigned char *in_buf ,u16 *in_size)
 	 */
 	
 }
+
+
 /*****************************************************************************
 Syntax:      	    void nbuf_get_datapacket_dir2 (const u16 *in_buf ,const u16 in_size)
 Remarks:			get data packet and set to fifo
@@ -843,7 +1198,7 @@ bool nbuf_get_datapacket_dir10 ( unsigned char *in_buf , u16 *in_size)
 	    return 0;
 	
 }
-
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -861,7 +1216,9 @@ u16 status=0;
 u16 static set_iteration_dir1=0;  
 unsigned long flags;
 //u8 dop_nechet_packet =0;    
-     //printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0);	 
+
+
+//printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir1|iter=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir1);	 
      //set packet size to fifo buffer
 
 /*
