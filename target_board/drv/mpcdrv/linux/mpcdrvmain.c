@@ -251,23 +251,6 @@ extern void Event_TDM8_direction_WRITE_READY(void);
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
 
-unsigned char  in_buf_dir1[1514];
-u16  in_size_dir1=0;
-unsigned char  in_buf_dir2[1514];
-u16  in_size_dir2=0;
-unsigned char  in_buf_dir3[1514];
-u16  in_size_dir3=0;
-unsigned char  in_buf_dir4[1514];
-u16  in_size_dir4=0;
-unsigned char  in_buf_dir5[1514];
-u16  in_size_dir5=0;
-unsigned char  in_buf_dir6[1514];
-u16  in_size_dir6=0;
-unsigned char  in_buf_dir7[1514];
-u16  in_size_dir7=0;
-unsigned char  in_buf_dir8[1514];
-u16  in_size_dir8=0;	
-
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
@@ -286,8 +269,14 @@ struct timer_list timer1_read,timer2_write;          //default timer
 static struct hrtimer hr_timer;           //high resolution timer 
 
 ///////////////////TASK _STRUCTURE///////////////
-struct task_struct *r_t1,*r_t2,*test_thread_tdm_read,*test_thread_tdm_write;
-static int N=2;
+struct task_struct *r_t1,*r_t2,*test_thread_tdm_read_1,*test_thread_tdm_write_1;
+//Task на чтение
+struct task_struct  *test_thread_tdm_read_2,*test_thread_tdm_read_3,*test_thread_tdm_read_4,*test_thread_tdm_read_5,*test_thread_tdm_read_6,*test_thread_tdm_read_7,*test_thread_tdm_read_8;
+//Task на запись
+struct task_struct  *test_thread_tdm_write_2,*test_thread_tdm_write_3,*test_thread_tdm_write_4,*test_thread_tdm_write_5,*test_thread_tdm_write_6,*test_thread_tdm_write_7,*test_thread_tdm_write_8;
+
+
+static int N=16;
 
 
 
@@ -338,7 +327,14 @@ Parameters:     	void
 Remarks:			timer functions 
 ***************************************************************************************************/
 static inline ktime_t ktime_now(void)
-{struct timespec ts;ktime_get_ts(&ts);printk("%lld.%.9ld->>>", (long long)ts.tv_sec, ts.tv_nsec);return timespec_to_ktime(ts);}
+{
+struct timespec ts;
+ktime_get_ts(&ts);
+printk("%lld.%.9ld->>>", (long long)ts.tv_sec, ts.tv_nsec);
+return timespec_to_ktime(ts);
+
+
+}
 
 
 /**************************************************************************************************
@@ -351,7 +347,7 @@ void timer1_routine(unsigned long data)
  //UINT16  lbcread_state=0;
  //UINT16  out_buf[1518];//1518 bait;
    //printk(KERN_ALERT"+timer1_routine+\n\r");
-   TDM1_direction_READ_READY();
+   TDM1_direction_READ_READY();   
    TDM2_direction_READ_READY();
    TDM3_direction_READ_READY();
    TDM4_direction_READ_READY();  
@@ -359,7 +355,8 @@ void timer1_routine(unsigned long data)
    TDM6_direction_READ_READY();
    TDM7_direction_READ_READY();
    TDM8_direction_READ_READY();
-	
+
+   
    mod_timer(&timer1_read, jiffies + msecs_to_jiffies(100)); // restarting timer 100 тиковов
  //ktime_now();     
 }
@@ -371,12 +368,7 @@ Remarks:			timer functions
 ***************************************************************************************************/
 void timer2_routine(unsigned long data)
 {
-    //printk("++timer2_routin++\n\r");
-    //mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-	// mod_timer(&timer2, jiffies + msecs_to_jiffies(2000)); // restarting timer 2sec or 2000msec
-	//ktime_now();
-	//get ethernet packet and transmit to cyclone3 local bus //transmit success;
-	//set transmission success;
+
 	TDM1_direction_WRITE_READY();
 	TDM2_direction_WRITE_READY();
 	TDM3_direction_WRITE_READY();
@@ -385,272 +377,11 @@ void timer2_routine(unsigned long data)
 	TDM6_direction_WRITE_READY();
 	TDM7_direction_WRITE_READY();
 	TDM8_direction_WRITE_READY();
+
 	mod_timer(&timer2_write, jiffies + msecs_to_jiffies(100)); // restarting timer 2sec or 2000msec
 	//ktime_now();
 
 }
-
-/**************************************************************************************************
-Syntax:      	    static int tdm_recieve_thread_two(void *data)
-Parameters:     	void *ptr
-Remarks:			 
-Return Value:	    1  =>  Success  ,-1 => Failure
-
-***************************************************************************************************/
-static int tdm_recieve_thread_two(void *data)
-{
-	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );	
-	u16 status=0;
-	unsigned char  in_buf_dir1[1514];
-	u16  in_size_dir1=0;
-	
-	unsigned char  in_buf_dir2[1514];
-	u16  in_size_dir2=0;
-	
-	unsigned char  in_buf_dir3[1514];
-	u16  in_size_dir3=0;
-	
-	unsigned char  in_buf_dir4[1514];
-	u16  in_size_dir4=0;
-	
-	unsigned char  in_buf_dir5[1514];
-	u16  in_size_dir5=0;
-	
-	unsigned char  in_buf_dir6[1514];
-	u16  in_size_dir6=0;
-	
-	unsigned char  in_buf_dir7[1514];
-	u16  in_size_dir7=0;
-	
-	unsigned char  in_buf_dir8[1514];
-	u16  in_size_dir8=0;
-	
-	
-	
-    
-	
-	while(!kthread_should_stop()) 
-		{
-		schedule();
-		
-	/*//////////////////////////////////Шина Local bus готова к записи по направадению 0//////////////////////*/
-#if 0
-		if(TDM1_direction_WRITE_READY()==1)
-			{			
-		        
-				//Есть пакет в буфере FIFO на отправку по направлению 0
-			    if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
-		        {
-			    	 printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-			    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		        	 
-			    	 /*
-			    	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		        	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		        	 */
-			    	 /*
-			    	 printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		        	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
-			    	 */
-			    	 TDM1_direction_write (in_buf_dir1 ,in_size_dir1);
-			    	 mdelay(32);
-		        }
-			
-			}			
-	/*///////////////////////////////Шина Local bus готова к записи по направадению 1//////////////////////////*/
-//#if 0	
-			if(TDM2_direction_WRITE_READY()==1)
-			{
-		       
-//#if 0				
-				if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
-				{
-					
-					 printk("-----------WRITELoopback_dir2_routine----->%s---------------\n\r",lbc_ready_towrite); 
-					//printk("+FIFO_DIR1_insize_byte=%d\n\r+",in_size);
-		        	//printk("+FIFO_Dir1_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-		        	//printk("+FIFO_Dir1_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-					TDM2_direction_write (in_buf_dir2 ,in_size_dir2);	
-					mdelay(32);
-					//mdelay(150);
-				}		
-			
-			}
-    /*///////////////////////////////Шина Local bus готова к записи по направадению 2//////////////////////////*/
-			if(TDM3_direction_WRITE_READY()==1)
-			{
-				if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
-				{
-				     
-					 ///p2020_get_recieve_virttsec_packet_buf(in_buf_dir2,in_size_dir2,2);
-					 
-					 
-					 printk("-----------WRITELoopback_dir3_routine----->%s---------------\n\r",lbc_ready_towrite);    
-				     /*
-					 printk("+FIFO_DIR2_insize_byte=%d\n\r+",in_size_dir2);
-		        	 printk("+FIFO_Dir2_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[0],in_buf_dir2[1],in_buf_dir2[2],in_buf_dir2[3],in_buf_dir2[4],in_buf_dir2[5]);
-		        	 printk("+FIFO_Dir2_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir2[(in_size_dir2/2)-6],in_buf_dir2[(in_size_dir2/2)-5],in_buf_dir2[(in_size_dir2/2)-4],in_buf_dir2[(in_size_dir2/2)-3],in_buf_dir2[(in_size_dir2/2)-2],in_buf_dir2[(in_size_dir2/2)-1]);
-		        	 */
-		        	 //mdelay(250); //250 миллисекунд задержки перед отправкой
-		        	 TDM3_direction_write (in_buf_dir3  ,in_size_dir3);
-		        	 mdelay(32);
-		        	 //mdelay(250);
-				}	 		
-			}
-   
-		  /*///////////////////////////////Шина Local bus готова к записи по направадению 3//////////////////////////*/				
-		    if(TDM4_direction_WRITE_READY()==1)
-		    {
-		    	if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
-		    	{
-		    	   printk("-----------WRITELoopback_dir4_routine----->%s---------------\n\r",lbc_ready_towrite);
-		    	     //printk("+FIF3_DIRO_insize_byte=%d\n\r+",in_size); 
-		        	 //printk("+FIF3_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[0],in_buf[1],in_buf[2],in_buf[3],in_buf[4],in_buf[5]);
-		        	 //printk("+FIF3_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf[(in_size_dir0/2)-6],in_buf[(in_size_dir0/2)-5],in_buf[(in_size_dir0/2)-4],in_buf[(in_size_dir0/2)-3],in_buf[(in_size_dir0/2)-2],in_buf[(in_size_dir0/2)-1]);
-		    	   TDM4_direction_write (in_buf_dir4 ,in_size_dir4); 
-		    	   mdelay(32);
-		    	}
-            }	    
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	    
-//#if 0
-		    if(TDM5_direction_WRITE_READY()==1)
-		    {			
-		    		        
-		      //Есть пакет в буфере FIFO на отправку по направлению 0
-		      if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
-		      {
-		    	// printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-		        //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		    		        	 
-		        /*
-		        printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		    	printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		        */
-		    	/*
-		        printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		    	printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
-		    	*/
-		    	TDM5_direction_write (in_buf_dir5 ,in_size_dir5);
-		    	mdelay(32);
-		      }
-		    			
-		   }
-		   ///////////////////////
-		   if(TDM6_direction_WRITE_READY()==1)
-		   {			
-		    		        
-		      //Есть пакет в буфере FIFO на отправку по направлению 0
-		      if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
-		      {
-		         // printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-		    	 //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 	        	 
-		    	 /*
-		    	 printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		    	 printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		    	 */
-		    	 /*
-		         printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		    	 printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
-		    	 */
-		    	 TDM6_direction_write (in_buf_dir6 ,in_size_dir6);
-		    	 mdelay(32);
-		      }
-		    			
-		   }
-		    /////////////////
-		  if(TDM7_direction_WRITE_READY()==1)
-		  {			
-		    //Есть пакет в буфере FIFO на отправку по направлению 0
-		    if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
-		    {
-		     // printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-		     //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		     /*
-		     printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		     printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		     */
-		     /*
-		     printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		     printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
-		     */
-		     TDM7_direction_write (in_buf_dir7 ,in_size_dir7);
-		     mdelay(32);
-		     }
-		    			
-		   }
-		    ////////////////////////////
-		    if(TDM8_direction_WRITE_READY()==1)
-		    {			
-		      //Есть пакет в буфере FIFO на отправку по направлению 0
-		      if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
-		      {
-		      //printk("-----------WRITE_to_tdm_dir0_routine----->%s---------------\n\r",lbc_ready_towrite); 	
-		      //printk("+FIFO_DIRO_insize_byte=%d\n\r+",in_size_dir0); 
-		      /*
-		      printk("+FIFO_Dir0_rfirst   |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		      printk("+FIFO_Dir0_rlast    |0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|0x%04x|+\n\r",in_buf_dir0[(in_size_dir0/2)-6],in_buf_dir0[(in_size_dir0/2)-5],in_buf_dir0[(in_size_dir0/2)-4],in_buf_dir0[(in_size_dir0/2)-3],in_buf_dir0[(in_size_dir0/2)-2],in_buf_dir0[(in_size_dir0/2)-1]);
-		      */
-		      /*
-		      printk("+FIFO_Dir0_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
-		      printk("+FIFO_Dir0_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
-		      */
-		      TDM8_direction_write (in_buf_dir8 ,in_size_dir8);
-		      mdelay(32);
-		      }
-		    			
-		    }
-		 
-		  
-    #endif	
-		    
-		}
-	printk( "%s find signal!\n", st( N ) );
-	printk( "%s is completed\n", st( N ) );
-return 0;	
-}
-
-/**************************************************************************************************
-Syntax:      	    static int tdm_recieve_thread_one(void *data)
-Parameters:     	void *ptr
-Remarks:			 
-Return Value:	    1  =>  Success  ,-1 => Failure
-
-***************************************************************************************************/
-static int tdm_recieve_thread_one(void *data)
-{
-printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
-
-			while(!kthread_should_stop()) 
-			{	
-				//выполняемая работа потоковой функции
-				// msleep( 100 );  	 
-			     schedule();
-#if 0			     
-			     if(TDM1_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR0------>%s---------------\n\r",lbc_ready_toread );*/TDM1_dierction_read();} 			 
-			     if(TDM2_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR1------>%s---------------\n\r",lbc_ready_toread );*/TDM2_dierction_read();}
-				 if(TDM3_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR2------>%s---------------\n\r",lbc_ready_toread );*/TDM3_dierction_read();}
-				 if(TDM4_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR3------>%s---------------\n\r",lbc_ready_toread );*/TDM4_dierction_read();} 
-				 
-//#if 0
-				 if(TDM5_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR4------>%s---------------\n\r",lbc_ready_toread );*/TDM5_dierction_read();}
-				 if(TDM6_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR5------>%s---------------\n\r",lbc_ready_toread );*/TDM6_dierction_read();}
-				 if(TDM7_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR6------>%s---------------\n\r",lbc_ready_toread );*/TDM7_dierction_read();}
-				 if(TDM8_direction_READ_READY()==1){/*printk("------------READLoopback_TDM_DIR7------>%s---------------\n\r",lbc_ready_toread );*/TDM8_dierction_read();}
-#endif			     
-				 //if(TDM9_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR8------>%s---------------\n\r",lbc_ready_toread );TDM8_dierction_read();}
-				 //if(TDM10_direction_READ_READY()==1){printk("------------READLoopback_TDM_DIR9------>%s---------------\n\r",lbc_ready_toread );TDM9_dierction_read();}
-			     
-			     
-//#endif
-				 
-			}
-		printk( "%s find signal!\n", st( N ) );
-		printk( "%s is completed\n", st( N ) );
-	return 0;	
-}
-
-
 
 
 /**************************************************************************************************
@@ -676,7 +407,6 @@ void Event_TDM2_direction_READ_READY(void)
 	wake_up(&myevent_waitqueue_tdm2_read);
 	printk("ok_event_tdm_read2\n\r");
 }
-
 /**************************************************************************************************
 Syntax:      	    void Event_TDM3_direction_READ_READY(void)
 Parameters:     	void *ptr
@@ -733,7 +463,7 @@ Return Value:
 ***************************************************************************************************/
 void Event_TDM7_direction_READ_READY(void)
 {
-	 wake_up(&myevent_waitqueue_tdm7_read);
+	wake_up(&myevent_waitqueue_tdm7_read);
 	printk("ok_event_tdm_read7\n\r");
 }
 
@@ -757,8 +487,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM1_direction_WRITE_READY(void)
 {
-	  wake_up(&myevent_waitqueue_tdm1_write);
-	  printk("ok_event_tdm_write1\n\r");
+	    wake_up(&myevent_waitqueue_tdm1_write);
+	  //printk("ok_event_tdm_write1\n\r");
 	
 }
 /**************************************************************************************************
@@ -768,8 +498,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM2_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm2_write);
-	//printk("ok_event_tdm_read7\n\r");
+	  wake_up(&myevent_waitqueue_tdm2_write);
+	  //printk("ok_event_tdm_write2\n\r");
 	
 }
 
@@ -782,8 +512,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM3_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm3_write);
-	//printk("ok_event_tdm_read7\n\r");
+	    wake_up(&myevent_waitqueue_tdm3_write);
+	 // printk("ok_event_tdm_write3\n\r");
 	
 }
 
@@ -795,8 +525,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM4_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm4_write);
-	//printk("ok_event_tdm_read7\n\r");
+	    wake_up(&myevent_waitqueue_tdm4_write);
+	//  printk("ok_event_tdm_write4\n\r");
 	
 }
 
@@ -808,8 +538,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM5_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm5_write);
-	//printk("ok_event_tdm_read7\n\r");
+	  wake_up(&myevent_waitqueue_tdm5_write);
+	//printk("ok_event_tdm_write5\n\r");
 	
 }
 /**************************************************************************************************
@@ -819,8 +549,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM6_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm6_write);
-	//printk("ok_event_tdm_read7\n\r");
+	    wake_up(&myevent_waitqueue_tdm6_write);
+	//  printk("ok_event_tdm_write6\n\r");
 	
 }
 /**************************************************************************************************
@@ -830,8 +560,8 @@ Remarks:
 ***************************************************************************************************/
 void Event_TDM7_direction_WRITE_READY(void)
 {
-	wake_up(&myevent_waitqueue_tdm7_write);
-	//printk("ok_event_tdm_read7\n\r");
+	    wake_up(&myevent_waitqueue_tdm7_write);
+	    //printk("ok_event_tdm_write7\n\r");
 	
 }
 /**************************************************************************************************
@@ -842,147 +572,266 @@ Remarks:
 void Event_TDM8_direction_WRITE_READY(void)
 {
 	
-	wake_up(&myevent_waitqueue_tdm8_write);
-	//printk("ok_event_tdm_read7\n\r");
+	  wake_up(&myevent_waitqueue_tdm8_write);
+	 /// printk("ok_event_tdm_write8\n\r");
 }
 
 
 
-
-
-
+///////////////////////////////////////////Read_Thread_TASK////////////////////////////////////
+///////////////////////////////////////////Read_Thread_TASK////////////////////////////////////
+///////////////////////////////////////////Read_Thread_TASK////////////////////////////////////
 /**************************************************************************************************
-Syntax:      	    static int tdm_test_thread_one(void *data)
+Syntax:      	    static int tdm_read_thread_one(void *data)
 Parameters:     	void *ptr
 Remarks:			Testing thread for event low zagruzka cpu 
 Return Value:	    
 ***************************************************************************************************/
-static int tdm_test_thread_one(void *data)
+static int tdm_read_thread_one(void *data)
 {
-	unsigned int event_id = 0;
-	printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
-	
-	
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
 	DECLARE_WAITQUEUE (wait_tdm_read1, current);	
-	DECLARE_WAITQUEUE (wait_tdm_read2, current);
-	DECLARE_WAITQUEUE (wait_tdm_read3, current);
-	DECLARE_WAITQUEUE (wait_tdm_read4, current);
-	DECLARE_WAITQUEUE (wait_tdm_read5, current);	
-	DECLARE_WAITQUEUE (wait_tdm_read6, current);
-	DECLARE_WAITQUEUE (wait_tdm_read7, current);
-	DECLARE_WAITQUEUE (wait_tdm_read8, current);
-	
-	
-	
 	add_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
-	add_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
-	add_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
-	add_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);	
-	add_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
-	add_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
-	add_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
-	add_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
-	
-	
-	
-	
+
 	while(!kthread_should_stop()) 
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
            
         //критическая секция
-		
 		read_lock (&myevent_read_tdm1_lock);
 	 	TDM1_dierction_read();
 	 	read_unlock (&myevent_read_tdm1_lock); 
-		
-#if 0
-	 	
-		read_lock (&myevent_read_tdm2_lock);
-	 	TDM2_dierction_read();
-	 	read_unlock (&myevent_read_tdm2_lock); 
-	 	//
-		read_lock (&myevent_read_tdm3_lock);
-	 	TDM3_dierction_read();
-	 	read_unlock (&myevent_read_tdm3_lock); 
-	    //
-	 	read_lock (&myevent_read_tdm4_lock);
-	 	TDM4_dierction_read();
-	 	read_unlock (&myevent_read_tdm4_lock);
-	    //
-	 	read_lock (&myevent_read_tdm5_lock);
-	 	TDM5_dierction_read();
-	 	read_unlock (&myevent_read_tdm5_lock); 
-	 	//
-	 	read_lock (&myevent_read_tdm6_lock);
-	 	TDM6_dierction_read();
-	 	read_unlock (&myevent_read_tdm6_lock); 
-	 	//
-	 	read_lock (&myevent_read_tdm7_lock);
-	 	TDM7_dierction_read();
-	 	read_unlock (&myevent_read_tdm7_lock); 
-	 	//
-	 	read_lock (&myevent_read_tdm8_lock);
-	 	TDM8_dierction_read();
-	 	read_unlock (&myevent_read_tdm8_lock); 
-#endif	
 	
 	}
 	set_current_state (TASK_RUNNING);
-	
 	remove_wait_queue (&myevent_waitqueue_tdm1_read, &wait_tdm_read1);
-	remove_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
-	remove_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
-	remove_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
-	remove_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
-	remove_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
-	remove_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
-	remove_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
 	
-	
-printk( "%s find signal!\n", st( N ) );	
+printk( "%s r_exit_find signal!\n", st( N ) );	
 return 0;	
 }
+
 /**************************************************************************************************
-Syntax:      	    static int tdm_test_thread_two(void *data)
+Syntax:      	    static int tdm_read_thread_two(void *data)
 Parameters:     	void *ptr
 Remarks:			Testing thread for event low zagruzka cpu 
 Return Value:	    
 ***************************************************************************************************/
-static int tdm_test_thread_two(void *data)
+static int tdm_read_thread_two(void *data)
 {
-unsigned int event_id = 0;
-printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
-
-
-	DECLARE_WAITQUEUE (wait_tdm_write1, current);	
-	DECLARE_WAITQUEUE (wait_tdm_write2, current);
-	DECLARE_WAITQUEUE (wait_tdm_write3, current);
-	DECLARE_WAITQUEUE (wait_tdm_write4, current);
-	DECLARE_WAITQUEUE (wait_tdm_write5, current);	
-	DECLARE_WAITQUEUE (wait_tdm_write6, current);
-	DECLARE_WAITQUEUE (wait_tdm_write7, current);
-	DECLARE_WAITQUEUE (wait_tdm_write8, current);
-
-
-	add_wait_queue (&myevent_waitqueue_tdm1_write, &wait_tdm_write1);
-	add_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
-	add_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
-	add_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);	
-	add_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
-	add_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
-	add_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
-	add_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
-	
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read2, current);	
+	add_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
 	
 	while(!kthread_should_stop()) 
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		
-//#if 0
-		
+	
+		read_lock (&myevent_read_tdm2_lock);
+		TDM2_dierction_read();
+		read_unlock (&myevent_read_tdm2_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm2_read, &wait_tdm_read2);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_three(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_three(void *data)
+{
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read3, current);	
+	add_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm3_lock);
+		TDM3_dierction_read();
+		read_unlock (&myevent_read_tdm3_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm3_read, &wait_tdm_read3);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_four(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_four(void *data)
+{
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read4, current);	
+	add_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm4_lock);
+		TDM4_dierction_read();
+		read_unlock (&myevent_read_tdm4_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm4_read, &wait_tdm_read4);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_five(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_five(void *data)
+{
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read5, current);	
+	add_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm5_lock);
+		TDM5_dierction_read();
+		read_unlock (&myevent_read_tdm5_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm5_read, &wait_tdm_read5);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_six(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_six(void *data)
+{
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read6, current);	
+	add_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm6_lock);
+		TDM6_dierction_read();
+		read_unlock (&myevent_read_tdm6_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm6_read, &wait_tdm_read6);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_seven(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_seven(void *data)
+{
+	printk( "%s r_start_is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read7, current);	
+	add_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm7_lock);
+		TDM7_dierction_read();
+		read_unlock (&myevent_read_tdm7_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm7_read, &wait_tdm_read7);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/**************************************************************************************************
+Syntax:      	    static int tdm_read_thread_eight(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_read_thread_eight(void *data)
+{
+	printk( "r_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_read8, current);	
+	add_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
+	
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+	
+		read_lock (&myevent_read_tdm8_lock);
+		TDM8_dierction_read();
+		read_unlock (&myevent_read_tdm8_lock); 
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm8_read, &wait_tdm_read8);
+	
+printk( "%s r_exit_find signal!\n", st( N ) );
+return 0;
+}
+
+/////////////////////////////////Write Thread//////////////////////////////////
+/////////////////////////////////Write Thread//////////////////////////////////
+/////////////////////////////////Write Thread//////////////////////////////////
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_one(void *data)
+{
+ unsigned char  in_buf_dir1[1514];
+ u16  in_size_dir1=0;
+	
+	
+ printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+  
+ 
+ DECLARE_WAITQUEUE (wait_tdm_write1, current);	
+	add_wait_queue (&myevent_waitqueue_tdm1_write, &wait_tdm_write1);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+				
 		//Есть пакет в буфере FIFO на отправку по направлению 0
 		if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 		{
@@ -994,64 +843,264 @@ printk( "%s is parent [%05d]\n",st( N ), current->parent->pid );
 		     TDM1_direction_write (in_buf_dir1 ,in_size_dir1);
 		}
 		
-		
-		if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
-		{
-		TDM2_direction_write (in_buf_dir2 ,in_size_dir2);
-		}
-		
-		if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
-		{
-		TDM3_direction_write (in_buf_dir3 ,in_size_dir3);
-		}
-		
-		if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
-		{
-		TDM4_direction_write (in_buf_dir4 ,in_size_dir4);
-		}
-		
-		
-		if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
-		{
-		TDM5_direction_write (in_buf_dir5 ,in_size_dir5);
-		}
-		
-		if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
-		{
-		TDM6_direction_write (in_buf_dir6 ,in_size_dir6);
-		}
-		
-		if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
-		{
-		TDM7_direction_write (in_buf_dir7 ,in_size_dir7);
-		}
-		
-		if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
-		{
-		TDM8_direction_write (in_buf_dir8 ,in_size_dir8);
-		}
-//#endif	
-
 	}
 	set_current_state (TASK_RUNNING);
 	remove_wait_queue (&myevent_waitqueue_tdm1_write, &wait_tdm_write1);
-	remove_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
-	remove_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
-	remove_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);	
-	remove_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
-	remove_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
-	remove_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
-	remove_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
-	
-printk( "%s find signal!\n", st( N ) );	
+
+printk( "%s w_exit_find signal!\n", st( N ) );	
 return 0;			
 }
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_two(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_two(void *data)
+{
+	 unsigned char  in_buf_dir2[1514];
+	 u16  in_size_dir2=0;
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write2, current);
+	add_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir2_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF2_Dir2_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF2_Dir2_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM2_direction_write (in_buf_dir2 ,in_size_dir2);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm2_write, &wait_tdm_write2);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_three(void *data)
+{
+	 unsigned char  in_buf_dir3[1514];
+	 u16  in_size_dir3=0;
+	
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write3, current);
+	add_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir3_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM3_direction_write (in_buf_dir3 ,in_size_dir3);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm3_write, &wait_tdm_write3);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_four(void *data)
+{
+	 unsigned char  in_buf_dir4[1514];
+	 u16  in_size_dir4=0;
 
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write4, current);
+	add_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM4_direction_write (in_buf_dir4 ,in_size_dir4);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm4_write, &wait_tdm_write4);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_five(void *data)
+{
 
-
-
-
-
+	 unsigned char  in_buf_dir5[1514];
+	 u16  in_size_dir5=0;
+	
+	
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write5, current);
+	add_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir5_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM5_direction_write (in_buf_dir5 ,in_size_dir5);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm5_write, &wait_tdm_write5);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_six(void *data)
+{
+	 unsigned char  in_buf_dir6[1514];
+	 u16  in_size_dir6=0;
+	 
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write6, current);
+	add_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM6_direction_write (in_buf_dir6 ,in_size_dir6);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm6_write, &wait_tdm_write6);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_seven(void *data)
+{
+	 unsigned char  in_buf_dir7[1514];
+	 u16  in_size_dir7=0;
+	
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write7, current);
+	add_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM7_direction_write (in_buf_dir7 ,in_size_dir7);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm7_write, &wait_tdm_write7);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
+/**************************************************************************************************
+Syntax:      	    static int tdm_write_thread_one(void *data)
+Parameters:     	void *ptr
+Remarks:			Testing thread for event low zagruzka cpu 
+Return Value:	    
+***************************************************************************************************/
+static int tdm_write_thread_eight(void *data)
+{
+	unsigned char  in_buf_dir8[1514];
+    u16  in_size_dir8=0;
+	
+	printk( "w_start_%s is parent [%05d]\n",st( N ), current->parent->pid );
+	DECLARE_WAITQUEUE (wait_tdm_write8, current);
+	add_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
+	while(!kthread_should_stop()) 
+	{
+		set_current_state (TASK_INTERRUPTIBLE);
+		schedule ();
+		//Есть пакет в буфере FIFO на отправку по направлению 0
+		if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
+		{
+			 //printk("-----------WRITE_to_tdm_dir8_routine----->%s---------------\n\r",lbc_ready_towrite); 	
+			 /*
+			 printk("+FIF1_Dir1_rfirst   |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[0],in_buf_dir0[1],in_buf_dir0[2],in_buf_dir0[3],in_buf_dir0[4],in_buf_dir0[5]);
+		     printk("+FIF1_Dir1_rlast    |0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|+\n\r",in_buf_dir0[in_size_dir0-6],in_buf_dir0[in_size_dir0-5],in_buf_dir0[in_size_dir0-4],in_buf_dir0[in_size_dir0-3],in_buf_dir0[in_size_dir0-2],in_buf_dir0[in_size_dir0-1]);
+		     */	
+		     TDM8_direction_write (in_buf_dir8 ,in_size_dir8);
+		}
+	
+	}
+	set_current_state (TASK_RUNNING);
+	remove_wait_queue (&myevent_waitqueue_tdm8_write, &wait_tdm_write8);
+printk( "%s w_exit_find signal!\n", st( N ) );	
+return 0;
+}
 
 /**************************************************************************************************
 Syntax:      	    static int tdm_recieve_thread(void *data)
@@ -1068,10 +1117,31 @@ static int tdm_recieve_thread(void *data)
    
    
    
-   //test_thread_tdm = kthread_run( tdm_test_thread_one,NULL, CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-     test_thread_tdm_read  = kthread_run( tdm_test_thread_one,(void*)N,"tdm_read_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-     test_thread_tdm_write = kthread_run( tdm_test_thread_two,(void*)N,"tdm_write_%d",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
-   
+     //Read_Thread_test
+     test_thread_tdm_read_1  = kthread_run( tdm_read_thread_one,(void*)N,"tdm_read_1",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_2  = kthread_run( tdm_read_thread_two,(void*)N,"tdm_read_2",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_3  = kthread_run( tdm_read_thread_three,(void*)N,"tdm_read_3",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_4  = kthread_run( tdm_read_thread_four,(void*)N,"tdm_read_4",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_5  = kthread_run( tdm_read_thread_five,(void*)N,"tdm_read_5",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_6  = kthread_run( tdm_read_thread_six,(void*)N,"tdm_read_6",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_7  = kthread_run( tdm_read_thread_seven,(void*)N,"tdm_read_7",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_read_8  = kthread_run( tdm_read_thread_eight,(void*)N,"tdm_read_8",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     
+     //Write_Thread_test
+     test_thread_tdm_write_1 = kthread_run( tdm_write_thread_one,(void*)N,"tdm_write_1",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_2 = kthread_run( tdm_write_thread_two,(void*)N,"tdm_write_2",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_3 = kthread_run( tdm_write_thread_three,(void*)N,"tdm_write_3",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_4 = kthread_run( tdm_write_thread_four,(void*)N,"tdm_write_4",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_5 = kthread_run( tdm_write_thread_five,(void*)N,"tdm_write_5",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_6 = kthread_run( tdm_write_thread_six,(void*)N,"tdm_write_6",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_7 = kthread_run( tdm_write_thread_seven,(void*)N,"tdm_write_7",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     test_thread_tdm_write_8 = kthread_run( tdm_write_thread_eight,(void*)N,"tdm_write_8",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
+     
+     
+     
+     
+     
+     
    // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    
    //Запускаем первый тред (приём данных с local bus)
@@ -1329,7 +1399,6 @@ unsigned int Hook_Func(uint hooknum,
 	//printk("packet_ok\n\r");
 		
 	nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-	/*
 	nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir4  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
@@ -1337,7 +1406,7 @@ unsigned int Hook_Func(uint hooknum,
     nbuf_set_datapacket_dir6  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-	*/	
+	
 		
 		
 
@@ -1521,16 +1590,33 @@ Return Value:	    none
 ***************************************************************************************************/
 void mpc_cleanup_module(void)
 {	
-	
+
 	del_timer_sync(&timer1_read);              /* Deleting the timer */
 	del_timer_sync(&timer2_write);             /* Deleting the timer */
 	/* Регистрируем */
 	nf_unregister_hook(&bundle);
 	nf_unregister_hook(&arp_bundle);
 	msleep(10);
-	kthread_stop(test_thread_tdm_read); 
-	kthread_stop(test_thread_tdm_write); 
-	 
+	kthread_stop(test_thread_tdm_read_1); 
+	kthread_stop(test_thread_tdm_read_2); 
+	kthread_stop(test_thread_tdm_read_3); 
+	kthread_stop(test_thread_tdm_read_4); 
+	kthread_stop(test_thread_tdm_read_5); 
+	kthread_stop(test_thread_tdm_read_6); 
+	kthread_stop(test_thread_tdm_read_7); 
+	kthread_stop(test_thread_tdm_read_8); 
+	
+	/////////////////////////////////////////
+ 	kthread_stop(test_thread_tdm_write_1); 
+ 	kthread_stop(test_thread_tdm_write_2);
+ 	kthread_stop(test_thread_tdm_write_3);
+ 	kthread_stop(test_thread_tdm_write_4);
+ 	kthread_stop(test_thread_tdm_write_5);
+ 	kthread_stop(test_thread_tdm_write_6);
+ 	kthread_stop(test_thread_tdm_write_7);
+ 	kthread_stop(test_thread_tdm_write_8);
+ 	
+ 	
 	
 	//kthread_stop(r_t1);
     //kthread_stop(r_t2);

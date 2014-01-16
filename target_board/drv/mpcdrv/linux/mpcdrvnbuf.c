@@ -827,7 +827,7 @@ bool nbuf_get_datapacket_dir8 (unsigned char *in_buf ,u16 *in_size)
 	 //Буфер готов	
 	 if(mpcfifo_get_buf_ready(fifo_put_to_tdm8_dir)==1)
 	 {
-		 //printk(">>>>>>>>>>>>nbuf_get_datapacket_dir8|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir8);
+		 printk(">>>>>>>>>>>>nbuf_get_datapacket_dir8|iter=%d<<<<<<<<<<<<<<<<\n\r",get_iteration_dir8);
 		 spin_lock_irqsave(fifo_put_to_tdm8_dir->lock,flags);
 		 //берём из буфера пакет с данными 
 		 mpcfifo_get(fifo_put_to_tdm8_dir, in_buf);
@@ -1411,7 +1411,7 @@ void nbuf_set_datapacket_dir8  (const unsigned char *in_buf ,const u16 in_size)
 	 unsigned long flags;
      
 	  spin_lock_irqsave(fifo_put_to_tdm8_dir->lock,flags);
-     // printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir0|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir0,in_size);	
+      //printk(">>>>>>>>>>>>>>nbuf_set_datapacket_dir8|iter=%d|size=%d<<<<<<<<<<<<<<<<\n\r",set_iteration_dir8,in_size);	
       fifo_put_to_tdm8_dir->cur_put_packet_size=in_size;
      //Set to the FIFO buffer
 	  status=mpcfifo_put(fifo_put_to_tdm8_dir, in_buf);  

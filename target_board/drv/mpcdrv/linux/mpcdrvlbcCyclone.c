@@ -232,7 +232,7 @@ void TDM1_direction_READ_READY(void)
 {
 UINT16 dannie1000=0;
 UINT16 dannie800=0;
-
+   
 	dannie1000=plis_read16 (DIR1_PLIS_READOK_ADDR1000);
 	//printk("Status1000 =0x%x\n\r",dannie1000);
 	if((dannie1000==0xabc1) || (dannie1000==0x1))
@@ -241,7 +241,9 @@ UINT16 dannie800=0;
 		dannie800=plis_read16 (DIR1_PLIS_READ_BUG_ADDR800);
 		if((dannie800==0x1)||(dannie800==0xabc1))
 		{
+			//printk("Status1000 =0x%x->>status800 =0x%x\n\r",dannie1000,dannie800);
 			Event_TDM1_direction_READ_READY();
+			
 		}
 		
   	} 
@@ -372,7 +374,6 @@ Return Value:	    Returns 1 on success and negative value on failure.
 void TDM7_direction_READ_READY(void)
 {
 	UINT16 dannie1012=0;
-	UINT16 status =0;
 	UINT16 dannie812=0;
 
 	dannie1012=plis_read16 (DIR7_PLIS_READOK_ADDR1012);
@@ -1660,6 +1661,14 @@ void TDM1_dierction_read ()
   memset(&out_buf, 0x0000, sizeof(out_buf));  
   dannie1200 = plis_read16 (DIR1_PLIS_PACKSIZE_ADDR1200 );
   
+  /*Проверка что читаем пришёл нормальный пакет с направления 1*/
+  if((dannie1200==65535)||(dannie1200==0)||(dannie1200>1518))
+  {
+	  printk("?bad_exeption_read_dir1_pack_size=%d?\n\r",dannie1200);
+	  return;
+  }
+  
+  
   //Если пакет нечётный читаем на еденицу больше из шины local bus;
   if((dannie1200)%2==1)
   {
@@ -1668,7 +1677,7 @@ void TDM1_dierction_read ()
   
   
   packet_size_hex=(dannie1200/2)+dir0_dobavka_esli_packet_nechetnii; //convert byte to element of massive in hex 
-  
+  printk("+Tdm_Dir1_read->>ITERATION=%d|in_byte=%d|in_hex=%d+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex);
   
   //printk("+Tdm_Dir1_read->>ITERATION=%d|1200in_byte=%d|1200in_hex=%d|size=%d|+\n\r",tdm0_read_iteration,dannie1200,packet_size_hex,dannie1200+PATCH_READ_PACKET_SIZE_ADD_ONE); 
   
@@ -1748,7 +1757,7 @@ void TDM1_dierction_read ()
 
 
 /**************************************************************************************************
-Syntax:      	   void TDM1_dierction_read  ()
+Syntax:      	   void TDM2_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -1780,6 +1789,14 @@ void TDM2_dierction_read ()
 	  memset(&out_buf1, 0x0000, sizeof(out_buf1));
 	  dannie1202 = plis_read16 (DIR2_PLIS_PACKSIZE_ADDR1202);
 	 
+	  /*Проверка что читаем пришёл нормальный пакет с направления 2*/
+	  if((dannie1202==65535)||(dannie1202==0)||(dannie1202>1518))
+	  {
+		  printk("?bad_exeption_read_dir1_pack_size=%d?\n\r",dannie1202);
+		  return;
+	  }
+	  
+	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1202)%2==1)
 	  {
@@ -1895,6 +1912,13 @@ void TDM3_dierction_read ()
 	  memset(&out_buf2, 0x0000, sizeof(out_buf2));
 	  	  
 	  dannie1204 = plis_read16 (DIR3_PLIS_PACKSIZE_ADDR1204 );
+	  /*Проверка что читаем пришёл нормальный пакет с направления 3*/
+	  if((dannie1204==65535)||(dannie1204==0)||(dannie1204>1518))
+	  {
+		  printk("?bad_exeption_read_dir3_pack_size=%d?\n\r",dannie1204);
+		  return;
+	  }
+	  
 	  
 	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
@@ -1968,7 +1992,6 @@ void TDM3_dierction_read ()
 }
 	
 	
-	
 /**************************************************************************************************
 Syntax:      	   void TDM4_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
@@ -2001,6 +2024,15 @@ void TDM4_dierction_read  ()
 	  
 	  memset(&out_buf3 ,0x0000, sizeof(out_buf3));	 	  
 	  dannie1206 = plis_read16 (DIR4_PLIS_PACKSIZE_ADDR1206 );
+	  
+	  /*Проверка что читаем пришёл нормальный пакет с направления 4*/
+	  if((dannie1206==65535)||(dannie1206==0)||(dannie1206>1518))
+	  {
+		  printk("?bad_exeption_read_dir4_pack_size=%d?\n\r",dannie1206);
+		  return;
+	  }
+	  
+	  
 	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1206)%2==1)
@@ -2103,6 +2135,16 @@ void TDM5_dierction_read  ()
 	  memset(&out_buf5 ,0x0000, sizeof(out_buf5));	 	  
 	  dannie1208 = plis_read16 (DIR5_PLIS_PACKSIZE_ADDR1208 );
 	  
+	  /*Проверка что читаем пришёл нормальный пакет с направления 5*/
+	  if((dannie1208==65535)||(dannie1208==0)||(dannie1208>1518))
+	  {
+		  printk("?bad_exeption_read_dir5_pack_size=%d?\n\r",dannie1208);
+		  return;
+	  }
+	  
+	  
+	  
+	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1208)%2==1)
 	  {
@@ -2190,6 +2232,15 @@ void TDM6_dierction_read  ()
 	  memset(&out_buf6 ,0x0000, sizeof(out_buf6));	 	  
 	  dannie1210 = plis_read16 (DIR6_PLIS_PACKSIZE_ADDR1210 );
 	  
+	  /*Проверка что читаем пришёл нормальный пакет с направления 6*/
+	  if((dannie1210==65535)||(dannie1210==0)||(dannie1210>1518))
+	  {
+		  printk("?bad_exeption_read_dir6_pack_size=%d?\n\r",dannie1210);
+		  return;
+	  }
+	  
+	  
+	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1210)%2==1)
 	  {
@@ -2270,6 +2321,16 @@ void TDM7_dierction_read  ()
 	    
 	  memset(&out_buf7 ,0x0000, sizeof(out_buf7));	 	  
 	  dannie1212 = plis_read16 (DIR7_PLIS_PACKSIZE_ADDR1212 );
+	  
+	  /*Проверка что читаем пришёл нормальный пакет с направления 7*/
+	  if((dannie1212==65535)||(dannie1212==0)||(dannie1212>1518))
+	  {
+		  printk("?bad_exeption_read_dir7_pack_size=%d?\n\r",dannie1212);
+		  return;
+	  }
+	  
+	  
+	  
 	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1212)%2==1)
@@ -2355,6 +2416,16 @@ void TDM8_dierction_read  ()
 	  memset(&out_buf8 ,0x0000, sizeof(out_buf8));	 	  
 	  dannie1214 = plis_read16 (DIR8_PLIS_PACKSIZE_ADDR1214);
 	  
+	  /*Проверка что читаем пришёл нормальный пакет с направления 8*/
+	  if((dannie1214==65535)||(dannie1214==0)||(dannie1214>1518))
+	  {
+		  printk("?bad_exeption_read_dir8_pack_size=%d?\n\r",dannie1214);
+		  return;
+	  }
+	  
+	  
+	  
+	  
 	  //Если пакет нечётный читаем на еденицу больше из шины local bus;
 	  if((dannie1214)%2==1)
 	  {
@@ -2415,7 +2486,7 @@ tdm8_read_iteration++;
 
 #if 0
 /**************************************************************************************************
-Syntax:      	   void TDM8_dierction_read  ()
+Syntax:      	   void TDM9_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
@@ -2466,10 +2537,8 @@ void TDM9_dierction_read  ()
 }
 	
 	
-	
-	
 /**************************************************************************************************
-Syntax:      	   void TDM9_dierction_read  ()
+Syntax:      	   void TDM10_dierction_read  ()
 Remarks:		   This Read from PLIS0 tdm direction  
 Return Value:	Returns 1 on success and negative value on failure.
  				Value		 									Description
