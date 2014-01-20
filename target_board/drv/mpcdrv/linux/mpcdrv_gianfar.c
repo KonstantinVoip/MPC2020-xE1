@@ -381,13 +381,11 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id)
 	  //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",l_data[0],l_data[1],l_data[2],l_data[3]);
 	//p2020_get_from_tdmdir_and_put_to_ethernet(tsec_get_device_by_name(ifname3));
 	
-	/*
+	
 	if(tsec_id==0)
 	{
 		p2020_get_from_tdmdir_and_put_to_ethernet(tsec0_dev);
-	}*/
-	
-	
+	}
 	
 	if(tsec_id==1)
 	{

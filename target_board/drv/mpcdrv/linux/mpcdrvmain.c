@@ -502,9 +502,6 @@ void Event_TDM2_direction_WRITE_READY(void)
 	  //printk("ok_event_tdm_write2\n\r");
 	
 }
-
-
-
 /**************************************************************************************************
 Syntax:      	    void Event_TDM3_direction_WRITE_READY(void)
 Parameters:     	void *ptr
@@ -1114,9 +1111,6 @@ static int tdm_recieve_thread(void *data)
    int out;
    printk( "%smain process [%d] is running\n",ktime_now(), current->pid );
    
-   
-   
-   
      //Read_Thread_test
      test_thread_tdm_read_1  = kthread_run( tdm_read_thread_one,(void*)N,"tdm_read_1",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
      test_thread_tdm_read_2  = kthread_run( tdm_read_thread_two,(void*)N,"tdm_read_2",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
@@ -1202,7 +1196,7 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 	}	
 	
 	//printk("get_ethernet_packet=0x%x\n\r",target_arp_ip_da_addr);
-	//ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr,0);
+	 ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr,0);
 	
 	//#endif	
 	
@@ -1397,7 +1391,8 @@ unsigned int Hook_Func(uint hooknum,
 	{	
 	   
 	//printk("packet_ok\n\r");
-		
+	//Тест TDM траффика	
+    #if 0	
 	nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 	nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
@@ -1406,10 +1401,10 @@ unsigned int Hook_Func(uint hooknum,
     nbuf_set_datapacket_dir6  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
     nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-	
+    #endif
 		
 		
-
+   //Более глубокий тест траффика
 		
 #if 0
 		if(TDM2_direction_WRITE_READY()==1)
@@ -1454,7 +1449,7 @@ unsigned int Hook_Func(uint hooknum,
 		
 		//Бужу поток на  приём пакетов		
 		//Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
-	   //get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
+	   get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
        return NF_DROP;
 	}
 	    	 

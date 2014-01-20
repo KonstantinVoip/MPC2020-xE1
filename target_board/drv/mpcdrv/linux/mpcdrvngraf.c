@@ -52,8 +52,8 @@ GENERAL NOTES
 static UINT8 i_am_schluz=1;
 //Глобальная переменная признак наличия пакета с маршрутизацией 
 static UINT8 packet_from_marsrutiazation=0;
-//Глобальная переменная ip адрес НМС3
-static UINT8 no_marshrutization_nms3_ipaddr=0;
+//Глобальная переменная ip адрес нашего НМС3
+static UINT32 no_marshrutization_nms3_ipaddr=0;
 
 
 
@@ -435,7 +435,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
    //Признак шлюзового пока делаем так
    //multipleksor[0].priznac_shcluzovogo=1;
      
-    //для отладки на ките 
+ //для отладки на ките 
 #if 0
     memcpy(&udp_dest_port,&in_buf[18],2); 
     //printk("udp_dest_port=%d,0x%x\n\r",udp_dest_port,udp_dest_port);
@@ -460,16 +460,20 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       		//Проверяем что пакет идёт к КY-S нашему шлюза в даннос случае DA ip нашего KY-S совпадает с DA MAC в ARP
       		if(my_current_kos.ip_addres==priznak_kommutacii) 	
       		{
+      		 
       		 no_marshrutization_nms3_ipaddr=priznak_nms3_arp_sender;
-      		 //отправляем моему KY-S в eth1 
+      		 //отправляем моему KY-S в eth1
+      		 printk("ARP_scluz_otNMS3_send(0x%x)->kys-s\n\r",no_marshrutization_nms3_ipaddr);
       		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
+      		
       		}
       	
       		//Пакет идёт назад к НМС3 c DA НМС3 находящемся в ARP
       		if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
       		{
       		//отправляем обратно НМС3 на выход eth2
-      		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+      	    printk("ARP_scluz_otKYS_send->nms3\n\r");
+      		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,0);
       		}
     		  
     	  }	  
@@ -495,7 +499,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		  //Пакет идёт назад к НМС3
     		  if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
     		  {
-    			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,2);
+    			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,0);
     		  }
     		
     	  }/*конец обработки обычного пакета для шлюзового*/
