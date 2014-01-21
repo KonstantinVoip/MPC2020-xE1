@@ -1293,22 +1293,31 @@ unsigned int Hook_Func(uint hooknum,
 	//UDP пакет 
 	//udph = (struct udphdr *)skb_transport_header(skb);
 	
+	//printk("%x\n\r",eth->h_dest);
 	
+	
+	//memcpy(input_mac_da_addr,eth->h_dest,6);
 	memcpy(input_mac_da_addr,eth->h_dest,6);
+	
+	//printk("0x%x\n\r",input_mac_da_addr);
+	
 	input_mac_da_addr[1]=input_mac_da_addr[1]>>16;
 	//Last four byte mac _address input_mac_last_word
 	input_mac_last_word=input_mac_da_addr[1];
 	//Last byte mac address for priznac_commutacii;
 	//priznac coconst char *virt_dev=0;mmutacii po mac;
 	//const char *virt_dev=0;
-	//input_mac_prelast_byte=input_mac_last_word>>8;
+	  input_mac_prelast_byte=input_mac_last_word>>8;
 	//priznac chto iformation channel packet;
 	//input_mac_last_byte = input_mac_last_word;
 	//virt_dev=skb->dev->name;
 //#if 0  //Global comment	
 	
-	//printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
-	//printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);
+	  //printk(">>>last16_word    =0x%04x<<|\n\r",input_mac_last_word);
+	  
+	  /*
+	 printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
+	  printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);*/
     /*Принял от КУ-S Информационный пакет который сожержит
      *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
@@ -1370,11 +1379,13 @@ unsigned int Hook_Func(uint hooknum,
 	 	 // g_my_kys_ip_addres=(UINT8)ip->saddr;
 		  g_my_kys_ip_addres=ip->saddr;
 		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
+		  
 		  /*
 	 	  printk("\n\r");
 	 	  printk("+KYS_Inform_PACKET|SA_MAC =|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|0x%02x|\n\r",g_my_kys_mac_addr[0],g_my_kys_mac_addr[1],g_my_kys_mac_addr[2],g_my_kys_mac_addr[3],g_my_kys_mac_addr[4],g_my_kys_mac_addr[5]);
 	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
-	      */
+	 	  */
+	      
 	 	  //Заворачиваю назад с подменой MAC адреса
 	 	 // p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
 	      //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 

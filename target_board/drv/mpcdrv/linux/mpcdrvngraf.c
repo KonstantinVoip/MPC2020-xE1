@@ -133,7 +133,7 @@ UINT32  ip_addr;
 UINT8   posad_mesto;
 UINT8   mk8_vihod;
 UINT32  soedinen_s_ipaddr;
-}num_pari[10];
+}num_pari[16];
 
 
 
@@ -359,7 +359,7 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto ,u8 *mk8_sosed_vyhod)
 {
 
-   // static iteration =0;
+      static iteration =0;
 	__be32  l_ipaddr=0;
     __be32  l_sosed_ipaddr=0;
      UINT16 l_first_polovinka_sosed=0;
@@ -407,7 +407,8 @@ static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8
     *mk8_sosed_vyhod=l_sosed_mk8_vihod;
     *sosed_posad_mesto=l_sosed_posad_mesto;
     
-	//iteration++;
+     //printk("iter=%d\n\r",iteration);
+	 iteration++;
 }
 
 /**************************************************************************************************
@@ -463,7 +464,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       		 
       		 no_marshrutization_nms3_ipaddr=priznak_nms3_arp_sender;
       		 //отправляем моему KY-S в eth1
-      		 printk("ARP_scluz_otNMS3_send(0x%x)->kys-s\n\r",no_marshrutization_nms3_ipaddr);
+      		 printk("!noroutetab_ARP_scluz_otNMS3_send(0x%x)->kys-s!\n\r",no_marshrutization_nms3_ipaddr);
       		 p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
       		
       		}
@@ -472,7 +473,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       		if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
       		{
       		//отправляем обратно НМС3 на выход eth2
-      	    printk("ARP_scluz_otKYS_send->nms3\n\r");
+      	    printk("!noroutetab_ARP_scluz_otKYS_send->nms3!\n\r");
       		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,0);
       		}
     		  
@@ -491,7 +492,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     			  //если обычные пакеты.без маршрутизации
     			  else
     			  {	
-    			  printk("PACK_ot_NMS3_SEND_KYS\n\r");
+    			  //printk("!noroutetab_pack_scluz_otNMS3_send->kys-s\n\r");
     			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     			  }
     	        	
@@ -499,6 +500,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     		  //Пакет идёт назад к НМС3
     		  if(no_marshrutization_nms3_ipaddr==priznak_kommutacii)
     		  {
+    			  //printk("!noroutetab_pack_scluz_otKYS_send->nms3!\n\r");
     			  p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,0);
     		  }
     		
@@ -512,7 +514,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    //определяем откуда свалился пакет с какого направления пока нет таблицы маршрутизации
     		//Здесь мы должны знать откуда с какого направления пришёл ARP пакет чтобы отправить
     		//его назад пока нет таблицы маршрутизации.
-    		/*обработка ARP пакета для обычного сетевого элемента*/
+    		/*обработка ARP пакета для обычного сетевого элемента не шлюза*/
     	    if(priznak_nms3_arp_sender)
     	    {
     	    	static u8 l_tdm_input_direction=0;
@@ -521,7 +523,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	if(!tdm_input_read_direction==0)
     	    	{
     	    	  l_tdm_input_direction =tdm_input_read_direction;
-    	          printk("ARP _Input _direction =%d\n\r",l_tdm_input_direction);
+    	      	  //printk("!noroutetab_ARP_element_otNMS3(tdm_dir=%d)_send>kys-s!\n\r",l_tdm_input_direction);
+    	    	  printk("!noroutetab_ARP_element_otNMS3(tdm_dir=%d)!\n\r",l_tdm_input_direction);
     	    	}
     	    	
     	    	
@@ -534,6 +537,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    		no_marshrutization_nms3_ipaddr=priznak_nms3_arp_sender;
     	    		//отправляем моему KY-S в eth1 
     	    		//printk("Send ARP to KYS\n\r");
+    	    		printk("!noroutetab_ARP_element_otNMS3_send->kys-s\n\r");
     	    		p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     	    	}
     	
@@ -542,12 +546,17 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	    	{
     	    		//отправляем обратно нзад НМС3 выход откуда пришёл на выход tdm
     	    		//Здесь надо знать куда отправить обратно пакет в какое направление tdm
+    	    		printk("!noroutetab_ARP_element_otKYS_send->nms3 to (tdm_dir=%d)!\n\r",l_tdm_input_direction);
     	    		switch (l_tdm_input_direction)
     	    		{
     	    		case 1:nbuf_set_datapacket_dir1  (in_buf ,in_size);break;
     	    		case 2:nbuf_set_datapacket_dir2  (in_buf ,in_size);break;
     	    		case 3:nbuf_set_datapacket_dir3  (in_buf ,in_size);break;
     	    		case 4:nbuf_set_datapacket_dir4  (in_buf ,in_size);break;  
+    	    		case 5:nbuf_set_datapacket_dir5  (in_buf ,in_size);break;
+    	    		case 6:nbuf_set_datapacket_dir6  (in_buf ,in_size);break;
+    	    		case 7:nbuf_set_datapacket_dir7  (in_buf ,in_size);break;
+    	    		case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
     	    		default:printk("?ARP_NMS3->Send  UNICNOWN to IP sosed \n\r");break;
     	    		}
     	    	    			  	    			
@@ -559,7 +568,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     	  {
     		  
     		  //Здесь нам нужно просто получит пакет и построить таблицу маршрутизации
-    		  //больше ничего не надо нам.
+    		  //больше ничего не надо нам пока нет таблицы маршрутизации пакет нет таблицы маршрутизации пакет не пропускаем.
     		  if(my_current_kos.ip_addres==priznak_kommutacii) //если да то узнаем адрес нашего НМС3	
     		  {
     			  //Пакет с матрицой коммутации для моего МПС шлюзового
@@ -945,9 +954,6 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   UINT16 l_iter=0;
   
   //Конец для Дейкстры
-  
-  
-  
   UINT8 smeshenie_grisha_scluz=0;
   UINT32 data_graf_massive[32]; //128 bait 4 *32 bait
   UINT16 razmer_data_graf_massive=0;
@@ -989,52 +995,43 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
    
    unsigned long flags;
    
-   
-   
-
-    /*
-    for(i=0;i<in_size;i++)
-    {
-    	
-    	printk("0x%x ",in_buf[i]);
-    }
-    */
-
-     printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
+   printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
      //printk("matrica_packet_recieve=%d\n\r",iteration);
      //18 это в пакете наш  UDP  порт destination
-     printk("GL_IP_ADDR:"); 
+    printk("IP_ADDR:"); 
     
     memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	if(nms3_ip_addres==0){printk("?bad nms3_ip_addres =0?\n\r");return -1;}
-	printk ("NMS3=<0x%x>|",nms3_ip_addres);
+	printk ("NMS3_ip=<0x%x>|",nms3_ip_addres);
 	multipleksor[0].nms3_ipaddr=nms3_ip_addres;
 
 	//memcpy(&protocol_version,&in_buf[13],4);
 	//printk ("NMS3_protocol_version =0x%x>\n\r",protocol_version);
 	memcpy(&scluz_ip_addres,&in_buf[25],4);
-	printk ("SCHLUZ=<0x%x>\n\r",scluz_ip_addres);
+	printk ("SCHLUZ_ip=<0x%x>|",scluz_ip_addres);
 	if(scluz_ip_addres==0){printk("?bad scluz_ip_address =0?\n\r");return -1;}
 	multipleksor[0].gate_ipaddr=scluz_ip_addres;
 	
-	
 	if(my_current_kos.ip_addres==0){printk("?bad current_kos.ip_addres exit=0?\n\r");return -1;}
+	printk("CURR_ip=<0x%x>\n\r",my_current_kos.ip_addres);
 	
 	//Определяем что мы шлюз или простой элемент.
-	printk("Setevoi status:");
+	printk("MP_STATUS:");
 	if(my_current_kos.ip_addres==scluz_ip_addres)
-	{ printk("<MP_Scluz>ip_addr=<0x%x>\n\r",my_current_kos.ip_addres);
+	{ printk("<MP_Scluz>\n\r");
 	priznac_scluz=1;multipleksor[0].priznac_shcluzovogo=1;}
-	else{printk("MP_Element ip_addr=0x%x\n\r",my_current_kos.ip_addres);
+	else{printk("<MP_Element>\n\r");
 	priznac_scluz=0;multipleksor[0].priznac_shcluzovogo=0;}
 	
-    printk("Matrica Status:");  
+	
+
+    printk("MATRICA:\n\r");  
 	//Первые 8 байт это название Гришиного протокола,следующие 4 байт это ip адрес шлюза. = 12 байт
 	smeshenie_grisha_scluz=(4+8);  //смещение 12 байт или 6 элементов в hex;
 	razmer_data_graf_massive=in_size-42-smeshenie_grisha_scluz; //размер данных в массиве
 	if(razmer_data_graf_massive<12){printk("?bad razmer_data_graf_massive =%d bait?\n\r",razmer_data_graf_massive);return -1;}
 	
-	printk("graf_bait=%d|\n\r",razmer_data_graf_massive);
+	printk("razmer_data_graf_bait_in_packet=%d|\n\r",razmer_data_graf_massive);
 	
 	
 	//21 байт это начало данных.+смещение получаем массив пар связности
@@ -1045,92 +1042,47 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	//Istochnic                               ||Priemnic
 	//IP-address|nomer_PM|nomer_port_isch_MK8 ||//IP-address|nomer_PM|nomer_port_priemnic_MK8
 	//(4-bait)   (1-bait)     (1-bait)        ||(4-bait)   (1-bait)     (1-bait)    
-	  
-	  /*number_of_par_sviaznosti = общий размер данных в пакете 1440 байт /12 байт длинна одной пары связности = 120 пар
-	   *kolichestvo_iteration_on_this_packet = 120 пар /количество пар для одного сетевого элемента в случае МК8 - 10 = 12
-	   *итого получаеться 12 сетевых элемeнтов по 10 связей в каждом. 
-	   * 
-	   */
-	
-	
-	
-    //длинна связи =12 байт размер одного элемента массива =4 байт
-	//UINT16 dlinna_svyazi_elements_of_massive=DLINNA_SVYAZI/4;
-	//UINT16 number_of_par_sviaznosti_in_packet=razmer_data_graf_massive/DLINNA_SVYAZI;
-    //UINT16 max_kolichestvo_setvich_elementov_onpacket=2;//(number_of_par_sviaznosti_in_packet/max_kolichestvo_par_v_odnom_setevom_elemente);
-		  
-    
-   // printk("max_kolichestvo_setvich_elementov_onpacket= %d\n\r",max_kolichestvo_setvich_elementov_onpacket);
-   // printk("number_of_par_sviaznosti_in_packet        = %d\n\r",number_of_par_sviaznosti_in_packet);	
-   // printk("max_kolichestvo_par_v_odnom_setevom_elemente= %d\n\r",max_kolichestvo_par_v_odnom_setevom_elemente); 
-	
-   //Подсчитываю количество пар связности в пакете
-	//max_kolichestvo_setvich_elementov_onpacket=1;
-	number_of_par_sviaznosti_in_packet=razmer_data_graf_massive/DLINNA_SVYAZI;
-	//вычислить количество пар для данного элемента
-	//tek_kolichestvo_par_dli_dannogo_elementa=2;
-	
-	//printk("par_sviaznosti=<%d>|",number_of_par_sviaznosti_in_packet);	
-	
-	//printk("tek_kolichestvo_par_dli_dannogo_elementa= %d\n\r",tek_kolichestvo_par_dli_dannogo_elementa); 
-	//parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
-	
-  //Рассчитываем количество узловых мультплексоров в пакете			
-	//просматриваем все пары связности в пакете ищем вхождения.
-	
-/*  	
-	for(m=0;m<number_of_par_sviaznosti_in_packet+1;m++)
-	{
-		parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_mk8_vyhod);
-		if(m==0)
-		{
-			curr_ipaddr=l_ipaddr;
-		}
-	
-		//printk("l_ipaddr=0x%x,curr_ipaddr=0x%x\n\r",l_ipaddr,curr_ipaddr);
-		dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
-		if(l_ipaddr==curr_ipaddr){}
-		else
-		{
-			number_of_multipleksorov_in_packet++;
-			//printk("ne ravno\n\r");
-		}
-		curr_ipaddr=l_ipaddr;
-	}
-  printk("mp_uzlov_isch= <%d>\n\r",number_of_multipleksorov_in_packet); 
- */ 
-  //Рабочая штука
-  
- 
-  //Теперь нужно определить кто я  с точки зрения пакета котроый пришёл
-  //пакет для маршрутизации () от меня  (1)
-  //или пакет пакет для прокладки трассы от остальных ко мне
-  //Как узнать?
- // dlinna_pari_sviaznosti_byte=0;
-  //1.Ищу вхождения что маршрутизация от меня ()
-//spin_lock_irqsave(my_lock_djcstra,flags);
-
-	
-for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
-  {
+	/*number_of_par_sviaznosti = общий размер данных в пакете 1440 байт /12 байт длинна одной пары связности = 120 пар
+	 *kolichestvo_iteration_on_this_packet = 120 пар /количество пар для одного сетевого элемента в случае МК8 - 10 = 12
+	 *итого получаеться 12 сетевых элемeнтов по 10 связей в каждом. 
+	 */
+	  number_of_par_sviaznosti_in_packet=razmer_data_graf_massive/DLINNA_SVYAZI; 
+	  printk("num_par_svyazi_in_packet=%d\n\r",number_of_par_sviaznosti_in_packet);
+      //Рабочая штука
+	  u8 count =0;
+	  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
+	  { 
+	  // printk("first =%d,second =%d|\n\r",0+count+i,1+i+count);	  
+      //#if 0 
 	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_posad_mesto,&sosed_mk8_vyhod);
-      
 	  //1 элемент в свзяи
-	  num_pari[0+i+l_iter].ip_addr=l_ipaddr;
-	  num_pari[0+i+l_iter].mk8_vihod=my_mk8_vihod;
-	  num_pari[0+i+l_iter].posad_mesto=my_posad_mesto;
-	  num_pari[0+i+l_iter].soedinen_s_ipaddr=sosed_ipaddr; //С кем соединён первый
+	  num_pari[0+count+i].ip_addr=l_ipaddr;
+	  num_pari[0+count+i].mk8_vihod=my_mk8_vihod;
+	  num_pari[0+count+i].posad_mesto=my_posad_mesto;
+	  num_pari[0+count+i].soedinen_s_ipaddr=sosed_ipaddr; //С кем соединён первый
 	  // 2 элемент в свзяи
-	  num_pari[1+i+l_iter].ip_addr=sosed_ipaddr;
-	  num_pari[1+i+l_iter].mk8_vihod=sosed_mk8_vyhod;
-	  num_pari[1+i+l_iter].posad_mesto=sosed_posad_mesto;
-	  num_pari[1+i+l_iter].soedinen_s_ipaddr=l_ipaddr; //С кем соединён второй
-	  l_iter=1;
-   dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
-  }//end for cicle
+	  num_pari[1+i+count].ip_addr=sosed_ipaddr;
+	  num_pari[1+i+count].mk8_vihod=sosed_mk8_vyhod;
+	  num_pari[1+i+count].posad_mesto=sosed_posad_mesto;
+	  num_pari[1+i+count].soedinen_s_ipaddr=l_ipaddr; //С кем соединён второй
+      dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
+      count=1+i;
+      //#endif
+	  }//end for cicle
  
   //Количество всего полных связей в пакете
   num_of_svyazi=number_of_par_sviaznosti_in_packet*2;
+  
+  /*
+  for(i=0;i<num_of_svyazi;i++)
+  {
+	  printk("i[%d]|ip_addr=0x%x|mk8_vihod=%d|posad_mesto%d|soedinen_s_ipaddr=0x%x \n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].posad_mesto,num_pari[i].soedinen_s_ipaddr);
+	  
+  }
+  */
+  
+//#if 0
+  
   //num_of_uzlov_v_seti=3;
   for(i=0;i<num_of_svyazi;i++)
   {
@@ -1141,12 +1093,6 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   UINT8  max_v=255;
   UINT8  matrica_sviaznosto[4][4];
   UINT8  dejcstar_input_matrix[3][3];
-
-  
-
-  
-  
-  //spin_lock_irqsave(my_lock_djcstra,flags);
   
   //Алгоритм подсчётка количества сетевых элементов и сортировка их в порядке возрастания
   for(i=0;i<max_v;i++){c[i]=0;}
@@ -1165,35 +1111,14 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  } 
 	  
   }
-  
-  //spin_unlock_irqrestore(my_lock_djcstra,flags);
+   
+  printk("num_of_MP_node=%d|",num_of_uzlov_v_seti);
   //распечатываем отсортированный массив
-  
-  
-  
-  printk("num_of_multi_node=%d|",num_of_uzlov_v_seti);
-  //распечатываем отсортированный массив
-  
-  /*
-  for(i=0;i<num_of_uzlov_v_seti;i++)
-  {
-	  printk("b[%d]=%d\n\r",i,b[i]);
-  }
-  */
-  printk("num_of_par_svyazi=%d\n\r",num_of_svyazi);
-  
-
-  //Подготовительный массив сортируем количестов связей для каждого узла
-  /////////////////////////////////////////////////3 на 3
-  //UINT16 array_of_soedineniy[num_of_uzlov_v_seti][num_of_uzlov_v_seti];
-  //memset(&array_of_soedineniy,0x00,sizeof(array_of_soedineniy));
-  //memset(&adj_matrix,0x00,sizeof(adj_matrix));
-  //memset(&cost,0x0000,sizeof(cost));
-  
-  
+  printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi);
+#if 0  
   for(t=0;t<num_of_svyazi;t++)
   {
-  	  printk("para_svyazi =%d|",t);
+  	  //printk("para_svyazi =%d|",t);
   	  //printk("ip.addr =%d , b[i] =%d \n\r",(UINT8)num_pari[t].ip_addr,b[i]);
       for(i=0;i<num_of_uzlov_v_seti;i++)	  
       {
@@ -1216,7 +1141,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
     			  {	  
     			  if(b[j]==(UINT8)num_pari[t].soedinen_s_ipaddr)
     			  {
-    				  printk("sovpalo i=%d|j =%d\n\r",i,j);
+    				  //printk("sovpalo i=%d|j =%d\n\r",i,j);
     				  adj_matrix[i][j]=1;  
     			  }
     			  /*else
@@ -1233,6 +1158,8 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   
   }
   
+  
+  /*
   for(i=0;i<num_of_uzlov_v_seti;i++)
   {
 	  
@@ -1242,24 +1169,12 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	 }
 	 
   }
-  
-  /*Распечатываем обраьный массив*/
-  /*
-  for(j=0;j<3;j++)
-  {
-	  
-	 printk("array_j[j]=%d,=%d\n\r",array_j[j],j);
-  }*/
+  */
   
    //пихаем наш массив в Дейкстру
-   dijkstra(0);
-  
-   printk("--------------------STOP-----------------------------\n\r");
-   
-
-   
-   
-   
+   //dijkstra(0);
+   //packet_from_marsrutiazation=1;
+  // printk("--------------------STOP_packet_from_marshrutization_OK=%d------\n\r",packet_from_marsrutiazation);
    
   //распечатываем неотсортированных элементов просто тупо набор данных массив целых числе ip адресов
   /*
@@ -1268,7 +1183,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  printk("neotsort_mas =%x\n\r",araay_of_ip_sviazei[i]);
   }
   */
-    
+
   //Распечатываем пары связности
   /*
   for(i=0;i<num_of_svyazi;i++)
@@ -1276,6 +1191,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  printk("I=[%d],ip_addr=0x%x,mk8_vihod=%d,posad_mesto=0x%x,soed_s_ipaddr=0x%x\n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].posad_mesto,num_pari[i].soedinen_s_ipaddr);  
   }
   */
+  
   //распечатывем пары
   /*
   for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
@@ -1284,6 +1200,7 @@ for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
   }
   */
  
+#endif
   iteration++;
   return 0;
 	
@@ -1373,35 +1290,7 @@ UINT8  n = 4 ;       //количество элементов в массиве
                 printk("neotsort_mas =%x\n\r",a[i]);
                 }
                 */
-           
-                
-#if 0         
-                /*Заполнение массивов нулями да делаем memset потом*/
-                for(i=0;i<count;i++)
-                {
-                	
-             
-                	
-                }
-                ////////////////////////////////////////
-                for(i=0;i<k;i++)
-                {
-                
-        
-                }
-                //////////////////////////////////////
-               
-                /*
-                for(i=0;i<count;i++)
-                {
-  	
-                }
-                */
-
-
-#endif       
-                
-                
+                          
                 ////////////////////////////////// 
                 ////////выводим на печать////////
                 
@@ -1424,17 +1313,6 @@ UINT8  n = 4 ;       //количество элементов в массиве
  */
 	
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**************************************************************************************************
