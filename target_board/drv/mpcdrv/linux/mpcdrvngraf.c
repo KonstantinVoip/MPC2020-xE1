@@ -948,52 +948,38 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
-
-  //Что нам нужно для Алгоритма Дейкстра?
-  //UINT16 num_of_setevich_elementov = 3;
-  UINT16 l_iter=0;
   
-  //Конец для Дейкстры
-  UINT8 smeshenie_grisha_scluz=0;
   UINT32 data_graf_massive[32]; //128 bait 4 *32 bait
+  UINT8  soed_mk8_tdm_from_to[10][10];
+  
+  
   UINT16 razmer_data_graf_massive=0;
+  UINT8  smeshenie_grisha_scluz=0;
+   
   __be32  l_ipaddr=0;
+  UINT8   my_posad_mesto=0;
+  UINT8   my_mk8_vihod=0;
   __be32  sosed_ipaddr=0;
-  __be32  last_ip_addr=0;
-  __be32  curr_ipaddr=0;
-   static UINT16 iteration=0;
-   UINT16 i,j,t;
-  // UINT16 m=0;  //структура с текущим мультиплексором
-   
-   UINT8 my_posad_mesto=0;
-   UINT8 sosed_posad_mesto=0;
-   UINT8 my_mk8_vihod=0;
-   UINT8 sosed_mk8_vyhod=0;
-   
-   UINT16 number_of_multipleksorov_in_packet=0;
+  UINT8   sosed_posad_mesto=0;
+  UINT8   sosed_mk8_vyhod=0;
+    
    //здесь храниться длинна одной связи либо в байтах либо в количестве элементов по 4 байта каждый; 
    UINT16 dlinna_pari_sviaznosti_byte=0;
-   //Для МК-8 8 пар связности для одного сетевого элемента.
-   UINT16 kolichestvo_par_v_odnom_setevom_elemente=8;
-   //Текущее количество пар для одного сетевого элемента
-   UINT16 tek_kolichestvo_par_dli_dannogo_elementa=0;
-   //количество сетевых элементов (узлов в пакете) для построения матрицы коммутации
-   UINT16 kolichestvi_setevigh_elementov_in_packet=0;
    //Общее количество пар связности в пакете по размеру пакета
    UINT16 number_of_par_sviaznosti_in_packet=0;
-   //Количество сетевых элементов в пакете
-   UINT16 max_kolichestvo_setvich_elementov_onpacket=0;
-  
-   //////////////////////////////////////Дополнительные параметры////////////////////
    //всего количество связей в пакете
-   UINT16 num_of_svyazi=0;
+   UINT16 num_of_svyazi_all=0;
    //количество узлов в сети
    UINT16 num_of_uzlov_v_seti=0;
-   //
-   UINT8  araay_neotsort_of_ip_sviazei[16];
    
+   static UINT16 iteration=0;
+   UINT16 i,j,t;
    
-   unsigned long flags;
+   //Переменные для подсчёта паралельных связей
+   UINT16 num_of_paralel_sviazy=0;
+   UINT16 max_of_mk8_tdm_dir=10;
+   
+   memset(soed_mk8_tdm_from_to,0x00,sizeof(soed_mk8_tdm_from_to));
    
    printk("------------------Clear_matrica---------%d-------------\n\r",iteration);
      //printk("matrica_packet_recieve=%d\n\r",iteration);
@@ -1025,13 +1011,13 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 	
 
-    printk("MATRICA:\n\r");  
+    printk("MATRICA:");  
 	//Первые 8 байт это название Гришиного протокола,следующие 4 байт это ip адрес шлюза. = 12 байт
 	smeshenie_grisha_scluz=(4+8);  //смещение 12 байт или 6 элементов в hex;
 	razmer_data_graf_massive=in_size-42-smeshenie_grisha_scluz; //размер данных в массиве
 	if(razmer_data_graf_massive<12){printk("?bad razmer_data_graf_massive =%d bait?\n\r",razmer_data_graf_massive);return -1;}
 	
-	printk("razmer_data_graf_bait_in_packet=%d|\n\r",razmer_data_graf_massive);
+	printk("size_all_par_bait_in_packet=%d|",razmer_data_graf_massive);
 	
 	
 	//21 байт это начало данных.+смещение получаем массив пар связности
@@ -1047,11 +1033,13 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	 *итого получаеться 12 сетевых элемeнтов по 10 связей в каждом. 
 	 */
 	  number_of_par_sviaznosti_in_packet=razmer_data_graf_massive/DLINNA_SVYAZI; 
-	  printk("num_par_svyazi_in_packet=%d\n\r",number_of_par_sviaznosti_in_packet);
-      //Рабочая штука
+	  printk("num_par_in_packet=%d\n\r",number_of_par_sviaznosti_in_packet);
+      
+	  //Рабочая штука
 	  u8 count =0;
+	  u8 num_paralel_svyaz=0;
 	  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
-	  { 
+	  {
 	  // printk("first =%d,second =%d|\n\r",0+count+i,1+i+count);	  
       //#if 0 
 	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_posad_mesto,&sosed_mk8_vyhod);
@@ -1065,38 +1053,70 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  num_pari[1+i+count].mk8_vihod=sosed_mk8_vyhod;
 	  num_pari[1+i+count].posad_mesto=sosed_posad_mesto;
 	  num_pari[1+i+count].soedinen_s_ipaddr=l_ipaddr; //С кем соединён второй
-      dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
+      
+	  //Дополнительно ищем паралельные вхождения в каждой паре связности 
+	  //и говорим есть ли паралельные вхождения в данно  пакете.
+	  
+	  //Заполняю матрицу коммутации МК8 только для своего ip
+	  
+	  //Случай соединения с самим собой
+	  if(l_ipaddr==my_current_kos.ip_addres)
+	  {  
+		//заполняем матрицу соединений МК-8
+		//printk("+my_mk8_vihod=%d|sosed_mk8_vyhod=%d\n\r",my_mk8_vihod,sosed_mk8_vyhod);
+	    soed_mk8_tdm_from_to[my_mk8_vihod][sosed_mk8_vyhod]=(UINT8)sosed_ipaddr;
+	  	    
+	   }
+
+	  	  
+	  
+	  dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
       count=1+i;
       //#endif
 	  }//end for cicle
  
   //Количество всего полных связей в пакете
-  num_of_svyazi=number_of_par_sviaznosti_in_packet*2;
+    num_of_svyazi_all=number_of_par_sviaznosti_in_packet*2;
+  
+  //Выводим матрицу соединенй МК8 пока для локального меня
   
   /*
-  for(i=0;i<num_of_svyazi;i++)
+  for(i=0;i<max_of_mk8_tdm_dir;i++)
   {
-	  printk("i[%d]|ip_addr=0x%x|mk8_vihod=%d|posad_mesto%d|soedinen_s_ipaddr=0x%x \n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].posad_mesto,num_pari[i].soedinen_s_ipaddr);
 	  
+	 for(j=0;j<max_of_mk8_tdm_dir;j++)
+	 {    	  
+	   if(soed_mk8_tdm_from_to[i][j])
+	   {	  
+	   printk("from %d->to %d,val=%d\n\r",i,j,soed_mk8_tdm_from_to[i][j]);
+	   }
+	  
+	 }
+	 
   }
   */
   
-//#if 0
   
-  //num_of_uzlov_v_seti=3;
+  //Выводим полностью все cвязи которые у нас получились
+  /*
   for(i=0;i<num_of_svyazi;i++)
   {
-	  araay_neotsort_of_ip_sviazei[i]=(UINT8)num_pari[i].ip_addr; 
+	  printk("i[%d]|ip_addr=0x%x|mk8_vihod=%d|soedinen_s_ipaddr=0x%x \n\r",i,num_pari[i].ip_addr,num_pari[i].mk8_vihod,num_pari[i].soedinen_s_ipaddr);  
   }
+  */
+  
+
+  //Алгоритм подсчётка количества сетевых элементов и сортировка их в порядке возрастания присвоение порядкового номера
+  //каждому сетевому элементу пока работаем по младшему разряду ip адреса a.b.c.255 только потом нужно модифицировать
+  //наш алгоритм
+  /*Доработать Алгоритм для всех IP адресов */
   UINT8  c[255],b[255];
   UINT16 k=0;
   UINT8  max_v=255;
-  UINT8  matrica_sviaznosto[4][4];
-  UINT8  dejcstar_input_matrix[3][3];
   
-  //Алгоритм подсчётка количества сетевых элементов и сортировка их в порядке возрастания
   for(i=0;i<max_v;i++){c[i]=0;}
-  for(i=0;i<num_of_svyazi;i++){c[araay_neotsort_of_ip_sviazei[i]]++;}
+  //for(i=0;i<num_of_svyazi;i++){c[araay_neotsort_of_ip_sviazei[i]]++;}
+  for(i=0;i<num_of_svyazi_all;i++){c[(UINT8)num_pari[i].ip_addr]++;}
   
   for(i=0;i<max_v;i++)
   {
@@ -1106,17 +1126,78 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 		  {
 		  b[k++]=i;  
 		  num_of_uzlov_v_seti++;
-		  //printk("i=%d|j=%d\n\r",i,j);
 		  }
 	  } 
 	  
   }
+  
+  //Подсчитываем количество паралельных связей от текущего мультиплексора
+  
+  
+  
+  
+  //Выводим полностью массив b[k] cоответсвующими порядковыми аресами мультплексора
+  //каждому IP адресу соответсвует свой номер узла 0,1,2,3.
+  printk("num_of_MP_node=%d|\n\r",num_of_uzlov_v_seti);
+
+  for(i=0;i<num_of_uzlov_v_seti;i++)
+  {  
+      for(j=0;j<max_of_mk8_tdm_dir;j++)
+      {
+ 	  
+    	  for(t=0;t<max_of_mk8_tdm_dir;t++)
+    	  {	  
    
-  printk("num_of_MP_node=%d|",num_of_uzlov_v_seti);
-  //распечатываем отсортированный массив
-  printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi);
+    	    if(b[i]==soed_mk8_tdm_from_to[j][t])
+    	    {
+    	    	  printk("from %d->to %d,val=%d\n\r",j,t,soed_mk8_tdm_from_to[j][t]);
+    	    	  printk("num_uzla= %d|ip_addr=%d |paralel_svyze=%d\n\r",i,b[i],num_of_paralel_sviazy);  
+    	    	  num_of_paralel_sviazy++;
+    	          //printk("\n\r");
+    	    	  //заполняем структуру количество паралельных связей для моего мультплексора
+    	          
+    	    
+    	    }
+    	    	
+    	  }
+     
+      }
+	  
+	  
+	  
+	  
+	  //if()
+	  
+  
+  }
+  
+  
+  
+  
+  
+  //Теперь нужно определить кто я (порядковый номер) и присоить его
+  //для расчёта алгоритма дейкстры о
+  
+  printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi_all);
+  
+  /*
+	ret = kmalloc(sizeof(struct mpcfifo), GFP_MASK);
+	if (!ret)
+	{	
+		return(NULL);
+	}
+  */	
+ //Теперь следующий вопрос это обработка паралельных связей и петля сам на себя через 
+ //один МК-8.
+  
+  
+  
+  
+  
+  //Алгоритм построения матрицы коммутации
+  
 #if 0  
-  for(t=0;t<num_of_svyazi;t++)
+  for(t=0;t<num_of_svyazi_all;t++)
   {
   	  //printk("para_svyazi =%d|",t);
   	  //printk("ip.addr =%d , b[i] =%d \n\r",(UINT8)num_pari[t].ip_addr,b[i]);
