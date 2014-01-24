@@ -104,7 +104,7 @@
 //Start Ethernet Initialization
 void InitIp_Ethernet();
 //Stop  Ethernet Initialization
-void StopIp_Ethernet();
+
 
 /*struct net_device * get_tsec0();
 struct net_device * get_tsec1();
@@ -113,10 +113,17 @@ struct net_device * get_virt_tsec3();
 struct net_device * get_virt_tsec4();
 */
 
-void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size,const u16 *mac_header);
-void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_dev);
-void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
+//void p2020_get_recieve_packet_and_setDA_MAC(const u16 *in_buf,const u16 in_size,const u16 *mac_header);
+//void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_dev);
+//void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 //Recieve and transmit packet on ethernet
+
+//Transmit Tsec functions
+void send_packet_buf_to_tsec0(u16 buf[758],u16 len);
+void send_packet_buf_to_tsec1(u16 buf[758],u16 len);
+void send_packet_buf_to_tsec2(u16 buf[758],u16 len);
+
+
 
 
 

@@ -223,8 +223,8 @@ extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_add
 
 //extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
 //extern void nbuf_get_datapacket_dir0 (const u16 *in_buf ,const u16 in_size);
-extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
-extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
+//extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
+//extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
 /*Функции события готовность к чтению из ПЛИС */
 extern void Event_TDM1_direction_READ_READY(void);

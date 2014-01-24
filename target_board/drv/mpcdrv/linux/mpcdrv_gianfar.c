@@ -108,7 +108,7 @@ static UINT16 my_kys_mac1_addr[12]={0x0025,0x0100,0x1f05,0x01ff,0xffff,0xff00};
 
 struct net_device *tsec0_dev,*tsec1_dev,*tsec2_dev;
 
-static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
+//static void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev);
 static struct net_device *tsec_get_device_by_name(const char *ifname);
 static void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev);
 
@@ -126,8 +126,6 @@ static struct ethdata_packet1
 	u16 length;
     u16 state;
 };
-
-
 static struct ethdata_packet1 transmit_tsec_packet;
 
 
@@ -135,17 +133,13 @@ static struct ethdata_packet1 transmit_tsec_packet;
 Syntax:      	    void InitIp_Ethernet()
 Parameters:     	
 Remarks:			Initialize ethernet tsec1,tsec2,tsec3 and virtual tsec function
-
 Return Value:	    
-
 ***************************************************************************************************/
 void InitIp_Ethernet()
 {
 const char *ifname0="eth0";
 const char *ifname1="eth1";
 const char *ifname2="eth2";
-int  init_status_tsec2 =0;
-int  init_status_tsec1 =0;
 
 
 //tsec 0 ,tsec1 ,tsec2 ethernet controller
@@ -164,26 +158,10 @@ if(!tsec1_dev){printk("No Device Found %s\n\r",ifname1);}
 tsec2_dev=tsec_get_device_by_name(ifname2);
 if(!tsec2_dev){printk("No Device Found %s\n\r",ifname2);}
 
-
-//Set multicast configuration for  1 and 2 device
+//Set multicast configuration for  1 and 2 device 3 devices
 p2020_tsec_set_hardware_reg_configuration(tsec0_dev);
 p2020_tsec_set_hardware_reg_configuration(tsec1_dev);
 p2020_tsec_set_hardware_reg_configuration(tsec2_dev);
-
-
-//Start GIANFAR DRIVER eth1.
-//int	(*ndo_init_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_init;
-//init_status_tsec1=(*ndo_init_tsec1)(tsec1_dev);
-//printk("+!Start_ETH1_status= %d!+\n\r",init_status_tsec1);
-//Start GIANFAR DRIVER eth2.
-/*
-int	(*ndo_init)(struct net_device *dev) = tsec2_dev->netdev_ops ->ndo_init;
-init_status_tsec2=(*ndo_init)(tsec2_dev);
-printk("+!Start_ETH2_status= %d!+\n\r",init_status_tsec2);
-*/
-//p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
-
-
 
 }
 
@@ -192,7 +170,6 @@ Syntax:      	    static void p2020_tsec_set_hardware_reg_configuration
 Parameters:     	
 Remarks:	        set p2020 etsec registers configurations for hardware	
 Return Value:	    
-****************************************
 ***************************************************************************************************/
 void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 {
@@ -200,18 +177,13 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar  *regs = priv->gfargrp[0].regs;
 	u32 tempval;
-	
 
-	
 	// Set RCTRL to PROMISC mode
-
 	printk("++Enable Promis mode for eth2+\n\r");
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
-	
-	
-	
+		
 /*
 	printk("++Enable Multicast Frame for eth2\n\r++");
 	//Set multicast frames incoming packet
@@ -235,6 +207,196 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	
 }
 
+
+
+/**************************************************************************************************
+Syntax:      	    void send_packet_buf_to_tsec0(u16 buf[758],u16 len)
+Parameters:     	
+Remarks:	        set p2020 etsec registers configurations for hardware	
+Return Value:	    
+***************************************************************************************************/
+void send_packet_buf_to_tsec0(u16 buf[758],u16 len)
+{
+	
+	struct gfar_private *priv = netdev_priv(tsec0_dev);
+	struct gfar_priv_rx_q *rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+	struct rxbd8 *bdp = rx_queue->cur_rx;
+	struct sk_buff *skb=NULL;
+	__u8 *eth;
+	__be16 protocol = htons(ETH_P_IP);
+	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= tsec0_dev->netdev_ops->ndo_start_xmit;		
+	u16 ret;
+	skb = netdev_alloc_skb(tsec0_dev, len);
+	  if (!skb) 
+	  {
+		tsec0_dev->stats.rx_dropped++;
+		priv->extra_stats.rx_skbmissing++;
+		printk("?tsec0_cannot allocate Ethernt SKB buffer?\n\r");
+		return;
+	  }
+	  //copy received packet to skb buffer 
+	  memcpy(skb->data, buf, len);
+	  //Reserve for ethernet and IP header 
+	  eth = (__u8 *) skb_push(skb, 14);
+	  
+	  memcpy(eth, buf, 12);
+	  *(__be16 *) & eth[12] = protocol;
+	 
+	  skb_put(skb, len);
+	  // Tell the skb what kind of packet this is 
+	  skb->protocol = eth_type_trans(skb, tsec0_dev);
+	  //////////////////Create and Fill packet to Send///////////////
+	  ret = (*xmit)(skb, tsec0_dev);
+	  
+	  /* Значения ret возвращаемые функцией
+	   * #define NETDEV_TX_OK 0           driver took care of packet 
+       * #define NETDEV_TX_BUSY 1         driver tx path was busy
+       * #define NETDEV_TX_LOCKED -1      driver tx lock was already taken
+	   */
+	  if(ret==0)
+	  {
+		  
+	  }
+	  else
+	  {
+		  printk("?tsec0_transmit_failed,ret=%d\n\r?\n\r",ret);
+	  }
+	   
+	  if (NET_RX_DROP == ret) 
+	  {priv->extra_stats.kernel_dropped++;} 
+	  else {
+	  // Increment the number of packets 
+	  tsec0_dev->stats.rx_packets++;tsec0_dev->stats.rx_bytes += len;}
+	   
+}
+
+
+/**************************************************************************************************
+Syntax:      	    void send_packet_buf_to_tsec1(u16 buf[758],u16 len)on
+Parameters:     	
+Remarks:	        set p2020 etsec registers configurations for hardware	
+Return Value:	    
+***************************************************************************************************/
+void send_packet_buf_to_tsec1(u16 buf[758],u16 len)
+{
+
+	struct gfar_private *priv = netdev_priv(tsec1_dev);
+	struct gfar_priv_rx_q *rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+	struct rxbd8 *bdp = rx_queue->cur_rx;
+	struct sk_buff *skb=NULL;
+	__u8 *eth;
+	__be16 protocol = htons(ETH_P_IP);
+	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= tsec1_dev->netdev_ops->ndo_start_xmit;
+	u16 ret;
+	skb = netdev_alloc_skb(tsec1_dev, len);
+	  if (!skb) 
+	  {
+		tsec1_dev->stats.rx_dropped++;
+		priv->extra_stats.rx_skbmissing++;
+		printk("?tsec1_cannot allocate Ethernt SKB buffer?\n\r");
+		return;
+	  }
+	  //copy received packet to skb buffer 
+	  memcpy(skb->data, buf, len);
+	  eth = (__u8 *) skb_push(skb, 14);
+	  //
+	  memcpy(eth, buf, 12);
+	  *(__be16 *) & eth[12] = protocol;		
+	  //
+	  skb_put(skb, len);
+	  // Tell the skb what kind of packet this is 
+	  skb->protocol = eth_type_trans(skb, tsec1_dev);
+	
+	  ret = (*xmit)(skb, tsec1_dev);
+	  // Значения ret возвращаемые функцией
+	  // #define NETDEV_TX_OK 0           driver took care of packet 
+      // #define NETDEV_TX_BUSY 1         driver tx path was busy
+      // #define NETDEV_TX_LOCKED -1      driver tx lock was already taken
+	  //
+	  if(ret==0)
+	  {
+		 //printk("SEND_OK\n\r")  ;
+	  }
+	  else
+	  {
+		  printk("?tsec1_transmit_failed,ret=%d\n\r?\n\r",ret);
+	  }
+	   
+	  if (NET_RX_DROP == ret) 
+	  {priv->extra_stats.kernel_dropped++;} 
+	  else {
+	  // Increment the number of packets 
+	  tsec1_dev->stats.rx_packets++;tsec1_dev->stats.rx_bytes += len;}
+     
+
+}
+
+/**************************************************************************************************
+Syntax:      	    void send_packet_buf_to_tsec2(u16 buf[758],u16 len)
+Parameters:     	
+Remarks:	        set p2020 etsec registers configurations for hardware	
+Return Value:	    
+***************************************************************************************************/
+void send_packet_buf_to_tsec2(u16 buf[758],u16 len)
+{
+
+	struct gfar_private *priv = netdev_priv(tsec2_dev);
+	struct gfar_priv_rx_q *rx_queue = priv->rx_queue[priv->num_rx_queues-1];
+	struct rxbd8 *bdp = rx_queue->cur_rx;
+	struct sk_buff *skb=NULL;
+	__u8 *eth;
+	__be16 protocol = htons(ETH_P_IP);
+	netdev_tx_t (*xmit)(struct sk_buff *, struct net_device *)= tsec2_dev->netdev_ops->ndo_start_xmit;	
+	u16 ret;
+	skb = netdev_alloc_skb(tsec2_dev, len);
+	  if (!skb) 
+	  {
+		tsec2_dev->stats.rx_dropped++;
+		priv->extra_stats.rx_skbmissing++;
+		printk("?tsec2_cannot allocate Ethernt SKB buffer?\n\r");
+		return;
+	  }
+	  //copy received packet to skb buffer 
+	  memcpy(skb->data, buf, len);
+	  //Reserve for ethernet and IP header 
+	  eth = (__u8 *) skb_push(skb, 14);
+	  
+	  memcpy(eth, buf, 12);
+	  *(__be16 *) & eth[12] = protocol;
+
+	  skb_put(skb, len);
+	  // Tell the skb what kind of packet this is 
+	  skb->protocol = eth_type_trans(skb, tsec2_dev);
+	  //////////////////Create and Fill packet to Send///////////////
+	  ret = (*xmit)(skb, tsec2_dev);
+	  
+	  /* Значения ret возвращаемые функцией
+	   * #define NETDEV_TX_OK 0           driver took care of packet 
+       * #define NETDEV_TX_BUSY 1         driver tx path was busy
+       * #define NETDEV_TX_LOCKED -1      driver tx lock was already taken
+	   */
+	  if(ret==0)
+	  {
+		  
+	  }
+	  else
+	  {
+		  printk("?tsec2_transmit_failed,ret=%d\n\r?\n\r",ret);
+	  }
+	   
+	  if (NET_RX_DROP == ret) 
+	  {priv->extra_stats.kernel_dropped++;} 
+	  else {
+	  // Increment the number of packets 
+	  tsec2_dev->stats.rx_packets++;tsec2_dev->stats.rx_bytes += len;}
+
+}
+
+
+
+
+
+
 /**************************************************************************************************
 Syntax:      	    void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
 Parameters:     	
@@ -242,8 +404,11 @@ Remarks:			Set DA address my_kos only Input Packet
 Return Value:	    
 
 ***************************************************************************************************/
+#if 0
 void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
 {
+
+	
 	// printk("podmena_mac_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",out_mac[0],out_mac[1],out_mac[2],out_mac[3]);
 	   printk("+++Revert_MAC+++\n\r");
 	  //Подмена MAC заголовков для отправки обратно КY-S;
@@ -253,26 +418,17 @@ void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12])
 	  
 	  
 }
-
-
-
-
-
-
-
-
-
-
 /**************************************************************************************************
 Syntax:      	    p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size
 Parameters:     	
 Remarks:			Set DA address my_kos only Input Packet
 Return Value:	    
-
 ***************************************************************************************************/
 void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_header)
 {
-	 //printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
+
+	
+	//printk("+p2020_get_recieve_packet_and_setDA_MAC+\n\r");
 	 //printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",mac_header[0],mac_header[1],mac_header[2],mac_header[3]);
 	 
 	 //memcpy(in_buf, my_kys_mac1_addr, 6);
@@ -295,12 +451,10 @@ void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_siz
 	 //Send Packet to ethernet eTSEC2
 	 p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
 	//printk("OK\n\r");
-	
-	
-	
+
+	 
 }
-
-
+#endif
 
 /**************************************************************************************************
 Syntax:      	    static inline u16* get_tdmdir_packet_data()
@@ -361,9 +515,12 @@ static struct net_device *tsec_get_device_by_name(const char *ifname)
 /*                        Test1                                       */
 /**********************************************************************/
 
-//#if 0
+#if 0
 void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id)
 {
+
+
+	
 	//Real and Virtual Ethernet devices
 	//eth0,eth1,eth2,eth3,eth4,eth5,eth6.,eth7,eth8;
 	//const char *ifname3="eth2";
@@ -397,10 +554,11 @@ void p2020_get_recieve_virttsec_packet_buf(u16 buf[758],u16 len,u8 tsec_id)
 	p2020_get_from_tdmdir_and_put_to_ethernet(tsec2_dev);
 	}
 	
+
     
 }
 
-//#endif
+
 
 
 /**********************************************************************/
@@ -483,34 +641,11 @@ void p2020_get_from_tdmdir_and_put_to_ethernet(struct net_device *dev)
 		// Increment the number of packets 
 		dev->stats.rx_packets++;dev->stats.rx_bytes += len;}
 	   
-//#endif
+
 
 }
+#endif
 
-
-
-/**************************************************************************************************
-Syntax:      	    void StopIp_Ethernet()
-Parameters:     	
-Remarks:		    Stop ethernet tsec1,tsec2,tsec3 and virtual tsec function
-
-Return Value:	    
-***************************************************************************************************/
-void StopIp_Ethernet()
-{
-	int  stop_status_tsec2 =0;
-	int  stop_status_tsec1 =0;
-
-	//Stop GIANFAR DRIVER eth1.
-	//int	(*ndo_stop_tsec1)(struct net_device *dev) = tsec1_dev->netdev_ops ->ndo_stop;
-	//stop_status_tsec1=(*ndo_stop_tsec1)(tsec1_dev);
-	//printk("+!Stop_ETH1_status= %d!+\n\r",stop_status_tsec1);
-	//Stop GIANFAR DRIVER eth2.
-	int	(*ndo_stop_tsec2)(struct net_device *dev) = tsec2_dev->netdev_ops ->ndo_stop;
-	stop_status_tsec2=(*ndo_stop_tsec2)(tsec2_dev);
-	printk("+!Stop_ETH2_status= %d!+\n\r",stop_status_tsec2);
-	
-}
 
 
 
