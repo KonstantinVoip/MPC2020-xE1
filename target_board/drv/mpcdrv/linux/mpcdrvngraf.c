@@ -61,58 +61,10 @@ static UINT16 who_is_schluz=0;
 
 
 
-static bool adj_matrix[16][16];
-
-
 //
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
-spinlock_t my_lock_djcstra;
-
-
-static u16 ok_170 [32]=
-{
-	0x001b, 0x2180, 0x4923, 0x0050, 
-	0xC224, 0x594E, 0x0800, 0x4500, 
-	0x0032, 0x6355, 0x0000, 0x3F11,
-	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
-	0x784C, 0xE4BA, 0x4650, 0x001E, 
-	0xA06E, 0x546F, 0x706F, 0x2E76,
-	0x312E, 0x6F6B, 0x2E00, 0x0000, 
-	0x0000, 0x0000, 0x0000, 0x0000
-		
-};
-
-static u16 er_170 [32]=
-{
-	0x0050, 0xC224, 0xFF73, 0x7071, 
-	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
-	0x0032, 0x6355, 0x0000, 0x3F11,
-	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
-	0x784C, 0xE4BA, 0x4650, 0x001E, 
-	0xF6C6, 0x546F, 0x706F, 0x2E76,
-	0x312E, 0x6572, 0x6F72, 0x722E, 
-	0x0000, 0x0000, 0x0000, 0x0000
-		
-};
-
-/*
-static u16 ok_171 [32]=
-{
-	0x0050, 0xC224, 0xFF73, 0x7071, 
-	0xBCBE, 0x5F4E, 0x0800, 0x4500, 
-	0x0032, 0x6355, 0x0000, 0x3F11,
-	0xA61C, 0xC0A9, 0x78AA, 0xC0A9,
-	0x784C, 0xE4BA, 0x4650, 0x001E, 
-	0xA06E, 0x546F, 0x706F, 0x2E76,
-	0x312E, 0x6F6B, 0x2E00, 0x0000, 
-	0x0000, 0x0000, 0x0000, 0x0000
-		
-};
-*/
-
-
 ///CURRENT _KYS
 static struct KY_S
 {
@@ -122,19 +74,35 @@ bool   state;
 UINT8  marshrutization_enable; 
 }my_current_kos;
 
+struct commutacii
+{
+	UINT32 ipaddr_sosed[8];
+	UINT8  tdm_direction_sosed[8];
+    UINT8  paralel_sviazi_mk8[8];
+};
 
-/*Структура для мультиплексора */
+
+/*Структура описывающая сетевой элемент для мультиплексора */
 struct ngarf_setevoi_element
 {
 UINT32 nms3_ipaddr;
 UINT32 curr_ipaddr;
 UINT32 gate_ipaddr;
-UINT32 ipaddr_sosed[8];
-UINT8  tdm_direction_sosed[8];
+
+
+//UINT32 ipaddr_sosed[8];
+//UINT8  tdm_direction_sosed[8];
+struct commutacii comm;
+
 UINT8  priznac_shcluzovogo;
-                           //
-                           //нужно добавить ещё пару полей для паралельныхсвязей
+//нужно добавить ещё пару полей для паралельныхсвязей
+UINT16   node;  //порядковый номер узла
+UINT16   puti_k_udalennomy[16];
+
+
 }multipleksor[16];
+
+
 
 struct pari_sviaznosti
 {
@@ -154,10 +122,6 @@ UINT32  soedinen_s_ipaddr;
 __be32  my_kys_ipaddr=0;                         //IP адрес моего КY-S
                                                  //вместо бесконечностей
 
-//заполянем поле в матрице коммутации чтот свзяи по этому направлению нет
-UINT32 no_current_napr_mk8_svyaz= 0xffffffff;
-UINT32 est_current_napr_mk8_svyaz=0x00000001;
-
 ////////////////////////////////////////////////
 #define DLINNA_SVYAZI   12   /*длинна цепочки приёмник источник в пакете на 12 байт
                                в неё входит узел(наш мультиплексор и куда какому мультплексору)                     
@@ -166,17 +130,9 @@ UINT32 est_current_napr_mk8_svyaz=0x00000001;
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					                             */
 /*****************************************************************************/
-//static void Algoritm_puti_udalennogo_ip_and_chisla_hop();
 static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto,u8 *mk8_sosed_vyhod);
-
-static void dijkstra(int start);
-/*функция Алгоритма сортировки подсчётом */
-static void calculation_sort(const u8 *array,const u16 count);
 /*Функция новая для Дейкстры с динамическим выделением памяти */
 static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node);
-
-
-
 
 
 
@@ -185,75 +141,61 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node);
 /*	PRIVATE GLOBALS							     */
 /*****************************************************************************/
 #define INT_MAX  0xffff
-
-//количество узлов в сети
-//static const int N =4;
 /*****************************************************************************/
 /*	PUBLIC GLOBALS							     */
 /*****************************************************************************/
 /*Добавил дома Алгоритм Дейкстры*/
 /*соединение для нашей схемы*/
-//Матрица соединенй  исходные данные для 4 узлов
-#if 0
+//Матрица соединенй  исходные данные для 4 узлов c петлёй как Сызранцев требует
+//#define DEBUG_DEJCSTRA   0
+//массив узлов в отсортированном порядке.
+UINT8  b[255];
 
-static bool adj_matrix[4][4]=
+//Размер матрицы коммутации пока статиком сделан
+#ifdef DEBUG_DEJCSTRA
+static bool adj_matrix[16][16];
+#endif
+
+
+
+
+//#if 0
+
+static bool adj_matrix[5][5]=
 {
 // ---0--|---1--|-2-|---3---|  
-   0    ,1    ,1   ,0,
-   1    ,0    ,1   ,0,
-   1    ,1    ,0   ,1,
-   0    ,0    ,1   ,0 
+   0    ,1    ,1   ,0,	0,
+   1    ,0    ,1   ,0,	0,
+   1    ,1    ,0   ,1,	0,
+   0    ,0    ,1   ,0,	1,
+   0    ,0    ,0   ,1,	0
+
 };
 
 
 /*Матрица смежностей(стоимостей)для алгоритма Дейкстра
  исходные данные для построение путей
 */
-static unsigned short int cost[4][4]=
+static unsigned short int cost[5][5]=
 {
  
 // ---0--|---1--|-2-|---3---|  
-   0     ,10     ,10 ,0xffff,
-   10     ,0     ,10 ,0xffff,
-   10    ,10    ,0  ,10,
-   0xffff,0xffff,10 ,0 
+   0     ,10     ,10      ,0xffff,0xffff , 
+   10     ,0     ,10      ,0xffff,0xffff,
+   10    ,10     ,0       ,10    ,0xffff,
+   0xffff,0xffff ,10      ,0     ,10,
+   0xffff,0xffff ,0xffff  ,10    ,0
+
 };
 
 //массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний
-unsigned short dist[4]={0xffff,0xffff,0xffff,0xffff};
+//unsigned short dist[4]={0xffff,0xffff,0xffff,0xffff};
 //массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока
-unsigned short used[4]={0,0,0,0};
+//unsigned short used[4]={0,0,0,0};
 //массив кратчайших путей
-signed short C[4]={-1,-1,-1,-1};
-#endif
+//signed short C[4]={-1,-1,-1,-1};
 
-
-/*
-bool adj_matrix[3][3]=
-{
-//-0--|---1--|-2-|  
-   0    ,0    ,1, 
-   0    ,0    ,1,
-   1    ,1    ,0 
-};
-
-unsigned short int cost[3][3]=
-{
- 
-// ---0--|---1--|---2---|  
-   0,0xffff,10,
-   0xffff,0,10,
-   10,10,0 
-};
-*/
-
-//массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний
-//unsigned short dist[3]={0xffff,0xffff,0xffff};
-//массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока
-//unsigned short used[3]={0,0,0};
-//массив кратчайших путей
-//signed short C[3]={-1,-1,-1};
-
+//#endif
 
 
 
@@ -338,8 +280,12 @@ UINT8  priznac_scluz=255;//состояние не опредлено
 
 
 
-
-
+/**************************************************************************************************
+Syntax:      	    void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
+Parameters:     	беру от ky-s номер шлюза
+Remarks:			timer functions 
+Return Value:	    1  =>  Success  ,-1 => Failure
+***************************************************************************************************/
 void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address)
 {	
 	//printk("virt_TSEC_|0x%04x|0x%04x|0x%04x|0x%04x\n\r",buf[0],buf[1],buf[2],buf[3]);
@@ -364,8 +310,14 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
 	u16 l_i=0,l_j=0;
 	int i;
 	bool in_tree[16] = {false}; //num_of_node
+	
+	
+#ifdef DEBUG_DEJCSTRA 
 	//нужно заполнять тоже в процессе работы
 	unsigned short int cost[16][16];
+#endif
+	
+	
 	//массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний val= 0xffff
 	unsigned short dist[16]={0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
 	//массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока  val = 0
@@ -384,7 +336,8 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
     //смежные элементы
     UINT16 cost_smegnii_elementi=0x0000;
         
-	
+#ifdef DEBUG_DEJCSTRA 	
+    
     for(l_i=0;l_i<num_of_node;l_i++)
     {
     	    	
@@ -409,7 +362,7 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
     	}	
     	
     }
-    
+#endif   
     
     //выводим на печать
     /*
@@ -476,114 +429,108 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
 	   for (i=0; i<num_of_node; i++)
 	   {
 	   
-		   //C ->матрица стоимостей
-	        if (i!=a && cost[C[i]][i]!=NULL)
+		    //C ->матрица стоимостей
+	        //Количество прыжков (расстояние) до сетевого элемента 10 = 1 прыжок
+		    if (i!=a && cost[C[i]][i]!=NULL)
 	        {
+	        	
+		    	//C[i] ->массивы где храниться последняя посещённая вершина куда нам нужно идти
+		    	
+		    	printk("i=%d,dist[i]=%d,C[i]=%d\n\r",i,dist[i],C[i]);
+		    	multipleksor[curr_node].puti_k_udalennomy[i]=C[i];
+		    	
+		    	
+		    	
+		    	//if (dist[i]==30)
+		    	//{
+		    	 //	multipleksor[curr_node].puti_k_udalennomy[i]=
+		    		
+		    	//}
+		    	
+
+		    	//массив кратчайших расстояний на данном шаге до вершины i в начальный момент нет расстояний val= 0xffff
+		    	//unsigned short dist[16]
+		    	//массив посещённых вершин в начальный момент заполнеы нулями никого не посетили пока  val = 0
+		    	//unsigned short used[16]
+		        //массив кратчайших путей val =-1
+		    	//signed short C[16] 	
+		    	/*
 
 	          	if(dist[i]==10)
 	          	{
-	          	  printk("Ot MP[%d] -> MP[%d] hop = %d \n\r",curr_node,i,dist[i]);
+	          	  //printk("Ot MP[%d] -> MP[%d] hop = %d \n\r",curr_node,i,dist[i]);
+	          	  //b[255]
+	          	  //multipleksor[curr_node].comm.ipaddr_sosed[m]=b[i];
 	          	}
 	        	
 	        	if(dist[i]==20)
 	          	{
-	          	 printk("Ot MP[%d] -> MP[%d] ->MP[%d]  hop = %d \n\r",curr_node,C[i],i,dist[i]);	
+	        	  //printk("Ot MP[%d] -> MP[%d] ->MP[%d]  hop = %d \n\r",curr_node,C[i],i,dist[i]);	
+	             
+	        	  //multipleksor[curr_node].comm.ipaddr_sosed[m]=b[i];
+	          	
+	          	}
+	        
+	        	if(dist[i]==30)
+	          	{
+
+	          	}
+	          	
+	        	if(dist[i]==40)
+	          	{
+
 	          	}
 	        	
+	        	if(dist[i]==50)
+	          	{
+
+	          	}
+	        	
+	        	
+	        	if(dist[i]==60)
+	          	{
+
+	          	}
+	        	
+	        	if(dist[i]==70)
+	          	{
+
+	          	}
+	        	
+	        	
+	        	if(dist[i]==80)
+	          	{
+
+	          	}
+	        	
+	        	if(dist[i]==90)
+	          	{
+
+	          	}
+	        	if(dist[i]==100){}
+	        	*/
 	        // printk("from %d to %d =cost %d\n\r",curr_node,i,dist[i]);
 	        // printk("i=%d,C[i]=%d\n\r",i,C[i]);
 	        }
-
 	    // printk("i=%d,C[i]=%d\n\r",i,C[i]);  
-	        
-	   }
-    
-    
-    
-    
-    
-	return 1;
+	   }//end dejcstra commutation
+       //Восстанавливаем путь назад
+	   
+
+
+
+
+   //printk("i=%d,  %d->\n\r",i,multipleksor[curr_node].puti_k_udalennomy[i]);
+	   
+	
+   
+	   
+return 1;
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**************************************************************************************************
-Syntax:      	    static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip)
-Parameters:     	parse odny pary vhogdenia
-Remarks:			timer functions 
-
-Return Value:	    1  =>  Success  ,-1 => Failure
-
-***************************************************************************************************/
-static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto ,u8 *mk8_sosed_vyhod)
-{
-
-      static iteration =0;
-	__be32  l_ipaddr=0;
-    __be32  l_sosed_ipaddr=0;
-     UINT16 l_first_polovinka_sosed=0;
-     UINT16 l_last_polovinka_sosed =0;
-	 UINT8  l_my_posad_mesto=0;
-	 UINT8  l_my_mk8_vihod=0;
-	 UINT8  l_sosed_posad_mesto=0; 
-	 UINT8  l_sosed_mk8_vihod=0;
-
-	 
-	//IP адрес источника
-	l_ipaddr  = in_sviaz_array[0]; 	
-	//посадочное место
-	l_my_posad_mesto= (UINT8)(in_sviaz_array[1]>>24);
-	//номер выхода МК8
-	l_my_mk8_vihod  =	(UINT8)(in_sviaz_array[1]>>16); 
-    //Находим IP адрес соседа
-    l_first_polovinka_sosed=(UINT16)in_sviaz_array[1];
-    l_last_polovinka_sosed =(UINT16)(in_sviaz_array[2]>>16);
-	l_sosed_ipaddr  = l_first_polovinka_sosed;
-	l_sosed_ipaddr  = (l_sosed_ipaddr<<16); 
-	l_sosed_ipaddr = l_sosed_ipaddr +l_last_polovinka_sosed;
-	
-	l_sosed_posad_mesto =(UINT8)(in_sviaz_array[2]>>8); 
-	l_sosed_mk8_vihod   =(UINT8)(in_sviaz_array[2]);
-	
-	
-	//printk("l_sosed_posad_mesto= 0x%x\n\r",l_sosed_posad_mesto);
-	
-	//printk("l_sosed_mk8_vihod=%d\n\r",l_sosed_mk8_vihod);
-	//
-	//printk("\n\r");
-	// printk("iter=%d->>SOSED_IP_ADDR=0x%x->mk8_vihod=%d \n\r",iteration,l_sosed_ipaddr,l_my_mk8_vihod);
-	  
-	  //printk("|array[2]=0x%x \n\r+",in_sviaz_array[2]);
-	
-	 //printk("L_MY_MPS_SOSED>>first_polovinka=0x%x|last_polovinka_=0x%x+\n\r",l_first_polovinka_sosed,l_last_polovinka_sosed);
-	 //printk("L_perv_element_dejcstra= 0x%x>>my_posad_mesto=%d>>>my_mk8_vihod=%d+\n\r",l_ipaddr,l_my_posad_mesto,l_my_mk8_vihod);
-	
-	//Присваиваем назад данные
-	*my_ip=l_ipaddr;
-	*posad_mesto=l_my_posad_mesto;
-	*mk8_vyhod=l_my_mk8_vihod;
-	*sosed_ip=l_sosed_ipaddr;
-    *mk8_sosed_vyhod=l_sosed_mk8_vihod;
-    *sosed_posad_mesto=l_sosed_posad_mesto;
-    
-     //printk("iter=%d\n\r",iteration);
-	 iteration++;
-}
 
 /**************************************************************************************************
 Syntax:      	    void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u16 priznak_kommutacii)
@@ -670,9 +617,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
     			  else
     			  {	
     			  //printk("!noroutetab_pack_scluz_otNMS3_send->kys-s\n\r");
-    			  
     			   send_packet_buf_to_tsec1(in_buf,in_size);
-    			  //p2020_get_recieve_virttsec_packet_buf(in_buf,in_size,1);
     			  }
     	        	
     		  }
@@ -1129,9 +1074,7 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
 Syntax:      	    void ngraf_packet_for_my_mps(skb->data ,(uint)skb->len)
 Parameters:     	void data
 Remarks:			Пакет с маршрутизацией для данного МПС 
-
 Return Value:	    1  =>  Success  ,-1 => Failure
-
 ***************************************************************************************************/
 bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 {
@@ -1187,14 +1130,14 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     memcpy(&nms3_ip_addres,&in_buf[13],4); 
 	if(nms3_ip_addres==0){printk("?bad nms3_ip_addres =0?\n\r");return -1;}
 	printk ("NMS3_ip=<0x%x>|",nms3_ip_addres);
-	//multipleksor[0].nms3_ipaddr=nms3_ip_addres;
+	
 
 	//memcpy(&protocol_version,&in_buf[13],4);
 	//printk ("NMS3_protocol_version =0x%x>\n\r",protocol_version);
 	memcpy(&scluz_ip_addres,&in_buf[25],4);
 	printk ("SCHLUZ_ip=<0x%x>|",scluz_ip_addres);
 	if(scluz_ip_addres==0){printk("?bad scluz_ip_address =0?\n\r");return -1;}
-	//multipleksor[0].gate_ipaddr=scluz_ip_addres;
+	
 	
 	if(my_current_kos.ip_addres==0){printk("?bad current_kos.ip_addres exit=0?\n\r");return -1;}
 	printk("CURR_ip=<0x%x>\n\r",my_current_kos.ip_addres);
@@ -1205,14 +1148,12 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	{ 
 	printk("<MP_Scluz>\n\r");
 	priznac_scluz=1;
-	//multipleksor[0].priznac_shcluzovogo=1;
 	}
 
 	else
 	{
 	printk("<MP_Element>\n\r");
 	priznac_scluz=0;
-	//multipleksor[0].priznac_shcluzovogo=0;
 	}
 	
 	
@@ -1277,6 +1218,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  }
 	  	  
 	  dlinna_pari_sviaznosti_byte=dlinna_pari_sviaznosti_byte+3;
+	  
       count=1+i;
 
 	  }//end for cicle
@@ -1306,7 +1248,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   //каждому сетевому элементу пока работаем по младшему разряду ip адреса a.b.c.255 только потом нужно модифицировать
   //наш алгоритм
   /*Доработать Алгоритм для всех IP адресов */
-  UINT8  c[255],b[255];
+  UINT8  c[255];//b[255];
   UINT16 k=0;
   UINT8  max_v=255;
   
@@ -1336,6 +1278,20 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  } 
 	  
   }
+  
+  ///!!!!Заполняем данные для сетвого элемента мультиплексора!!!!!//
+  multipleksor[who_i_am_node].node=who_i_am_node;
+  multipleksor[who_i_am_node].nms3_ipaddr=nms3_ip_addres;
+  multipleksor[who_i_am_node].curr_ipaddr=my_current_kos.ip_addres;
+  multipleksor[who_i_am_node].gate_ipaddr=scluz_ip_addres;
+  multipleksor[who_i_am_node].priznac_shcluzovogo=priznac_scluz;
+  ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!///
+  
+  //Заполняем структуру сетевого элемента от меня кто есть соседи
+  //multipleksor[who_i_am_node].comm.ipaddr_sosed[m]= 0x888888;
+  //multipleksor[who_i_am_node].comm.tdm_direction_sosed[0]=0x7777;
+  
+  
   UINT8 array_paralel_svuazei[8]; 
   memset(array_paralel_svuazei,0x00,sizeof(array_paralel_svuazei));
   printk("NODE:") ;
@@ -1365,19 +1321,21 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     	    	  // printk("num_uzla= %d|ip_addr=%d |paralel_svyze=%d\n\r",i,b[i],num_of_paralel_sviazy);  
     	    	  num_of_paralel_sviazy++;
     	          //printk("\n\r");
-    	    	  //заполняем структуру количество паралельных связей для моего мультплексора
-    	              
+    	    	  //заполняем структуру количество паралельных связей для моего мультплексора       
     	    }
-    	   
-    	  
     	  }//end for t
     
       }//end for j
 	  array_paralel_svuazei[i]=num_of_paralel_sviazy;
   }//end for uzlov v seti
+  
   printk("PARALEL_ot->%d:\n\r",who_i_am_node);
   printk("node[0]=%d,node[1]=%d,node[2]=%d,node[3]=%d,node[4]=%d\n\r",array_paralel_svuazei[0],array_paralel_svuazei[1],array_paralel_svuazei[2],array_paralel_svuazei[3],array_paralel_svuazei[4]);
     
+ 
+#ifdef DEBUG_DEJCSTRA 	
+  
+  
   //printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi_all);
   //Алгоритм построения матрицы коммутации
   for(t=0;t<num_of_svyazi_all;t++)
@@ -1403,15 +1361,12 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     		      }  
     			  else
     			  {	  
-    			  if(b[j]==(UINT8)num_pari[t].soedinen_s_ipaddr)
-    			  {
+    				  if(b[j]==(UINT8)num_pari[t].soedinen_s_ipaddr)
+    				  {
     				  //printk("sovpalo i=%d|j =%d\n\r",i,j);
     				  adj_matrix[i][j]=1;  
-    			  }
-    			  /*else
-    			  {
-    			  array_j[i][j]=0;
-    			  }*/
+    				  }
+    
     			  }
     			  	  
     		  }
@@ -1421,11 +1376,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
       }
   
   }
-  
+#endif 
   //Алгоритм Дейкстры для расчёта маршрута
-  algoritm_deijcstra_example(who_i_am_node,num_of_uzlov_v_seti);
+  algoritm_deijcstra_example(0/*who_i_am_node*/,5);//*num_of_uzlov_v_seti*/);
 
-  //packet_from_marsrutiazation=1;
+
 
  
   iteration++;
@@ -1433,210 +1388,73 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	
 }
 
-
-
-
-
-
-
 /**************************************************************************************************
-Syntax:      	    static void calculation_sort(u8 * array,u16 count)
-Parameters:     	Сортировка подсчётом количества сетевых элементов в сети
-Remarks:			timer functions 
-Return Value:	    1  =>  Success  ,-1 => Failure
+Syntax:      	    static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip)
+Parameters:     	parse odny pary vhogdenia
+Remarks:			Функция парсинга пар связности
 ***************************************************************************************************/
-static void calculation_sort(const u8 *array,const u16 count)
+static inline void parse_pari_svyaznosti(const u32 *in_sviaz_array,u32 *my_ip,u8 *posad_mesto,u8 *mk8_vyhod,u32 *sosed_ip,u8 *sosed_posad_mesto ,u8 *mk8_sosed_vyhod)
 {
-UINT16 i=0,j=0;	
-UINT16 min=0,max=0;  //минимальный и максимальный элемент во входном массиве  array[1..count]
-UINT16 k=0;          //количество элементов во вспомогательном массиве;	      c[1..k]
-UINT8  c[256];        //вспомогательный массив из k элементов                  с[1..k]
-UINT8  b[256];        //выходная отсортированная последовательность            b[1..count]
-UINT8  a[4]={172,171,172,170};
-UINT8  max_v=255;    //максимальное значение которое принимает массив
-UINT8  n = 4 ;       //количество элементов в массиве
-                 
 
-                /* 
-                for(i=0;i<max_v;i++)
-                {
-                 c[i]=0;	 	
-                }*/
-                
-                memset(&c,0x00,sizeof(c[256]));
-                memset(&b,0x00,sizeof(c[256]));
-                
-                
-                for(i=0;i<n;i++)
-                {
-                  c[a[i]]++;	
-                }
-                k=0;
-                for(i=0;i<max_v;i++)
-                {
-                	for(j=0;j<c[i];j++)
-                	{
-                		
-                		//b[k++]=i;
-                		//array[k++]=i;
-                	    //printk("i=%d|j=%d\n\r",i,j);
-                	    //if(j==0)
-                	    //{
-                	    	//b[k]=i;
-                	       // printk("i=%d,k=%d|b[k++]=%d\n\r",i,k,b[k]) ;
-                	    
-                	    //}
-                		
-                	}
-                	 
-                	
-                }
-                
-                  printk("STOP\n\r");
-                
-               // printk("STOP ,k=%d,a[0]=%d,\n\r",k,b[0]);
-                /*Находим минимальный и максимальный элементы массива*/
-                
-                /*
-                min=max=array[0];
-                for(i=1;i<count;i++)
-                {
-                	if(array[i]<min) min=array[i];
-                	else if (array[i]>max) max=array[i];
-                	
-                }*/
-                
-                //printk("min= %x |max =%x\n\r",min,max);  
-                //vrode_pravilno ++
-                
-                //k=max-min+1; //разброс
-                //printk("k=%x\n\r",k);
-                /*
-                for(i=0;i<count;i++)
-                {
-                printk("neotsort_mas =%x\n\r",a[i]);
-                }
-                */
-                          
-                ////////////////////////////////// 
-                ////////выводим на печать////////
-                
-                /*
-                for(i=0;i<k;i++)
-                {
-                printk("otsort_mas =%x\n\r",b[i]);
-                }
-                */
-                
-                
-                
-                
-//распечатываем неотсортированных элементов просто тупо набор данных массив целых числе ip адресов
- /*
- for(l_i=0;l_i<count;l_i++)
- {
- printk("neotsort_mas =%x\n\r",array[l_i]);
- }
- */
+      static iteration =0;
+	__be32  l_ipaddr=0;
+    __be32  l_sosed_ipaddr=0;
+     UINT16 l_first_polovinka_sosed=0;
+     UINT16 l_last_polovinka_sosed =0;
+	 UINT8  l_my_posad_mesto=0;
+	 UINT8  l_my_mk8_vihod=0;
+	 UINT8  l_sosed_posad_mesto=0; 
+	 UINT8  l_sosed_mk8_vihod=0;
+
+	 
+	//IP адрес источника
+	l_ipaddr  = in_sviaz_array[0]; 	
+	//посадочное место
+	l_my_posad_mesto= (UINT8)(in_sviaz_array[1]>>24);
+	//номер выхода МК8
+	l_my_mk8_vihod  =	(UINT8)(in_sviaz_array[1]>>16); 
+    //Находим IP адрес соседа
+    l_first_polovinka_sosed=(UINT16)in_sviaz_array[1];
+    l_last_polovinka_sosed =(UINT16)(in_sviaz_array[2]>>16);
+	l_sosed_ipaddr  = l_first_polovinka_sosed;
+	l_sosed_ipaddr  = (l_sosed_ipaddr<<16); 
+	l_sosed_ipaddr = l_sosed_ipaddr +l_last_polovinka_sosed;
+	l_sosed_posad_mesto =(UINT8)(in_sviaz_array[2]>>8); 
+	l_sosed_mk8_vihod   =(UINT8)(in_sviaz_array[2]);
 	
+	
+	//printk("l_sosed_posad_mesto= 0x%x\n\r",l_sosed_posad_mesto);
+	
+	//printk("l_sosed_mk8_vihod=%d\n\r",l_sosed_mk8_vihod);
+	//
+	//printk("\n\r");
+	// printk("iter=%d->>SOSED_IP_ADDR=0x%x->mk8_vihod=%d \n\r",iteration,l_sosed_ipaddr,l_my_mk8_vihod);
+	  
+	  //printk("|array[2]=0x%x \n\r+",in_sviaz_array[2]);
+	
+	 //printk("L_MY_MPS_SOSED>>first_polovinka=0x%x|last_polovinka_=0x%x+\n\r",l_first_polovinka_sosed,l_last_polovinka_sosed);
+	 //printk("L_perv_element_dejcstra= 0x%x>>my_posad_mesto=%d>>>my_mk8_vihod=%d+\n\r",l_ipaddr,l_my_posad_mesto,l_my_mk8_vihod);
+	
+	//Присваиваем назад данные
+	*my_ip=l_ipaddr;
+	*posad_mesto=l_my_posad_mesto;
+	*mk8_vyhod=l_my_mk8_vihod;
+	*sosed_ip=l_sosed_ipaddr;
+    *mk8_sosed_vyhod=l_sosed_mk8_vihod;
+    *sosed_posad_mesto=l_sosed_posad_mesto;
+    
+     //printk("iter=%d\n\r",iteration);
+	 iteration++;
 }
 
 
-/**************************************************************************************************
-Syntax:      	    static void Algoritm_puti_udalennogo_ip_and_chisla_hop()
-Parameters:     	Алгоритм полсчета числа прыжков и маршрута к удалённому Мультиплексорую.
-Remarks:			timer functions 
-Return Value:	    1  =>  Success  ,-1 => Failure
-***************************************************************************************************/
-static void dijkstra(int start)
-{
-	
-#if 0	
-	
-	   bool in_tree[4] = {false};
-       int i; 
-	   dist[start] = 0; 
-	   int cur = start; // вершина, с которой работаем
-	   int prom;
-	   int a;
-	  	   
-	   // пока есть необработанная вершина
-	   while(!in_tree[cur])
-	   {
-	      in_tree[cur] = true;
 
-	      for(i = 0; i < N; i++)
-	      {
-	         // если между cur и i есть ребро
-	         if(adj_matrix[cur][i])
-	         {
-	            // считаем расстояние до вершины i:
-	            // расстояние до cur + вес ребра
-	            int d = dist[cur] + cost[cur][i];
-	            // если оно меньше, чем уже записанное
-	            if(d < dist[i])
-	            {
-	               dist[i]   = d;   // обновляем его
-	               C[i] = cur; // и "родителя"
-	            }
-	         }
-	      }
 
-	      // ищем нерассмотренную вершину  с минимальным расстоянием
-	      int min_dist = INT_MAX;
-	      for(i = 0; i < N; i++)
-	      {
-	         if(!in_tree[i] && dist[i] < min_dist)
-	         {
-	            cur      = i;
-	            min_dist = dist[i];
-	         }
-	      }
-	   }
 
-	   //printf("STOP\n\r");
-	   /*
-	   *  После окончания алгоритма значение c[i] будет указывать вершину, предпоследнюю в кратчайшем пути от start до i, 
-	   *  и сам путь восстанавливается простым циклом.
-	   */ 
 
-	   // Теперь:
-	   // в dist[i] минимальное расстояние от start до i
-	   // в parent[i] вершина, из которой лежит оптимальный путь в i
-	   // нужно распечатать пути
-	   //Кратчайшие маршруты 
-	   a = start;
-	   printk("Route_tab MP[%d] ip=0x%x\n\r",start,my_current_kos.ip_addres);
-	   for (i=0; i<N; i++)
-	   {
-	   
-		   //C ->матрица стоимостей
-	        if (i!=a && cost[C[i]][i]!=NULL)
-	        {
-	        	//printk("Ot MP[%d] -> MP[%d] hop = %d |C[i]=%d\n\r",start,i,dist[i],C[i]);
-	          	if(dist[i]==10)
-	          	{
-	          	  printk("Ot MP[%d] -> MP[%d] hop = %d \n\r",start,i,dist[i]);
-	          	}
-	        	
-	        	if(dist[i]==20)
-	          	{
-	          	
-	          	 printk("Ot MP[%d] -> MP[%d] ->MP[%d]  hop = %d \n\r",start,C[i],i,dist[i]);
-	          		
-	          	}
-	        	
-	         //printk("from %d to %d =cost %d\n\r",start,i,dist[i]);
-	         //printk("i=%d,C[i]=%d\n\r",i,C[i]);
-	        }
 
-	     //printk("i=%d,C[i]=%d\n\r",i,C[i]);  
-	        
-	   }
-	
-#endif
 
-}
+
 
 
 
