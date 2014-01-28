@@ -1401,23 +1401,21 @@ unsigned int Hook_Func(uint hooknum,
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
 	   
-	//printk("packet_ok\n\r");
-	//Тест TDM траффика	
-    #if 0	
-	nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-	nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    nbuf_set_datapacket_dir4  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
-    nbuf_set_datapacket_dir5  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    nbuf_set_datapacket_dir6  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
-    #endif
+		//printk("packet_ok\n\r");
+		//Тест TDM траффика	
+    	#if 0	
+		nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir4  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);  
+		nbuf_set_datapacket_dir5  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir6  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
+		#endif
+		//Более глубокий тест траффика
 		
-		
-   //Более глубокий тест траффика
-		
-#if 0
+		#if 0
 		if(TDM2_direction_WRITE_READY()==1)
 		{	
 		TDM2_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
@@ -1452,13 +1450,9 @@ unsigned int Hook_Func(uint hooknum,
 		{	
 		TDM8_direction_write (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		}
-#endif
+		#endif
 		
-		//printk("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\r");
-		
-		
-		
-		//Бужу поток на  приём пакетов		
+		//printk("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\r");	
 		//Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
 	   get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
        return NF_DROP;
