@@ -393,7 +393,7 @@ Return Value:
 void Event_TDM1_direction_READ_READY(void)
 {
 	  wake_up(&myevent_waitqueue_tdm1_read);
-	  printk("ok_event_tdm_read1\n\r");	
+	  //printk("ok_event_tdm_read1\n\r");	
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM2_direction_READ_READY(void)
@@ -405,7 +405,7 @@ void Event_TDM2_direction_READ_READY(void)
 {
 	
 	wake_up(&myevent_waitqueue_tdm2_read);
-	printk("ok_event_tdm_read2\n\r");
+	//printk("ok_event_tdm_read2\n\r");
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM3_direction_READ_READY(void)
@@ -416,7 +416,7 @@ Return Value:
 void Event_TDM3_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm3_read);
-	printk("ok_event_tdm_read3\n\r");
+	//printk("ok_event_tdm_read3\n\r");
 }
 
 /**************************************************************************************************
@@ -428,7 +428,7 @@ Return Value:
 void Event_TDM4_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm4_read);
-	printk("ok_event_tdm_read4\n\r");
+	//printk("ok_event_tdm_read4\n\r");
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM5_direction_READ_READY(void)
@@ -439,7 +439,7 @@ Return Value:
 void Event_TDM5_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm5_read);
-	printk("ok_event_tdm_read5\n\r");
+	//printk("ok_event_tdm_read5\n\r");
 }
 
 
@@ -452,7 +452,7 @@ Return Value:
 void Event_TDM6_direction_READ_READY(void)
 {
 	  wake_up(&myevent_waitqueue_tdm6_read);
-	  printk("ok_event_tdm_read6\n\r");
+	  //printk("ok_event_tdm_read6\n\r");
 }
 
 /**************************************************************************************************
@@ -464,7 +464,7 @@ Return Value:
 void Event_TDM7_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm7_read);
-	printk("ok_event_tdm_read7\n\r");
+	//printk("ok_event_tdm_read7\n\r");
 }
 
 /**************************************************************************************************
@@ -476,7 +476,7 @@ Return Value:
 void Event_TDM8_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm8_read);
-	printk("ok_event_tdm_read8\n\r");
+	//printk("ok_event_tdm_read8\n\r");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
