@@ -428,7 +428,7 @@ Return Value:
 void Event_TDM4_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm4_read);
-	//printk("ok_event_tdm_read4\n\r");
+	printk("ok_event_tdm_read4\n\r");
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM5_direction_READ_READY(void)

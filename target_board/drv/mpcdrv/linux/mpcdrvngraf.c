@@ -340,7 +340,7 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
         
 //#ifdef DEBUG_DEJCSTRA 	
     
-    
+  /*  
     
     printk("ADJ_MATRICA:\n\r");
     
@@ -357,7 +357,7 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
     
     
     printk("----------------------------------------------------\n\r");
-    
+    */
     
     
     
@@ -389,6 +389,7 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
 //#endif   
     
     //выводим на печать
+ /*
     printk("COST_MATRICA:\n\r");
     
     for(l_i=0;l_i<num_of_node;l_i++)
@@ -401,7 +402,7 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
     	}	
     printk("\n\r");
     }	
-    
+  */  
     
   
     //Заполяем матрицу стоимостей.по входной матрице соединений.должны получить такую
@@ -499,7 +500,6 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
 		            //номер Предыдущей посещённой вершины храниться в С[i]
 		    		l_vershina_pred_poslednii=C[i];
 		    		printk("dist=20(hop)%d->%d->i_node(%d)\n\r",i,l_vershina_pred_poslednii,curr_node);
-		    		
 		    		 //printk("l_vershina_pred_poslednii=%d\n\r",l_vershina_pred_poslednii);
 		    		// printk("i=%d,dist[i]=%d,C[i]=%d,ip=%d\n\r",i,dist[i],C[i],b[i]);
 		    		//Если вершина равна мне самому то я дошёл до начала 1 прыжок
@@ -510,11 +510,6 @@ static bool algoritm_deijcstra_example(u16 curr_node,u16 num_of_node)
 		    			printk("for ip=%d->send ->tdm%d\n\r",multipleksor[curr_node].comm.ipaddr_sosed[i],aray_mk8_for_ip[l_vershina_pred_poslednii][0]);
 		    			//printk("!!!!!!!=napr_mk8_tdm_dir=%d\n\r",aray_mk8_for_ip[l_vershina_pred_poslednii][0]);
 		    		}
-		    		
-		    		
-		    		
-		    		
-		    		
 		    		
 		    	}
 		    	//3 прыжка
@@ -675,6 +670,8 @@ void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u3
       	    		case 8:nbuf_set_datapacket_dir8  (in_buf ,in_size);break; 
       	    		default:printk("?noroutetab_ARP_NMS3->Send  UNICNOWN to IP sosed \n\r");break;
       	    		}
+      			   //отправили пакет назад обнуляем содержимое
+      				l_tdm_input_direction=0;
       			}
       	  	    else
       	      	{	
@@ -1265,7 +1262,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 	  u8 num_paralel_svyaz=0;
 	  for(i=0;i<number_of_par_sviaznosti_in_packet;i++)
 	  {
-	  // printk("first =%d,second =%d|\n\r",0+count+i,1+i+count);	  
+	  //printk("first =%d,second =%d|\n\r",0+count+i,1+i+count);	  
       //#if 0 
 	  parse_pari_svyaznosti(&data_graf_massive[dlinna_pari_sviaznosti_byte],&l_ipaddr,&my_posad_mesto,&my_mk8_vihod,&sosed_ipaddr,&sosed_posad_mesto,&sosed_mk8_vyhod);
 	  //1 элемент в свзяи
@@ -1365,13 +1362,7 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
   multipleksor[who_i_am_node].gate_ipaddr=scluz_ip_addres;
   multipleksor[who_i_am_node].priznac_shcluzovogo=priznac_scluz;
   ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!///
-  
-  //Заполняем структуру сетевого элемента от меня кто есть соседи
-  //multipleksor[who_i_am_node].comm.ipaddr_sosed[m]= 0x888888;
-  //multipleksor[who_i_am_node].comm.tdm_direction_sosed[0]=0x7777;
-  
-  
- // UINT8 array_paralel_svuazei[8]; 
+ 
   memset(array_paralel_svuazei,0x00,sizeof(array_paralel_svuazei));
   printk("NODE:") ;
   //Выводим полностью массив b[k] cоответсвующими порядковыми аресами мультплексора
@@ -1422,7 +1413,11 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
 //#ifdef DEBUG_DEJCSTRA 	
   
   
-  //printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi_all);
+  printk("num_of_all_par_svyazi=%d\n\r",num_of_svyazi_all);
+  printk("ZAP_ADJ_matrix:\n\r");
+  //Зачищаем матрицу соединений перед новым использованием.
+  //Что не заполниться заполняем нулями.пока затычка потом сделаем более лучше
+  memset(adj_matrix,0x00,sizeof(adj_matrix));
   //Алгоритм построения матрицы коммутации
   for(t=0;t<num_of_svyazi_all;t++)
   {
@@ -1444,24 +1439,27 @@ bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size)
     			  if(i==j)
     		      {
     				  adj_matrix[i][j]=0; 
+    				  //printk("i_%d_j_%d=0|",i,j);
     		      }  
     			  else
     			  {	  
     				  if(b[j]==(UINT8)num_pari[t].soedinen_s_ipaddr)
     				  {
-    				  //printk("sovpalo i=%d|j =%d\n\r",i,j);
+    				  //printk("i_%d_j_%d=1|",i,j);
     				  adj_matrix[i][j]=1;  
     				  }
     
     			  }
     			  	  
-    		  }
+    		  }//end for j
 
-    	  }
-  	        	    	
-      }
+    	  }//end if((UINT8)num_pari[t].ip_addr==b[i])
+  	    // printk("\n\r") ;  	    	
+      }//end for i
   
-  }
+  }//end for tcd
+  
+
 //#endif 
   //Алгоритм Дейкстры для расчёта маршрута
   algoritm_deijcstra_example(who_i_am_node,num_of_uzlov_v_seti);
