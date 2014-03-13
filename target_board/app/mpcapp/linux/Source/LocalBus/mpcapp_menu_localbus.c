@@ -111,11 +111,8 @@ struct p2020menu localbusmenu[]=
 	
 /**************************************************************************************************
 Syntax:      	    int elbc_menu(void)
-
 Remarks:			create elbc_menu function. 
-
 Return Value:	    1  =>  Success  ,-1 => Failure
-
 ***************************************************************************************************/
 int elbc_menu(void)
 {
@@ -129,20 +126,6 @@ int exit_to_parent_menu=0;
 return 1;
 }	
 	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-
-
-
-
 
 /*---------------------------------------------------------------------------*
 Function:	set debug level

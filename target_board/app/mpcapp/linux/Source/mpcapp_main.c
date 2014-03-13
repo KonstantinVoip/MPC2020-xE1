@@ -93,6 +93,21 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PUBLIC FUNCTION DEFINITIONS					     */
 /*****************************************************************************/
+#define QUERY_MAX_SIZE		32
+char * query_str;
+
+
+
+void print_evar (const char * var)
+{
+	char * tmp = getenv (var);
+	if (tmp == 0)
+	{
+		printf ("%s is not set\n", var);
+		return;
+	}
+	printf ("%s=%s\n", var, tmp);
+}
 
 /**************************************************************************************************
 Syntax:      	    int main(int argc, char **argv)
@@ -104,10 +119,39 @@ Return Value:	    1  =>  Success  ,-1 => Failure
 ***************************************************************************************************/
 int main(int argc, char **argv)
 {
+char *set_env="SUPER";
+char *val_env="192";
+int overwrite =0;
+int ret;
 
-	
-//printf("START_APPLICATION\n\r");	
-	
+printf("START_APPLICATION\n\r");
+
+query_str = (char *) calloc (QUERY_MAX_SIZE, sizeof(char));
+strncpy (query_str, "FOO=foo_value1", QUERY_MAX_SIZE-1);
+
+ret = putenv (query_str);
+print_evar ("FOO");
+
+
+
+free (query_str);
+
+
+
+#if 0
+
+char *string ="MONSTR=512";
+
+ret_val=putenv(string);
+
+//ret_val=setenv(set_env, val_env,0);
+//unsetenv("TERM");
+printf("ret_val=%d\n\r",ret_val);
+ 
+//char *myenvvar=getenv("SUPER");
+//printf("The editor environment variable is set to %s\n",myenvvar);
+#endif
+
 
 return 0;
 }

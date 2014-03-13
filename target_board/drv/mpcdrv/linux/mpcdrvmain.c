@@ -163,7 +163,11 @@ GENERAL NOTES
  //#define SEVA_NMS_IP_ADDR 0xC0A88261  //192.168.130.97
 //#define NMS3_IP_ADDR     0xC0A8784C  //192.168.120.76
 #define NMS3_IP_ADDR     0xC0A9784C  //192.169.120.76
-UINT32 CUR_KYS_IP_ADDR =0x00000000; //
+
+
+//UINT32 CUR_KYS_IP_ADDR =0x00000000; //
+UINT32 g_my_kys_ip_addres=0x00000000; //эту переменную вытащить наверхх
+
 
  
 /*Первый стартовый информационный пакет от КУ-S содержит информация о IP и моего КУ-S
@@ -428,7 +432,7 @@ Return Value:
 void Event_TDM4_direction_READ_READY(void)
 {
 	wake_up(&myevent_waitqueue_tdm4_read);
-	printk("ok_event_tdm_read4\n\r");
+	//printk("ok_event_tdm_read4\n\r");
 }
 /**************************************************************************************************
 Syntax:      	    void Event_TDM5_direction_READ_READY(void)
@@ -1131,13 +1135,7 @@ static int tdm_recieve_thread(void *data)
      test_thread_tdm_write_7 = kthread_run( tdm_write_thread_seven,(void*)N,"tdm_write_7",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
      test_thread_tdm_write_8 = kthread_run( tdm_write_thread_eight,(void*)N,"tdm_write_8",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
      
-     
-     
-     
-     
-     
    // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
-   
    //Запускаем первый тред (приём данных с local bus)
   // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    /*
@@ -1204,18 +1202,6 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 	return 1;
  
  }	 
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1348,17 +1334,13 @@ unsigned int Hook_Func(uint hooknum,
 	 }
 	 
 	 
-	 
-	 
-	 
-	 
-	 
+
 	/*Принял от КУ-S Информационный пакет который сожержит
 	*IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
 	 {
 		  /*Локальные переменные*/
-		  UINT32 g_my_kys_ip_addres=0x00000000;
+		  //UINT32 g_my_kys_ip_addres=0x00000000;
 		  bool   g_my_kys_state=0;
 		  UINT8  g_my_kys_mac_addr[6];
 		  
@@ -1375,7 +1357,7 @@ unsigned int Hook_Func(uint hooknum,
 		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
 	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
 	 	  /*заполняем структуру для нашего КY-S */	 	  
-		  CUR_KYS_IP_ADDR	= ip->saddr;  
+		  //CUR_KYS_IP_ADDR	= ip->saddr;  
 	 	 // g_my_kys_ip_addres=(UINT8)ip->saddr;
 		  g_my_kys_ip_addres=ip->saddr;
 		  memcpy(g_my_kys_mac_addr,eth->h_source,6);
