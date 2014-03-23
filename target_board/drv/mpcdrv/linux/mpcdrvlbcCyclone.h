@@ -68,14 +68,13 @@
 typedef enum
 {
 	 PLIS_LINUX_START_DATA_OFFSET = 0x0000000000000000,
-	 PLIS_PHYSICAL_RESOURCE_START = 0xef000000,
+	 PLIS_PHYSICAL_RESOURCE_START = 0xEF000000,
 	 PLIS_PHYSICAL_RESOURCE_SIZE  = 0x01000000,
-	 PLIS_WRITE_SUCCESS = 0x0003
-     	
-
+	 PLIS_WRITE_SUCCESS  = 0x0003,
+	 PLIS_KYS_IP_OFFSET  = 0x0288
 }Plis_register_value;
-
-
+//Zoya
+UINT16  plis_read16 (const UINT16 addr);
 
 /*  Registers offset on Cyclone 3 ->lbc MAP */
 typedef enum{

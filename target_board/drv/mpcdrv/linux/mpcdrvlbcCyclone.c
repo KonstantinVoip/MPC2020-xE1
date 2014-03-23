@@ -97,7 +97,7 @@ GENERAL NOTES
 /*****************************************************************************/
 /*	PRIVATE DATA TYPES						     */
 /*****************************************************************************/
-static inline UINT16  plis_read16 (const UINT16 addr);
+// static inline UINT16  plis_read16 (const UINT16 addr);
 static inline void    plis_write16(const UINT16 addr,const UINT16 value);
 /*****************************************************************************/
 /*	PRIVATE FUNCTION PROTOTYPES					     */
@@ -175,7 +175,7 @@ void LocalBusCyc3_Init()
 	}
 	
 	map->name="Cyclone3";//dev_name(&dev->dev);
-	map->phys=0xef000000;//res.start;
+	map->phys=PLIS_PHYSICAL_RESOURCE_START;//0xef000000;//res.start;
 	map->size=0x01000000;//res_size; 16Mb
 	map->bankwidth=2;//width;
 	map->fldrv_priv= NULL;//cfi;
@@ -196,7 +196,7 @@ Syntax:      	    UINT16 plis_read16 (const u16 addr)
 Remarks:			This Function wait for complete operations Read/Write. 
 Return Value:	    Returns 1 on success and negative value on failure.
 ***************************************************************************************************/
-static inline UINT16 plis_read16 (const UINT16 addr)
+/*Zoya static inline */UINT16 plis_read16 (const UINT16 addr)
 {
   UINT16 out_data=0x0000;
  // UINT16 byte_offset=0x0000; 
@@ -1198,7 +1198,7 @@ void TDM1_dierction_read ()
 	    
 	 //MAC DA address read on direction 0
 	 //dir0_mac_da_addr   = out_buf[2];
-	 //определяю признак KY-S по mac адресам 
+	 //определяю признак KY-S по mac адресам
 	 //dir0_mac_priznak_kys = out_buf[2]>>8;
 	 //priznak ARP 0x806
 	 dir0_priznak_arp_packet =out_buf[6];
@@ -1208,7 +1208,7 @@ void TDM1_dierction_read ()
 	 //printk("+dir0_mac_priznak_kys+=0x%x\n\r",dir0_mac_priznak_kys);
 	  // rintk("+ARP_dir0_priznak_arp_packets=0x%x\n\r",dir0_priznak_arp_packet);
 	 //broadcast frame arp request
-	   //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута	 
+	   //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2 на выход пока петоя не замкнута
 	   if(dir0_priznak_arp_packet==0x0806)
 	   { 
 		  //ARP packet for matrica  //2 bait massive 
@@ -1321,14 +1321,14 @@ void TDM2_dierction_read ()
 	  	  // dir1_ip_da_addr    = out_buf1[16];
 	  	  //MAC DA address read on direction 0
 	  	 //dir1_mac_da_addr   = out_buf1[2];
-	  	 //определяю признак KY-S по mac адресам 
+	  	 //определяю признак KY-S по mac адресам
 	  	 //dir1_mac_priznak_kys = out_buf1[2]>>8;
 	  	 
 	     dir1_priznak_arp_packet =out_buf1[6];
 	  	 
 	  	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
 	  	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-		 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+		 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2
 		 if(dir1_priznak_arp_packet==0x0806)
 		 {
 		 		 
@@ -1449,7 +1449,7 @@ void TDM3_dierction_read ()
 	 	  	 // dir2_ip_da_addr    = out_buf2[16];
 	 	  	 //MAC DA address read on direction 0
 	 	  	 //dir2_mac_da_addr   = out_buf2[2];
-	 	  	 //определяю признак KY-S по mac адресам 
+	 	  	 //определяю признак KY-S по mac адресам
 	 	  	 //dir2_mac_priznak_kys = out_buf2[2]>>8;
 	 	  	 ///Arp priznak
 	 	  	 dir2_priznak_arp_packet =out_buf2[6];
@@ -1558,7 +1558,7 @@ void TDM4_dierction_read  ()
 	  	 	  	    //dir3_ip_da_addr    = out_buf3[16];
 	  	 	  	  //MAC DA address read on direction 0
 	  	 	  	 dir3_mac_da_addr   = out_buf3[2];
-	  	 	  	 //определяю признак KY-S по mac адресам 
+	  	 	  	 //определяю признак KY-S по mac адресам
 	  	 	  	 dir3_mac_priznak_kys = out_buf3[2]>>8;
 	  	 	  	 //
 	  	 	     dir3_priznak_arp_packet =out_buf3[6];
@@ -1662,14 +1662,14 @@ void TDM5_dierction_read  ()
   	  // dir1_ip_da_addr    = out_buf1[16];
   	  //MAC DA address read on direction 0
   	 //dir1_mac_da_addr   = out_buf1[2];
-  	 //определяю признак KY-S по mac адресам 
+  	 //определяю признак KY-S по mac адресам
   	 //dir1_mac_priznak_kys = out_buf1[2]>>8;
   	 
      dir5_priznak_arp_packet =out_buf5[6];
   	 
   	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
   	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2
 	 if(dir5_priznak_arp_packet==0x0806)
 	 {
 	 		 
@@ -1759,14 +1759,14 @@ void TDM6_dierction_read  ()
   	  // dir1_ip_da_addr    = out_buf1[16];
   	  //MAC DA address read on direction 0
   	 //dir1_mac_da_addr   = out_buf1[2];
-  	 //определяю признак KY-S по mac адресам 
+  	 //определяю признак KY-S по mac адресам
   	 //dir1_mac_priznak_kys = out_buf1[2]>>8;
   	 
      dir6_priznak_arp_packet =out_buf6[6];
   	 
   	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
   	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2
 	 if(dir6_priznak_arp_packet==0x0806)
 	 {
 	 		 
@@ -1847,14 +1847,14 @@ void TDM7_dierction_read  ()
   	  // dir1_ip_da_addr    = out_buf1[16];
   	  //MAC DA address read on direction 0
   	 //dir1_mac_da_addr   = out_buf1[2];
-  	 //определяю признак KY-S по mac адресам 
+  	 //определяю признак KY-S по mac адресам
   	 //dir1_mac_priznak_kys = out_buf1[2]>>8;
   	 
      dir7_priznak_arp_packet =out_buf7[6];
   	 
   	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
   	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2
 	 if(dir7_priznak_arp_packet==0x0806)
 	 {
 	 		 
@@ -1943,14 +1943,14 @@ void TDM8_dierction_read  ()
   	  // dir1_ip_da_addr    = out_buf1[16];
   	  //MAC DA address read on direction 0
   	 //dir1_mac_da_addr   = out_buf1[2];
-  	 //определяю признак KY-S по mac адресам 
+  	 //определяю признак KY-S по mac адресам
   	 //dir1_mac_priznak_kys = out_buf1[2]>>8;
   	 
      dir8_priznak_arp_packet =out_buf8[6];
   	 
   	 //printk("++dir1_ip_da_addr=0x%x|dir1_mac_da_addr=0x%x+\n\r",dir1_ip_da_addr,dir1_mac_da_addr);
   	 //printk("+dir1_mac_priznak_kys+=0x%x\n\r",dir1_mac_priznak_kys);
-	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2  
+	 //пока делаю затычку Broadcast APR отсылаю в ethernet tsec2
 	 if(dir8_priznak_arp_packet==0x0806)
 	 {
 	 		 
