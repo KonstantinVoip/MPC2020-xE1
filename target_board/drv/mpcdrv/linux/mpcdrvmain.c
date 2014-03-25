@@ -51,22 +51,22 @@ GENERAL NOTES
 #include <linux/autoconf.h>
 #endif
 
-#include <linux/sched.h> //все предусмотренные версией ядра примитивы синхронизации
+#include <linux/sched.h> //РІСЃРµ РїСЂРµРґСѓСЃРјРѕС‚СЂРµРЅРЅС‹Рµ РІРµСЂСЃРёРµР№ СЏРґСЂР° РїСЂРёРјРёС‚РёРІС‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 #include <linux/wait.h> 
-//Механизмы синхронизации
+//РњРµС…Р°РЅРёР·РјС‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 # if 0 
-#include <linux/sched.h> //все предусмотренные версией ядра примитивы синхронизации
-#include <linux/percpu.h> //переменные, локальные для каждого процессора (per-CPU variables)
-#include <linux/spinlock.h> //спин-блокировки
-#include <linux/seqlock.h> //сериальные (последовательные) блокировки
+#include <linux/sched.h> //РІСЃРµ РїСЂРµРґСѓСЃРјРѕС‚СЂРµРЅРЅС‹Рµ РІРµСЂСЃРёРµР№ СЏРґСЂР° РїСЂРёРјРёС‚РёРІС‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+#include <linux/percpu.h> //РїРµСЂРµРјРµРЅРЅС‹Рµ, Р»РѕРєР°Р»СЊРЅС‹Рµ РґР»СЏ РєР°Р¶РґРѕРіРѕ РїСЂРѕС†РµСЃСЃРѕСЂР° (per-CPU variables)
+#include <linux/spinlock.h> //СЃРїРёРЅ-Р±Р»РѕРєРёСЂРѕРІРєРё
+#include <linux/seqlock.h> //СЃРµСЂРёР°Р»СЊРЅС‹Рµ (РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹Рµ) Р±Р»РѕРєРёСЂРѕРІРєРё
 
 
-#include <linux/rwsem.h> //семафоры чтения и записи
-#include <linux/semaphore.h> //семафоры
-#include <linux/rtmutex.h>   //мьютексы реального времени
+#include <linux/rwsem.h> //СЃРµРјР°С„РѕСЂС‹ С‡С‚РµРЅРёСЏ Рё Р·Р°РїРёСЃРё
+#include <linux/semaphore.h> //СЃРµРјР°С„РѕСЂС‹
+#include <linux/rtmutex.h>   //РјСЊСЋС‚РµРєСЃС‹ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё
 
 
-#include <linux/completion.h> //механизмы ожидания завершения
+#include <linux/completion.h> //РјРµС…Р°РЅРёР·РјС‹ РѕР¶РёРґР°РЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ
 #endif
 
 #include <linux/module.h> // Needed by all modules
@@ -150,16 +150,16 @@ GENERAL NOTES
 #define UDP_HEADER_LENGTH          8     //8 bait
  
 
-/*Cтруктура длинны UDP пакета как мы его видим в WIRESHARK */
-//Ethernet заголовок = 14 байт = 0xE
-//IPv4 заголовок     = 20 байт = 0x14
-//UDP заголовок      = 8  байт = 0x8
+/*CС‚СЂСѓРєС‚СѓСЂР° РґР»РёРЅРЅС‹ UDP РїР°РєРµС‚Р° РєР°Рє РјС‹ РµРіРѕ РІРёРґРёРј РІ WIRESHARK */
+//Ethernet Р·Р°РіРѕР»РѕРІРѕРє = 14 Р±Р°Р№С‚ = 0xE
+//IPv4 Р·Р°РіРѕР»РѕРІРѕРє     = 20 Р±Р°Р№С‚ = 0x14
+//UDP Р·Р°РіРѕР»РѕРІРѕРє      = 8  Р±Р°Р№С‚ = 0x8
 
-/*в IP части*/
-//Поле :Headerlength = 20 ,байт
-//Поле :Totallength  =общая длинна ip пакета без Ethernet части ;Totallength = all_length-Ethernet заголовок
-/*в UDP части*/
-//Поле Length = data_length+udp заголовок.
+/*РІ IP С‡Р°СЃС‚Рё*/
+//РџРѕР»Рµ :Headerlength = 20 ,Р±Р°Р№С‚
+//РџРѕР»Рµ :Totallength  =РѕР±С‰Р°СЏ РґР»РёРЅРЅР° ip РїР°РєРµС‚Р° Р±РµР· Ethernet С‡Р°СЃС‚Рё ;Totallength = all_length-Ethernet Р·Р°РіРѕР»РѕРІРѕРє
+/*РІ UDP С‡Р°СЃС‚Рё*/
+//РџРѕР»Рµ Length = data_length+udp Р·Р°РіРѕР»РѕРІРѕРє.
 
 
 ///////////////////////////////////////////DEFINE IP and MAC address//////////////////////////
@@ -170,26 +170,26 @@ GENERAL NOTES
 
 
 //UINT32 CUR_KYS_IP_ADDR =0x00000000; //
-UINT32 g_my_kys_ip_addres=0x00000000; //эту переменную вытащить наверхх
+UINT32 g_my_kys_ip_addres=0x00000000; //СЌС‚Сѓ РїРµСЂРµРјРµРЅРЅСѓСЋ РІС‹С‚Р°С‰РёС‚СЊ РЅР°РІРµСЂС…С…
 
 
  
-/*Первый стартовый информационный пакет от КУ-S содержит информация о IP и моего КУ-S
- *обратно отвечаю пакетом с поменённым MAC_oм */
+/*РџРµСЂРІС‹Р№ СЃС‚Р°СЂС‚РѕРІС‹Р№ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅС‹Р№ РїР°РєРµС‚ РѕС‚ РљРЈ-S СЃРѕРґРµСЂР¶РёС‚ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ IP Рё РјРѕРµРіРѕ РљРЈ-S
+ *РѕР±СЂР°С‚РЅРѕ РѕС‚РІРµС‡Р°СЋ РїР°РєРµС‚РѕРј СЃ РїРѕРјРµРЅС‘РЅРЅС‹Рј MAC_oРј */
 char    kys_information_packet_da_mac         [18]=  {"01:ff:ff:ff:ff:00"};
 UINT16  kys_information_packet_mac_last_word = 0xff00;
 
 
-/*пакеты предназначенные моему МПС здесь содержиться  пакет информации о структуре
- * сети для Дейкстры  строю или изменяю граф*/
+/*РїР°РєРµС‚С‹ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅС‹Рµ РјРѕРµРјСѓ РњРџРЎ Р·РґРµСЃСЊ СЃРѕРґРµСЂР¶РёС‚СЊСЃСЏ  РїР°РєРµС‚ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃС‚СЂСѓРєС‚СѓСЂРµ
+ * СЃРµС‚Рё РґР»СЏ Р”РµР№РєСЃС‚СЂС‹  СЃС‚СЂРѕСЋ РёР»Рё РёР·РјРµРЅСЏСЋ РіСЂР°С„*/
 char    kys_deicstra_mps_packet_da_mac         [18]=  {"01:ff:ff:ff:ff:11"};
 UINT16  kys_deicstra_packet_mac_last_word=0xff11;
 
-/* с этим DA MAC адресом будут служебные данные от КУ-S ,замена
-   ppp который работает в данный момент на скорости 2400 бит/c у нас будет
-   64 К/бит (1 тайм-слот)
-   + здесь будет ледать информация о алгоритме декстры предназначенная другим МПС
-   (сетевым элементам)
+/* СЃ СЌС‚РёРј DA MAC Р°РґСЂРµСЃРѕРј Р±СѓРґСѓС‚ СЃР»СѓР¶РµР±РЅС‹Рµ РґР°РЅРЅС‹Рµ РѕС‚ РљРЈ-S ,Р·Р°РјРµРЅР°
+   ppp РєРѕС‚РѕСЂС‹Р№ СЂР°Р±РѕС‚Р°РµС‚ РІ РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ РЅР° СЃРєРѕСЂРѕСЃС‚Рё 2400 Р±РёС‚/c Сѓ РЅР°СЃ Р±СѓРґРµС‚
+   64 Рљ/Р±РёС‚ (1 С‚Р°Р№Рј-СЃР»РѕС‚)
+   + Р·РґРµСЃСЊ Р±СѓРґРµС‚ Р»РµРґР°С‚СЊ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р°Р»РіРѕСЂРёС‚РјРµ РґРµРєСЃС‚СЂС‹ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅР°СЏ РґСЂСѓРіРёРј РњРџРЎ
+   (СЃРµС‚РµРІС‹Рј СЌР»РµРјРµРЅС‚Р°Рј)
 */
 //char kys_service_channel_packet_da_mac     [18]=  {"01:ff:ff:ff:22:00"};
  char   kys_service_channel_packet_da_mac     [16]=  {"01:ff:ff:ff:22"}; 
@@ -201,7 +201,7 @@ UINT16  kys_deicstra_packet_mac_last_word=0xff11;
 //#define LBCR      0x50D0  
 //#define PMJCR		0x50D4
 //#define PMJCR		0x50D0   //
-//#define PMJCR     0xE00A0  //PVR—Processor version register 0x80211040
+//#define PMJCR     0xE00A0  //PVRвЂ”Processor version register 0x80211040
  #define PMJCR     0xE0070  //DEVICE Disable Registers  
  
  const char * lbc_ready_toread     =    "data_read_ready_OK";
@@ -222,11 +222,11 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 /*****************************************************************************/
 /***********************	EXTERN FUNCTION DEFENITION************			*/
 /*****************************************************************************/
-/*функция для обработки пакета от Гришы содержащей граф сети для моего МПС*/
+/*С„СѓРЅРєС†РёСЏ РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё РїР°РєРµС‚Р° РѕС‚ Р“СЂРёС€С‹ СЃРѕРґРµСЂР¶Р°С‰РµР№ РіСЂР°С„ СЃРµС‚Рё РґР»СЏ РјРѕРµРіРѕ РњРџРЎ*/
 //extern bool ngraf_packet_for_my_mps(const u16 *in_buf ,const u16 in_size);
-/*функция для передачи пакета в матрицу коммутации для определния куда его направить*/
+/*С„СѓРЅРєС†РёСЏ РґР»СЏ РїРµСЂРµРґР°С‡Рё РїР°РєРµС‚Р° РІ РјР°С‚СЂРёС†Сѓ РєРѕРјРјСѓС‚Р°С†РёРё РґР»СЏ РѕРїСЂРµРґРµР»РЅРёСЏ РєСѓРґР° РµРіРѕ РЅР°РїСЂР°РІРёС‚СЊ*/
 extern void ngraf_packet_for_matrica_kommutacii(const u16 *in_buf ,const u16 in_size,u32 priznak_kommutacii,u32 priznak_nms3_ot_arp_sa_addr,u8 tdm_input_read_direction);
-/*устанавливаем MAC моего KY-S */
+/*СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј MAC РјРѕРµРіРѕ KY-S */
 extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_address);
 
 //extern void nbuf_set_datapacket_dir0  (const u16 *in_buf ,const u16 in_size);
@@ -234,7 +234,7 @@ extern void ngraf_get_ip_mac_my_kys (UINT8 state,UINT32 ip_addres,UINT8 *mac_add
 //extern void p2020_get_recieve_packet_and_setDA_MAC (const u16 *in_buf ,const u16 in_size,const u16 *mac_heder);
 //extern void p2020_revert_mac_header(u16 *dst,u16 *src,u16 out_mac[12]);
 
-/*Функции события готовность к чтению из ПЛИС */
+/*Р¤СѓРЅРєС†РёРё СЃРѕР±С‹С‚РёСЏ РіРѕС‚РѕРІРЅРѕСЃС‚СЊ Рє С‡С‚РµРЅРёСЋ РёР· РџР›РРЎ */
 extern void Event_TDM1_direction_READ_READY(void);
 extern void Event_TDM2_direction_READ_READY(void);
 extern void Event_TDM3_direction_READ_READY(void);
@@ -243,7 +243,7 @@ extern void Event_TDM5_direction_READ_READY(void);
 extern void Event_TDM6_direction_READ_READY(void);
 extern void Event_TDM7_direction_READ_READY(void);
 extern void Event_TDM8_direction_READ_READY(void);
-/*Функции события готовность к записи в ПЛИС */
+/*Р¤СѓРЅРєС†РёРё СЃРѕР±С‹С‚РёСЏ РіРѕС‚РѕРІРЅРѕСЃС‚СЊ Рє Р·Р°РїРёСЃРё РІ РџР›РРЎ */
 extern void Event_TDM1_direction_WRITE_READY(void);
 extern void Event_TDM2_direction_WRITE_READY(void);
 extern void Event_TDM3_direction_WRITE_READY(void);
@@ -263,12 +263,12 @@ extern void Event_TDM8_direction_WRITE_READY(void);
 /*	PRIVATE FUNCTION PROTOTYPES					     */
 /*****************************************************************************/
 ////NET FILTER STRUCTURE///////////////////////////////////////////////
-//// Структура для регистрации функции перехватчика входящих ip пакетов
+//// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ СЂРµРіРёСЃС‚СЂР°С†РёРё С„СѓРЅРєС†РёРё РїРµСЂРµС…РІР°С‚С‡РёРєР° РІС…РѕРґСЏС‰РёС… ip РїР°РєРµС‚РѕРІ
 struct nf_hook_ops bundle;
 struct nf_hook_ops arp_bundle;
 
 
-//Приоритеты задач
+//РџСЂРёРѕСЂРёС‚РµС‚С‹ Р·Р°РґР°С‡
 struct sched_param priority;
 struct sched_param priority1;
 
@@ -278,9 +278,9 @@ static struct hrtimer hr_timer;           //high resolution timer
 
 ///////////////////TASK _STRUCTURE///////////////
 struct task_struct *r_t1,*r_t2,*test_thread_tdm_read_1,*test_thread_tdm_write_1;
-//Task на чтение
+//Task РЅР° С‡С‚РµРЅРёРµ
 struct task_struct  *test_thread_tdm_read_2,*test_thread_tdm_read_3,*test_thread_tdm_read_4,*test_thread_tdm_read_5,*test_thread_tdm_read_6,*test_thread_tdm_read_7,*test_thread_tdm_read_8;
-//Task на запись
+//Task РЅР° Р·Р°РїРёСЃСЊ
 struct task_struct  *test_thread_tdm_write_2,*test_thread_tdm_write_3,*test_thread_tdm_write_4,*test_thread_tdm_write_5,*test_thread_tdm_write_6,*test_thread_tdm_write_7,*test_thread_tdm_write_8;
 
 
@@ -288,7 +288,7 @@ static int N=16;
 
 
 
-//Очередь ожидания потока для чтения
+//РћС‡РµСЂРµРґСЊ РѕР¶РёРґР°РЅРёСЏ РїРѕС‚РѕРєР° РґР»СЏ С‡С‚РµРЅРёСЏ
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_read);
@@ -297,7 +297,7 @@ static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm5_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm6_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm7_read);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm8_read);
-//Очередь ожидания потока для записи
+//РћС‡РµСЂРµРґСЊ РѕР¶РёРґР°РЅРёСЏ РїРѕС‚РѕРєР° РґР»СЏ Р·Р°РїРёСЃРё
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm1_write);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm2_write);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm3_write);
@@ -308,10 +308,10 @@ static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm7_write);
 static DECLARE_WAIT_QUEUE_HEAD (myevent_waitqueue_tdm8_write);
 
 
-//Критические секции для чтения
+//РљСЂРёС‚РёС‡РµСЃРєРёРµ СЃРµРєС†РёРё РґР»СЏ С‡С‚РµРЅРёСЏ
 rwlock_t myevent_read_tdm1_lock,myevent_read_tdm2_lock,myevent_read_tdm3_lock,myevent_read_tdm4_lock,
 myevent_read_tdm4_lock,myevent_read_tdm5_lock,myevent_read_tdm6_lock,myevent_read_tdm7_lock,myevent_read_tdm8_lock;
-//Критические секции на запись
+//РљСЂРёС‚РёС‡РµСЃРєРёРµ СЃРµРєС†РёРё РЅР° Р·Р°РїРёСЃСЊ
 rwlock_t myevent_write_tdm1_lock,myevent_write_tdm2_lock,myevent_write_tdm3_lock,myevent_write_tdm4_lock,
 myevent_write_tdm4_lock,myevent_write_tdm5_lock,myevent_write_tdm6_lock,myevent_write_tdm7_lock,myevent_write_tdm8_lock;
 
@@ -365,7 +365,7 @@ void timer1_routine(unsigned long data)
    TDM8_direction_READ_READY();
 
    
-   mod_timer(&timer1_read, jiffies + msecs_to_jiffies(100)); // restarting timer 100 тиковов
+   mod_timer(&timer1_read, jiffies + msecs_to_jiffies(100)); // restarting timer 100 С‚РёРєРѕРІРѕРІ
  //ktime_now();     
 }
 
@@ -603,7 +603,7 @@ static int tdm_read_thread_one(void *data)
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
            
-        //критическая секция
+        //РєСЂРёС‚РёС‡РµСЃРєР°СЏ СЃРµРєС†РёСЏ
 		read_lock (&myevent_read_tdm1_lock);
 	 	TDM1_dierction_read();
 	 	read_unlock (&myevent_read_tdm1_lock); 
@@ -837,7 +837,7 @@ static int tdm_write_thread_one(void *data)
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
 				
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir1 (&in_buf_dir1 ,&in_size_dir1)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -872,7 +872,7 @@ static int tdm_write_thread_two(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir2 (&in_buf_dir2 ,&in_size_dir2)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir2_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -908,7 +908,7 @@ static int tdm_write_thread_three(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir3 (&in_buf_dir3 ,&in_size_dir3)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir3_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -944,7 +944,7 @@ static int tdm_write_thread_four(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir4 (&in_buf_dir4 ,&in_size_dir4)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -982,7 +982,7 @@ static int tdm_write_thread_five(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir5 (&in_buf_dir5 ,&in_size_dir5)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir5_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -1018,7 +1018,7 @@ static int tdm_write_thread_six(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir6 (&in_buf_dir6 ,&in_size_dir6)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -1054,7 +1054,7 @@ static int tdm_write_thread_seven(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir7 (&in_buf_dir7 ,&in_size_dir7)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir1_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -1089,7 +1089,7 @@ static int tdm_write_thread_eight(void *data)
 	{
 		set_current_state (TASK_INTERRUPTIBLE);
 		schedule ();
-		//Есть пакет в буфере FIFO на отправку по направлению 0
+		//Р•СЃС‚СЊ РїР°РєРµС‚ РІ Р±СѓС„РµСЂРµ FIFO РЅР° РѕС‚РїСЂР°РІРєСѓ РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЋ 0
 		if(nbuf_get_datapacket_dir8 (&in_buf_dir8 ,&in_size_dir8)==1)
 		{
 			 //printk("-----------WRITE_to_tdm_dir8_routine----->%s---------------\n\r",lbc_ready_towrite); 	
@@ -1140,7 +1140,7 @@ static int tdm_recieve_thread(void *data)
      test_thread_tdm_write_8 = kthread_run( tdm_write_thread_eight,(void*)N,"tdm_write_8",CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD);
      
    // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
-   //Запускаем первый тред (приём данных с local bus)
+   //Р—Р°РїСѓСЃРєР°РµРј РїРµСЂРІС‹Р№ С‚СЂРµРґ (РїСЂРёС‘Рј РґР°РЅРЅС‹С… СЃ local bus)
   // r_t1 = kthread_run( tdm_recieve_thread_one, (void*)N, "tdm_recieve_%d", N );
    /*
    priority.sched_priority=0;
@@ -1149,7 +1149,7 @@ static int tdm_recieve_thread(void *data)
    //out=task_nice(r_t1);
    */
    
-   //Запускаем второй тред
+   //Р—Р°РїСѓСЃРєР°РµРј РІС‚РѕСЂРѕР№ С‚СЂРµРґ
   // r_t2 = kthread_run( tdm_recieve_thread_two, (void*)N, "tdm_transmit_%d",N );
    /*
    priority1.sched_priority=0;
@@ -1225,7 +1225,7 @@ unsigned int Hook_Func_ARP(uint hooknum,
 
 {
  u16 priznak_packet=0x0806;
- //Затычка для определения device
+ //Р—Р°С‚С‹С‡РєР° РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ device
  /*const char *virt_dev=0;
   *virt_dev=skb->dev->name; 
   * if (virt_dev && !strcasecmp(virt_dev ,"eth0"))
@@ -1256,13 +1256,13 @@ unsigned int Hook_Func(uint hooknum,
 {
 	
 	//__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
-    /* Указатель на структуру заголовка протокола eth в пакете */
+    /* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° СЃС‚СЂСѓРєС‚СѓСЂСѓ Р·Р°РіРѕР»РѕРІРєР° РїСЂРѕС‚РѕРєРѕР»Р° eth РІ РїР°РєРµС‚Рµ */
 	struct ethhdr *eth;
-    /* Указатель на структуру заголовка протокола ip в пакете */
+    /* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° СЃС‚СЂСѓРєС‚СѓСЂСѓ Р·Р°РіРѕР»РѕРІРєР° РїСЂРѕС‚РѕРєРѕР»Р° ip РІ РїР°РєРµС‚Рµ */
 	struct iphdr *ip;
-	/*Указатель на UDP заголовок*/
+	/*РЈРєР°Р·Р°С‚РµР»СЊ РЅР° UDP Р·Р°РіРѕР»РѕРІРѕРє*/
 	struct udphdr *udph;
-		/*указатель на icmp сообщение*/
+		/*СѓРєР°Р·Р°С‚РµР»СЊ РЅР° icmp СЃРѕРѕР±С‰РµРЅРёРµ*/
 	struct icmphdr *icmp;
 		
 	
@@ -1274,13 +1274,13 @@ unsigned int Hook_Func(uint hooknum,
 	UINT8   input_mac_prelast_byte;
 	UINT8   input_mac_last_byte;  //priznac commutacii po mac
 	
-	//Фильтрация 2 го уровня по ETH заголовку
+	//Р¤РёР»СЊС‚СЂР°С†РёСЏ 2 РіРѕ СѓСЂРѕРІРЅСЏ РїРѕ ETH Р·Р°РіРѕР»РѕРІРєСѓ
 	eth=(struct ethhdr *)skb_mac_header(skb);
-	 //Фильтрация 3 го уровня по IP
+	 //Р¤РёР»СЊС‚СЂР°С†РёСЏ 3 РіРѕ СѓСЂРѕРІРЅСЏ РїРѕ IP
 	ip = (struct iphdr *)skb_network_header(skb);
-    //ICMP пакет
+    //ICMP РїР°РєРµС‚
 	//icmp= (struct icmphdr*)skb_transport_header(skb);
-	//UDP пакет
+	//UDP РїР°РєРµС‚
 	//udph = (struct udphdr *)skb_transport_header(skb);
 	
 	//printk("%x\n\r",eth->h_dest);
@@ -1308,12 +1308,12 @@ unsigned int Hook_Func(uint hooknum,
 	  /*
 	 printk(">>>last8_word    =0x%02x<<|\n\r",input_mac_last_byte);
 	  printk(">>>last8_preword =0x%02x<<|\n\r",input_mac_prelast_byte);*/
-    /*Принял от КУ-S Информационный пакет который сожержит
-     *IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
+    /*РџСЂРёРЅСЏР» РѕС‚ РљРЈ-S РРЅС„РѕСЂРјР°С†РёРѕРЅРЅС‹Р№ РїР°РєРµС‚ РєРѕС‚РѕСЂС‹Р№ СЃРѕР¶РµСЂР¶РёС‚
+     *IP Рё MAC РјРѕРµРіРѕ РљРЈ-S РЅРµ РЅР°С‡РёРЅР°СЋ СЂР°Р±РѕС‚Р°С‚ РїРѕРєР° РЅРµС‚ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕРіРѕ РїР°РєРµС‚Р°*/
 	 //result_comparsion=strcmp(kys_information_packet_da_mac,buf_mac_dst);
 	 //printk("+Drop_packet_size=%d|->>%d|data=%d\n\r",(uint)skb->mac_len,(uint)skb->len,(uint)skb->data_len);
 	
-	 /*Пустой UDP пакет отбрасываю*/
+	 /*РџСѓСЃС‚РѕР№ UDP РїР°РєРµС‚ РѕС‚Р±СЂР°СЃС‹РІР°СЋ*/
 	 if((skb->mac_len+skb->len)==42) 
 	 {
 	 printk("bad input packet size =%d\n\r",skb->mac_len+skb->len);
@@ -1321,11 +1321,11 @@ unsigned int Hook_Func(uint hooknum,
 	 } 
 	 
 	
-	 //Фильтрация по TCP  порт 7()
-	 //Протокл TCP
+	 //Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕ TCP  РїРѕСЂС‚ 7()
+	 //РџСЂРѕС‚РѕРєР» TCP
 	 if(ip->protocol==TCP)
 	 {	 
-	    //Протокол TCP нужно фтльтровать порт 7
+	    //РџСЂРѕС‚РѕРєРѕР» TCP РЅСѓР¶РЅРѕ С„С‚Р»СЊС‚СЂРѕРІР°С‚СЊ РїРѕСЂС‚ 7
 		 memcpy(&tcp_dest_port,skb->data+IPv4_HEADER_LENGTH+2,2);
 		 //printk("+TCP _protocol=0x%x|port =0x%x\n\r+",ip->protocol,tcp_dest_port);
          if((tcp_dest_port==7)||(tcp_dest_port==59097))
@@ -1339,11 +1339,11 @@ unsigned int Hook_Func(uint hooknum,
 	 
 	 
 
-	/*Принял от КУ-S Информационный пакет который сожержит
-	*IP и MAC моего КУ-S не начинаю работат пока нет информационного пакета*/
+	/*РџСЂРёРЅСЏР» РѕС‚ РљРЈ-S РРЅС„РѕСЂРјР°С†РёРѕРЅРЅС‹Р№ РїР°РєРµС‚ РєРѕС‚РѕСЂС‹Р№ СЃРѕР¶РµСЂР¶РёС‚
+	*IP Рё MAC РјРѕРµРіРѕ РљРЈ-S РЅРµ РЅР°С‡РёРЅР°СЋ СЂР°Р±РѕС‚Р°С‚ РїРѕРєР° РЅРµС‚ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕРіРѕ РїР°РєРµС‚Р°*/
 	if(input_mac_last_word==kys_information_packet_mac_last_word)
 	 {
-		  /*Локальные переменные*/
+		  /*Р›РѕРєР°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ*/
 		  //UINT32 g_my_kys_ip_addres=0x00000000;
 		  bool   g_my_kys_state=0;
 		  UINT8  g_my_kys_mac_addr[6];
@@ -1352,15 +1352,15 @@ unsigned int Hook_Func(uint hooknum,
 		//my_kys_ip_addr=(uint)ip->saddr;  	 	  
   	 	  //memcpy(my_kys_mac_addr,eth->h_source,6);	  
 	      //#if 0	  //comment for FIFO buffer Testing 
-	      //1.Беру отсюда IP и MAC адрес моего КУ-S(шлюзовой)
-	      //2.отправляю назад пакет потдтверждения для КУ-S
+	      //1.Р‘РµСЂСѓ РѕС‚СЃСЋРґР° IP Рё MAC Р°РґСЂРµСЃ РјРѕРµРіРѕ РљРЈ-S(С€Р»СЋР·РѕРІРѕР№)
+	      //2.РѕС‚РїСЂР°РІР»СЏСЋ РЅР°Р·Р°Рґ РїР°РєРµС‚ РїРѕС‚РґС‚РІРµСЂР¶РґРµРЅРёСЏ РґР»СЏ РљРЈ-S
 	      //SA:01-ff-ff-ff-ff-00
-	      //DA:00-25-01-00-11-2D (MAC KY-S) котроый получил
-		  //Копируем данные из информационного пакета в MAC и IP адрес
-	 	  //Берём IP адрес нашего КУ-S и MAC
+	      //DA:00-25-01-00-11-2D (MAC KY-S) РєРѕС‚СЂРѕС‹Р№ РїРѕР»СѓС‡РёР»
+		  //РљРѕРїРёСЂСѓРµРј РґР°РЅРЅС‹Рµ РёР· РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕРіРѕ РїР°РєРµС‚Р° РІ MAC Рё IP Р°РґСЂРµСЃ
+	 	  //Р‘РµСЂС‘Рј IP Р°РґСЂРµСЃ РЅР°С€РµРіРѕ РљРЈ-S Рё MAC
 		  //my_kys_ip_addr=(uint)ip->saddr;  	 	  
 	 	 // memcpy(my_kys_mac_addr,eth->h_source,6);
-	 	  /*заполняем структуру для нашего КY-S */
+	 	  /*Р·Р°РїРѕР»РЅСЏРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ РґР»СЏ РЅР°С€РµРіРѕ РљY-S */
 		  //CUR_KYS_IP_ADDR	= ip->saddr;  
 	 	 // g_my_kys_ip_addres=(UINT8)ip->saddr;
 		  g_my_kys_ip_addres=ip->saddr;
@@ -1372,23 +1372,23 @@ unsigned int Hook_Func(uint hooknum,
 	 	  printk("+KYS_Inform_PACKET|SA_IP  =0x%x\n\r",g_my_kys_ip_addres);
 	 	  */
 	      
-	 	  //Заворачиваю назад с подменой MAC адреса
+	 	  //Р—Р°РІРѕСЂР°С‡РёРІР°СЋ РЅР°Р·Р°Рґ СЃ РїРѕРґРјРµРЅРѕР№ MAC Р°РґСЂРµСЃР°
 	 	 // p2020_revert_mac_header(eth->h_source,mac_addr1,&mac_header_for_kys);	 	  	    
 	      //p2020_get_recieve_packet_and_setDA_MAC(skb->mac_header ,(uint)skb->mac_len+(uint)skb->len,mac_header_for_kys);    	 	 
 	 	  
-	      //Сообщаю состояние что принял инофрмационный пакета передаю в матрицу коммутации эту информацию
-	      //чтобы дальше с ней работать.
+	      //РЎРѕРѕР±С‰Р°СЋ СЃРѕСЃС‚РѕСЏРЅРёРµ С‡С‚Рѕ РїСЂРёРЅСЏР» РёРЅРѕС„СЂРјР°С†РёРѕРЅРЅС‹Р№ РїР°РєРµС‚Р° РїРµСЂРµРґР°СЋ РІ РјР°С‚СЂРёС†Сѓ РєРѕРјРјСѓС‚Р°С†РёРё СЌС‚Сѓ РёРЅС„РѕСЂРјР°С†РёСЋ
+	      //С‡С‚РѕР±С‹ РґР°Р»СЊС€Рµ СЃ РЅРµР№ СЂР°Р±РѕС‚Р°С‚СЊ.
 	 	  g_my_kys_state=true;	  
 	 	  ngraf_get_ip_mac_my_kys (g_my_kys_state,g_my_kys_ip_addres,g_my_kys_mac_addr);  	  
-	      return NF_DROP;	//cбрасывю не пускаю дальше пакет в ОС
+	      return NF_DROP;	//cР±СЂР°СЃС‹РІСЋ РЅРµ РїСѓСЃРєР°СЋ РґР°Р»СЊС€Рµ РїР°РєРµС‚ РІ РћРЎ
 	 }
 	
-	//Фильтр для пакетов от НМС3 и к НМС3  нужн подумать как ручками не прописывать может лучше сделать порт 18000;
+	//Р¤РёР»СЊС‚СЂ РґР»СЏ РїР°РєРµС‚РѕРІ РѕС‚ РќРњРЎ3 Рё Рє РќРњРЎ3  РЅСѓР¶РЅ РїРѕРґСѓРјР°С‚СЊ РєР°Рє СЂСѓС‡РєР°РјРё РЅРµ РїСЂРѕРїРёСЃС‹РІР°С‚СЊ РјРѕР¶РµС‚ Р»СѓС‡С€Рµ СЃРґРµР»Р°С‚СЊ РїРѕСЂС‚ 18000;
 	if (((uint)ip->saddr==NMS3_IP_ADDR)||(uint)ip->daddr==NMS3_IP_ADDR)
 	{	
 	   
 		//printk("packet_ok\n\r");
-		//Тест TDM траффика
+		//РўРµСЃС‚ TDM С‚СЂР°С„С„РёРєР°
     	#if 0	
 		nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
@@ -1399,7 +1399,7 @@ unsigned int Hook_Func(uint hooknum,
 		nbuf_set_datapacket_dir7  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		nbuf_set_datapacket_dir8  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		#endif
-		//Более глубокий тест траффика
+		//Р‘РѕР»РµРµ РіР»СѓР±РѕРєРёР№ С‚РµСЃС‚ С‚СЂР°С„С„РёРєР°
 		
 		#if 0
 		if(TDM2_direction_WRITE_READY()==1)
@@ -1439,7 +1439,7 @@ unsigned int Hook_Func(uint hooknum,
 		#endif
 		
 		//printk("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\r");	
-		//Нужна фтльтрация пакетов чтобы лишний раз не делать memcpy
+		//РќСѓР¶РЅР° С„С‚Р»СЊС‚СЂР°С†РёСЏ РїР°РєРµС‚РѕРІ С‡С‚РѕР±С‹ Р»РёС€РЅРёР№ СЂР°Р· РЅРµ РґРµР»Р°С‚СЊ memcpy
 	   get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len, priznak_packet);
        return NF_DROP;
 	}
@@ -1511,7 +1511,7 @@ void kys_ip()
    int fd;
    mm_segment_t old_fs = get_fs();
 
-   //Из этого файла читают скрипты snmp
+   //РР· СЌС‚РѕРіРѕ С„Р°Р№Р»Р° С‡РёС‚Р°СЋС‚ СЃРєСЂРёРїС‚С‹ snmp
    fd = filp_open("/var/log/kys", O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR);
    if(IS_ERR(fd))
    {
@@ -1540,18 +1540,18 @@ int mpc_init_module(void)
 	*/
          printk("init_module_tdm() called\n"); 
 //#if 0 
-      /* Заполняем структуру для регистрации hook функции */
-      /* Указываем имя функции, которая будет обрабатывать пакеты */
+      /* Р—Р°РїРѕР»РЅСЏРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ РґР»СЏ СЂРµРіРёСЃС‚СЂР°С†РёРё hook С„СѓРЅРєС†РёРё */
+      /* РЈРєР°Р·С‹РІР°РµРј РёРјСЏ С„СѓРЅРєС†РёРё, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РїР°РєРµС‚С‹ */
          bundle.hook = Hook_Func;
-      /* Устанавливаем указатель на модуль, создавший hook */
+      /* РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјРѕРґСѓР»СЊ, СЃРѕР·РґР°РІС€РёР№ hook */
          bundle.owner = THIS_MODULE;
-      /* Указываем семейство протоколов */
+      /* РЈРєР°Р·С‹РІР°РµРј СЃРµРјРµР№СЃС‚РІРѕ РїСЂРѕС‚РѕРєРѕР»РѕРІ */
          bundle.pf = NFPROTO_IPV4;         
-      /* Указываем, в каком месте будет срабатывать функция */
+      /* РЈРєР°Р·С‹РІР°РµРј, РІ РєР°РєРѕРј РјРµСЃС‚Рµ Р±СѓРґРµС‚ СЃСЂР°Р±Р°С‚С‹РІР°С‚СЊ С„СѓРЅРєС†РёСЏ */
          bundle.hooknum = NF_INET_PRE_ROUTING;
-      /* Выставляем самый высокий приоритет для функции */
+      /* Р’С‹СЃС‚Р°РІР»СЏРµРј СЃР°РјС‹Р№ РІС‹СЃРѕРєРёР№ РїСЂРёРѕСЂРёС‚РµС‚ РґР»СЏ С„СѓРЅРєС†РёРё */
          bundle.priority = NF_IP_PRI_FIRST;
-      /* Регистрируем */
+      /* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј */
          nf_register_hook(&bundle);
 //#endif
          
@@ -1609,7 +1609,7 @@ void mpc_cleanup_module(void)
 
 	del_timer_sync(&timer1_read);              /* Deleting the timer */
 	del_timer_sync(&timer2_write);             /* Deleting the timer */
-	/* Регистрируем */
+	/* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј */
 	nf_unregister_hook(&bundle);
 	nf_unregister_hook(&arp_bundle);
 	msleep(10);
