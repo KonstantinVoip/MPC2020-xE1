@@ -3,3 +3,5 @@
 
 2.файл dev.c
 путь:/linux/net/core/dev.c
+
+3.файл fsl_mp25.c
