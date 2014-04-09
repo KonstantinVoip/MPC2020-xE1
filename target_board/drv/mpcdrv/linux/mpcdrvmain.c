@@ -201,7 +201,7 @@ UINT16  kys_deicstra_packet_mac_last_word=0xff11;
 //#define LBCR      0x50D0  
 //#define PMJCR		0x50D4
 //#define PMJCR		0x50D0   //
-//#define PMJCR     0xE00A0  //PVR—Processor version register 0x80211040
+//#define PMJCR     0xE00A0  //PVR-Processor version register 0x80211040
  #define PMJCR     0xE0070  //DEVICE Disable Registers  
  
  const char * lbc_ready_toread     =    "data_read_ready_OK";
@@ -1197,7 +1197,7 @@ static inline bool get_ethernet_packet(u16 *in_buf ,const u16 in_size,const u16 
 	  memcpy(&target_arp_ip_da_addr,in_buf+19,4);
 	}	
 	
-	//printk("get_ethernet_packet=0x%x\n\r",target_arp_ip_da_addr);
+	 //printk("get_ethernet_packet=0x%x\n\r",target_arp_ip_da_addr);
 	 ngraf_packet_for_matrica_kommutacii(in_buf,in_size,target_arp_ip_da_addr,target_arp_nms_sa_addr,0);
 	
 	//#endif	
@@ -1234,6 +1234,8 @@ unsigned int Hook_Func_ARP(uint hooknum,
   */ 
     //if(g_my_kys_state==1)    //Information packet OK
     // {	
+ //Zoya [04 апр. 2014 г.]
+ //printk("%s (%s %s) \r\n", __FUNCTION__, in->name, out->name);
 	    get_ethernet_packet(skb->mac_header,(uint)skb->mac_len+(uint)skb->len,priznak_packet);
         //return NF_ACCEPT;
      //} 
@@ -1254,7 +1256,7 @@ unsigned int Hook_Func(uint hooknum,
                   const struct net_device *out,
                   int (*okfn)(struct sk_buff *))
 {
-	
+ //  printk("%s (%s %s) \r\n", __FUNCTION__, in->name, out->name);
 	//__be32  my_kys_ipaddr    = MY_KYS_IPADDR;
     /* Указатель на структуру заголовка протокола eth в пакете */
 	struct ethhdr *eth;
@@ -1389,7 +1391,7 @@ unsigned int Hook_Func(uint hooknum,
 	   
 		//printk("packet_ok\n\r");
 		//Тест TDM траффика
-    	#if 0	
+    	#if 0
 		nbuf_set_datapacket_dir1  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		nbuf_set_datapacket_dir2  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
 		nbuf_set_datapacket_dir3  (skb->mac_header ,(uint)skb->mac_len+(uint)skb->len);
@@ -1523,6 +1525,8 @@ void kys_ip()
    cnt = vfs_write(fd, buf, cnt, &pos);
    set_fs(old_fs);
    filp_close(fd, NULL);
+   char mac[6] = {0};
+   ngraf_get_ip_mac_my_kys(true, ip, mac);
 }
 /**************************************************************************************************
 Syntax:      	    int init_module(void)
@@ -1539,6 +1543,7 @@ int mpc_init_module(void)
 	** We use the miscfs to register our device.
 	*/
          printk("init_module_tdm() called\n"); 
+         printk("VERSION 
 //#if 0 
       /* Заполняем структуру для регистрации hook функции */
       /* Указываем имя функции, которая будет обрабатывать пакеты */
