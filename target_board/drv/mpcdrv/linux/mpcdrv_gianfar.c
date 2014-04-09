@@ -177,9 +177,11 @@ void p2020_tsec_set_hardware_reg_configuration(struct net_device *dev)
 	struct gfar_private *priv = netdev_priv(dev);
 	struct gfar  *regs = priv->gfargrp[0].regs;
 	u32 tempval;
+//Zoya [04 апр. 2014 г.]
+	///Ошибка! не работает???
 
 	// Set RCTRL to PROMISC mode
-	printk("++Enable Promis mode for eth2+\n\r");
+	printk("++Enable Promis mode for %s\n\r", dev->name);
 	tempval = gfar_read(&regs->rctrl);
 	tempval |= RCTRL_PROM;
 	gfar_write(&regs->rctrl, tempval);
