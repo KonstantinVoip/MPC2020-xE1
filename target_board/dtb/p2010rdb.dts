@@ -1,7 +1,7 @@
 /*
- * P2020 RDB Device Tree Source
+ * P2010 RDB Device Tree Source
  *
- * Copyright 2010 Freescale Semiconductor Inc.+kosta
+ * Copyright 2010 Freescale Semiconductor Inc.
  *
  * This program is free software; you can redistribute  it and/or modify it
  * under  the terms of  the GNU General  Public License as published by the
@@ -11,7 +11,7 @@
 
 /dts-v1/;
 / {
-	model = "fsl,P2020";
+	model = "fsl,P2010";
 	compatible = "fsl,P2020RDB";
 	#address-cells = <2>;
 	#size-cells = <2>;
@@ -24,7 +24,7 @@
 		serial1 = &serial1;
 	};
 
-    cpus {
+	cpus {
 		#address-cells = <1>;
 		#size-cells = <0>;
 
@@ -40,7 +40,6 @@
 			next-level-cache = <&L2>;
 		};
 	};
-    
 
 	memory {
 		device_type = "memory";
@@ -52,7 +51,7 @@
 		reg = <0x0 0xfff00000 0 0x10000>;
 	};
 
-    	localbus@ffe05000 {
+	localbus@ffe05000 {
 		#address-cells = <2>;
 		#size-cells = <1>;
 		compatible = "fsl,p2020-elbc", "fsl,elbc", "simple-bus";
@@ -76,7 +75,7 @@
 		};
 
 	};
-    
+
 	soc@ffe00000 {
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -150,7 +149,8 @@
 			interrupts = <42 2>;
 			interrupt-parent = <&mpic>;
 		};
-        spi@7000 {
+
+		spi@7000 {
 			cell-index = <0>;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -195,15 +195,15 @@
 					read-only;
 				};
                 
-			    partition@D10000 {
-					/* 2.5 Mb for script and router soft */
-					reg = <0x00D10000 0x00250000>;
+   			        partition@E00000 {
+					/* 2.0 Mb for script and router soft */
+					reg = <0x00E00000 0x00160000>;
 					label = "SPI (RW) RWFS";
 				};
 			
 			};
 		};
-        
+		
 		dma@c300 {
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -295,9 +295,8 @@
 				interrupts = <23 2>;
 			};
 		};
-  /******************WARNING!!!  ****WARNING!!!****WARNING!!!*********************/
-  /***************************Ethernet for P2020 RDB KIT**************************/
-            enet0: ethernet@24000 {
+
+		enet0: ethernet@24000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
 			cell-index = <0>;
@@ -309,8 +308,8 @@
 			local-mac-address = [ 00 00 00 00 00 00 ];
 			interrupts = <29 2 30 2 34 2>;
 			interrupt-parent = <&mpic>;
-			fixed-link = <1 1 1000 0 0>;
-			phy-connection-type = "rgmii-id";
+            phy-handle = <&phy1>;
+			phy-connection-type = "rmii";
 
 			mdio@520 {
 				#address-cells = <1>;
@@ -318,19 +317,29 @@
 				compatible = "fsl,gianfar-mdio";
 				reg = <0x520 0x20>;
 
-				phy0: ethernet-phy@0 {
-					interrupt-parent = <&mpic>;
-					interrupts = <3 1>;
-					reg = <0x0>;
-				};
 				phy1: ethernet-phy@1 {
 					interrupt-parent = <&mpic>;
 					interrupts = <3 1>;
 					reg = <0x1>;
 				};
+			
+			    phy2: ethernet-phy@2 {
+					interrupt-parent = <&mpic>;
+					interrupts = <3 1>;
+					reg = <0x2>;
+				};
+			
+			   phy3: ethernet-phy@3 {
+					interrupt-parent = <&mpic>;
+					interrupts = <3 1>;
+					reg = <0x3>;
+				};
+			
 			};
+		
+		
 		};
-
+      
 		enet1: ethernet@25000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -343,23 +352,13 @@
 			local-mac-address = [ 00 00 00 00 00 00 ];
 			interrupts = <35 2 36 2 40 2>;
 			interrupt-parent = <&mpic>;
-			tbi-handle = <&tbi0>;
-			phy-handle = <&phy0>;
-			phy-connection-type = "sgmii";
-
-			mdio@520 {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				compatible = "fsl,gianfar-tbi";
-				reg = <0x520 0x20>;
-
-				tbi0: tbi-phy@11 {
-					reg = <0x11>;
-					device_type = "tbi-phy";
-				};
-			};
+			phy-handle = <&phy2>;
+			phy-connection-type = "rmii";
+            	   
+		   
 		};
-
+        
+		
 		enet2: ethernet@26000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -372,10 +371,28 @@
 			local-mac-address = [ 00 00 00 00 00 00 ];
 			interrupts = <31 2 32 2 33 2>;
 			interrupt-parent = <&mpic>;
-			phy-handle = <&phy1>;
-			phy-connection-type = "rgmii-id";
-		};
+			phy-handle = <&phy3>;
+			phy-connection-type = "rmii";
+		   
+		}; 
 
+        /*Virtual Ethernet  <<->>Local BUS and CYC3 PLIS*/
+        /*
+        enet3: ethernet@22000 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			cell-index = <3>;
+			device_type = "network";
+			model = "KeTSEC";
+			compatible = "gianfar";
+			reg = <0x22000 0x1000>;
+			local-mac-address = [ 00 00 00 00 00 00 ];
+			interrupts = <81 2 82 2 84 2>;
+			interrupt-parent = <&mpic>;
+			fixed-link = <1 1 100 0 0>;
+			phy-connection-type = "rmii";
+		};
+        */
 		mpic: pic@40000 {
 			interrupt-controller;
 			#address-cells = <0>;
